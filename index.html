@@ -11,10 +11,9 @@
   </style>
 </head>
 <body>
-  <header class="topbar"><div class="wrap"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">⌘</span> ConfigKit</a><nav aria-label="Main navigation"><a href="#builders">Builders</a><a href="examples.html">Examples</a><a href="credits.html">Credits</a><a href="safety.html">Safety &amp; contact</a></nav></div></header>
+  <header class="topbar"><div class="wrap"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">⌘</span> ConfigKit</a><nav aria-label="Main navigation"><a href="#builders">Builders</a><a href="examples.html">Examples</a><a href="credits.html">Credits</a><a href="safety.html">Safety &amp; contact</a><a href="login.html">Log in / Sign up</a></nav></div></header>
   <main class="wrap">
     <section class="hero"><span class="eyebrow">Configuration, made simple</span><h1>Build and review mobileconfig profiles.</h1><p>Create a basic Wi-Fi profile right here, or open a dedicated builder for DNS and Home Screen web clips. Profile generation happens in your browser; files are not uploaded.</p><div class="notice"><strong>Safety first:</strong> Profiles can change device settings or route traffic. Review the XML and trust the source before installation. ConfigKit does not install profiles automatically and is not affiliated with Apple. <a href="safety.html">Read safety guidance and get in touch.</a></div></section>
-
     <section id="builders" aria-labelledby="builders-title"><h2 class="section-title" id="builders-title">Profile builders &amp; tools</h2><div class="grid">
       <article class="card"><h2>Wi-Fi profile builder</h2><p>Create an unsigned Wi-Fi configuration profile locally. Treat profiles containing passwords as sensitive.</p><a href="#wifi-builder">Build a Wi-Fi profile →</a></article>
       <article class="card"><h2>DNS profile builder</h2><p>Configure a DNS-over-HTTPS or DNS-over-TLS resolver, then download the profile for review.</p><a href="dns-builder.html">Open DNS builder →</a></article>
@@ -23,50 +22,22 @@
       <article class="card"><h2>Examples</h2><p>Read illustrative mobileconfig payload fragments for Wi-Fi, web clips, DNS, and more.</p><a href="examples.html">Browse examples →</a></article>
       <article class="card"><h2>Credits</h2><p>See project acknowledgements and references to Apple’s configuration documentation.</p><a href="credits.html">View credits →</a></article>
     </div></section>
-
     <section class="panel builder" id="wifi-builder" aria-labelledby="wifi-title"><span class="eyebrow">Local generator</span><h2 id="wifi-title">Build a Wi-Fi profile</h2><p>Enter your network details. The profile is generated in this browser and downloaded to your device.</p>
-      <form id="wifi-form">
-        <div class="form-grid"><div class="field"><label for="profile-name">Profile name</label><input id="profile-name" value="My Wi-Fi Profile" maxlength="100" required></div><div class="field"><label for="ssid">Network name (SSID)</label><input id="ssid" placeholder="e.g. Studio Wi-Fi" maxlength="32" required autocomplete="off"></div><div class="field"><label for="security">Security type</label><select id="security"><option value="WPA">WPA / WPA2 / WPA3 Personal</option><option value="WEP">WEP</option><option value="None">Open network</option></select></div><div class="field" id="password-wrap"><label for="password">Network password</label><input id="password" type="password" maxlength="63" autocomplete="new-password"><small>WPA passphrases must be 8–63 characters.</small></div></div>
-        <label class="check"><input type="checkbox" id="autojoin" checked><span>Automatically join this network when available.</span></label><button type="submit">Generate &amp; download profile</button>
-      </form><p id="status" class="status" role="status" aria-live="polite"></p><div id="output" class="output" hidden><h3>Generated XML</h3><p>Review it before installation. This profile is unsigned.</p><pre id="xml-preview"></pre><a id="download" class="download" download="wifi-profile.mobileconfig">Download again</a></div>
+      <form id="wifi-form"><div class="form-grid"><div class="field"><label for="profile-name">Profile name</label><input id="profile-name" value="My Wi-Fi Profile" maxlength="100" required></div><div class="field"><label for="ssid">Network name (SSID)</label><input id="ssid" placeholder="e.g. Studio Wi-Fi" maxlength="32" required autocomplete="off"></div><div class="field"><label for="security">Security type</label><select id="security"><option value="WPA">WPA / WPA2 / WPA3 Personal</option><option value="WEP">WEP</option><option value="None">Open network</option></select></div><div class="field" id="password-wrap"><label for="password">Network password</label><input id="password" type="password" maxlength="63" autocomplete="new-password"><small>WPA passphrases must be 8–63 characters.</small></div></div><label class="check"><input type="checkbox" id="autojoin" checked><span>Automatically join this network when available.</span></label><button type="submit">Generate &amp; download profile</button></form><p id="status" class="status" role="status" aria-live="polite"></p><div id="output" class="output" hidden><h3>Generated XML</h3><p>Review it before installation. This profile is unsigned.</p><pre id="xml-preview"></pre><a id="download" class="download" download="wifi-profile.mobileconfig">Download again</a></div>
     </section>
   </main>
-  <footer class="wrap footer"><span>ConfigKit · Independent mobileconfig builder demo</span><div class="footer-links"><a href="safety.html">Safety &amp; contact</a><a href="credits.html">Credits</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="https://github.com/huynhw19/huynhw19.github.io">Source on GitHub</a></div></footer>
+  <footer class="wrap footer"><span>ConfigKit · Independent mobileconfig builder demo</span><div class="footer-links"><a href="login.html">Log in / Sign up</a><a href="safety.html">Safety &amp; contact</a><a href="credits.html">Credits</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="https://github.com/huynhw19/huynhw19.github.io">Source on GitHub</a></div></footer>
   <script>
     (() => {
-      const form = document.getElementById('wifi-form');
-      const security = document.getElementById('security');
-      const password = document.getElementById('password');
-      const passwordWrap = document.getElementById('password-wrap');
-      const status = document.getElementById('status');
-      const output = document.getElementById('output');
-      const preview = document.getElementById('xml-preview');
-      const download = document.getElementById('download');
-      let objectUrl = '';
-      const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }).toUpperCase();
-      const xmlEscape = value => String(value).replace(/[<>&'"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c]));
-      function updateSecurity(){const open=security.value==='None';passwordWrap.hidden=open;password.required=!open;if(open)password.value='';}
-      security.addEventListener('change', updateSecurity);updateSecurity();
-      form.addEventListener('submit', event => {
-        event.preventDefault();
-        const name=document.getElementById('profile-name').value.trim();
-        const ssid=document.getElementById('ssid').value.trim();
-        const type=security.value;
-        if(!name||!ssid){status.className='status error';status.textContent='Enter both a profile name and network name.';return;}
-        if(type==='WPA'&&(password.value.length<8||password.value.length>63)){status.className='status error';status.textContent='WPA passphrases must be 8–63 characters.';return;}
-        if(type==='WEP'&&!password.value){status.className='status error';status.textContent='Enter the network password, or choose another security type.';return;}
-        const profileId=uuid(),payloadId=uuid();
-        const entry=(key,value)=>`\t\t\t<key>${key}</key>\n\t\t\t<string>${xmlEscape(value)}</string>`;
-        const payload=[entry('PayloadType','com.apple.wifi.managed'),'\t\t\t<key>PayloadVersion</key>\n\t\t\t<integer>1</integer>',entry('PayloadIdentifier',`com.configkit.wifi.${payloadId.toLowerCase()}`),entry('PayloadUUID',payloadId),entry('PayloadDisplayName',`${name} Wi-Fi`),entry('SSID_STR',ssid),'\t\t\t<key>AutoJoin</key>\n\t\t\t<'+(document.getElementById('autojoin').checked?'true':'false')+ '/>','\t\t\t<key>EncryptionType</key>\n\t\t\t<string>'+(type==='None'?'None':type)+'</string>',...(type==='None'?[]:[entry('Password',password.value)])].join('\n');
+      const form=document.getElementById('wifi-form'),security=document.getElementById('security'),password=document.getElementById('password'),passwordWrap=document.getElementById('password-wrap'),status=document.getElementById('status'),output=document.getElementById('output'),preview=document.getElementById('xml-preview'),download=document.getElementById('download');let objectUrl='';
+      const uuid=()=> 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16)}).toUpperCase();
+      const xmlEscape=value=>String(value).replace(/[<>&'"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c]));
+      function updateSecurity(){const open=security.value==='None';passwordWrap.hidden=open;password.required=!open;if(open)password.value='';}security.addEventListener('change',updateSecurity);updateSecurity();
+      form.addEventListener('submit',event=>{event.preventDefault();const name=document.getElementById('profile-name').value.trim(),ssid=document.getElementById('ssid').value.trim(),type=security.value;if(!name||!ssid){status.className='status error';status.textContent='Enter both a profile name and network name.';return}if(type==='WPA'&&(password.value.length<8||password.value.length>63)){status.className='status error';status.textContent='WPA passphrases must be 8–63 characters.';return}if(type==='WEP'&&!password.value){status.className='status error';status.textContent='Enter the network password, or choose another security type.';return}
+        const profileId=uuid(),payloadId=uuid(),entry=(key,value)=>`\t\t\t<key>${key}</key>\n\t\t\t<string>${xmlEscape(value)}</string>`;
+        const payload=[entry('PayloadType','com.apple.wifi.managed'),'\t\t\t<key>PayloadVersion</key>\n\t\t\t<integer>1</integer>',entry('PayloadIdentifier',`com.configkit.wifi.${payloadId.toLowerCase()}`),entry('PayloadUUID',payloadId),entry('PayloadDisplayName',`${name} Wi-Fi`),entry('SSID_STR',ssid),'\t\t\t<key>AutoJoin</key>\n\t\t\t<'+(document.getElementById('autojoin').checked?'true':'false')+'/>','\t\t\t<key>EncryptionType</key>\n\t\t\t<string>'+(type==='None'?'None':type)+'</string>',...(type==='None'?[]:[entry('Password',password.value)])].join('\n');
         const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n\t<key>PayloadType</key>\n\t<string>Configuration</string>\n\t<key>PayloadVersion</key>\n\t<integer>1</integer>\n\t<key>PayloadIdentifier</key>\n\t<string>com.configkit.profile.${profileId.toLowerCase()}</string>\n\t<key>PayloadUUID</key>\n\t<string>${profileId}</string>\n\t<key>PayloadDisplayName</key>\n\t<string>${xmlEscape(name)}</string>\n\t<key>PayloadContent</key>\n\t<array>\n\t\t<dict>\n${payload}\n\t\t</dict>\n\t</array>\n</dict>\n</plist>\n`;
-        const parsed=new DOMParser().parseFromString(xml,'application/xml');
-        if(parsed.querySelector('parsererror')){status.className='status error';status.textContent='Could not create valid XML. Check the fields and try again.';return;}
-        if(objectUrl)URL.revokeObjectURL(objectUrl);
-        objectUrl=URL.createObjectURL(new Blob([xml],{type:'application/x-apple-aspen-config'}));
-        download.href=objectUrl;download.download=(name.replace(/[^a-z0-9_-]+/gi,'-').replace(/^-|-$/g,'')||'wifi-profile')+'.mobileconfig';
-        preview.textContent=xml;output.hidden=false;status.className='status';status.textContent='Profile generated locally. Treat it as sensitive and review it before installing.';
-      });
-      window.addEventListener('pagehide',()=>{if(objectUrl)URL.revokeObjectURL(objectUrl);});
+        if(new DOMParser().parseFromString(xml,'application/xml').querySelector('parsererror')){status.className='status error';status.textContent='Could not create valid XML. Check the fields and try again.';return}if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=URL.createObjectURL(new Blob([xml],{type:'application/x-apple-aspen-config'}));download.href=objectUrl;download.download=(name.replace(/[^a-z0-9_-]+/gi,'-').replace(/^-|-$/g,'')||'wifi-profile')+'.mobileconfig';preview.textContent=xml;output.hidden=false;status.className='status';status.textContent='Profile generated locally. Treat it as sensitive and review it before installing.'});window.addEventListener('pagehide',()=>{if(objectUrl)URL.revokeObjectURL(objectUrl)});
     })();
   </script>
 </body>
