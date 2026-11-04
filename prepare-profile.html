@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Validate XML mobileconfig profile text locally and download it for manual installation through your device settings.">
+  <title>Prepare a Profile — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 36px,900px);margin-inline:auto}header{padding:22px 0;border-bottom:1px solid var(--line)}a{color:var(--green)}header a,footer a{text-decoration:none;font-weight:700}main{padding:42px 0 64px}h1{font-size:clamp(2rem,6vw,3rem);line-height:1.15;margin:0 0 10px}h2{font-size:1.2rem;margin:0 0 12px}.lead,.muted{color:var(--muted)}.panel{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:24px;margin-top:24px;box-shadow:0 12px 36px #173a2b0d}.warning{background:var(--gold);border:1px solid #f1d8a8;border-radius:12px;padding:16px 18px;margin:22px 0}label{display:block;font-weight:700;margin-bottom:8px}textarea{display:block;width:100%;min-height:280px;padding:14px;border:1px solid #b8c8bd;border-radius:10px;font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}input,button{font:inherit}input[type=file]{display:block;margin-top:10px;max-width:100%}.row{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}button,.download{display:inline-block;border:0;border-radius:8px;background:var(--green);color:white;padding:10px 15px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}button:hover,.download:hover{background:var(--green-dark);color:#fff}button.secondary{background:#e8f4ed;color:var(--green-dark)}button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #8bc6a5;outline-offset:3px}.status{min-height:1.6em;color:var(--muted)}.error{color:var(--red)}.result[hidden]{display:none}.result{padding:12px 14px;background:#f4f8f5;border-radius:10px;margin:12px 0}.steps li{margin:8px 0}footer{border-top:1px solid var(--line);padding:20px 0 32px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header><a href="index.html">← ConfigKit</a></header>
+  <main>
+    <h1>Prepare a mobileconfig profile</h1>
+    <p class="lead">Paste XML profile text or choose an XML <code>.mobileconfig</code> file. We check that it is an XML property list, then let you download it for review. Processing happens in your browser; nothing is uploaded.</p>
+    <div class="warning"><strong>This page cannot install profiles.</strong> Profiles may make significant changes to a device, including adding certificates, network settings, or management controls. Only install a profile from a source you trust, inspect all its contents, and approve installation yourself in your device’s settings. This basic check is not a security review.</div>
+
+    <section class="panel" aria-labelledby="input-title">
+      <h2 id="input-title">Paste profile XML</h2>
+      <label for="xml-input">XML property-list content</label>
+      <textarea id="xml-input" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Paste the complete XML plist here, beginning with <?xml ... ?>"></textarea>
+      <div class="row"><button id="validate" type="button">Check XML</button><button class="secondary" id="clear" type="button">Clear</button></div>
+      <p class="muted">Or select an existing XML-format profile file (maximum 2 MB):</p>
+      <input id="file-input" type="file" accept=".mobileconfig,.xml,application/xml,text/xml" aria-label="Choose an XML mobileconfig or XML file">
+      <p class="status" id="status" role="status" aria-live="polite">No profile is selected.</p>
+      <div class="result" id="result" hidden></div>
+      <a class="download" id="download" hidden download="configkit-profile.mobileconfig">Download .mobileconfig</a>
+    </section>
+
+    <section class="panel" aria-labelledby="install-title">
+      <h2 id="install-title">Install it yourself after reviewing</h2>
+      <p>Downloading does not install or activate a profile. Follow the prompts on your device, and stop if the displayed organization or requested settings are unexpected.</p>
+      <ul class="steps">
+        <li><strong>iPhone or iPad:</strong> download the profile to the device, open the downloaded profile (or the “Profile Downloaded” notice in Settings), then review it in Settings and choose Install only if you trust it. The exact menus vary by iOS/iPadOS version.</li>
+        <li><strong>Mac:</strong> download the file, open it, then review the profile in System Settings (often under Privacy &amp; Security or Device Management) and approve installation only if you trust it. Menus vary by macOS version.</li>
+      </ul>
+      <p class="muted">Some profiles require administrator approval, may be restricted by your organization, or may not be installable on your device. Check current Apple instructions for your OS version.</p>
+    </section>
+  </main>
+  <footer><a href="profile-viewer.html">Inspect a profile</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="index.html">ConfigKit home</a></footer>
+  <script>
+    (() => {
+      const textarea = document.getElementById('xml-input');
+      const picker = document.getElementById('file-input');
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+      const download = document.getElementById('download');
+      const maxBytes = 2 * 1024 * 1024;
+      let objectUrl = '';
+
+      function clearDownload() {
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        objectUrl = '';
+        download.removeAttribute('href');
+        download.hidden = true;
+        result.hidden = true;
+        result.textContent = '';
+      }
+      function checkXml(xml, filename) {
+        clearDownload();
+        if (!xml.trim()) {
+          status.className = 'status error';
+          status.textContent = 'Paste XML or choose a profile file first.';
+          return;
+        }
+        if (new Blob([xml]).size > maxBytes) {
+          status.className = 'status error';
+          status.textContent = 'The profile is larger than the 2 MB limit.';
+          return;
+        }
+        const parsed = new DOMParser().parseFromString(xml, 'application/xml');
+        if (parsed.querySelector('parsererror')) {
+          status.className = 'status error';
+          status.textContent = 'Could not parse XML. Check that the complete profile is well-formed XML.';
+          return;
+        }
+        const root = parsed.documentElement;
+        const profile = root?.localName === 'plist' && root.namespaceURI === 'http://www.apple.com/DTDs/PropertyList-1.0.dtd';
+        // XML parsers may omit a namespace for Apple's traditional plist DTD, so also validate the root and plist dictionary.
+        const dict = root?.localName === 'plist' && [...root.children].some(child => child.localName === 'dict');
+        if (!profile && !dict) {
+          status.className = 'status error';
+          status.textContent = 'This is not an XML plist profile. Binary plist files are not supported.';
+          return;
+        }
+        const profileDict = [...root.children].find(child => child.localName === 'dict');
+        const children = [...(profileDict?.children || [])];
+        const getString = key => {
+          const i = children.findIndex(node => node.localName === 'key' && node.textContent.trim() === key);
+          const value = children[i + 1];
+          return value?.localName === 'string' ? value.textContent.trim() : '';
+        };
+        const name = getString('PayloadDisplayName') || filename || 'Profile XML';
+        const payloadContentIndex = children.findIndex(node => node.localName === 'key' && node.textContent.trim() === 'PayloadContent');
+        const payloadContent = children[payloadContentIndex + 1];
+        const payloadCount = payloadContent?.localName === 'array' ? [...payloadContent.children].filter(node => node.localName === 'dict').length : 0;
+        result.textContent = `Valid XML plist structure. Display name: ${name}. Top-level payloads found: ${payloadCount}. This does not confirm the profile is safe or installable.`;
+        result.hidden = false;
+        const blob = new Blob([xml], {type: 'application/x-apple-aspen-config'});
+        objectUrl = URL.createObjectURL(blob);
+        const safeBase = (filename || 'configkit-profile').replace(/\.(mobileconfig|xml)$/i, '').replace(/[^a-z0-9_-]+/gi, '-').replace(/^-|-$/g, '') || 'configkit-profile';
+        download.download = `${safeBase}.mobileconfig`;
+        download.href = objectUrl;
+        download.hidden = false;
+        status.className = 'status';
+        status.textContent = 'Checked locally. Review the profile contents and source before downloading or installing.';
+      }
+      document.getElementById('validate').addEventListener('click', () => {
+        picker.value = '';
+        checkXml(textarea.value, '');
+      });
+      picker.addEventListener('change', async () => {
+        clearDownload();
+        const file = picker.files?.[0];
+        if (!file) return;
+        if (!/\.(mobileconfig|xml)$/i.test(file.name)) {
+          status.className = 'status error';
+          status.textContent = 'Choose a .mobileconfig or .xml file.';
+          picker.value = '';
+          return;
+        }
+        if (file.size > maxBytes) {
+          status.className = 'status error';
+          status.textContent = 'The profile is larger than the 2 MB limit.';
+          picker.value = '';
+          return;
+        }
+        const xml = await file.text();
+        textarea.value = xml;
+        checkXml(xml, file.name);
+      });
+      document.getElementById('clear').addEventListener('click', () => {
+        textarea.value = '';
+        picker.value = '';
+        clearDownload();
+        status.className = 'status';
+        status.textContent = 'No profile is selected.';
+        textarea.focus();
+      });
+      window.addEventListener('pagehide', () => { if (objectUrl) URL.revokeObjectURL(objectUrl); });
+    })();
+  </script>
+</body>
+</html>
