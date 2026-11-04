@@ -1,4 +1,13 @@
 <form id="newsletter-form" action="https://formspree.io/f/moeeynvr" method="POST">
+  <label for="newsletter-name" class="sr-only" style="position:absolute;left:-10000px">Name (optional)</label>
+  <input
+    id="newsletter-name"
+    name="name"
+    type="text"
+    autocomplete="name"
+    placeholder="Your name (optional)"
+  >
+
   <label for="newsletter-email" class="sr-only" style="position:absolute;left:-10000px">Email address</label>
   <input
     id="newsletter-email"
@@ -8,5 +17,7 @@
     placeholder="Your email address"
     required
   >
+
+  <input type="hidden" name="_subject" value="New newsletter subscriber">
   <button class="button" type="submit">Subscribe</button>
 </form>
