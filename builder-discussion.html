@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Discuss ConfigKit builders and comment on ideas with the community.">
+  <title>Builder discussion — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px #17231f12}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(920px,calc(100% - 32px));margin:auto}header{padding:24px 0}header a,footer a{color:var(--green-dark);font-weight:650}main{padding:16px 0 56px}h1,h2,p{margin-top:0}h1{font-size:clamp(2rem,5vw,2.7rem);line-height:1.15;margin-bottom:10px}.muted,.meta{color:var(--muted)}.panel,.thread{background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px;margin-top:20px}.field{display:grid;gap:6px;margin:14px 0}label{font-weight:650}input,textarea{width:100%;border:1px solid #cbd6cf;border-radius:10px;padding:12px;font:inherit;color:var(--ink);background:#fff}textarea{min-height:110px;resize:vertical}button{border:0;border-radius:10px;background:var(--green);color:white;padding:11px 16px;font:inherit;font-weight:650;cursor:pointer}button:hover{background:var(--green-dark)}button:disabled{opacity:.6;cursor:wait}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px}.thread h2{font-size:1.2rem;margin-bottom:6px}.thread-body{white-space:pre-wrap;overflow-wrap:anywhere}.meta{font-size:.9rem}.comment-list{border-top:1px solid var(--line);margin-top:18px;padding-top:14px}.comment{border-left:3px solid var(--mint);padding:4px 0 4px 12px;margin:12px 0}.comment p{margin-bottom:4px;white-space:pre-wrap;overflow-wrap:anywhere}.comment-form{display:grid;gap:10px;margin-top:14px}.comment-form textarea{min-height:72px}.status{padding:12px;border-radius:10px;background:var(--mint)}.status.error{background:#fff0f0;color:var(--red)}[hidden]{display:none!important}footer{padding:0 0 28px}a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #81b99e;outline-offset:2px}@media(max-width:600px){.panel,.thread{padding:18px}.toolbar{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+  <header><a href="index.html">← ConfigKit</a></header>
+  <main>
+    <h1>Builder discussion</h1>
+    <p class="muted">Share ideas, ask questions, and leave comments about the profile builders. Please keep posts helpful and never include passwords, private keys, or other sensitive information.</p>
+    <div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
+    <section id="discussion" hidden>
+      <form id="new-thread" class="panel">
+        <h2>Start a discussion</h2>
+        <div class="field"><label for="title">Topic</label><input id="title" name="title" maxlength="120" required placeholder="e.g. Could the DNS builder support…"></div>
+        <div class="field"><label for="body">Details</label><textarea id="body" name="body" maxlength="5000" required placeholder="Describe your question or idea"></textarea></div>
+        <button id="publish" type="submit">Post discussion</button>
+      </form>
+      <div class="toolbar"><h2>Recent discussions</h2><button id="refresh" type="button">Refresh</button></div>
+      <div id="threads" aria-live="polite"></div>
+    </section>
+  </main>
+  <footer><a href="login.html">Account</a> · <a href="safety.html">Safety &amp; contact</a></footer>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (async () => {
+      const status = document.getElementById('status');
+      const discussion = document.getElementById('discussion');
+      const threads = document.getElementById('threads');
+      const config = window.CONFIGKIT_AUTH || {};
+      const setStatus = (message, error = false) => {
+        status.textContent = message;
+        status.classList.toggle('error', error);
+      };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+        setStatus('Discussion is not configured. The site owner must set up Supabase and apply the SQL in BUILDER-DISCUSSION-SETUP.md.', true);
+        return;
+      }
+
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      const {data, error} = await client.auth.getSession();
+      if (error) { setStatus('Could not check your sign-in. Please try again.', true); return; }
+      if (!data.session) {
+        setStatus('Please sign in to join the builder discussion.');
+        const login = document.createElement('a');
+        login.href = 'login.html';
+        login.textContent = 'Go to sign in';
+        status.append(' ', login);
+        return;
+      }
+      const user = data.session.user;
+      discussion.hidden = false;
+      status.hidden = true;
+      const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.preferred_username || user.email || 'Community member';
+      const escapeDate = value => new Date(value).toLocaleString();
+      const showError = error => setStatus(error?.message || 'Something went wrong. Please try again.', true);
+
+      async function loadThreads() {
+        threads.replaceChildren();
+        const {data: posts, error: postError} = await client.from('builder_discussions').select('id,user_id,title,body,created_at').order('created_at', {ascending:false}).limit(50);
+        if (postError) { status.hidden = false; showError(postError); return; }
+        if (!posts.length) {
+          const empty = document.createElement('p'); empty.className = 'muted'; empty.textContent = 'No discussions yet. Start the first one!'; threads.append(empty); return;
+        }
+        const {data: comments, error: commentError} = await client.from('builder_discussion_comments').select('id,discussion_id,user_id,body,created_at').in('discussion_id', posts.map(post => post.id)).order('created_at', {ascending:true});
+        if (commentError) { status.hidden = false; showError(commentError); return; }
+        const commentsByPost = new Map(posts.map(post => [post.id, []]));
+        for (const comment of comments || []) commentsByPost.get(comment.discussion_id)?.push(comment);
+
+        for (const post of posts) {
+          const article = document.createElement('article'); article.className = 'thread';
+          const heading = document.createElement('h2'); heading.textContent = post.title;
+          const meta = document.createElement('p'); meta.className = 'meta'; meta.textContent = `Posted by ${post.user_id === user.id ? displayName : 'a community member'} · ${escapeDate(post.created_at)}`;
+          const body = document.createElement('p'); body.className = 'thread-body'; body.textContent = post.body;
+          const commentSection = document.createElement('section'); commentSection.className = 'comment-list';
+          const commentsHeading = document.createElement('h3'); commentsHeading.textContent = `Comments (${(commentsByPost.get(post.id) || []).length})`; commentSection.append( commentsHeading );
+          for (const comment of commentsByPost.get(post.id) || []) {
+            const item = document.createElement('div'); item.className = 'comment';
+            const text = document.createElement('p'); text.textContent = comment.body;
+            const byline = document.createElement('small'); byline.className = 'meta'; byline.textContent = `${comment.user_id === user.id ? displayName : 'Community member'} · ${escapeDate(comment.created_at)}`;
+            item.append(text, byline); commentSection.append(item);
+          }
+          const form = document.createElement('form'); form.className = 'comment-form';
+          const label = document.createElement('label'); label.textContent = 'Add a comment';
+          const input = document.createElement('textarea'); input.required = true; input.maxLength = 2000; input.placeholder = 'Write a helpful reply…';
+          const button = document.createElement('button'); button.type = 'submit'; button.textContent = 'Comment';
+          form.append(label, input, button);
+          form.addEventListener('submit', async event => {
+            event.preventDefault(); button.disabled = true;
+            const {error: insertError} = await client.from('builder_discussion_comments').insert({discussion_id:post.id, user_id:user.id, body:input.value.trim()});
+            button.disabled = false;
+            if (insertError) { setStatus(insertError.message, true); status.hidden = false; return; }
+            await loadThreads();
+          });
+          article.append(heading, meta, body, commentSection, form); threads.append(article);
+        }
+      }
+
+      document.getElementById('new-thread').addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = document.getElementById('publish'); button.disabled = true;
+        const title = document.getElementById('title').value.trim();
+        const body = document.getElementById('body').value.trim();
+        const {error: insertError} = await client.from('builder_discussions').insert({user_id:user.id, title, body});
+        button.disabled = false;
+        if (insertError) { setStatus(insertError.message, true); status.hidden = false; return; }
+        event.target.reset();
+        await loadThreads();
+      });
+      document.getElementById('refresh').addEventListener('click', loadThreads);
+      await loadThreads();
+    })();
+  </script>
+</body>
+</html>
