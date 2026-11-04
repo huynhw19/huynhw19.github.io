@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Illustrative Apple mobileconfig payload examples for Wi-Fi, web clips, passcodes, restrictions, and DNS.">
+  <title>More mobileconfig examples — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--mint:#e8f4ed}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}.wrap{width:min(100% - 36px,1050px);margin:auto}header{padding:24px 0;border-bottom:1px solid var(--line);background:#fff}header a{text-decoration:none;font-weight:700}.hero{padding:56px 0 30px}.eyebrow{color:var(--green);font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}.hero h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.08;margin:12px 0}.hero p,.card p{color:var(--muted)}.notice{padding:16px 18px;background:var(--mint);border-radius:12px;margin:22px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:12px 0 56px}.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;min-width:0}.card h2{margin:0 0 5px;font-size:1.25rem}.card p{margin:0 0 14px}.card pre{margin:0;padding:16px;background:#f4f7f4;border-radius:10px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;color:#34443c}.hint{font-size:.85rem!important;margin-top:12px!important}.back{display:inline-block;margin:4px 0 24px;font-weight:650}@media(max-width:680px){.grid{grid-template-columns:1fr}.hero{padding-top:38px}}
+  </style>
+</head>
+<body>
+  <header><div class="wrap"><a href="./">⌘ ConfigKit</a></div></header>
+  <main class="wrap">
+    <section class="hero">
+      <span class="eyebrow">Payload cookbook</span>
+      <h1>More mobileconfig examples</h1>
+      <p>Browse common Apple configuration payloads and adapt the snippets for learning or prototyping.</p>
+      <div class="notice"><strong>Important:</strong> These are illustrative payload fragments, not complete installable profiles. A real profile needs the outer configuration dictionary, unique identifiers and UUIDs, and may require signing, device enrollment, supervision, or administrator approval. Check Apple's current documentation and test on a non-production device before installing.</div>
+      <a class="back" href="./">← Back to ConfigKit</a>
+    </section>
+    <section class="grid" aria-label="Configuration profile examples">
+      <article class="card">
+        <h2>Wi-Fi network</h2>
+        <p>Join a WPA2/WPA3 Personal network automatically. Replace the sample SSID and password; keep credentials private.</p>
+        <pre><code>&lt;dict&gt;
+  &lt;key&gt;PayloadType&lt;/key&gt;&lt;string&gt;com.apple.wifi.managed&lt;/string&gt;
+  &lt;key&gt;PayloadVersion&lt;/key&gt;&lt;integer&gt;1&lt;/integer&gt;
+  &lt;key&gt;SSID_STR&lt;/key&gt;&lt;string&gt;Example Network&lt;/string&gt;
+  &lt;key&gt;AutoJoin&lt;/key&gt;&lt;true/&gt;
+  &lt;key&gt;EncryptionType&lt;/key&gt;&lt;string&gt;WPA&lt;/string&gt;
+  &lt;key&gt;Password&lt;/key&gt;&lt;string&gt;replace-with-a-secret&lt;/string&gt;
+&lt;/dict&gt;</code></pre>
+        <p class="hint">The password is stored in the profile. Do not share a profile containing a real network password.</p>
+      </article>
+      <article class="card">
+        <h2>Home Screen web clip</h2>
+        <p>Add a labeled shortcut to a website. Only use a URL you trust.</p>
+        <pre><code>&lt;dict&gt;
+  &lt;key&gt;PayloadType&lt;/key&gt;&lt;string&gt;com.apple.webClip.managed&lt;/string&gt;
+  &lt;key&gt;PayloadVersion&lt;/key&gt;&lt;integer&gt;1&lt;/integer&gt;
+  &lt;key&gt;Label&lt;/key&gt;&lt;string&gt;Company Portal&lt;/string&gt;
+  &lt;key&gt;URL&lt;/key&gt;&lt;string&gt;https://example.com/&lt;/string&gt;
+  &lt;key&gt;IsRemovable&lt;/key&gt;&lt;true/&gt;
+  &lt;key&gt;FullScreen&lt;/key&gt;&lt;false/&gt;
+&lt;/dict&gt;</code></pre>
+      </article>
+      <article class="card">
+        <h2>Passcode policy</h2>
+        <p>A basic policy requiring a passcode of at least six characters and allowing a short auto-lock grace period.</p>
+        <pre><code>&lt;dict&gt;
+  &lt;key&gt;PayloadType&lt;/key&gt;&lt;string&gt;com.apple.mobiledevice.passwordpolicy&lt;/string&gt;
+  &lt;key&gt;PayloadVersion&lt;/key&gt;&lt;integer&gt;1&lt;/integer&gt;
+  &lt;key&gt; minLength&lt;/key&gt;&lt;integer&gt;6&lt;/integer&gt;
+  &lt;key&gt;maxFailedAttempts&lt;/key&gt;&lt;integer&gt;10&lt;/integer&gt;
+  &lt;key&gt;maxGracePeriod&lt;/key&gt;&lt;integer&gt;5&lt;/integer&gt;
+&lt;/dict&gt;</code></pre>
+        <p class="hint">Passcode policy support and behavior vary by OS version and management method. Review the keys against Apple's payload reference.</p>
+      </article>
+      <article class="card">
+        <h2>Restrictions payload</h2>
+        <p>Example of a restriction setting with an explicit boolean value. Confirm availability for the target platform and OS.</p>
+        <pre><code>&lt;dict&gt;
+  &lt;key&gt;PayloadType&lt;/key&gt;&lt;string&gt;com.apple.applicationaccess&lt;/string&gt;
+  &lt;key&gt;PayloadVersion&lt;/key&gt;&lt;integer&gt;1&lt;/integer&gt;
+  &lt;key&gt;allowSafari&lt;/key&gt;&lt;true/&gt;
+  &lt;key&gt;allowCamera&lt;/key&gt;&lt;true/&gt;
+&lt;/dict&gt;</code></pre>
+        <p class="hint">This demonstrates the payload shape only; it does not apply a restrictive setting. Restriction keys and supervision requirements vary.</p>
+      </article>
+      <article class="card">
+        <h2>Encrypted DNS (DoH)</h2>
+        <p>Configure DNS over HTTPS with a resolver URL. Substitute a resolver operated by an organization you trust.</p>
+        <pre><code>&lt;dict&gt;
+  &lt;key&gt;PayloadType&lt;/key&gt;&lt;string&gt;com.apple.dnsSettings.managed&lt;/string&gt;
+  &lt;key&gt;PayloadVersion&lt;/key&gt;&lt;integer&gt;1&lt;/integer&gt;
+  &lt;key&gt;DNSSettings&lt;/key&gt;
+  &lt;dict&gt;
+    &lt;key&gt;DNSProtocol&lt;/key&gt;&lt;string&gt;HTTPS&lt;/string&gt;
+    &lt;key&gt;ServerURL&lt;/key&gt;&lt;string&gt;https://dns.example.net/dns-query&lt;/string&gt;
+  &lt;/dict&gt;
+&lt;/dict&gt;</code></pre>
+        <p class="hint">DNS settings payload support depends on Apple's OS versions and management context. Use a valid resolver endpoint.</p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
