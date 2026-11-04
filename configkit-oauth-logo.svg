@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">ConfigKit</title>
+  <rect width="64" height="64" rx="18" fill="#226b51"/>
+  <path d="M43.5 18.5a18 18 0 1 0 0 27M38 26H24m-3 6h20m-17 6h14" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+  <circle cx="44" cy="32" r="3" fill="#bde8ce"/>
+</svg>
