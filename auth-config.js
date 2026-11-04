@@ -3,4 +3,4 @@
 window.CONFIGKIT_AUTH = {
   supabaseUrl: '',
   supabaseAnonKey: ''
-};
+};https://supabase.com/dashboard/project/gwhqnqzzlgslwgijkkpt
