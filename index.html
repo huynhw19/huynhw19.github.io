@@ -11,9 +11,9 @@
   </style>
 </head>
 <body>
-  <header class="topbar"><div class="wrap"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">⌘</span> ConfigKit</a><nav aria-label="Main navigation"><a href="#builders">Builders</a><a href="examples.html">Examples</a><a href="credits.html">Credits</a><a href="profile-viewer.html">Profile inspector</a></nav></div></header>
+  <header class="topbar"><div class="wrap"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">⌘</span> ConfigKit</a><nav aria-label="Main navigation"><a href="#builders">Builders</a><a href="examples.html">Examples</a><a href="credits.html">Credits</a><a href="safety.html">Safety &amp; contact</a></nav></div></header>
   <main class="wrap">
-    <section class="hero"><span class="eyebrow">Configuration, made simple</span><h1>Build and review mobileconfig profiles.</h1><p>Create a basic Wi-Fi profile right here, or open a dedicated builder for DNS and Home Screen web clips. Profile generation happens in your browser; files are not uploaded.</p><div class="notice"><strong>Safety first:</strong> Profiles can change device settings or route traffic. Review the XML and trust the source before installation. ConfigKit does not install profiles automatically and is not affiliated with Apple.</div></section>
+    <section class="hero"><span class="eyebrow">Configuration, made simple</span><h1>Build and review mobileconfig profiles.</h1><p>Create a basic Wi-Fi profile right here, or open a dedicated builder for DNS and Home Screen web clips. Profile generation happens in your browser; files are not uploaded.</p><div class="notice"><strong>Safety first:</strong> Profiles can change device settings or route traffic. Review the XML and trust the source before installation. ConfigKit does not install profiles automatically and is not affiliated with Apple. <a href="safety.html">Read safety guidance and get in touch.</a></div></section>
 
     <section id="builders" aria-labelledby="builders-title"><h2 class="section-title" id="builders-title">Profile builders &amp; tools</h2><div class="grid">
       <article class="card"><h2>Wi-Fi profile builder</h2><p>Create an unsigned Wi-Fi configuration profile locally. Treat profiles containing passwords as sensitive.</p><a href="#wifi-builder">Build a Wi-Fi profile →</a></article>
@@ -31,7 +31,7 @@
       </form><p id="status" class="status" role="status" aria-live="polite"></p><div id="output" class="output" hidden><h3>Generated XML</h3><p>Review it before installation. This profile is unsigned.</p><pre id="xml-preview"></pre><a id="download" class="download" download="wifi-profile.mobileconfig">Download again</a></div>
     </section>
   </main>
-  <footer class="wrap footer"><span>ConfigKit · Independent mobileconfig builder demo</span><div class="footer-links"><a href="credits.html">Credits</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="https://github.com/huynhw19/huynhw19.github.io">Source on GitHub</a></div></footer>
+  <footer class="wrap footer"><span>ConfigKit · Independent mobileconfig builder demo</span><div class="footer-links"><a href="safety.html">Safety &amp; contact</a><a href="credits.html">Credits</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="https://github.com/huynhw19/huynhw19.github.io">Source on GitHub</a></div></footer>
   <script>
     (() => {
       const form = document.getElementById('wifi-form');
