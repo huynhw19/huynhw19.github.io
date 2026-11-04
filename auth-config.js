@@ -5,7 +5,7 @@ window.CONFIGKIT_AUTH = {
   supabaseAnonKey: ''
 };
 
-// Brand the OAuth page and expose the builder discussion only after sign-in.
+// Brand the OAuth page and expose account links only after sign-in.
 (() => {
   const addLoginEnhancements = () => {
     if (!window.location.pathname.endsWith('/login.html')) return;
@@ -23,16 +23,18 @@ window.CONFIGKIT_AUTH = {
     }
 
     const account = document.getElementById('account');
-    if (!account || account.dataset.discussionObserver) return;
-    account.dataset.discussionObserver = 'true';
+    if (!account || account.dataset.accountObserver) return;
+    account.dataset.accountObserver = 'true';
 
-    const addDiscussionLink = () => {
-      const existing = account.querySelector('.builder-discussion-link');
+    const addAccountLinks = () => {
+      const discussionLink = account.querySelector('.builder-discussion-link');
+      const settingsLink = account.querySelector('.account-settings-link');
       if (account.hidden) {
-        existing?.remove();
+        discussionLink?.remove();
+        settingsLink?.remove();
         return;
       }
-      if (!existing) {
+      if (!discussionLink) {
         const link = document.createElement('a');
         link.className = 'builder-discussion-link';
         link.href = 'builder-discussion.html';
@@ -40,10 +42,18 @@ window.CONFIGKIT_AUTH = {
         link.style.cssText = 'display:block;margin-top:8px;font-weight:600';
         account.append(document.createElement('br'), link);
       }
+      if (!settingsLink) {
+        const link = document.createElement('a');
+        link.className = 'account-settings-link';
+        link.href = 'account-settings.html';
+        link.textContent = 'Account settings →';
+        link.style.cssText = 'display:block;margin-top:6px;font-weight:600';
+        account.append(document.createElement('br'), link);
+      }
     };
 
-    new MutationObserver(addDiscussionLink).observe(account, {attributes:true, childList:true, subtree:true});
-    addDiscussionLink();
+    new MutationObserver(addAccountLinks).observe(account, {attributes:true, childList:true, subtree:true});
+    addAccountLinks();
   };
 
   if (document.readyState === 'loading') {
