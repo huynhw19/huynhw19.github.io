@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Create an Apple DNS-over-HTTPS or DNS-over-TLS configuration profile locally.">
+  <title>DNS Profile Builder — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 36px,850px);margin-inline:auto}header{padding:22px 0;border-bottom:1px solid var(--line)}a{color:var(--green)}header a,footer a{text-decoration:none;font-weight:700}main{padding:42px 0 64px}h1{font-size:clamp(2rem,6vw,3rem);line-height:1.15;margin:0 0 10px}h2{font-size:1.2rem;margin:0 0 12px}.lead,.muted{color:var(--muted)}.panel{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:24px;margin-top:24px;box-shadow:0 12px 36px #173a2b0d}.warning{background:var(--gold);border:1px solid #f1d8a8;border-radius:12px;padding:16px 18px;margin:22px 0}.field{margin:16px 0}.field label{display:block;font-weight:700;margin-bottom:6px}input,select{width:100%;padding:11px 12px;border:1px solid #b8c8bd;border-radius:8px;background:#fff;color:var(--ink);font:inherit}input[type=checkbox]{width:auto}.hint{margin:5px 0 0;color:var(--muted);font-size:.9rem}.check{display:flex;align-items:flex-start;gap:10px;margin:16px 0}.check input{margin-top:5px}button,.download{display:inline-block;border:0;border-radius:8px;background:var(--green);color:white;padding:11px 16px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}button:hover,.download:hover{background:var(--green-dark);color:#fff}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #8bc6a5;outline-offset:3px}.status{min-height:1.6em;color:var(--muted)}.error{color:var(--red)}.result[hidden],.download[hidden],.conditional[hidden]{display:none}.result{padding:12px 14px;background:#f4f8f5;border-radius:10px;margin:14px 0}pre{max-height:420px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#17231f;color:#eef6f0;padding:16px;border-radius:10px;font-size:.84rem}footer{border-top:1px solid var(--line);padding:20px 0 32px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header><a href="index.html">← ConfigKit</a></header>
+  <main>
+    <h1>DNS profile builder</h1>
+    <p class="lead">Create a basic Apple DNS Settings configuration profile for a DNS-over-HTTPS (DoH) or DNS-over-TLS (DoT) resolver. The profile is generated in your browser and is not uploaded.</p>
+    <div class="warning"><strong>Review before installing.</strong> A DNS profile can route your device's DNS queries through the resolver you specify. The resolver may learn which domains your device looks up. Use only a resolver you trust, verify its endpoint with its operator, and inspect the generated profile before installing. This tool does not install profiles.</div>
+
+    <section class="panel" aria-labelledby="form-title">
+      <h2 id="form-title">Resolver settings</h2>
+      <form id="dns-form">
+        <div class="field"><label for="profile-name">Profile name</label><input id="profile-name" value="DNS Resolver" maxlength="100" required><p class="hint">Shown in device profile settings.</p></div>
+        <div class="field"><label for="organization">Organization (optional)</label><input id="organization" maxlength="100" placeholder="Your organization"></div>
+        <div class="field"><label for="protocol">Encrypted DNS protocol</label><select id="protocol"><option value="HTTPS">DNS over HTTPS (DoH)</option><option value="TLS">DNS over TLS (DoT)</option></select></div>
+        <div class="field" id="https-field"><label for="server-url">DoH server URL</label><input id="server-url" type="url" inputmode="url" placeholder="https://resolver.example/dns-query" autocomplete="url"><p class="hint">Enter the exact HTTPS endpoint supplied by your resolver operator.</p></div>
+        <div class="field conditional" id="tls-field" hidden><label for="server-name">DoT server name</label><input id="server-name" type="text" inputmode="url" placeholder="resolver.example" autocomplete="off"><p class="hint">Enter the TLS server hostname supplied by your resolver operator, without a scheme or path.</p>
+          <label for="server-addresses" style="margin-top:12px">Server IP addresses (optional)</label><input id="server-addresses" type="text" inputmode="url" placeholder="192.0.2.1, 2001:db8::1"><p class="hint">Optional comma-separated IP addresses. Use the values provided by your resolver operator.</p>
+        </div>
+        <div class="field"><label for="match-domains">Match domains (optional)</label><input id="match-domains" type="text" placeholder="example.com, internal.example"><p class="hint">Comma-separated domains to match. Leave blank for the system's default matching behavior; check your target OS requirements.</p></div>
+        <label class="check"><input id="include-all" type="checkbox"><span>Include a match-all domain (<code>.</code>) so this resolver is used for all domains. Confirm your device and OS support the intended behavior.</span></label>
+        <button type="submit">Generate DNS profile</button>
+      </form>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel result" id="result" hidden aria-labelledby="result-title">
+      <h2 id="result-title">Generated profile</h2>
+      <p>Review the XML and resolver settings. This profile is unsigned and has not been tested for your device or management environment.</p>
+      <pre id="xml-preview"></pre>
+      <a class="download" id="download" download="dns-profile.mobileconfig">Download .mobileconfig</a>
+    </section>
+    <section class="panel">
+      <h2>Install manually after review</h2>
+      <p>Open the downloaded file on your device and follow its profile-installation prompts. Review the organization and requested DNS settings before approving. You can cancel if anything is unexpected. Installation steps and support vary by OS version and organization management; consult current Apple instructions. Removing the profile may restore the previous DNS behavior.</p>
+      <p class="muted">ConfigKit is an independent demo and is not affiliated with Apple. This generator is not a security audit and does not guarantee profile compatibility.</p>
+    </section>
+  </main>
+  <footer><a href="profile-viewer.html">Inspect a profile</a> · <a href="prepare-profile.html">Prepare a profile</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="index.html">Home</a></footer>
+  <script>
+    (() => {
+      const protocol = document.getElementById('protocol');
+      const httpsField = document.getElementById('https-field');
+      const tlsField = document.getElementById('tls-field');
+      const serverUrl = document.getElementById('server-url');
+      const serverName = document.getElementById('server-name');
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+      const preview = document.getElementById('xml-preview');
+      const download = document.getElementById('download');
+      let objectUrl = '';
+
+      const escapeXml = value => String(value).replace(/[<>&'"]/g, char => ({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[char]));
+      const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, char => { const r = Math.random() * 16 | 0; return (char === 'x' ? r : (r & 3 | 8)).toString(16); }).toUpperCase();
+      const stringEntry = (key, value, indent = '\t\t') => `${indent}<key>${escapeXml(key)}</key>\n${indent}<string>${escapeXml(value)}</string>`;
+      function updateProtocol() {
+        const useHttps = protocol.value === 'HTTPS';
+        httpsField.hidden = !useHttps;
+        tlsField.hidden = useHttps;
+        serverUrl.required = useHttps;
+        serverName.required = !useHttps;
+      }
+      function fail(message) {
+        status.className = 'status error';
+        status.textContent = message;
+        result.hidden = true;
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        objectUrl = '';
+        download.removeAttribute('href');
+      }
+      protocol.addEventListener('change', updateProtocol);
+      updateProtocol();
+
+      document.getElementById('dns-form').addEventListener('submit', event => {
+        event.preventDefault();
+        const name = document.getElementById('profile-name').value.trim();
+        const organization = document.getElementById('organization').value.trim();
+        const selectedProtocol = protocol.value;
+        const matchDomains = document.getElementById('match-domains').value.split(',').map(value => value.trim()).filter(Boolean);
+        if (!name) return fail('Enter a profile name.');
+
+        let dnsSettings;
+        if (selectedProtocol === 'HTTPS') {
+          let parsedUrl;
+          try { parsedUrl = new URL(serverUrl.value.trim()); } catch { return fail('Enter a valid HTTPS resolver URL.'); }
+          if (parsedUrl.protocol !== 'https:' || !parsedUrl.hostname) return fail('The DoH endpoint must use HTTPS and include a hostname.');
+          dnsSettings = [stringEntry('DNSProtocol', 'HTTPS'), stringEntry('ServerURL', parsedUrl.href)].join('\n');
+        } else {
+          const hostname = serverName.value.trim();
+          if (!hostname || /[\s/:?#@]/.test(hostname)) return fail('Enter a valid TLS server hostname without https:// or a path.');
+          dnsSettings = [stringEntry('DNSProtocol', 'TLS'), stringEntry('ServerName', hostname)];
+          const addresses = document.getElementById('server-addresses').value.split(',').map(value => value.trim()).filter(Boolean);
+          if (addresses.length) {
+            if (addresses.some(address => !/^[0-9a-fA-F:.]+$/.test(address) || !/[.:]/.test(address))) return fail('Enter comma-separated IP addresses only, or leave this field blank.');
+            dnsSettings.push(`\t\t<key>ServerAddresses</key>\n\t\t<array>\n${addresses.map(address => `\t\t\t<string>${escapeXml(address)}</string>`).join('\n')}\n\t\t</array>`);
+          }
+        }
+        if (document.getElementById('include-all').checked && !matchDomains.includes('.')) matchDomains.unshift('.');
+        if (matchDomains.length) {
+          dnsSettings.push(`\t\t<key>SupplementalMatchDomains</key>\n\t\t<array>\n${matchDomains.map(domain => `\t\t\t<string>${escapeXml(domain)}</string>`).join('\n')}\n\t\t</array>`);
+        }
+        if (typeof dnsSettings === 'string') dnsSettings = [dnsSettings];
+
+        const profileUuid = uuid();
+        const payloadUuid = uuid();
+        const profileIdentifier = `com.configkit.dns.${profileUuid.toLowerCase()}`;
+        const payloadIdentifier = `${profileIdentifier}.settings`;
+        const payloadName = `${name} DNS Settings`;
+        const profileEntries = [
+          stringEntry('PayloadType', 'Configuration'),
+          '\t<key>PayloadVersion</key>\n\t<integer>1</integer>',
+          stringEntry('PayloadIdentifier', profileIdentifier, '\t'),
+          stringEntry('PayloadUUID', profileUuid, '\t'),
+          stringEntry('PayloadDisplayName', name, '\t'),
+          ...(organization ? [stringEntry('PayloadOrganization', organization, '\t')] : []),
+          '\t<key>PayloadContent</key>\n\t<array>\n\t\t<dict>',
+          stringEntry('PayloadType', 'com.apple.dnsSettings.managed'),
+          '\t\t<key>PayloadVersion</key>\n\t\t<integer>1</integer>',
+          stringEntry('PayloadIdentifier', payloadIdentifier),
+          stringEntry('PayloadUUID', payloadUuid),
+          stringEntry('PayloadDisplayName', payloadName),
+          '\t\t<key>DNSSettings</key>\n\t\t<dict>',
+          ...dnsSettings,
+          '\t\t</dict>',
+          '\t\t</dict>\n\t</array>'
+        ].join('\n');
+        const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n${profileEntries}\n</dict>\n</plist>\n`;
+        const parsed = new DOMParser().parseFromString(xml, 'application/xml');
+        if (parsed.querySelector('parsererror')) return fail('There was a problem generating valid XML. Check the fields and try again.');
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        objectUrl = URL.createObjectURL(new Blob([xml], {type:'application/x-apple-aspen-config'}));
+        download.href = objectUrl;
+        const filename = name.replace(/[^a-z0-9_-]+/gi, '-').replace(/^-|-$/g, '') || 'dns-profile';
+        download.download = `${filename}.mobileconfig`;
+        preview.textContent = xml;
+        result.hidden = false;
+        status.className = 'status';
+        status.textContent = 'Profile created locally. Verify its contents and your resolver’s documentation before installation.';
+      });
+      window.addEventListener('pagehide', () => { if (objectUrl) URL.revokeObjectURL(objectUrl); });
+    })();
+  </script>
+</body>
+</html>
