@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Inspect an Apple mobile configuration profile locally before deciding whether to install it.">
+  <title>Inspect a Profile — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 36px,900px);margin-inline:auto}header{padding:22px 0;border-bottom:1px solid var(--line)}a{color:var(--green)}header a,footer a{text-decoration:none;font-weight:700}.brand{font-size:1.05rem}main{padding:42px 0 64px}h1{font-size:clamp(2rem,6vw,3rem);line-height:1.15;margin:0 0 10px}h2{font-size:1.2rem;margin:0 0 12px}.lead,.muted{color:var(--muted)}.panel{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:24px;margin-top:24px;box-shadow:0 12px 36px #173a2b0d}.warning{background:#fff7e8;border:1px solid #f1d8a8;border-radius:12px;padding:16px 18px;margin:22px 0}.drop{display:block;border:2px dashed #b8c8bd;border-radius:12px;padding:24px;text-align:center;background:#fbfdfb}.drop input{display:block;margin:12px auto 0;max-width:100%}button{border:0;border-radius:8px;background:var(--green);color:white;padding:10px 15px;font:inherit;font-weight:700;cursor:pointer}button:hover{background:var(--green-dark)}button:focus-visible,input:focus-visible{outline:3px solid #8bc6a5;outline-offset:3px}.status{min-height:1.6em;color:var(--muted)}.error{color:var(--red)}.details[hidden]{display:none}.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0}.item{background:#f4f8f5;padding:12px 14px;border-radius:10px;overflow-wrap:anywhere}.item dt{font-size:.82rem;color:var(--muted)}.item dd{margin:3px 0 0;font-weight:650}ul{padding-left:22px}.payload{margin:8px 0;padding:10px 12px;background:#f4f8f5;border-radius:8px;overflow-wrap:anywhere}pre{max-height:420px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#17231f;color:#eef6f0;padding:16px;border-radius:10px;font-size:.85rem}footer{border-top:1px solid var(--line);padding:20px 0 32px;color:var(--muted)}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}.actions button.secondary{background:#e8f4ed;color:var(--green-dark)}
+  </style>
+</head>
+<body>
+  <header><a class="brand" href="index.html">← ConfigKit</a></header>
+  <main>
+    <h1>Inspect a mobileconfig profile</h1>
+    <p class="lead">Choose an XML-format <code>.mobileconfig</code> file to inspect its visible profile details and payload types in your browser. The file is not sent to a server.</p>
+    <div class="warning"><strong>Review before installing.</strong> Configuration profiles can change device settings or install certificates, accounts, and network configurations. This tool only displays profile information; it does not install or run profiles. Never install a profile unless you trust its source and understand its contents.</div>
+
+    <section class="panel" aria-labelledby="upload-title">
+      <h2 id="upload-title">Select a profile file</h2>
+      <label class="drop" for="profile-file">Choose an XML <code>.mobileconfig</code> or <code>.xml</code> file (up to 2 MB)
+        <input id="profile-file" type="file" accept=".mobileconfig,.xml,application/xml,text/xml">
+      </label>
+      <p class="status" id="status" role="status" aria-live="polite">Your file stays in this browser session; it is not uploaded.</p>
+    </section>
+
+    <section class="panel details" id="details" aria-labelledby="details-title" hidden>
+      <h2 id="details-title">Profile information</h2>
+      <dl class="summary" id="summary"></dl>
+      <h2>Payloads found</h2>
+      <ul id="payloads"></ul>
+      <details>
+        <summary>Show source text</summary>
+        <pre id="source"></pre>
+      </details>
+      <div class="actions"><button class="secondary" id="clear" type="button">Clear selected file</button></div>
+    </section>
+  </main>
+  <footer><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="index.html">ConfigKit home</a></footer>
+  <script>
+    (() => {
+      const picker = document.getElementById('profile-file');
+      const status = document.getElementById('status');
+      const details = document.getElementById('details');
+      const summary = document.getElementById('summary');
+      const payloads = document.getElementById('payloads');
+      const source = document.getElementById('source');
+      const maxBytes = 2 * 1024 * 1024;
+
+      function textOf(node) {
+        return node?.textContent?.trim() || '';
+      }
+      function plistValue(node) {
+        const value = node?.firstElementChild;
+        if (!value) return '';
+        if (value.tagName === 'string' || value.tagName === 'integer' || value.tagName === 'real' || value.tagName === 'date') return textOf(value);
+        if (value.tagName === 'true' || value.tagName === 'false') return value.tagName === 'true' ? 'Yes' : 'No';
+        if (value.tagName === 'array') return `${value.children.length} item(s)`;
+        if (value.tagName === 'dict') return 'Dictionary';
+        if (value.tagName === 'data') return 'Data value (not displayed)';
+        return '';
+      }
+      function dictEntry(dict, key) {
+        if (!dict) return '';
+        const children = [...dict.children];
+        const index = children.findIndex(node => node.tagName === 'key' && textOf(node) === key);
+        return index >= 0 ? plistValue(children[index + 1]) : '';
+      }
+      function addSummary(label, value) {
+        if (!value) return;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'item';
+        const term = document.createElement('dt');
+        term.textContent = label;
+        const description = document.createElement('dd');
+        description.textContent = value;
+        wrapper.append(term, description);
+        summary.append(wrapper);
+      }
+      function showError(message) {
+        details.hidden = true;
+        status.className = 'status error';
+        status.textContent = message;
+      }
+
+      picker.addEventListener('change', async () => {
+        const file = picker.files?.[0];
+        details.hidden = true;
+        summary.replaceChildren();
+        payloads.replaceChildren();
+        source.textContent = '';
+        status.className = 'status';
+        if (!file) {
+          status.textContent = 'Your file stays in this browser session; it is not uploaded.';
+          return;
+        }
+        if (!/\.(mobileconfig|xml)$/i.test(file.name)) {
+          showError('Choose a .mobileconfig or .xml file.');
+          picker.value = '';
+          return;
+        }
+        if (file.size > maxBytes) {
+          showError('This file is larger than the 2 MB limit.');
+          picker.value = '';
+          return;
+        }
+
+        try {
+          const xml = await file.text();
+          const documentXml = new DOMParser().parseFromString(xml, 'application/xml');
+          if (documentXml.querySelector('parsererror')) throw new Error('The file is not valid XML. This viewer supports XML plist profiles, not binary plist files.');
+          const root = documentXml.documentElement;
+          if (!root || root.localName !== 'plist') throw new Error('This does not look like an XML property-list profile. Binary plist files are not supported.');
+          const profileDict = root.querySelector(':scope > dict');
+          if (!profileDict) throw new Error('No profile property-list dictionary was found in the selected file.');
+
+          addSummary('File', file.name);
+          addSummary('Profile name', dictEntry(profileDict, 'PayloadDisplayName'));
+          addSummary('Description', dictEntry(profileDict, 'PayloadDescription'));
+          addSummary('Organization', dictEntry(profileDict, 'PayloadOrganization'));
+          addSummary('Identifier', dictEntry(profileDict, 'PayloadIdentifier'));
+          addSummary('Removal may be restricted', dictEntry(profileDict, 'PayloadRemovalDisallowed'));
+
+          const payloadArray = [...profileDict.children].find((node, index, list) => node.tagName === 'key' && textOf(node) === 'PayloadContent' && list[index + 1]?.tagName === 'array');
+          const array = payloadArray?.nextElementSibling;
+          const entries = array ? [...array.children].filter(node => node.tagName === 'dict') : [];
+          if (!entries.length) {
+            const item = document.createElement('li');
+            item.textContent = 'No payload entries were found (the file may be a different profile format).';
+            payloads.append(item);
+          } else {
+            entries.forEach((dict, index) => {
+              const name = dictEntry(dict, 'PayloadDisplayName') || dictEntry(dict, 'PayloadType') || `Payload ${index + 1}`;
+              const type = dictEntry(dict, 'PayloadType');
+              const identifier = dictEntry(dict, 'PayloadIdentifier');
+              const item = document.createElement('li');
+              item.className = 'payload';
+              item.textContent = [name, type && `Type: ${type}`, identifier && `Identifier: ${identifier}`].filter(Boolean).join(' — ');
+              payloads.append(item);
+            });
+          }
+          source.textContent = xml;
+          details.hidden = false;
+          status.textContent = 'Profile parsed locally. This is a basic preview, not a security analysis or installability check.';
+        } catch (error) {
+          showError(error instanceof Error ? error.message : 'Unable to read this profile.');
+          picker.value = '';
+        }
+      });
+
+      document.getElementById('clear').addEventListener('click', () => {
+        picker.value = '';
+        details.hidden = true;
+        summary.replaceChildren();
+        payloads.replaceChildren();
+        source.textContent = '';
+        status.className = 'status';
+        status.textContent = 'Your file stays in this browser session; it is not uploaded.';
+        picker.focus();
+      });
+    })();
+  </script>
+</body>
+</html>
