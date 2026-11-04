@@ -3,123 +3,71 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Explore sample Apple configuration profiles and build a simple Wi-Fi mobileconfig profile in your browser.">
+  <meta name="description" content="Build Wi-Fi, DNS, and web clip mobileconfig profiles locally with ConfigKit.">
   <title>ConfigKit — Mobileconfig Studio</title>
   <style>
-    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#e7bd72;--shadow:0 18px 50px #173a2910}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}button,input,select{font:inherit}button{cursor:pointer}.wrap{width:min(1120px,calc(100% - 40px));margin:auto}.topbar{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:#f7f9f6e8;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}.brand{font-weight:800;letter-spacing:-.04em;font-size:1.2rem;display:flex;align-items:center;gap:10px}.brand-mark{background:var(--green);color:white;width:34px;height:34px;display:grid;place-items:center;border-radius:11px;font-size:17px}.nav{display:flex;align-items:center;gap:28px;color:var(--muted);font-size:.92rem}.nav a:hover{color:var(--green)}.button{border:0;border-radius:10px;background:var(--green);color:#fff;padding:12px 18px;font-weight:700;display:inline-flex;justify-content:center;align-items:center;gap:8px;transition:.18s}.button:hover{background:var(--green-dark);transform:translateY(-1px)}.button.secondary{color:var(--green);background:var(--mint)}.button.small{padding:9px 13px;font-size:.88rem}.hero{padding:84px 0 70px;display:grid;grid-template-columns:1.05fr .95fr;gap:54px;align-items:center}.eyebrow{display:inline-flex;gap:8px;align-items:center;color:var(--green);background:var(--mint);padding:6px 11px;border-radius:99px;font-weight:700;font-size:.78rem;letter-spacing:.04em;text-transform:uppercase}.eyebrow span{width:7px;height:7px;border-radius:50%;background:#56a67d}.hero h1{font-size:clamp(2.7rem,6vw,4.7rem);letter-spacing:-.065em;line-height:1.02;margin:20px 0}.hero h1 em{font-style:normal;color:var(--green)}.hero p{color:var(--muted);font-size:1.1rem;max-width:530px}.hero-actions{display:flex;gap:12px;margin-top:27px;flex-wrap:wrap}.hero-note{font-size:.82rem!important;margin-top:17px}.preview{background:#e8eee8;border-radius:24px;padding:26px;box-shadow:var(--shadow);position:relative;overflow:hidden}.preview:before{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:#d6e8dc;top:-75px;right:-60px}.window{position:relative;background:white;border:1px solid #e8ece8;border-radius:16px;box-shadow:0 12px 35px #173a2912;overflow:hidden}.window-bar{height:42px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 14px;gap:6px}.dot{width:7px;height:7px;background:#d7ded9;border-radius:50%}.window-title{margin:auto;color:#8a958e;font-size:.72rem}.code{padding:22px 23px 24px;font:12px/1.85 ui-monospace,SFMono-Regular,Menlo,monospace;color:#56675d;white-space:pre-wrap;overflow-wrap:anywhere}.code .tag{color:#236e52}.code .value{color:#a16630}.code .comment{color:#9ba59e}.float-card{position:absolute;right:9px;bottom:13px;background:white;padding:13px 15px;border-radius:13px;box-shadow:var(--shadow);font-size:.78rem;display:flex;align-items:center;gap:10px}.check{width:30px;height:30px;background:var(--mint);color:var(--green);border-radius:9px;display:grid;place-items:center;font-weight:900}.section{padding:72px 0}.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:28px}.section h2{font-size:clamp(2rem,4vw,2.8rem);letter-spacing:-.055em;line-height:1.1;margin:13px 0 0}.section-head p{color:var(--muted);max-width:430px;margin:0}.samples{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}.sample{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:23px;box-shadow:0 6px 20px #173a2905}.sample-icon{height:42px;width:42px;background:var(--mint);color:var(--green);border-radius:12px;display:grid;place-items:center;font-size:1.2rem}.sample h3{margin:17px 0 5px;font-size:1.05rem}.sample p{color:var(--muted);font-size:.91rem;margin:0 0 16px}.text-link{color:var(--green);font-weight:700;font-size:.9rem}.builder-section{background:#eef4ef}.builder-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:44px;align-items:start}.builder-copy{position:sticky;top:110px}.builder-copy p{color:var(--muted)}.privacy{display:flex;gap:10px;margin-top:23px;color:var(--muted);font-size:.87rem}.privacy b{color:var(--green)}.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:var(--shadow)}.panel h3{margin:0 0 5px}.panel-intro{margin:0 0 20px;color:var(--muted);font-size:.9rem}.field{margin-bottom:15px}.field label{display:block;font-weight:700;font-size:.87rem;margin-bottom:6px}.field input,.field select{width:100%;border:1px solid #dce4de;border-radius:9px;background:#fff;padding:11px 12px;color:var(--ink);outline:none}.field input:focus,.field select:focus{border-color:#5b9c7a;box-shadow:0 0 0 3px #226b5118}.hint{font-size:.78rem;color:var(--muted);margin:5px 0 0}.checkrow{display:flex;align-items:flex-start;gap:10px;color:var(--muted);font-size:.85rem;margin:13px 0 18px}.checkrow input{accent-color:var(--green);margin-top:5px}.form-status{min-height:24px;color:var(--green);font-size:.88rem;margin:10px 0 0}.auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.auth-card{border:1px solid var(--line);background:white;border-radius:17px;padding:23px}.auth-card h3{margin:0 0 4px}.auth-card>p{color:var(--muted);font-size:.88rem;margin:0 0 19px}.auth-card .button{width:100%}.newsletter{margin:20px 0 76px;background:var(--green-dark);border-radius:22px;padding:38px 42px;color:white;display:flex;justify-content:space-between;align-items:center;gap:30px}.newsletter h2{font-size:1.8rem;letter-spacing:-.04em;margin:0 0 5px}.newsletter p{margin:0;color:#d0e1d6;font-size:.9rem}.newsletter form{display:flex;gap:9px;width:min(420px,100%)}.newsletter input{min-width:0;flex:1;padding:12px 13px;border:1px solid #ffffff50;border-radius:9px;background:#ffffff12;color:white;outline:none}.newsletter input::placeholder{color:#d0e1d6}.newsletter .button{background:var(--gold);color:#20372a;white-space:nowrap}.footer{border-top:1px solid var(--line);padding:25px 0;color:var(--muted);font-size:.83rem;display:flex;justify-content:space-between;gap:15px}.footer strong{color:var(--ink)}.modal{position:fixed;inset:0;background:#101b16a8;display:none;place-items:center;padding:20px;z-index:10}.modal.open{display:grid}.modal-card{max-width:700px;width:100%;max-height:85vh;overflow:auto;background:white;border-radius:16px;padding:23px}.modal-head{display:flex;justify-content:space-between;align-items:center}.modal-head h3{margin:0}.close{border:0;background:#edf2ee;border-radius:8px;padding:7px 10px}.modal pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f7f4;padding:16px;border-radius:10px;font-size:.78rem;color:#42564a}.mobile-menu{display:none}
-    @media(max-width:800px){.hero{grid-template-columns:1fr;gap:34px;padding-top:58px}.preview{max-width:600px}.samples{grid-template-columns:1fr 1fr}.builder-grid{grid-template-columns:1fr;gap:24px}.builder-copy{position:static}.newsletter{align-items:flex-start;flex-direction:column;padding:30px}.newsletter form{width:100%}}
-    @media(max-width:560px){.wrap{width:min(100% - 30px,1120px)}.topbar{height:65px}.nav{gap:13px;font-size:.8rem}.nav a:nth-child(2){display:none}.nav .button{padding:8px 11px;font-size:.8rem}.brand{font-size:1.06rem}.hero{padding:48px 0}.hero h1{font-size:3rem}.preview{padding:15px}.code{padding:16px;font-size:10px}.float-card{right:4px;bottom:5px}.section{padding:54px 0}.section-head{display:block}.section-head p{margin-top:13px}.samples,.auth-grid{grid-template-columns:1fr}.panel{padding:19px}.newsletter{margin-bottom:50px;padding:25px 20px}.newsletter form{flex-direction:column}.footer{flex-direction:column}}
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030;--shadow:0 12px 36px #173a2b0d}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}.wrap{width:min(100% - 36px,1050px);margin-inline:auto}.topbar{background:#ffffffed;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2;backdrop-filter:blur(12px)}.topbar .wrap{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-weight:800;font-size:1.15rem;color:var(--ink);text-decoration:none}.brand-mark{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--mint);color:var(--green)}nav{display:flex;gap:18px;flex-wrap:wrap;justify-content:flex-end}nav a,.footer a{color:var(--green);font-weight:650;text-decoration:none}.hero{padding:64px 0 42px}.eyebrow{color:var(--green);font-size:.82rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.hero h1{font-size:clamp(2.4rem,7vw,4.7rem);line-height:1.05;letter-spacing:-.04em;margin:12px 0 18px;max-width:780px}.hero p{font-size:1.1rem;color:var(--muted);max-width:700px}.notice{background:var(--gold);border:1px solid #f1d8a8;border-radius:12px;padding:14px 18px;margin:20px 0 32px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:20px 0 52px}.card,.panel{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}.card h2,.panel h2{font-size:1.2rem;margin:0 0 8px}.card p{color:var(--muted);margin:0 0 16px}.card a{font-weight:750;text-decoration:none}.section-title{margin:48px 0 14px;font-size:1.65rem;letter-spacing:-.02em}.builder{padding:28px;margin-bottom:50px}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.field{margin:12px 0}.field label{display:block;font-weight:700;margin-bottom:6px}.field input,.field select{width:100%;padding:11px 12px;border:1px solid #b8c8bd;border-radius:8px;background:#fff;color:var(--ink);font:inherit}.check{display:flex;align-items:flex-start;gap:9px;margin:14px 0}.check input{margin-top:6px}button,.button{display:inline-block;border:0;border-radius:9px;background:var(--green);color:white;padding:11px 16px;font:inherit;font-weight:750;cursor:pointer;text-decoration:none}button:hover,.button:hover{background:var(--green-dark);color:#fff}.status{min-height:1.6em;color:var(--muted)}.error{color:var(--red)}.output[hidden]{display:none}.output{margin-top:20px}.output pre{max-height:420px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#17231f;color:#eef6f0;padding:16px;border-radius:10px;font-size:.82rem}.download{display:inline-block;background:var(--green);color:#fff;padding:10px 14px;border-radius:8px;text-decoration:none;font-weight:700}.footer{border-top:1px solid var(--line);padding:24px 0 36px;color:var(--muted);display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between}.footer-links{display:flex;gap:14px;flex-wrap:wrap}@media(max-width:600px){.topbar .wrap{padding:10px 0;align-items:flex-start;flex-direction:column}nav{justify-content:flex-start;gap:8px 14px}.hero{padding-top:42px}}
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;width:100%">
-      <a class="brand" href="#home" aria-label="ConfigKit home"><span class="brand-mark">⌘</span> ConfigKit</a>
-      <nav class="nav" aria-label="Main navigation">
-        <a href="#examples">Examples</a><a href="#accounts">Account UI</a><a href="#newsletter">Newsletter</a>
-        <a class="button small" href="#builder">Open builder <span aria-hidden="true">↗</span></a>
-      </nav>
-    </div>
-  </header>
-  <main>
-    <section class="hero wrap" id="home">
-      <div>
-        <span class="eyebrow"><span></span> Configuration, made simple</span>
-        <h1>Profiles that just <em>click.</em></h1>
-        <p>Explore sample configuration profiles, preview a clean sign-in experience, and build a basic Wi-Fi mobileconfig right in your browser.</p>
-        <div class="hero-actions"><a class="button" href="#builder">Build a profile <span aria-hidden="true">→</span></a><a class="button secondary" href="#examples">Browse examples</a></div>
-        <p class="hero-note">A lightweight demo. Your profile is generated locally and never uploaded.</p>
-      </div>
-      <div class="preview" aria-label="Sample XML configuration profile preview">
-        <div class="window"><div class="window-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="window-title">wifi-profile.mobileconfig</span></div>
-          <div class="code"><span class="comment">&lt;!-- Configuration profile preview --&gt;</span>
-<span class="tag">&lt;key&gt;</span>PayloadType<span class="tag">&lt;/key&gt;</span>
-<span class="tag">&lt;string&gt;</span>com.apple.wifi.managed<span class="tag">&lt;/string&gt;</span>
-<span class="tag">&lt;key&gt;</span>SSID_STR<span class="tag">&lt;/key&gt;</span>
-<span class="tag">&lt;string&gt;</span><span class="value">Your network</span><span class="tag">&lt;/string&gt;</span>
-<span class="tag">&lt;key&gt;</span>AutoJoin<span class="tag">&lt;/key&gt;</span>
-<span class="tag">&lt;true/&gt;</span></div>
-        </div><div class="float-card"><span class="check">✓</span><span><strong>Ready to install</strong><br><span style="color:var(--muted)">A profile on your terms</span></span></div>
-      </div>
-    </section>
+  <header class="topbar"><div class="wrap"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">⌘</span> ConfigKit</a><nav aria-label="Main navigation"><a href="#builders">Builders</a><a href="examples.html">Examples</a><a href="credits.html">Credits</a><a href="profile-viewer.html">Profile inspector</a></nav></div></header>
+  <main class="wrap">
+    <section class="hero"><span class="eyebrow">Configuration, made simple</span><h1>Build and review mobileconfig profiles.</h1><p>Create a basic Wi-Fi profile right here, or open a dedicated builder for DNS and Home Screen web clips. Profile generation happens in your browser; files are not uploaded.</p><div class="notice"><strong>Safety first:</strong> Profiles can change device settings or route traffic. Review the XML and trust the source before installation. ConfigKit does not install profiles automatically and is not affiliated with Apple.</div></section>
 
-    <section class="section wrap" id="examples">
-      <div class="section-head"><div><span class="eyebrow">A few starting points</span><h2>Profile examples</h2></div><p>Configuration profiles can set preferences on Apple devices. Review every setting before installing a profile.</p></div>
-      <div class="samples">
-        <article class="sample"><div class="sample-icon" aria-hidden="true">◉</div><h3>Wi-Fi network</h3><p>Connect to a named wireless network with an optional pre-shared key and auto-join setting.</p><a class="text-link" href="#builder">Try the Wi-Fi builder →</a></article>
-        <article class="sample"><div class="sample-icon" aria-hidden="true">⌁</div><h3>Device information</h3><p>A sample organization profile with a human-readable name and contact details for the profile owner.</p><button class="text-link" style="border:0;background:none;padding:0" type="button" data-example="info">View sample XML →</button></article>
-        <article class="sample"><div class="sample-icon" aria-hidden="true">◷</div><h3>Web clip</h3><p>A home-screen shortcut profile that points to a website you choose. Check the destination before use.</p><button class="text-link" style="border:0;background:none;padding:0" type="button" data-example="webclip">View sample XML →</button></article>
-      </div>
-    </section>
+    <section id="builders" aria-labelledby="builders-title"><h2 class="section-title" id="builders-title">Profile builders &amp; tools</h2><div class="grid">
+      <article class="card"><h2>Wi-Fi profile builder</h2><p>Create an unsigned Wi-Fi configuration profile locally. Treat profiles containing passwords as sensitive.</p><a href="#wifi-builder">Build a Wi-Fi profile →</a></article>
+      <article class="card"><h2>DNS profile builder</h2><p>Configure a DNS-over-HTTPS or DNS-over-TLS resolver, then download the profile for review.</p><a href="dns-builder.html">Open DNS builder →</a></article>
+      <article class="card"><h2>Web clip builder</h2><p>Create a Home Screen shortcut profile for a website you trust.</p><a href="webclip-builder.html">Open web clip builder →</a></article>
+      <article class="card"><h2>Prepare or inspect a profile</h2><p>Check XML locally, inspect profile metadata, and review payload types before you decide whether to install.</p><a href="prepare-profile.html">Prepare XML</a> · <a href="profile-viewer.html">Inspect a file</a></article>
+      <article class="card"><h2>Examples</h2><p>Read illustrative mobileconfig payload fragments for Wi-Fi, web clips, DNS, and more.</p><a href="examples.html">Browse examples →</a></article>
+      <article class="card"><h2>Credits</h2><p>See project acknowledgements and references to Apple’s configuration documentation.</p><a href="credits.html">View credits →</a></article>
+    </div></section>
 
-    <section class="section builder-section" id="builder">
-      <div class="wrap builder-grid">
-        <div class="builder-copy"><span class="eyebrow">Local profile generator</span><h2>Build a Wi-Fi profile</h2><p>Enter your network details to create a basic Apple configuration profile (.mobileconfig). The generated file is not signed; managed environments may require an administrator to review and sign it.</p><div class="privacy"><span aria-hidden="true">✦</span><span><b>Private by design.</b> This page creates the file in your browser. Nothing is sent to a server.</span></div></div>
-        <form class="panel" id="builder-form">
-          <h3>Network details</h3><p class="panel-intro">Fields marked optional can be left blank.</p>
-          <div class="field"><label for="profile-name">Profile name</label><input id="profile-name" name="profileName" value="My Wi-Fi Profile" maxlength="100" required><p class="hint">Shown in device settings.</p></div>
-          <div class="field"><label for="ssid">Network name (SSID)</label><input id="ssid" name="ssid" placeholder="e.g. Studio Wi-Fi" maxlength="32" required autocomplete="off"></div>
-          <div class="field"><label for="security">Security type</label><select id="security" name="security"><option value="WPA">WPA / WPA2 / WPA3 Personal</option><option value="WEP">WEP</option><option value="None">Open network (no password)</option></select></div>
-          <div class="field" id="password-field"><label for="password">Network password</label><input id="password" name="password" type="password" maxlength="63" autocomplete="new-password"><p class="hint">Stored inside the downloaded profile; treat it like a password.</p></div>
-          <label class="checkrow"><input type="checkbox" id="autojoin" checked><span>Automatically join this network when it is available.</span></label>
-          <button class="button" type="submit">Generate &amp; download profile <span aria-hidden="true">↓</span></button>
-          <p class="form-status" id="builder-status" role="status" aria-live="polite"></p>
-        </form>
-      </div>
+    <section class="panel builder" id="wifi-builder" aria-labelledby="wifi-title"><span class="eyebrow">Local generator</span><h2 id="wifi-title">Build a Wi-Fi profile</h2><p>Enter your network details. The profile is generated in this browser and downloaded to your device.</p>
+      <form id="wifi-form">
+        <div class="form-grid"><div class="field"><label for="profile-name">Profile name</label><input id="profile-name" value="My Wi-Fi Profile" maxlength="100" required></div><div class="field"><label for="ssid">Network name (SSID)</label><input id="ssid" placeholder="e.g. Studio Wi-Fi" maxlength="32" required autocomplete="off"></div><div class="field"><label for="security">Security type</label><select id="security"><option value="WPA">WPA / WPA2 / WPA3 Personal</option><option value="WEP">WEP</option><option value="None">Open network</option></select></div><div class="field" id="password-wrap"><label for="password">Network password</label><input id="password" type="password" maxlength="63" autocomplete="new-password"><small>WPA passphrases must be 8–63 characters.</small></div></div>
+        <label class="check"><input type="checkbox" id="autojoin" checked><span>Automatically join this network when available.</span></label><button type="submit">Generate &amp; download profile</button>
+      </form><p id="status" class="status" role="status" aria-live="polite"></p><div id="output" class="output" hidden><h3>Generated XML</h3><p>Review it before installation. This profile is unsigned.</p><pre id="xml-preview"></pre><a id="download" class="download" download="wifi-profile.mobileconfig">Download again</a></div>
     </section>
-
-    <section class="section wrap" id="accounts">
-      <div class="section-head"><div><span class="eyebrow">Interface examples</span><h2>Account pages, without the backend</h2></div><p>Simple sign-in and sign-up form layouts for a product site. These demo forms do not collect, store, or send account details.</p></div>
-      <div class="auth-grid">
-        <form class="auth-card demo-form"><h3>Welcome back</h3><p>Sign in to your account</p><div class="field"><label>Email address</label><input type="email" placeholder="you@example.com" autocomplete="email" required></div><div class="field"><label>Password</label><input type="password" placeholder="Your password" autocomplete="current-password" required></div><button class="button" type="submit">Sign in</button><p class="form-status" role="status" aria-live="polite"></p></form>
-        <form class="auth-card demo-form"><h3>Create an account</h3><p>Get started in a few steps</p><div class="field"><label>Name</label><input type="text" placeholder="Your name" autocomplete="name" required></div><div class="field"><label>Email address</label><input type="email" placeholder="you@example.com" autocomplete="email" required></div><div class="field"><label>Password</label><input type="password" placeholder="At least 8 characters" minlength="8" autocomplete="new-password" required></div><button class="button secondary" type="submit">Create account</button><p class="form-status" role="status" aria-live="polite"></p></form>
-      </div>
-    </section>
-
-    <section class="newsletter wrap" id="newsletter"><div><h2>Notes from ConfigKit</h2><p>Occasional product updates and practical profile tips. No backend connected in this demo.</p></div><form id="newsletter-form"><label for="newsletter-email" class="sr-only" style="position:absolute;left:-10000px">Email address</label><input id="newsletter-email" type="email" placeholder="Your email address" required><button class="button" type="submit">Subscribe</button></form></section>
   </main>
-  <footer class="footer wrap"><span><strong>ConfigKit</strong> · A mobileconfig builder demo</span><span>Review profiles before installing. This demo is not affiliated with Apple.</span></footer>
-
-  <div class="modal" id="example-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-card"><div class="modal-head"><h3 id="modal-title">Sample profile XML</h3><button class="close" type="button" aria-label="Close sample">✕</button></div><pre id="modal-content"></pre><p class="hint">Illustrative only. UUIDs and required payload metadata are omitted from this short example.</p></div></div>
+  <footer class="wrap footer"><span>ConfigKit · Independent mobileconfig builder demo</span><div class="footer-links"><a href="credits.html">Credits</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="https://github.com/huynhw19/huynhw19.github.io">Source on GitHub</a></div></footer>
   <script>
-    const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }).toUpperCase();
-    const escapeXml = value => String(value).replace(/[<>&'\"]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[ch]));
-    const plistString = (key, value) => `\t\t\t<key>${key}</key>\n\t\t\t<string>${escapeXml(value)}</string>`;
-    const security = document.getElementById('security');
-    const passwordInput = document.getElementById('password');
-    const passwordField = document.getElementById('password-field');
-    function updateSecurity(){const open=security.value==='None';passwordField.hidden=open;passwordInput.required=!open;if(open)passwordInput.value='';}
-    security.addEventListener('change', updateSecurity); updateSecurity();
-    document.getElementById('builder-form').addEventListener('submit', event => {
-      event.preventDefault();
-      const name=document.getElementById('profile-name').value.trim();
-      const ssid=document.getElementById('ssid').value;
-      const type=security.value;
-      const password=passwordInput.value;
-      const status=document.getElementById('builder-status');
-      if(!name||!ssid.trim()){status.textContent='Please enter a profile name and network name.';return;}
-      if(type!=='None'&&!password){status.textContent='Enter the network password or choose an open network.';return;}
-      if(type==='WPA'&&(password.length<8||password.length>63)){status.textContent='WPA passwords must be 8–63 characters.';return;}
-      const profileUUID=uuid(), wifiUUID=uuid();
-      const wifiPayload=[
-        '\t<dict>', plistString('PayloadType','com.apple.wifi.managed'),plistString('PayloadVersion','1'),plistString('PayloadIdentifier',`com.configkit.wifi.${wifiUUID.toLowerCase()}`),plistString('PayloadUUID',wifiUUID),plistString('PayloadDisplayName',`${name} Wi-Fi`),plistString('SSID_STR',ssid),
-        `\t\t\t<key>AutoJoin</key>\n\t\t\t<${document.getElementById('autojoin').checked?'true':'false'}/>`,'\t\t\t<key>EncryptionType</key>',`\t\t\t<string>${type==='None'?'None':type}</string>`,
-        ...(type==='None'?[]:[plistString('Password',password)]), '\t</dict>'
-      ].join('\n');
-      const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n\t<key>PayloadContent</key>\n\t<array>\n${wifiPayload}\n\t</array>\n${plistString('PayloadDescription','Wi-Fi settings generated locally with ConfigKit.') }\n${plistString('PayloadDisplayName',name)}\n${plistString('PayloadIdentifier',`com.configkit.profile.${profileUUID.toLowerCase()}`)}\n${plistString('PayloadOrganization','ConfigKit')}\n${plistString('PayloadType','Configuration')}\n${plistString('PayloadUUID',profileUUID)}\n\t<key>PayloadVersion</key>\n\t<integer>1</integer>\n</dict>\n</plist>\n`;
-      const blob=new Blob([xml],{type:'application/x-apple-aspen-config'});
-      const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`${name.replace(/[^a-z0-9_-]+/gi,'-').replace(/^-|-$/g,'')||'wifi-profile'}.mobileconfig`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
-      status.textContent='Profile downloaded. Review it before installing; it is not signed.';
-    });
-    document.querySelectorAll('.demo-form').forEach(form=>form.addEventListener('submit',event=>{event.preventDefault();form.querySelector('.form-status').textContent='Demo only — no account information was sent or saved.';}));
-    document.getElementById('newsletter-form').addEventListener('submit',event=>{event.preventDefault();event.currentTarget.reset();alert('Thanks! This is a front-end demo, so your email was not saved or sent.');});
-    const examples={info:`<dict>\n  <key>PayloadType</key><string>com.apple.ManagedClient.preferences</string>\n  <key>PayloadDisplayName</key><string>Organization preferences</string>\n  <key>PayloadDescription</key><string>Sample managed preference payload.</string>\n</dict>`,webclip:`<dict>\n  <key>PayloadType</key><string>com.apple.webClip.managed</string>\n  <key>Label</key><string>Company Portal</string>\n  <key>URL</key><string>https://example.com/</string>\n  <key>IsRemovable</key><true/>\n</dict>`};
-    const modal=document.getElementById('example-modal');
-    document.querySelectorAll('[data-example]').forEach(button=>button.addEventListener('click',()=>{document.getElementById('modal-content').textContent=examples[button.dataset.example];modal.classList.add('open');}));
-    document.querySelector('.close').addEventListener('click',()=>modal.classList.remove('open'));
-    modal.addEventListener('click',event=>{if(event.target===modal)modal.classList.remove('open');});
-    document.addEventListener('keydown',event=>{if(event.key==='Escape')modal.classList.remove('open');});
+    (() => {
+      const form = document.getElementById('wifi-form');
+      const security = document.getElementById('security');
+      const password = document.getElementById('password');
+      const passwordWrap = document.getElementById('password-wrap');
+      const status = document.getElementById('status');
+      const output = document.getElementById('output');
+      const preview = document.getElementById('xml-preview');
+      const download = document.getElementById('download');
+      let objectUrl = '';
+      const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }).toUpperCase();
+      const xmlEscape = value => String(value).replace(/[<>&'"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c]));
+      function updateSecurity(){const open=security.value==='None';passwordWrap.hidden=open;password.required=!open;if(open)password.value='';}
+      security.addEventListener('change', updateSecurity);updateSecurity();
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        const name=document.getElementById('profile-name').value.trim();
+        const ssid=document.getElementById('ssid').value.trim();
+        const type=security.value;
+        if(!name||!ssid){status.className='status error';status.textContent='Enter both a profile name and network name.';return;}
+        if(type==='WPA'&&(password.value.length<8||password.value.length>63)){status.className='status error';status.textContent='WPA passphrases must be 8–63 characters.';return;}
+        if(type==='WEP'&&!password.value){status.className='status error';status.textContent='Enter the network password, or choose another security type.';return;}
+        const profileId=uuid(),payloadId=uuid();
+        const entry=(key,value)=>`\t\t\t<key>${key}</key>\n\t\t\t<string>${xmlEscape(value)}</string>`;
+        const payload=[entry('PayloadType','com.apple.wifi.managed'),'\t\t\t<key>PayloadVersion</key>\n\t\t\t<integer>1</integer>',entry('PayloadIdentifier',`com.configkit.wifi.${payloadId.toLowerCase()}`),entry('PayloadUUID',payloadId),entry('PayloadDisplayName',`${name} Wi-Fi`),entry('SSID_STR',ssid),'\t\t\t<key>AutoJoin</key>\n\t\t\t<'+(document.getElementById('autojoin').checked?'true':'false')+ '/>','\t\t\t<key>EncryptionType</key>\n\t\t\t<string>'+(type==='None'?'None':type)+'</string>',...(type==='None'?[]:[entry('Password',password.value)])].join('\n');
+        const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n\t<key>PayloadType</key>\n\t<string>Configuration</string>\n\t<key>PayloadVersion</key>\n\t<integer>1</integer>\n\t<key>PayloadIdentifier</key>\n\t<string>com.configkit.profile.${profileId.toLowerCase()}</string>\n\t<key>PayloadUUID</key>\n\t<string>${profileId}</string>\n\t<key>PayloadDisplayName</key>\n\t<string>${xmlEscape(name)}</string>\n\t<key>PayloadContent</key>\n\t<array>\n\t\t<dict>\n${payload}\n\t\t</dict>\n\t</array>\n</dict>\n</plist>\n`;
+        const parsed=new DOMParser().parseFromString(xml,'application/xml');
+        if(parsed.querySelector('parsererror')){status.className='status error';status.textContent='Could not create valid XML. Check the fields and try again.';return;}
+        if(objectUrl)URL.revokeObjectURL(objectUrl);
+        objectUrl=URL.createObjectURL(new Blob([xml],{type:'application/x-apple-aspen-config'}));
+        download.href=objectUrl;download.download=(name.replace(/[^a-z0-9_-]+/gi,'-').replace(/^-|-$/g,'')||'wifi-profile')+'.mobileconfig';
+        preview.textContent=xml;output.hidden=false;status.className='status';status.textContent='Profile generated locally. Treat it as sensitive and review it before installing.';
+      });
+      window.addEventListener('pagehide',()=>{if(objectUrl)URL.revokeObjectURL(objectUrl);});
+    })();
   </script>
 </body>
 </html>
