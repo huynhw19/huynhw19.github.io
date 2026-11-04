@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How to use ConfigKit to build and safely review a Wi-Fi configuration profile.">
+  <title>How to use ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--green:#226b51;--mint:#e8f4ed}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif}.wrap{width:min(100% - 36px,800px);margin:auto}header{background:#fff;border-bottom:1px solid var(--line);padding:20px 0}header a,.back{color:var(--green);font-weight:700;text-decoration:none}.content{padding:42px 0 64px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.12;margin:8px 0 12px}h2{font-size:1.25rem;margin:28px 0 8px}.eyebrow{color:var(--green);font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}.intro,.muted{color:var(--muted)}.steps{padding-left:1.4rem}.steps li{padding:0 0 12px 5px}.notice{background:var(--mint);border-radius:12px;padding:16px 18px;margin:22px 0}.button{display:inline-block;background:var(--green);color:white;padding:11px 16px;border-radius:9px;text-decoration:none;font-weight:700;margin:8px 0}.button:hover{background:#174b39}.back{display:inline-block;margin-top:24px}
+  </style>
+</head>
+<body>
+  <header><div class="wrap"><a href="./">⌘ ConfigKit</a></div></header>
+  <main class="wrap content">
+    <span class="eyebrow">Quick start</span>
+    <h1>How to use ConfigKit</h1>
+    <p class="intro">Create a basic Wi-Fi configuration profile in your browser, then review it before installing.</p>
+    <a class="button" href="./#builder">Open the Wi-Fi builder →</a>
+
+    <h2>Build a Wi-Fi profile</h2>
+    <ol class="steps">
+      <li>Open the <a href="./#builder">Wi-Fi profile builder</a> on the home page.</li>
+      <li>Enter a profile name and the exact Wi-Fi network name (SSID).</li>
+      <li>Choose the network security type. For a secured network, enter its password; for an open network, choose the open-network option.</li>
+      <li>Choose whether the device should automatically join the network.</li>
+      <li>Select <strong>Generate &amp; download profile</strong>. The <code>.mobileconfig</code> file is generated locally in your browser.</li>
+    </ol>
+
+    <h2>Before installing</h2>
+    <div class="notice"><strong>Review first.</strong> The generated profile is not signed, and a Wi-Fi password is stored inside the downloaded file. Only install profiles you trust. Check the profile contents and confirm it is appropriate for your device; work or school devices may require an administrator to review or sign it.</div>
+    <p class="muted">The sample payloads are learning examples and may not be complete installable profiles. Supported settings can vary by operating-system version and device-management method. This independent demo is not affiliated with Apple.</p>
+
+    <h2>Explore examples</h2>
+    <p>See <a href="./examples.html">more mobileconfig payload examples</a> for Wi-Fi, web clips, passcode policy, restrictions, and encrypted DNS. Treat examples as starting points and verify them against current Apple documentation before deployment.</p>
+    <a class="back" href="./">← Back to ConfigKit home</a>
+  </main>
+</body>
+</html>
