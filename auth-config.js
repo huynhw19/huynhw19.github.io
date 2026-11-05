@@ -29,12 +29,22 @@ window.CONFIGKIT_AUTH = {
     account.dataset.accountObserver = 'true';
 
     const addAccountLinks = () => {
+      const dashboardLink = account.querySelector('.dashboard-link');
       const discussionLink = account.querySelector('.builder-discussion-link');
       const settingsLink = account.querySelector('.account-settings-link');
       if (account.hidden) {
+        dashboardLink?.remove();
         discussionLink?.remove();
         settingsLink?.remove();
         return;
+      }
+      if (!dashboardLink) {
+        const link = document.createElement('a');
+        link.className = 'dashboard-link';
+        link.href = 'dashboard.html';
+        link.textContent = 'Open dashboard →';
+        link.style.cssText = 'display:block;margin-top:8px;font-weight:600';
+        account.append(document.createElement('br'), link);
       }
       if (!discussionLink) {
         const link = document.createElement('a');
