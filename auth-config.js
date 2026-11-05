@@ -4,7 +4,7 @@ window.CONFIGKIT_AUTH = {
   supabaseUrl: 'https://gwhqnqzzlgslwgijkkpt.supabase.co',
   supabaseAnonKey: 'sb_publishable_qf35m_HhuP-QC_lFVlfmWg_VLPoUY7w',
   // Public Cloudflare Turnstile site key. Keep the corresponding secret in Supabase only.
-  turnstileSiteKey: '0x4AAAAAAF0lgF9cPbDl120'
+  turnstileSiteKey: '0x4AAAAAAF0lgF9cPbDl120-'
 };
 
 // Brand the OAuth page and expose account links only after sign-in.
