@@ -7,8 +7,10 @@ window.CONFIGKIT_AUTH = {
 
 // Brand the OAuth page and expose account links only after sign-in.
 (() => {
+  const isLoginPage = () => /(?:^|\/)login(?:\.html)?$/.test(window.location.pathname);
+
   const addLoginEnhancements = () => {
-    if (!window.location.pathname.endsWith('/login.html')) return;
+    if (!isLoginPage()) return;
 
     const header = document.querySelector('header');
     if (header && !header.querySelector('.oauth-app-logo')) {
@@ -52,12 +54,13 @@ window.CONFIGKIT_AUTH = {
       }
     };
 
-    new MutationObserver(addAccountLinks).observe(account, {attributes:true, childList:true, subtree:true});
+    const observer = new MutationObserver(addAccountLinks);
+    observer.observe(account, {attributes: true, childList: true, subtree: true});
     addAccountLinks();
   };
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', addLoginEnhancements, {once:true});
+    document.addEventListener('DOMContentLoaded', addLoginEnhancements, {once: true});
   } else {
     addLoginEnhancements();
   }
