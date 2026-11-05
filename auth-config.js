@@ -1,7 +1,7 @@
 // Public browser configuration only. Never put OAuth client secrets here.
 // Fill these in after completing AUTH-SETUP.md.
-window.CONFIGKIT_AUTH = {https://supabase.com/dashboard/project/gwhqnqzzlgslwgijkkpt}
-  supabaseUrl: '',https://supabase.com/dashboard/project/gwhqnqzzlgslwgijkkpt
+window.CONFIGKIT_AUTH = {
+  supabaseUrl: '',
   supabaseAnonKey: ''
 };
 
