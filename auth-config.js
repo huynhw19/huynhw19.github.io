@@ -1,8 +1,8 @@
 // Public browser configuration only. Never put OAuth client secrets here.
 // Fill these in after completing AUTH-SETUP.md.
 window.CONFIGKIT_AUTH = {
-  supabaseUrl: '',https://gwhqnqzzlgslwgijkkpt.supabase.co/auth/v1/callback
-  supabaseAnonKey: ''sb_publishable_qf35m_HhuP-QC_lFVlfmWg_VLPoUY7w
+  supabaseUrl: 'https://gwhqnqzzlgslwgijkkpt.supabase.co',
+  supabaseAnonKey: 'sb_publishable_qf35m_HhuP-QC_lFVlfmWg_VLPoUY7w'
 };
 
 // Brand the OAuth page and expose account links only after sign-in.
