@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Create or join private ConfigKit groups to coordinate mobileconfig profile work.">
+  <title>ConfigKit Groups</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,880px);margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650}main{padding:36px 0 56px}h1{font-size:clamp(2rem,6vw,3rem);line-height:1.15;margin:8px 0}h2{font-size:1.25rem;margin:0 0 10px}.lead,.muted{color:var(--muted)}.lead{font-size:1.1rem;max-width:680px}.notice{padding:14px 16px;background:var(--gold);border:1px solid #f1e4c9;border-radius:12px;color:#62512d;margin:20px 0}.status{padding:12px 14px;background:var(--white);border:1px solid var(--line);border-radius:10px}.error{color:var(--red)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin-top:22px}.panel,.group{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;margin:16px 0}.field{margin:14px 0}.field label{display:block;font-weight:650;margin-bottom:5px}input{width:100%;padding:11px 12px;border:1px solid #b9c9bf;border-radius:8px;font:inherit}button{padding:10px 15px;border:1px solid var(--green);border-radius:9px;background:var(--green);color:white;font:inherit;font-weight:650;cursor:pointer}button.secondary{background:white;color:var(--green-dark);border-color:var(--line)}button:disabled{opacity:.6;cursor:wait}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.code{font:700 1.05rem ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;overflow-wrap:anywhere}.group-list{list-style:none;padding:0}.group{margin:12px 0}.group h3{margin:0 0 6px}footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted)}[hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <header><a href="dashboard.html">← ConfigKit dashboard</a><a href="mobileconfig-builder.html">Mobileconfig Studio</a></header>
+  <main>
+    <h1>Your ConfigKit groups</h1>
+    <p class="lead">Create a group for your team or join one with an invite code. Group membership helps coordinate profile work; it does not share or store your mobileconfig files or settings.</p>
+    <p class="notice"><strong>Keep profiles private.</strong> Group features store only the group name and membership. Invite codes let people join, so share them privately. Never post Wi-Fi passwords, profile XML, or other secrets in a group name.</p>
+    <p id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</p>
+    <div id="groups-app" hidden>
+      <div class="grid">
+        <section class="panel" aria-labelledby="create-title">
+          <h2 id="create-title">Create a group</h2>
+          <form id="create-form"><div class="field"><label for="group-name">Group name</label><input id="group-name" maxlength="80" required placeholder="For example, Device setup team"></div><button id="create-button" type="submit">Create group</button></form>
+          <div id="created-code" class="notice" hidden aria-live="polite"></div>
+        </section>
+        <section class="panel" aria-labelledby="join-title">
+          <h2 id="join-title">Join a group</h2>
+          <form id="join-form"><div class="field"><label for="invite-code">Invite code</label><input id="invite-code" maxlength="64" autocomplete="off" autocapitalize="none" required placeholder="Paste the code shared by a member"></div><button id="join-button" type="submit">Join group</button></form>
+        </section>
+      </div>
+      <section class="panel" aria-labelledby="memberships-title"><h2 id="memberships-title">Your groups</h2><ul id="group-list" class="group-list"></ul></section>
+    </div>
+  </main>
+  <footer>ConfigKit · Independent mobileconfig builder demo · <a href="safety.html">Safety &amp; contact</a> · <a href="privacy.html">Privacy</a></footer>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (() => {
+      const status = document.getElementById('status');
+      const app = document.getElementById('groups-app');
+      const list = document.getElementById('group-list');
+      const config = window.CONFIGKIT_AUTH || {};
+      const setStatus = (message, error = false) => {
+        status.hidden = false;
+        status.textContent = message;
+        status.classList.toggle('error', error);
+      };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+        setStatus('Groups are not configured. The site owner must set up Supabase using GROUPS-SETUP.md.', true);
+        return;
+      }
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      let user;
+      const showError = error => setStatus(error?.message || 'Something went wrong. Please try again.', true);
+      async function loadGroups() {
+        list.replaceChildren();
+        const {data: memberships, error: membershipError} = await client.from('configkit_group_members').select('group_id').eq('user_id', user.id);
+        if (membershipError) { showError(membershipError); return; }
+        if (!memberships?.length) {
+          const item = document.createElement('li'); item.className = 'muted'; item.textContent = 'You have not joined any groups yet.'; list.append(item); return;
+        }
+        const ids = memberships.map(row => row.group_id);
+        const {data: groups, error: groupError} = await client.from('configkit_groups').select('id,name,created_at').in('id', ids).order('created_at', {ascending:false});
+        if (groupError) { showError(groupError); return; }
+        for (const group of groups || []) {
+          const item = document.createElement('li'); item.className = 'group';
+          const heading = document.createElement('h3'); heading.textContent = group.name;
+          const meta = document.createElement('p'); meta.className = 'muted'; meta.textContent = `Joined group · created ${new Date(group.created_at).toLocaleDateString()}`;
+          const leave = document.createElement('button'); leave.type = 'button'; leave.className = 'secondary'; leave.textContent = 'Leave group';
+          leave.addEventListener('click', async () => {
+            if (!window.confirm(`Leave “${group.name}”? You will need a new invite code to rejoin.`)) return;
+            leave.disabled = true;
+            const {error} = await client.from('configkit_group_members').delete().eq('group_id', group.id).eq('user_id', user.id);
+            if (error) { leave.disabled = false; showError(error); return; }
+            setStatus(`You left ${group.name}.`); await loadGroups();
+          });
+          item.append(heading, meta, leave); list.append(item);
+        }
+      }
+      async function start() {
+        const {data, error} = await client.auth.getSession();
+        if (error) { setStatus('Could not check your sign-in. Please refresh and try again.', true); return; }
+        if (!data.session) {
+          setStatus('Please sign in to create or join groups. ');
+          const link = document.createElement('a'); link.href = 'login.html'; link.textContent = 'Go to sign in'; status.append(link); return;
+        }
+        user = data.session.user; app.hidden = false; status.hidden = true; await loadGroups();
+      }
+      document.getElementById('create-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = document.getElementById('create-button'); const name = document.getElementById('group-name').value.trim();
+        if (!name) return;
+        button.disabled = true; setStatus('Creating your group…');
+        const {data, error} = await client.rpc('create_configkit_group', {group_name:name});
+        button.disabled = false;
+        if (error) { showError(error); return; }
+        const result = Array.isArray(data) ? data[0] : data;
+        if (!result?.invite_code) { setStatus('The group was created, but no invite code was returned. Check the Supabase setup.', true); return; }
+        const panel = document.getElementById('created-code'); panel.replaceChildren(); panel.hidden = false;
+        const label = document.createElement('strong'); label.textContent = 'Copy this invite code now. It is shown only once:';
+        const code = document.createElement('p'); code.className = 'code'; code.textContent = result.invite_code;
+        const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'secondary'; copy.textContent = 'Copy invite code';
+        copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(result.invite_code); copy.textContent = 'Copied'; } catch { code.textContent = result.invite_code; setStatus('Clipboard access is unavailable; select and copy the invite code manually.'); } });
+        panel.append(label, code, copy); document.getElementById('create-form').reset(); setStatus('Group created. Share its invite code privately.'); await loadGroups();
+      });
+      document.getElementById('join-form').addEventListener('submit', async event => {
+        event.preventDefault(); const button = document.getElementById('join-button'); const invite = document.getElementById('invite-code').value.trim();
+        if (!invite) return;
+        button.disabled = true; setStatus('Checking invite code…');
+        const {data, error} = await client.rpc('join_configkit_group', {invite_code:invite}); button.disabled = false;
+        if (error) { showError(error); return; }
+        const result = Array.isArray(data) ? data[0] : data;
+        if (!result?.group_name) { setStatus('That invite code was not accepted.', true); return; }
+        document.getElementById('join-form').reset(); setStatus(`You joined ${result.group_name}.`); await loadGroups();
+      });
+      client.auth.onAuthStateChange((_event, session) => { if (!session) window.location.replace('login.html'); });
+      void start();
+    })();
+  </script>
+</body>
+</html>
