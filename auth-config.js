@@ -96,7 +96,7 @@ window.CONFIGKIT_AUTH = {
   };
 
   const withCaptcha = (method, getOptions, setOptions) => async (...args) => {
-    if (!config.turnstileSiteKey) {
+    if (!config.turnstileSiteKey) {0x4AAAAAAF0lgF9cPbDl120}
       throw new Error('Email sign-in requires Turnstile setup. Add the site key to auth-config.js and configure CAPTCHA in Supabase.');
     }
     if (!token) throw new Error('Please complete the human verification challenge and try again.');
