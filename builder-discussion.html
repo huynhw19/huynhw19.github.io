@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Discuss ConfigKit builders and comment on ideas with the community.">
+  <meta name="description" content="Discuss ConfigKit builders and review shared mobileconfig files from the community.">
   <title>Builder discussion — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px #17231f12}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(920px,calc(100% - 32px));margin:auto}header{padding:24px 0}header a,footer a{color:var(--green-dark);font-weight:650}main{padding:16px 0 56px}h1,h2,p{margin-top:0}h1{font-size:clamp(2rem,5vw,2.7rem);line-height:1.15;margin-bottom:10px}.muted,.meta{color:var(--muted)}.panel,.thread{background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px;margin-top:20px}.field{display:grid;gap:6px;margin:14px 0}label{font-weight:650}input,textarea{width:100%;border:1px solid #cbd6cf;border-radius:10px;padding:12px;font:inherit;color:var(--ink);background:#fff}textarea{min-height:110px;resize:vertical}button{border:0;border-radius:10px;background:var(--green);color:white;padding:11px 16px;font:inherit;font-weight:650;cursor:pointer}button:hover{background:var(--green-dark)}button:disabled{opacity:.6;cursor:wait}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px}.thread h2{font-size:1.2rem;margin-bottom:6px}.thread-body{white-space:pre-wrap;overflow-wrap:anywhere}.meta{font-size:.9rem}.comment-list{border-top:1px solid var(--line);margin-top:18px;padding-top:14px}.comment{border-left:3px solid var(--mint);padding:4px 0 4px 12px;margin:12px 0}.comment p{margin-bottom:4px;white-space:pre-wrap;overflow-wrap:anywhere}.comment-form{display:grid;gap:10px;margin-top:14px}.comment-form textarea{min-height:72px}.status{padding:12px;border-radius:10px;background:var(--mint)}.status.error{background:#fff0f0;color:var(--red)}[hidden]{display:none!important}footer{padding:0 0 28px}a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #81b99e;outline-offset:2px}@media(max-width:600px){.panel,.thread{padding:18px}.toolbar{align-items:flex-start;flex-direction:column}}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,980px);margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650;text-decoration:none}a:hover{text-decoration:underline}main{padding:28px 0 56px}.muted{color:var(--muted)}.panel,.thread,.profile-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}.status{padding:12px 14px;border-radius:10px;background:#fff;border:1px solid var(--line)}.status.error{border-color:#f0b7b7;background:#fff7f7;color:var(--red)}.field{margin:14px 0}.field label{display:block;font-weight:650;margin-bottom:6px}input,textarea,button{font:inherit}input,textarea{width:100%;padding:11px 12px;border:1px solid #cbd6cf;border-radius:9px;background:#fff;color:var(--ink)}textarea{min-height:110px;resize:vertical}button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 16px;border:1px solid var(--green);border-radius:10px;background:var(--green);color:#fff;cursor:pointer;font-weight:650}button.secondary{background:#fff;color:var(--green-dark);border-color:var(--line)}button.inline{padding:8px 12px;min-height:36px}button:disabled{opacity:.55;cursor:wait}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 12px}.toolbar h2{margin:0}.meta{color:var(--muted);font-size:.92rem;margin:8px 0}.thread,.profile-card{margin-top:16px}.thread-body{margin:12px 0}.comment-list{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.comment{padding:10px 0;border-bottom:1px solid var(--line)}.comment:last-child{border-bottom:none}.comment-form{display:flex;gap:8px;flex-direction:column;margin-top:12px}.comment-form textarea{min-height:80px}.profile-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:8px}.download-link{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 12px;border-radius:10px;background:var(--mint);border:1px solid #cfe7d5;color:var(--green-dark);font-weight:650}.download-link:hover{text-decoration:none}.empty{color:var(--muted);padding:12px 0}footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted)}[hidden]{display:none!important}@media(max-width:560px){.toolbar{flex-direction:column;align-items:flex-start}.profile-actions{align-items:flex-start}.comment-form{gap:10px}}
   </style>
 </head>
 <body>
   <header><a href="index.html">← ConfigKit</a></header>
   <main>
     <h1>Builder discussion</h1>
-    <p class="muted">Share ideas, ask questions, and leave comments about the profile builders. Please keep posts helpful and never include passwords, private keys, or other sensitive information.</p>
+    <p class="muted">Share ideas, ask questions, and review other users’ shared mobileconfig files. Please keep posts helpful and never include passwords, private keys, or other sensitive information.</p>
     <div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
     <section id="discussion" hidden>
       <form id="new-thread" class="panel">
@@ -23,7 +23,11 @@
         <div class="field"><label for="body">Details</label><textarea id="body" name="body" maxlength="5000" required placeholder="Describe your question or idea"></textarea></div>
         <button id="publish" type="submit">Post discussion</button>
       </form>
-      <div class="toolbar"><h2>Recent discussions</h2><button id="refresh" type="button">Refresh</button></div>
+
+      <div class="toolbar"><h2>Shared profiles</h2> <button id="refresh" class="secondary" type="button">Refresh</button></div>
+      <div id="profiles" aria-live="polite"></div>
+
+      <div class="toolbar"><h2>Recent discussions</h2></div>
       <div id="threads" aria-live="polite"></div>
     </section>
   </main>
@@ -35,6 +39,7 @@
       const status = document.getElementById('status');
       const discussion = document.getElementById('discussion');
       const threads = document.getElementById('threads');
+      const profiles = document.getElementById('profiles');
       const config = window.CONFIGKIT_AUTH || {};
       const setStatus = (message, error = false) => {
         status.textContent = message;
@@ -61,27 +66,115 @@
       status.hidden = true;
       const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.preferred_username || user.email || 'Community member';
       const escapeDate = value => new Date(value).toLocaleString();
-      const showError = error => setStatus(error?.message || 'Something went wrong. Please try again.', true);
+      const showError = error => { setStatus(error?.message || 'Something went wrong. Please try again.', true); status.hidden = false; };
+
+      async function loadFollowedUsers() {
+        const {data: follows, error: followError} = await client.from('user_follows').select('following_id').eq('follower_id', user.id);
+        if (followError) throw followError;
+        return new Set((follows || []).map(item => item.following_id));
+      }
+
+      async function toggleFollow(followingId, button) {
+        const followed = button.dataset.following === 'true';
+        button.disabled = true;
+        try {
+          if (followed) {
+            const {error: deleteError} = await client.from('user_follows').delete().eq('follower_id', user.id).eq('following_id', followingId);
+            if (deleteError) throw deleteError;
+            button.dataset.following = 'false';
+            button.textContent = 'Follow';
+          } else {
+            const {error: insertError} = await client.from('user_follows').insert({follower_id:user.id, following_id:followingId});
+            if (insertError) throw insertError;
+            button.dataset.following = 'true';
+            button.textContent = 'Following';
+          }
+        } catch (error) {
+          showError(error);
+        } finally {
+          button.disabled = false;
+        }
+      }
+
+      async function loadSharedProfiles() {
+        profiles.replaceChildren();
+        const {data: posts, error: postError} = await client.from('mobileconfig_posts').select('id,user_id,title,description,filename,storage_path,created_at').order('created_at', {ascending:false}).limit(20);
+        if (postError) { showError(postError); return; }
+
+        if (!posts || !posts.length) {
+          const empty = document.createElement('p');
+          empty.className = 'empty';
+          empty.textContent = 'No shared profiles yet. The next upload will appear here.';
+          profiles.append(empty);
+          return;
+        }
+
+        let followedUsers = new Set();
+        try {
+          followedUsers = await loadFollowedUsers();
+        } catch (error) {
+          showError(error);
+        }
+
+        for (const post of posts) {
+          const item = document.createElement('article');
+          item.className = 'profile-card';
+          const creatorName = post.user_id === user.id ? displayName : 'Community member';
+          const title = document.createElement('h3');
+          title.textContent = post.title;
+          const meta = document.createElement('p');
+          meta.className = 'meta';
+          meta.textContent = `Posted by ${creatorName} · ${escapeDate(post.created_at)}`;
+          const description = document.createElement('p');
+          description.textContent = post.description;
+          const actions = document.createElement('div');
+          actions.className = 'profile-actions';
+          const download = document.createElement('a');
+          const publicUrl = client.storage.from('mobileconfig-shares').getPublicUrl(post.storage_path).data.publicUrl;
+          download.className = 'download-link';
+          download.href = publicUrl;
+          download.target = '_blank';
+          download.rel = 'noopener noreferrer';
+          download.download = post.filename;
+          download.textContent = `Download ${post.filename}`;
+
+          actions.append(download);
+
+          if (post.user_id !== user.id) {
+            const followButton = document.createElement('button');
+            followButton.type = 'button';
+            followButton.className = 'secondary inline';
+            const isFollowing = followedUsers.has(post.user_id);
+            followButton.dataset.following = String(isFollowing);
+            followButton.textContent = isFollowing ? 'Following' : 'Follow';
+            followButton.addEventListener('click', () => toggleFollow(post.user_id, followButton));
+            actions.append(followButton);
+          }
+
+          item.append(title, meta, description, actions);
+          profiles.append(item);
+        }
+      }
 
       async function loadThreads() {
         threads.replaceChildren();
         const {data: posts, error: postError} = await client.from('builder_discussions').select('id,user_id,title,body,created_at').order('created_at', {ascending:false}).limit(50);
-        if (postError) { status.hidden = false; showError(postError); return; }
+        if (postError) { showError(postError); return; }
         if (!posts.length) {
-          const empty = document.createElement('p'); empty.className = 'muted'; empty.textContent = 'No discussions yet. Start the first one!'; threads.append(empty); return;
+          const empty = document.createElement('p'); empty.className = 'empty'; empty.textContent = 'No discussions yet. Start the first one!'; threads.append(empty); return;
         }
-        const {data: comments, error: commentError} = await client.from('builder_discussion_comments').select('id,discussion_id,user_id,body,created_at').in('discussion_id', posts.map(post => post.id)).order('created_at', {ascending:true});
-        if (commentError) { status.hidden = false; showError(commentError); return; }
+        const {data: comments, error: commentError} = await client.from('builder_discussion_comments').select('id,discussion_id,user_id,body,created_at').in('discussion_id', posts.map(post => post.id));
+        if (commentError) { showError(commentError); return; }
         const commentsByPost = new Map(posts.map(post => [post.id, []]));
         for (const comment of comments || []) commentsByPost.get(comment.discussion_id)?.push(comment);
 
         for (const post of posts) {
           const article = document.createElement('article'); article.className = 'thread';
-          const heading = document.createElement('h2'); heading.textContent = post.title;
+          const heading = document.createElement('h3'); heading.textContent = post.title;
           const meta = document.createElement('p'); meta.className = 'meta'; meta.textContent = `Posted by ${post.user_id === user.id ? displayName : 'a community member'} · ${escapeDate(post.created_at)}`;
           const body = document.createElement('p'); body.className = 'thread-body'; body.textContent = post.body;
           const commentSection = document.createElement('section'); commentSection.className = 'comment-list';
-          const commentsHeading = document.createElement('h3'); commentsHeading.textContent = `Comments (${(commentsByPost.get(post.id) || []).length})`; commentSection.append( commentsHeading );
+          const commentsHeading = document.createElement('h4'); commentsHeading.textContent = `Comments (${(commentsByPost.get(post.id) || []).length})`; commentSection.append(commentsHeading);
           for (const comment of commentsByPost.get(post.id) || []) {
             const item = document.createElement('div'); item.className = 'comment';
             const text = document.createElement('p'); text.textContent = comment.body;
@@ -97,7 +190,7 @@
             event.preventDefault(); button.disabled = true;
             const {error: insertError} = await client.from('builder_discussion_comments').insert({discussion_id:post.id, user_id:user.id, body:input.value.trim()});
             button.disabled = false;
-            if (insertError) { setStatus(insertError.message, true); status.hidden = false; return; }
+            if (insertError) { showError(insertError); return; }
             await loadThreads();
           });
           article.append(heading, meta, body, commentSection, form); threads.append(article);
@@ -111,11 +204,15 @@
         const body = document.getElementById('body').value.trim();
         const {error: insertError} = await client.from('builder_discussions').insert({user_id:user.id, title, body});
         button.disabled = false;
-        if (insertError) { setStatus(insertError.message, true); status.hidden = false; return; }
+        if (insertError) { showError(insertError); return; }
         event.target.reset();
         await loadThreads();
       });
-      document.getElementById('refresh').addEventListener('click', loadThreads);
+      document.getElementById('refresh').addEventListener('click', async () => {
+        await loadSharedProfiles();
+        await loadThreads();
+      });
+      await loadSharedProfiles();
       await loadThreads();
     })();
   </script>
