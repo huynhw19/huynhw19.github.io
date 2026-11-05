@@ -4,7 +4,7 @@ window.CONFIGKIT_AUTH = {
   supabaseUrl: 'https://gwhqnqzzlgslwgijkkpt.supabase.co',
   supabaseAnonKey: 'sb_publishable_qf35m_HhuP-QC_lFVlfmWg_VLPoUY7w',
   // Public Cloudflare Turnstile site key. Keep the corresponding secret in Supabase only.
-  turnstileSiteKey: ''
+  turnstileSiteKey:0x4AAAAAAF0lgF9cPbDl120 ''
 };
 
 // Brand the OAuth page and expose account links only after sign-in.
@@ -96,8 +96,9 @@ window.CONFIGKIT_AUTH = {
   };
 
   const withCaptcha = (method, getOptions, setOptions) => async (...args) => {
-    turnstileSiteKey: '0x4AAAAAAF0lgF9cPbDl120'
+    if (!config.turnstileSiteKey) {
       throw new Error('Email sign-in requires Turnstile setup. Add the site key to auth-config.js and configure CAPTCHA in Supabase.');
+    }
     }
     if (!token) throw new Error('Please complete the human verification challenge and try again.');
     const captchaToken = token;
