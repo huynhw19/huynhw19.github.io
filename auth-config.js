@@ -94,22 +94,18 @@ window.CONFIGKIT_AUTH = {
     token = '';
     if (turnstile && widgetId !== null) turnstile.reset(widgetId);
   };
-
-  const withCaptcha = (method, getOptions, setOptions) => async (...args) => {
-    if (!config.turnstileSiteKey) {
-      throw new Error('Email sign-in requires Turnstile setup. Add the site key to auth-config.js and configure CAPTCHA in Supabase.');
-    }
-    }
-    if (!token) throw new Error('Please complete the human verification challenge and try again.');
-    const captchaToken = token;
+;
     token = '';
     setOptions(args, captchaToken, getOptions(args));
     try {
       return await method(...args);
     } finally {
       resetWidget();
+    }  const withCaptcha = (method, getOptions, setOptions) => async (...args) => {
+    if (!config.turnstileSiteKey) {
+      throw new Error('Email sign-in requires Turnstile setup. Add the site key to auth-config.js and configure CAPTCHA in Supabase.');
     }
-  };
+  
 
   const protectClient = client => {
     if (!client?.auth || client.auth.__configKitCaptcha) return client;
