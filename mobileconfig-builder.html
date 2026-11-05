@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Build a combined Wi-Fi, web clip, and encrypted DNS mobileconfig profile locally.">
+  <title>Mobileconfig Studio — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,960px);margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650}main{padding:36px 0 64px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:8px 0}.lead,.muted{color:var(--muted)}.panel{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;margin:20px 0}.notice{padding:14px 16px;background:var(--gold);border:1px solid #f1e4c9;border-radius:12px;color:#62512d}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.field{margin:14px 0}.field label,.legend{display:block;font-weight:650;margin-bottom:6px}input[type=text],input[type=password],input[type=url],select,textarea{width:100%;padding:11px 12px;border:1px solid #cbd6cf;border-radius:9px;background:#fff;color:var(--ink);font:inherit}textarea{min-height:90px;resize:vertical}.check{display:flex;gap:10px;align-items:flex-start;margin:12px 0}.check input{margin-top:6px}button,.button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 16px;border:1px solid var(--green);border-radius:10px;background:var(--green);color:#fff;font:inherit;font-weight:650;cursor:pointer}button:disabled{opacity:.55;cursor:wait}.secondary{background:white;color:var(--green-dark);border-color:var(--line)}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.status{padding:12px;border-radius:10px;background:var(--mint);margin-top:12px}.error{color:var(--red)}pre{overflow:auto;max-height:420px;padding:16px;background:#f2f5f2;border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere}footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted)}[hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <header><a href="dashboard.html">← Your ConfigKit dashboard</a><a href="builder-discussion.html">Community</a></header>
+  <main>
+    <span class="muted">Signed-in workspace · generated on this device</span>
+    <h1>Mobileconfig Studio</h1>
+    <p class="lead">Combine Wi-Fi, a Home Screen web clip, and encrypted DNS settings in one profile. Choose the payloads you need; the profile is generated and downloaded in your browser.</p>
+    <p id="auth-status" class="status" role="status" aria-live="polite">Checking your sign-in…</p>
+    <div id="studio" hidden>
+      <p class="notice"><strong>Review carefully before installing.</strong> Profiles can change network and device behavior. A profile containing Wi-Fi credentials is sensitive. This tool creates unsigned profiles and does not guarantee compatibility. Never install a profile unless you trust its source and understand every setting.</p>
+      <form id="builder-form">
+        <section class="panel">
+          <h2>Profile details</h2>
+          <div class="grid"><div class="field"><label for="profile-name">Profile name</label><input id="profile-name" type="text" maxlength="100" value="My ConfigKit Profile" required></div><div class="field"><label for="organization">Organization (optional)</label><input id="organization" type="text" maxlength="100" placeholder="Your organization"></div></div>
+        </section>
+        <section class="panel"><h2>Choose payloads</h2>
+          <label class="check"><input type="checkbox" id="include-wifi" checked><span><strong>Wi-Fi network</strong> — configure a network connection.</span></label>
+          <div id="wifi-fields" class="grid"><div class="field"><label for="ssid">Network name (SSID)</label><input id="ssid" type="text" maxlength="32" autocomplete="off" required></div><div class="field"><label for="wifi-security">Security</label><select id="wifi-security"><option value="WPA">WPA/WPA2/WPA3 Personal</option><option value="None">Open (no password)</option></select></div><div class="field" id="wifi-password-field"><label for="wifi-password">Network password</label><input id="wifi-password" type="password" maxlength="128" autocomplete="new-password" required></div></div>
+          <hr>
+          <label class="check"><input type="checkbox" id="include-webclip"><span><strong>Web clip</strong> — add a website shortcut to the Home Screen.</span></label>
+          <div id="webclip-fields" class="grid" hidden><div class="field"><label for="clip-label">Home Screen label</label><input id="clip-label" type="text" maxlength="100" value="My Website"></div><div class="field"><label for="clip-url">Website URL</label><input id="clip-url" type="url" inputmode="url" placeholder="https://example.com"></div><label class="check"><input type="checkbox" id="clip-removable" checked><span>Allow the web clip to be removed.</span></label><label class="check"><input type="checkbox" id="clip-fullscreen"><span>Open full screen when supported.</span></label></div>
+          <hr>
+          <label class="check"><input type="checkbox" id="include-dns"><span><strong>Encrypted DNS (DoH)</strong> — route matching DNS queries through a DNS-over-HTTPS resolver.</span></label>
+          <div id="dns-fields" class="grid" hidden><div class="field"><label for="dns-url">DoH resolver URL</label><input id="dns-url" type="url" inputmode="url" placeholder="https://resolver.example/dns-query"></div><div class="field"><label for="dns-domains">Match domains (optional, comma-separated)</label><input id="dns-domains" type="text" placeholder="example.com, internal.example"></div><label class="check"><input type="checkbox" id="dns-all"><span>Use this resolver for all domains (where supported).</span></label></div>
+        </section>
+        <div class="actions"><button type="submit">Generate profile</button></div>
+      </form>
+      <p id="build-status" class="status" role="status" aria-live="polite" hidden></p>
+      <section id="result" class="panel" hidden><h2>Review your profile</h2><p>Inspect the XML and verify every value before installation. Profile contents remain on your device unless you choose to share a community post below (which does not include the profile file or its contents).</p><pre id="xml-preview"></pre><div class="actions"><a class="button" id="download" download="configkit-profile.mobileconfig">Download .mobileconfig</a></div></section>
+      <section class="panel" aria-labelledby="share-title"><h2 id="share-title">Share with the community</h2><p>Share a title and your own description in ConfigKit discussions. The generated profile, Wi-Fi name/password, resolver URL, and XML are never sent. Do not put secrets or personal information in your description.</p><form id="share-form"><div class="field"><label for="share-heading">Post title</label><input id="share-heading" type="text" maxlength="120" required placeholder="A clear title for your profile idea"></div><div class="field"><label for="share-description">Description</label><textarea id="share-description" maxlength="2000" required placeholder="Describe the intended use without including credentials or private details."></textarea></div><label class="check"><input type="checkbox" id="share-confirm" required><span>I confirm that my description contains no passwords, personal data, or other secrets, and I understand that only this text is posted.</span></label><button id="share-button" type="submit">Post description to community</button><p id="share-status" role="status" aria-live="polite"></p></form></section>
+    </div>
+  </main>
+  <footer>ConfigKit · Independent mobileconfig builder demo · <a href="safety.html">Safety &amp; contact</a> · <a href="privacy.html">Privacy</a></footer>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (() => {
+      const authStatus = document.getElementById('auth-status');
+      const studio = document.getElementById('studio');
+      const config = window.CONFIGKIT_AUTH || {};
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { authStatus.textContent = 'Authentication is not configured. Ask the site owner to finish Supabase setup.'; authStatus.classList.add('error'); return; }
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      let currentUser = null;
+      async function checkSession() {
+        const {data,error} = await client.auth.getSession();
+        if (error) { authStatus.textContent = 'Could not check your sign-in. Please refresh and try again.'; authStatus.classList.add('error'); return; }
+        if (!data.session) { authStatus.textContent = 'Please sign in to use Mobileconfig Studio. '; const link = document.createElement('a'); link.href='login.html'; link.textContent='Go to sign in'; authStatus.append(link); studio.hidden=true; return; }
+        currentUser=data.session.user; authStatus.hidden=true; studio.hidden=false;
+      }
+      client.auth.onAuthStateChange((_event,session)=>{ if(!session){window.location.replace('login.html');return;} currentUser=session.user; });
+      void checkSession();
+      const includeWifi=document.getElementById('include-wifi'), includeClip=document.getElementById('include-webclip'), includeDns=document.getElementById('include-dns');
+      const wifiFields=document.getElementById('wifi-fields'), clipFields=document.getElementById('webclip-fields'), dnsFields=document.getElementById('dns-fields'), wifiSecurity=document.getElementById('wifi-security');
+      const setEnabled=(container,enabled)=>{container.hidden=!enabled;container.querySelectorAll('input,select').forEach(el=>{el.disabled=!enabled;});};
+      function updateFields(){setEnabled(wifiFields,includeWifi.checked);setEnabled(clipFields,includeClip.checked);setEnabled(dnsFields,includeDns.checked);const secured=wifiSecurity.value!=='None';document.getElementById('wifi-password-field').hidden=!secured;document.getElementById('wifi-password').required=includeWifi.checked&&secured;document.getElementById('wifi-password').disabled=!includeWifi.checked||!secured;}
+      [includeWifi,includeClip,includeDns,wifiSecurity].forEach(el=>el.addEventListener('change',updateFields)); updateFields();
+      const esc=value=>String(value).replace(/[<>&'"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c]));
+      const uuid=()=>crypto.randomUUID?crypto.randomUUID().toUpperCase():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16).toUpperCase();});
+      const str=(key,value,indent='\t\t')=>`${indent}<key>${esc(key)}</key>\n${indent}<string>${esc(value)}</string>`;
+      const bool=(key,value,indent='\t\t')=>`${indent}<key>${esc(key)}</key>\n${indent}<${value?'true':'false'}/>`;
+      const strings=(key,values,indent='\t\t')=>`${indent}<key>${esc(key)}</key>\n${indent}<array>\n${values.map(v=>`${indent}\t<string>${esc(v)}</string>`).join('\n')}\n${indent}</array>`;
+      function makePayload(type,id,displayName,fields){return ['\t<dict>',str('PayloadType',type,'\t\t'),'\t\t<key>PayloadVersion</key>\n\t\t<integer>1</integer>',str('PayloadIdentifier',id,'\t\t'),str('PayloadUUID',uuid(),'\t\t'),str('PayloadDisplayName',displayName,'\t\t'),...fields,'\t</dict>'].join('\n');}
+      document.getElementById('builder-form').addEventListener('submit',event=>{
+        event.preventDefault(); const status=document.getElementById('build-status'); const fail=message=>{status.hidden=false;status.classList.add('error');status.textContent=message;document.getElementById('result').hidden=true;};
+        const name=document.getElementById('profile-name').value.trim(), organization=document.getElementById('organization').value.trim(); if(!name)return fail('Enter a profile name.'); if(!includeWifi.checked&&!includeClip.checked&&!includeDns.checked)return fail('Select at least one payload.');
+        const profileId=uuid(), profileKey=`com.configkit.profile.${profileId.toLowerCase()}`, payloads=[];
+        if(includeWifi.checked){const ssid=document.getElementById('ssid').value.trim(),security=wifiSecurity.value,password=document.getElementById('wifi-password').value;if(!ssid)return fail('Enter the Wi-Fi network name.');if(security!=='None'&&!password)return fail('Enter the Wi-Fi password or choose open network.');const fields=[str('SSID_STR',ssid),bool('AutoJoin',true),bool('HIDDEN_NETWORK',false),str('EncryptionType',security)];if(security!=='None')fields.push(str('Password',password));payloads.push(makePayload('com.apple.wifi.managed',`${profileKey}.wifi`,'Wi-Fi',fields));}
+        if(includeClip.checked){let url;try{url=new URL(document.getElementById('clip-url').value.trim());}catch{return fail('Enter a valid web clip URL.');}if(!['https:','http:'].includes(url.protocol)||!url.hostname||url.username||url.password)return fail('Use a valid HTTP or HTTPS web clip URL without embedded credentials.');const label=document.getElementById('clip-label').value.trim();if(!label)return fail('Enter a Home Screen label.');const fields=[str('Label',label),str('URL',url.href),bool('IsRemovable',document.getElementById('clip-removable').checked),bool('FullScreen',document.getElementById('clip-fullscreen').checked),bool('Precomposed',false)];payloads.push(makePayload('com.apple.webClip.managed',`${profileKey}.webclip`,`${label} Web Clip`,fields));}
+        if(includeDns.checked){let url;try{url=new URL(document.getElementById('dns-url').value.trim());}catch{return fail('Enter a valid DNS-over-HTTPS URL.');}if(url.protocol!=='https:'||!url.hostname)return fail('The DNS-over-HTTPS resolver URL must use HTTPS.');const domains=document.getElementById('dns-domains').value.split(',').map(v=>v.trim()).filter(Boolean);if(document.getElementById('dns-all').checked&&!domains.includes('.'))domains.unshift('.');const settings=[str('DNSProtocol','HTTPS'),str('ServerURL',url.href)];if(domains.length)settings.push(strings('SupplementalMatchDomains',domains));const fields=['\t\t<key>DNSSettings</key>\n\t\t<dict>',...settings,'\t\t</dict>'];payloads.push(makePayload('com.apple.dnsSettings.managed',`${profileKey}.dns`,'Encrypted DNS',fields));}
+        const profileFields=[str('PayloadType','Configuration','\t'),'\t<key>PayloadVersion</key>\n\t<integer>1</integer>',str('PayloadIdentifier',profileKey,'\t'),str('PayloadUUID',profileId,'\t'),str('PayloadDisplayName',name,'\t'),...(organization?[str('PayloadOrganization',organization,'\t')]:[]),'\t<key>PayloadContent</key>\n\t<array>\n'+payloads.join('\n')+'\n\t</array>'];
+        const xml='<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n'+profileFields.join('\n')+'\n</dict>\n</plist>\n';
+        const parsed=new DOMParser().parseFromString(xml,'application/xml');if(parsed.querySelector('parsererror'))return fail('Could not generate valid XML. Check the fields and try again.');
+        const old=document.getElementById('download').dataset.url;if(old)URL.revokeObjectURL(old);const objectUrl=URL.createObjectURL(new Blob([xml],{type:'application/x-apple-aspen-config'}));const link=document.getElementById('download');link.href=objectUrl;link.dataset.url=objectUrl;link.download=`${name.replace(/[^a-z0-9_-]+/gi,'-').replace(/^-|-$/g,'')||'configkit-profile'}.mobileconfig`;document.getElementById('xml-preview').textContent=xml;document.getElementById('result').hidden=false;status.hidden=false;status.classList.remove('error');status.textContent='Profile generated locally. Review the XML and settings before downloading or installing.';
+      });
+      window.addEventListener('pagehide',()=>{const url=document.getElementById('download').dataset.url;if(url)URL.revokeObjectURL(url);});
+      document.getElementById('share-form').addEventListener('submit',async event=>{event.preventDefault();const status=document.getElementById('share-status'),button=document.getElementById('share-button'),title=document.getElementById('share-heading').value.trim(),description=document.getElementById('share-description').value.trim();status.classList.remove('error');if(!currentUser){status.textContent='Please sign in again before posting.';status.classList.add('error');return;}if(!document.getElementById('share-confirm').checked||!title||!description){status.textContent='Confirm the safety note and enter a title and description.';status.classList.add('error');return;}button.disabled=true;status.textContent='Posting your description…';try{const {error}=await client.from('builder_discussions').insert({user_id:currentUser.id,title,body:description});if(error)throw error;event.target.reset();status.textContent='Posted to the community. Only your title and description were shared; the profile and its settings stayed on your device.';}catch(error){status.textContent=error.message||'Could not post. Make sure community discussions are configured, then try again.';status.classList.add('error');}finally{button.disabled=false;}});
+    })();
+  </script>
+</body>
+</html>

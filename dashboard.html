@@ -7,172 +7,34 @@
   <title>Dashboard — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030;--shadow:0 12px 40px #17231f0a}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,960px);margin:auto}header{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650;text-decoration:none}a:hover{text-decoration:underline}.brand{font-size:1.08rem}.header-actions{display:flex;align-items:center;gap:18px}button,.button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 16px;border:1px solid var(--green);border-radius:10px;background:var(--green);color:#fff;font:inherit;font-weight:650;cursor:pointer}button:hover,.button:hover{background:var(--green-dark);text-decoration:none}button:disabled{opacity:.55;cursor:wait}.secondary{background:var(--white);color:var(--green-dark);border-color:var(--line)}main{padding:42px 0 64px}.welcome{display:flex;align-items:center;gap:22px;padding:28px;background:var(--mint);border:1px solid #d5e9dc;border-radius:18px}.avatar{width:88px;height:88px;flex:0 0 88px;display:grid;place-items:center;overflow:hidden;border:3px solid var(--white);border-radius:50%;background:var(--green);color:#fff;font-size:1.8rem;font-weight:750;box-shadow:0 3px 12px #17231f1a}.avatar img{width:100%;height:100%;object-fit:cover}.welcome-copy{min-width:0}.eyebrow{color:var(--green-dark);font-size:.78rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:8px 0}h2{font-size:1.2rem;margin:0 0 8px}.muted{color:var(--muted)}.welcome p{margin:8px 0 0;overflow-wrap:anywhere}.section-title{margin:34px 0 14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}.card{padding:22px;background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.card p{margin:0 0 16px;color:var(--muted)}.card a{display:inline-block}.upload-card{margin-top:16px}.field{margin:14px 0}.field label{display:block;margin-bottom:6px;font-weight:650}.field input,.field textarea{width:100%;padding:11px 12px;border:1px solid #cbd6cf;border-radius:9px;background:var(--white);color:var(--ink);font:inherit}.field textarea{min-height:120px;resize:vertical}.field input:focus,.field textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid #8cc9a9;outline-offset:2px}.field input[type=file]{padding:10px}.help{font-size:.88rem;color:var(--muted)}.notice{margin-top:22px;padding:14px 16px;background:var(--gold);border:1px solid #f1e4c9;border-radius:12px;color:#62512d;font-size:.92rem}.status{padding:16px;background:var(--white);border:1px solid var(--line);border-radius:12px}.status.error{color:var(--red)}.form-status{min-height:1.5em;margin:12px 0 0;color:var(--muted);font-size:.92rem}.form-status.error{color:var(--red)}[hidden]{display:none!important}footer{padding:22px 0 30px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}.footer-links{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px}
-    @media(max-width:520px){header{align-items:flex-start;padding:16px 0}.header-actions{gap:10px;flex-direction:column;align-items:flex-end}.welcome{align-items:flex-start;padding:22px;gap:16px}.avatar{width:64px;height:64px;flex-basis:64px;font-size:1.4rem}}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,960px);margin:auto}header{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650;text-decoration:none}a:hover{text-decoration:underline}.brand{font-size:1.08rem}.header-actions{display:flex;align-items:center;gap:18px}button,.button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 16px;border:1px solid var(--green);border-radius:10px;background:var(--green);color:#fff;font:inherit;font-weight:650;cursor:pointer}.secondary{background:#fff;color:var(--green-dark);border-color:var(--line)}main{padding:36px 0 56px}.status{padding:16px;background:#fff;border:1px solid var(--line);border-radius:12px}.status.error,.form-status.error{color:var(--red)}.welcome{display:flex;align-items:center;gap:22px;padding:28px;background:var(--mint);border:1px solid #d5e9dc;border-radius:18px}.avatar{width:88px;height:88px;flex:0 0 88px;display:grid;place-items:center;overflow:hidden;border:3px solid #fff;border-radius:50%;background:var(--green);color:#fff;font-size:1.8rem;font-weight:750}.avatar img{width:100%;height:100%;object-fit:cover}.eyebrow{color:var(--green-dark);font-size:.78rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:8px 0}h2{font-size:1.2rem;margin:0 0 8px}.muted{color:var(--muted)}.section-title{margin:34px 0 14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}.card{padding:22px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.card p{color:var(--muted);margin:0 0 14px}.card a{display:inline-block}.notice{margin-top:22px;padding:14px 16px;background:var(--gold);border:1px solid #f1e4c9;border-radius:12px;color:#62512d}footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted)}.footer-links{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px}[hidden]{display:none!important}@media(max-width:520px){header{align-items:flex-start;padding:16px 0}.header-actions{gap:10px;flex-direction:column;align-items:flex-end}.welcome{align-items:flex-start;padding:22px;gap:16px}.avatar{width:64px;height:64px;flex-basis:64px;font-size:1.4rem}}
   </style>
 </head>
 <body>
-  <header>
-    <a class="brand" href="index.html">⌘ ConfigKit</a>
-    <nav class="header-actions" aria-label="Account navigation">
-      <a href="account-settings.html">Account settings</a>
-      <button class="secondary" id="signout" type="button" hidden>Sign out</button>
-    </nav>
-  </header>
+  <header><a class="brand" href="index.html">⌘ ConfigKit</a><nav class="header-actions" aria-label="Account navigation"><a href="account-settings.html">Account settings</a><button class="secondary" id="signout" type="button" hidden>Sign out</button></nav></header>
   <main>
     <div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
     <div id="dashboard" hidden>
-      <section class="welcome" aria-labelledby="welcome-title">
-        <div class="avatar" id="avatar" aria-label="User avatar"><span id="avatar-initials" aria-hidden="true">?</span></div>
-        <div class="welcome-copy">
-          <span class="eyebrow">Your workspace</span>
-          <h1 id="welcome-title">Welcome to ConfigKit</h1>
-          <p id="account-label" class="muted"></p>
-        </div>
-      </section>
+      <section class="welcome" aria-labelledby="welcome-title"><div class="avatar" id="avatar" aria-label="User avatar"><span id="avatar-initials" aria-hidden="true">?</span></div><div><span class="eyebrow">Your workspace</span><h1 id="welcome-title">Welcome to ConfigKit</h1><p id="account-label" class="muted"></p></div></section>
       <h2 class="section-title">Create and review</h2>
       <section class="grid" aria-label="ConfigKit tools">
+        <article class="card"><h2>Mobileconfig Studio</h2><p>Combine Wi-Fi, web clip, and encrypted DNS payloads in one profile, then download it locally or share a description with the community.</p><a href="mobileconfig-builder.html">Open Mobileconfig Studio →</a></article>
         <article class="card"><h2>Wi-Fi profile builder</h2><p>Create a Wi-Fi configuration profile in your browser and download it for review.</p><a href="index.html#wifi-builder">Build a Wi-Fi profile →</a></article>
         <article class="card"><h2>DNS profile builder</h2><p>Configure a DNS-over-HTTPS or DNS-over-TLS resolver.</p><a href="dns-builder.html">Open DNS builder →</a></article>
         <article class="card"><h2>Web clip builder</h2><p>Create a Home Screen shortcut profile for a website you trust.</p><a href="webclip-builder.html">Open web clip builder →</a></article>
         <article class="card"><h2>Prepare or inspect</h2><p>Check XML locally and review profile metadata and payload types.</p><a href="prepare-profile.html">Inspect a profile →</a></article>
         <article class="card"><h2>Examples and guidance</h2><p>Browse illustrative payload examples and safety notes before installing profiles.</p><a href="examples.html">Browse examples →</a></article>
-        <article class="card"><h2>Builder discussion</h2><p>Join the community discussion about the ConfigKit builders.</p><a href="builder-discussion.html">Open discussion →</a></article>
-      </section>
-      <h2 class="section-title" id="share-profile-title">Share a profile with the community</h2>
-      <section class="card upload-card" aria-labelledby="share-profile-title">
-        <p class="muted">Choose a .mobileconfig file to check it locally, then share its title and description in the community discussion.</p>
-        <form id="profile-share-form">
-          <div class="field"><label for="profile-file">Mobileconfig file</label><input id="profile-file" name="profileFile" type="file" accept=".mobileconfig,application/x-apple-aspen-config,application/xml,text/xml" required><div class="help" id="file-help">The selected file is read in your browser only and is not uploaded or attached to the community post.</div></div>
-          <div class="field"><label for="profile-title">Title</label><input id="profile-title" name="title" type="text" maxlength="120" required placeholder="Give your profile a clear title"></div>
-          <div class="field"><label for="profile-description">Description</label><textarea id="profile-description" name="description" maxlength="2000" required placeholder="Explain what the profile does and who it is for."></textarea></div>
-          <button id="share-profile" type="submit">Share title and description</button>
-          <p id="share-status" class="form-status" role="status" aria-live="polite"></p>
-        </form>
-        <p class="help">Only the title, description, and selected filename are posted to the community. Profile contents are never sent. Do not include passwords, private keys, personal data, or other secrets in the description.</p>
+        <article class="card"><h2>Builder discussion</h2><p>Join the community discussion about ConfigKit builders.</p><a href="builder-discussion.html">Open discussion →</a></article>
       </section>
       <h2 class="section-title">Your account</h2>
-      <section class="grid" aria-label="Account shortcuts">
-        <article class="card"><h2>Account settings</h2><p>Update your display name, manage connected sign-in providers, or review your sessions.</p><a href="account-settings.html">Manage account →</a></article>
-        <article class="card"><h2>Saved profiles</h2><p>Profiles are generated and downloaded locally. ConfigKit does not currently store your profiles in an account.</p><a href="index.html">Return to ConfigKit →</a></article>
-      </section>
-      <p class="notice"><strong>Privacy note:</strong> Profile content is generated in your browser. Avoid sharing or installing configuration profiles unless you trust their contents and source.</p>
+      <section class="grid" aria-label="Account shortcuts"><article class="card"><h2>Account settings</h2><p>Update your display name, manage connected sign-in providers, or review your sessions.</p><a href="account-settings.html">Manage account →</a></article><article class="card"><h2>Saved profiles</h2><p>Profiles are generated and downloaded locally. ConfigKit does not store your profiles in an account.</p><a href="index.html">Return to ConfigKit →</a></article></section>
+      <p class="notice"><strong>Privacy note:</strong> Profile content is generated in your browser. Community sharing posts only the title and description you enter—not profile XML, Wi-Fi credentials, or resolver settings. Avoid sharing or installing configuration profiles unless you trust their contents and source.</p>
     </div>
   </main>
   <footer><span>ConfigKit · Independent mobileconfig builder demo</span><nav class="footer-links" aria-label="Footer"><a href="index.html">Home</a><a href="safety.html">Safety &amp; contact</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></nav></footer>
-  <script src="auth-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    (() => {
-      const status = document.getElementById('status');
-      const dashboard = document.getElementById('dashboard');
-      const signout = document.getElementById('signout');
-      const shareForm = document.getElementById('profile-share-form');
-      const shareStatus = document.getElementById('share-status');
-      const profileFile = document.getElementById('profile-file');
-      const config = window.CONFIGKIT_AUTH || {};
-      let currentUser = null;
-      const setStatus = (message, isError = false) => {
-        status.hidden = false;
-        status.classList.toggle('error', isError);
-        status.textContent = message;
-      };
-      const setShareStatus = (message, isError = false) => {
-        shareStatus.textContent = message;
-        shareStatus.classList.toggle('error', isError);
-      };
-      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
-        setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true);
-        return;
-      }
-      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-      async function renderSession() {
-        const {data, error} = await client.auth.getSession();
-        if (error) { setStatus('Could not check your sign-in. Please refresh and try again.', true); return; }
-        if (!data.session) {
-          currentUser = null;
-          dashboard.hidden = true;
-          signout.hidden = true;
-          setStatus('You are signed out. ');
-          const link = document.createElement('a');
-          link.href = 'login.html';
-          link.textContent = 'Go to sign in';
-          status.append(link);
-          return;
-        }
-        const user = data.session.user;
-        currentUser = user;
-        const metadata = user.user_metadata || {};
-        const name = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username || '';
-        const initials = (name || user.email || 'U').trim().split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map(part => part.charAt(0).toUpperCase()).join('') || 'U';
-        document.getElementById('welcome-title').textContent = name ? `Welcome, ${name}` : 'Welcome to ConfigKit';
-        document.getElementById('account-label').textContent = user.email ? `Signed in as ${user.email}` : 'You are signed in to your ConfigKit account.';
-        const avatar = document.getElementById('avatar');
-        const initialsLabel = document.getElementById('avatar-initials');
-        initialsLabel.textContent = initials;
-        avatar.replaceChildren(initialsLabel);
-        const avatarUrl = metadata.avatar_url || metadata.picture || metadata.photo_url;
-        if (typeof avatarUrl === 'string') {
-          try {
-            const parsedUrl = new URL(avatarUrl);
-            if (parsedUrl.protocol === 'https:') {
-              const image = document.createElement('img');
-              image.src = parsedUrl.href;
-              image.alt = name ? `${name}'s profile photo` : 'Your profile photo';
-              image.referrerPolicy = 'no-referrer';
-              image.addEventListener('error', () => image.remove(), {once:true});
-              avatar.replaceChildren(image);
-            }
-          } catch { /* Keep the initials fallback for invalid photo URLs. */ }
-        }
-        status.hidden = true;
-        dashboard.hidden = false;
-        signout.hidden = false;
-      }
-      shareForm.addEventListener('submit', async event => {
-        event.preventDefault();
-        if (!currentUser) { setShareStatus('Please sign in again before sharing.', true); return; }
-        const file = profileFile.files?.[0];
-        const title = document.getElementById('profile-title').value.trim();
-        const description = document.getElementById('profile-description').value.trim();
-        if (!file || !title || !description) { setShareStatus('Choose a file and enter both a title and description.', true); return; }
-        if (!file.name.toLowerCase().endsWith('.mobileconfig')) { setShareStatus('Please choose a file with the .mobileconfig extension.', true); return; }
-        if (file.size > 2 * 1024 * 1024) { setShareStatus('The selected file is larger than 2 MB. Choose a smaller profile.', true); return; }
-        const button = document.getElementById('share-profile');
-        button.disabled = true;
-        setShareStatus('Checking the profile locally…');
-        try {
-          const xml = await file.text();
-          const parsed = new DOMParser().parseFromString(xml, 'application/xml');
-          if (parsed.querySelector('parsererror') || parsed.documentElement?.tagName !== 'plist') {
-            setShareStatus('This file does not look like a valid XML property list. The file was not shared.', true);
-            return;
-          }
-          setShareStatus('Sharing the title and description with the community…');
-          const postBody = `${description}\n\nProfile file checked in your browser: ${file.name}\nThe profile file itself was not uploaded.`;
-          const {error} = await client.from('builder_discussions').insert({user_id:currentUser.id, title, body:postBody});
-          if (error) throw error;
-          shareForm.reset();
-          setShareStatus('Shared with the community. Only your title, description, and filename were posted; the profile file stayed on your device.');
-        } catch (error) {
-          setShareStatus(error.message || 'Could not share with the community. Please try again.', true);
-        } finally {
-          button.disabled = false;
-        }
-      });
-      signout.addEventListener('click', async () => {
-        signout.disabled = true;
-        const {error} = await client.auth.signOut();
-        signout.disabled = false;
-        if (error) { setStatus('Could not sign out. Please try again.', true); return; }
-        window.location.replace('login.html');
-      });
-      client.auth.onAuthStateChange((_event, session) => {
-        if (!session) { window.location.replace('login.html'); return; }
-        void renderSession();
-      });
-      void renderSession();
-    })();
+    (()=>{const status=document.getElementById('status'),dashboard=document.getElementById('dashboard'),signout=document.getElementById('signout'),config=window.CONFIGKIT_AUTH||{};const setStatus=(message,isError=false)=>{status.hidden=false;status.classList.toggle('error',isError);status.textContent=message;};if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.',true);return;}const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});async function renderSession(){const{data,error}=await client.auth.getSession();if(error){setStatus('Could not check your sign-in. Please refresh and try again.',true);return;}if(!data.session){dashboard.hidden=true;signout.hidden=true;setStatus('You are signed out. ');const link=document.createElement('a');link.href='login.html';link.textContent='Go to sign in';status.append(link);return;}const user=data.session.user,metadata=user.user_metadata||{},name=metadata.display_name||metadata.full_name||metadata.name||metadata.preferred_username||'',initials=(name||user.email||'U').trim().split(/[\s@._-]+/).filter(Boolean).slice(0,2).map(part=>part.charAt(0).toUpperCase()).join('')||'U';document.getElementById('welcome-title').textContent=name?`Welcome, ${name}`:'Welcome to ConfigKit';document.getElementById('account-label').textContent=user.email?`Signed in as ${user.email}`:'You are signed in to your ConfigKit account.';const avatar=document.getElementById('avatar'),initialsLabel=document.getElementById('avatar-initials');initialsLabel.textContent=initials;avatar.replaceChildren(initialsLabel);const avatarUrl=metadata.avatar_url||metadata.picture||metadata.photo_url;if(typeof avatarUrl==='string'){try{const parsed=new URL(avatarUrl);if(parsed.protocol==='https:'){const image=document.createElement('img');image.src=parsed.href;image.alt=name?`${name}'s profile photo`:'Your profile photo';image.referrerPolicy='no-referrer';image.addEventListener('error',()=>image.remove(),{once:true});avatar.replaceChildren(image);}}catch{/* Keep initials for an invalid photo URL. */}}status.hidden=true;dashboard.hidden=false;signout.hidden=false;}signout.addEventListener('click',async()=>{signout.disabled=true;const{error}=await client.auth.signOut();signout.disabled=false;if(error){setStatus('Could not sign out. Please try again.',true);return;}window.location.replace('login.html');});client.auth.onAuthStateChange((_event,session)=>{if(!session){window.location.replace('login.html');return;}void renderSession();});void renderSession();})();
   </script>
 </body>
 </html>
