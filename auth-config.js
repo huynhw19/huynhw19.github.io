@@ -4,12 +4,12 @@ window.CONFIGKIT_AUTH = {
   supabaseUrl: 'https://gwhqnqzzlgslwgijkkpt.supabase.co',
   supabaseAnonKey: 'sb_publishable_qf35m_HhuP-QC_lFVlfmWg_VLPoUY7w',
   // Public Cloudflare Turnstile site key. Keep the corresponding secret in Supabase only.
-  turnstileSiteKey:0x4AAAAAAF0lgF9cPbDl120 ''
+  turnstileSiteKey: '0x4AAAAAAF0lgF9cPbDl120'
 };
 
 // Brand the OAuth page and expose account links only after sign-in.
 (() => {
-  const isLoginPage = () => /(?:^|\/)login(?:\.html)?$/.test(window.location.pathname);
+  const isLoginPage = () => /(?:^|\/|)login(?:\.html)?$/.test(window.location.pathname);
 
   const addLoginEnhancements = () => {
     if (!isLoginPage()) return;
@@ -81,7 +81,7 @@ window.CONFIGKIT_AUTH = {
 // Add Turnstile verification to the email/password auth flows on the login page.
 // Supabase validates the token using the secret configured in its Auth dashboard.
 (() => {
-  const isLoginPage = () => /(?:^|\/)login(?:\.html)?$/.test(window.location.pathname);
+  const isLoginPage = () => /(?:^|\/|)login(?:\.html)?$/.test(window.location.pathname);
   if (!isLoginPage()) return;
 
   const config = window.CONFIGKIT_AUTH || {};
@@ -94,18 +94,21 @@ window.CONFIGKIT_AUTH = {
     token = '';
     if (turnstile && widgetId !== null) turnstile.reset(widgetId);
   };
-;
+
+  const withCaptcha = (method, getOptions, setOptions) => async (...args) => {
+    if (!config.turnstileSiteKey) {
+      throw new Error('Email sign-in requires Turnstile setup. Add the site key to auth-config.js and configure CAPTCHA in Supabase.');
+    }
+    if (!token) throw new Error('Please complete the human verification challenge and try again.');
+    const captchaToken = token;
     token = '';
     setOptions(args, captchaToken, getOptions(args));
     try {
       return await method(...args);
     } finally {
       resetWidget();
-    }  const withCaptcha = (method, getOptions, setOptions) => async (...args) => {
-    if (!config.turnstileSiteKey) {
-      throw new Error('Email sign-in requires Turnstile setup. Add the site key to auth-config.js and configure CAPTCHA in Supabase.');
     }
-  
+  };
 
   const protectClient = client => {
     if (!client?.auth || client.auth.__configKitCaptcha) return client;
