@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Get privacy-first, practical guidance for Apple mobileconfig profiles and payloads.">
+  <title>Mobileconfig Tips Assistant — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,820px);margin:auto}header{min-height:70px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:16px}a{color:var(--green-dark);font-weight:650}main{padding:36px 0 56px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:8px 0}.muted{color:var(--muted)}.panel{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;margin:20px 0}.notice{padding:14px 16px;background:var(--gold);border:1px solid #f1e4c9;border-radius:12px;color:#62512d}.field{margin:14px 0}.field label{display:block;font-weight:650;margin-bottom:6px}textarea,select{width:100%;padding:11px 12px;border:1px solid #cbd6cf;border-radius:9px;background:#fff;color:var(--ink);font:inherit}textarea{min-height:110px;resize:vertical}button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 16px;border:1px solid var(--green);border-radius:10px;background:var(--green);color:#fff;font:inherit;font-weight:650;cursor:pointer}button:focus-visible,textarea:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #8cc9a9;outline-offset:2px}.prompts{display:flex;flex-wrap:wrap;gap:8px}.prompts button{background:#fff;color:var(--green-dark);border-color:var(--line);font-size:.92rem}.answer{padding:18px;background:var(--mint);border:1px solid #d5e9dc;border-radius:12px;margin-top:18px}.answer h2{margin-top:0}.answer ul{padding-left:22px}.answer li+li{margin-top:8px}.answer p:last-child{margin-bottom:0}footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted)}[hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <header><a href="dashboard.html">← Your ConfigKit dashboard</a><a href="mobileconfig-builder.html">Mobileconfig Studio</a></header>
+  <main>
+    <p class="muted">Signed-in workspace · private, in-browser guidance</p>
+    <h1>Mobileconfig Tips Assistant</h1>
+    <p>Ask a question about Wi-Fi, web clips, DNS, VPNs, installation, or profile safety. Get practical next steps and a review checklist.</p>
+    <p id="auth-status" class="notice" role="status" aria-live="polite">Checking your sign-in…</p>
+    <section id="assistant" hidden>
+      <p class="notice"><strong>Privacy:</strong> This helper uses a small set of built-in guidance rules, not a cloud AI model. Your question stays in this browser and is not sent or saved. It can’t inspect a profile or verify compatibility; confirm important details with current Apple documentation and your administrator.</p>
+      <section class="panel" aria-labelledby="ask-title">
+        <h2 id="ask-title">What would you like help with?</h2>
+        <div class="field"><label for="topic">Device context</label><select id="topic"><option value="iphone">iPhone or iPad</option><option value="mac">Mac</option><option value="managed">Organization-managed device</option><option value="unsure">Not sure</option></select></div>
+        <div class="field"><label for="question">Your question</label><textarea id="question" maxlength="500" placeholder="For example: What should I check before sharing a Wi-Fi profile?" required></textarea></div>
+        <button id="ask" type="button">Get tips</button>
+        <p class="muted">Or try one of these:</p>
+        <div class="prompts" aria-label="Example questions"><button type="button" data-prompt="What should I check before installing a profile?">Before installing</button><button type="button" data-prompt="How do I keep Wi-Fi credentials safe?">Wi-Fi privacy</button><button type="button" data-prompt="What should I know about encrypted DNS?">DNS settings</button><button type="button" data-prompt="How do I review a web clip?">Web clip</button><button type="button" data-prompt="What should I know about VPN or certificates?">VPNs and certificates</button></div>
+      </section>
+      <section id="answer" class="answer" aria-live="polite" aria-labelledby="answer-title" hidden><h2 id="answer-title">Suggested guidance</h2><div id="answer-content"></div></section>
+    </section>
+  </main>
+  <footer>ConfigKit · Independent mobileconfig builder demo · <a href="safety.html">Safety &amp; contact</a> · <a href="privacy.html">Privacy</a></footer>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (()=>{
+      const authStatus=document.getElementById('auth-status'),assistant=document.getElementById('assistant'),answer=document.getElementById('answer'),content=document.getElementById('answer-content'),question=document.getElementById('question'),context=document.getElementById('topic');
+      const config=window.CONFIGKIT_AUTH||{};
+      if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){authStatus.textContent='Authentication is not configured. Ask the site owner to finish Supabase setup.';return;}
+      const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      async function checkSession(){const{data,error}=await client.auth.getSession();if(error){authStatus.textContent='Could not check your sign-in. Please refresh and try again.';return;}if(!data.session){authStatus.textContent='Please sign in to use the tips assistant. ';const link=document.createElement('a');link.href='login.html';link.textContent='Go to sign in';authStatus.append(link);return;}authStatus.hidden=true;assistant.hidden=false;}
+      client.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace('login.html');});void checkSession();
+      const tips=[
+        {keys:['wifi','wi-fi','ssid','password','wireless','network'],title:'Wi-Fi profile safety',items:['Use a profile only for a network you trust, and confirm the SSID and security type with its owner.','Treat a profile that contains a Wi-Fi password like a secret. Don’t upload it or paste credentials into community posts.','Prefer current, supported security settings. An open network does not protect traffic by itself.','If you shared a credential accidentally, change it with the network administrator.']},
+        {keys:['web clip','webclip','website','shortcut','url','home screen'],title:'Web clip review',items:['Check the full destination URL and hostname yourself; use HTTPS where available.','Avoid URLs containing usernames, passwords, private tokens, or other sensitive query data.','A web clip creates a shortcut and does not make the destination trustworthy. Check the removable and full-screen options before installation.']},
+        {keys:['dns',' doh','dot','resolver','domain'],title:'DNS settings',items:['A DNS profile can send domain lookups to the resolver you specify. Review that provider’s privacy and logging policies.','Confirm the resolver hostname and HTTPS endpoint from the provider’s official documentation.','A match-all setting can apply broadly; understand how it interacts with VPNs, managed networks, and your device before enabling it.']},
+        {keys:['vpn','certificate','cert','proxy','traffic','filter'],title:'VPNs, certificates, and traffic routing',items:['These payloads can affect network routing or trust decisions across your device. Install only profiles from an administrator or source you independently trust.','Verify the organization, certificate identity, server names, and requested permissions through a separate trusted channel.','Do not install a certificate or VPN profile merely to access a website or file. Ask your organization’s administrator if anything is unexpected.']},
+        {keys:['install','installation','remove','delete','review','safe','safety','share','community','profile'],title:'Before installing or sharing',items:['Inspect the profile source, name, organization, payload types, and every setting. Cancel if the prompt differs from what you expected.','Unsigned profiles do not establish who created them. Do not treat a successful download or XML parse as a safety or compatibility check.','For community sharing, share a description—not profile files, passwords, private keys, personal data, or sensitive network details.','Know how to remove the profile and check what settings will be reverted before installing it.']}
+      ];
+      function addParagraph(parent,text){const p=document.createElement('p');p.textContent=text;parent.append(p);}
+      function getGuidance(){const raw=question.value.trim();if(!raw){question.focus();return;}const normalized=raw.toLowerCase();const matched=tips.filter(t=>t.keys.some(key=>normalized.includes(key)));const selected=matched.length?matched:[tips[tips.length-1]];content.replaceChildren();selected.forEach(tip=>{const h=document.createElement('h3');h.textContent=tip.title;content.append(h);const list=document.createElement('ul');tip.items.forEach(item=>{const li=document.createElement('li');li.textContent=item;list.append(li);});content.append(list);});if(context.value==='managed')addParagraph(content,'For a managed device, your organization’s administrator may control which payloads are allowed. Check with them before making or installing changes.');else if(context.value==='mac')addParagraph(content,'On Mac, available payloads and installation behavior can vary by macOS version and management state. Verify against documentation for the exact version.');else if(context.value==='iphone')addParagraph(content,'On iPhone or iPad, review the installation screen and verify the profile’s displayed details before approving. Exact behavior depends on iOS/iPadOS version and management state.');addParagraph(content,'This is general educational guidance, not a security audit or Apple compatibility guarantee. Check current Apple documentation and consult your administrator for device-specific decisions.');answer.hidden=false;answer.scrollIntoView({behavior:'smooth',block:'nearest'});}
+      document.getElementById('ask').addEventListener('click',getGuidance);question.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key==='Enter')getGuidance();});document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>{question.value=button.dataset.prompt;getGuidance();}));
+    })();
+  </script>
+</body>
+</html>
