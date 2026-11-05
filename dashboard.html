@@ -7,8 +7,8 @@
   <title>Dashboard — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030;--shadow:0 12px 40px #17231f0a}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,960px);margin:auto}header{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650;text-decoration:none}a:hover{text-decoration:underline}.brand{font-size:1.08rem}.header-actions{display:flex;align-items:center;gap:18px}button,.button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 16px;border:1px solid var(--green);border-radius:10px;background:var(--green);color:#fff;font:inherit;font-weight:650;cursor:pointer}button:hover,.button:hover{background:var(--green-dark);text-decoration:none}.secondary{background:var(--white);color:var(--green-dark);border-color:var(--line)}main{padding:42px 0 64px}.welcome{padding:28px;background:var(--mint);border:1px solid #d5e9dc;border-radius:18px}.eyebrow{color:var(--green-dark);font-size:.78rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:8px 0}h2{font-size:1.2rem;margin:0 0 8px}.muted{color:var(--muted)}.welcome p{margin:8px 0 0}.section-title{margin:34px 0 14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}.card{padding:22px;background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.card p{margin:0 0 16px;color:var(--muted)}.card a{display:inline-block}.notice{margin-top:22px;padding:14px 16px;background:var(--gold);border:1px solid #f1e4c9;border-radius:12px;color:#62512d;font-size:.92rem}.status{padding:16px;background:var(--white);border:1px solid var(--line);border-radius:12px}.status.error{color:var(--red)}[hidden]{display:none!important}footer{padding:22px 0 30px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}.footer-links{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px}
-    @media(max-width:520px){header{align-items:flex-start;padding:16px 0}.header-actions{gap:10px;flex-direction:column;align-items:flex-end}.welcome{padding:22px}}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,960px);margin:auto}header{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650;text-decoration:none}a:hover{text-decoration:underline}.brand{font-size:1.08rem}.header-actions{display:flex;align-items:center;gap:18px}button,.button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 16px;border:1px solid var(--green);border-radius:10px;background:var(--green);color:#fff;font:inherit;font-weight:650;cursor:pointer}button:hover,.button:hover{background:var(--green-dark);text-decoration:none}.secondary{background:var(--white);color:var(--green-dark);border-color:var(--line)}main{padding:42px 0 64px}.welcome{display:flex;align-items:center;gap:22px;padding:28px;background:var(--mint);border:1px solid #d5e9dc;border-radius:18px}.avatar{width:88px;height:88px;flex:0 0 88px;display:grid;place-items:center;overflow:hidden;border:3px solid var(--white);border-radius:50%;background:var(--green);color:#fff;font-size:1.8rem;font-weight:750;box-shadow:0 3px 12px #17231f1a}.avatar img{width:100%;height:100%;object-fit:cover}.welcome-copy{min-width:0}.eyebrow{color:var(--green-dark);font-size:.78rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:8px 0}h2{font-size:1.2rem;margin:0 0 8px}.muted{color:var(--muted)}.welcome p{margin:8px 0 0;overflow-wrap:anywhere}.section-title{margin:34px 0 14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}.card{padding:22px;background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.card p{margin:0 0 16px;color:var(--muted)}.card a{display:inline-block}.notice{margin-top:22px;padding:14px 16px;background:var(--gold);border:1px solid #f1e4c9;border-radius:12px;color:#62512d;font-size:.92rem}.status{padding:16px;background:var(--white);border:1px solid var(--line);border-radius:12px}.status.error{color:var(--red)}[hidden]{display:none!important}footer{padding:22px 0 30px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}.footer-links{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px}
+    @media(max-width:520px){header{align-items:flex-start;padding:16px 0}.header-actions{gap:10px;flex-direction:column;align-items:flex-end}.welcome{align-items:flex-start;padding:22px;gap:16px}.avatar{width:64px;height:64px;flex-basis:64px;font-size:1.4rem}}
   </style>
 </head>
 <body>
@@ -23,9 +23,12 @@
     <div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
     <div id="dashboard" hidden>
       <section class="welcome" aria-labelledby="welcome-title">
-        <span class="eyebrow">Your workspace</span>
-        <h1 id="welcome-title">Welcome to ConfigKit</h1>
-        <p id="account-label" class="muted"></p>
+        <div class="avatar" id="avatar" aria-label="User avatar"><span id="avatar-initials" aria-hidden="true">?</span></div>
+        <div class="welcome-copy">
+          <span class="eyebrow">Your workspace</span>
+          <h1 id="welcome-title">Welcome to ConfigKit</h1>
+          <p id="account-label" class="muted"></p>
+        </div>
       </section>
       <h2 class="section-title">Create and review</h2>
       <section class="grid" aria-label="ConfigKit tools">
@@ -77,9 +80,28 @@
           return;
         }
         const user = data.session.user;
-        const name = user.user_metadata?.display_name || user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.preferred_username;
+        const metadata = user.user_metadata || {};
+        const name = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username || '';
+        const initials = (name || user.email || 'U').trim().split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map(part => part.charAt(0).toUpperCase()).join('') || 'U';
         document.getElementById('welcome-title').textContent = name ? `Welcome, ${name}` : 'Welcome to ConfigKit';
         document.getElementById('account-label').textContent = user.email ? `Signed in as ${user.email}` : 'You are signed in to your ConfigKit account.';
+        const avatar = document.getElementById('avatar');
+        const initialsLabel = document.getElementById('avatar-initials');
+        initialsLabel.textContent = initials;
+        const avatarUrl = metadata.avatar_url || metadata.picture || metadata.photo_url;
+        if (typeof avatarUrl === 'string') {
+          try {
+            const parsedUrl = new URL(avatarUrl);
+            if (parsedUrl.protocol === 'https:') {
+              const image = document.createElement('img');
+              image.src = parsedUrl.href;
+              image.alt = name ? `${name}'s profile photo` : 'Your profile photo';
+              image.referrerPolicy = 'no-referrer';
+              image.addEventListener('error', () => image.remove(), {once:true});
+              avatar.replaceChildren(image);
+            }
+          } catch { /* Keep the initials fallback for invalid photo URLs. */ }
+        }
         status.hidden = true;
         dashboard.hidden = false;
         signout.hidden = false;
