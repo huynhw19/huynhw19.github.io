@@ -183,7 +183,7 @@ window.CONFIGKIT_AUTH = {
     script.defer = true;
     script.onload = () => {
       turnstile = window.turnstile;
-      if (!turnstile) {0x4AAAAAAF0lgF9cPbDl120}
+      if (!turnstile) {
         message.textContent = 'Could not load human verification. Check your connection and reload the page.';
         return;
       }
