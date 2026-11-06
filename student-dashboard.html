@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student dashboard — ConfigKit</title>
+  <style>
+    body { font-family: sans-serif; margin: 24px; background: #f5f7f6; color: #17231f; line-height: 1.6; }
+    main { max-width: 720px; margin: 5vh auto; }
+    .card { background: white; border: 1px solid #dfe9e5; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .status { color: #174b39; }
+    .error { color: #9b3030; }
+    .record { padding: 12px 0; border-top: 1px solid #e5ece8; }
+    button, .button { display: inline-block; padding: 10px 14px; border: 0; border-radius: 8px; background: #226b51; color: white; text-decoration: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card">
+      <a href="dashboard.html">← ConfigKit dashboard</a>
+      <h1>Student dashboard</h1>
+      <p id="status" class="status" role="status" aria-live="polite">Checking your sign in…</p>
+      <div id="records"></div>
+      <button id="signout" type="button" hidden>Sign out</button>
+    </section>
+  </main>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (() => {
+      const status = document.getElementById('status');
+      const records = document.getElementById('records');
+      const signout = document.getElementById('signout');
+      const config = window.CONFIGKIT_AUTH || {};
+      const showStatus = (message, isError = false) => {
+        status.textContent = message;
+        status.className = isError ? 'status error' : 'status';
+      };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+        showStatus('Authentication is not configured. Please contact the site owner.', true);
+        return;
+      }
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      });
+      async function render() {
+        const { data, error } = await client.auth.getSession();
+        if (error || !data.session) {
+          window.location.replace('student-login.html');
+          return;
+        }
+        signout.hidden = false;
+        const { data: studentRecords, error: recordsError } = await client
+          .from('education_students')
+          .select('student_name, school, grade, created_at')
+          .eq('student_user_id', data.session.user.id)
+          .order('created_at', { ascending: false });
+        if (recordsError) {
+          showStatus('Could not load your student record. Ask your teacher or the site owner to check the student login setup.', true);
+          return;
+        }
+        if (!studentRecords || studentRecords.length === 0) {
+          showStatus('You are signed in, but no teacher-created student record is linked to this account yet. Confirm you used the exact email your teacher entered, then contact your teacher if needed.');
+          return;
+        }
+        showStatus(`Signed in as ${data.session.user.email || 'student'}.`);
+        studentRecords.forEach(student => {
+          const item = document.createElement('article');
+          item.className = 'record';
+          const name = document.createElement('strong');
+          name.textContent = student.student_name;
+          const details = document.createElement('p');
+          details.textContent = `${student.school || 'School not set'} · ${student.grade || 'Grade not set'}`;
+          item.append(name, details);
+          records.append(item);
+        });
+      }
+      signout.addEventListener('click', async () => {
+        signout.disabled = true;
+        const { error } = await client.auth.signOut();
+        signout.disabled = false;
+        if (error) { showStatus('Could not sign out. Please try again.', true); return; }
+        window.location.replace('student-login.html');
+      });
+      client.auth.onAuthStateChange((_event, session) => {
+        if (!session) window.location.replace('student-login.html');
+      });
+      void render();
+    })();
+  </script>
+</body>
+</html>

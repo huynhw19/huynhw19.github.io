@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Education Dashboard — ConfigKit</title>
   <style>
     body { font-family: sans-serif; margin: 24px; background: #f5f7f6; color: #17231f; }
@@ -14,6 +14,7 @@
     .error { color: #9b3030; }
     .student-list { list-style: none; padding: 0; }
     .student-item { background: #fff; border: 1px solid #e5ece8; border-radius: 10px; padding: 12px; margin: 8px 0; }
+    .muted { color: #56645e; }
   </style>
 </head>
 <body>
@@ -62,6 +63,7 @@
 
     <section class="card">
       <h2>Students</h2>
+      <p class="muted">Students can create their own account using the email address entered here. Share the <a href="student-login.html">student sign-in page</a> with them. Apply the <a href="STUDENT-LOGIN-SETUP.md">student login database setup</a> before enabling student access.</p>
       <ul id="student-list" class="student-list"></ul>
     </section>
   </main>
@@ -109,18 +111,18 @@
         }
 
         if (!data || data.length === 0) {
-          listEl.innerHTML = '<li class=\"student-item\">No students added yet.</li>';
+          listEl.innerHTML = '<li class="student-item">No students added yet.</li>';
           return;
         }
 
         data.forEach(student => {
           const item = document.createElement('li');
           item.className = 'student-item';
-          item.innerHTML = `
-            <strong>${student.student_name}</strong><br>
-            ${student.student_email}<br>
-            ${student.school || 'No school set'} · ${student.grade || 'No grade set'}
-          `;
+          const name = document.createElement('strong');
+          name.textContent = student.student_name;
+          const details = document.createElement('div');
+          details.textContent = `${student.student_email} · ${student.school || 'No school set'} · ${student.grade || 'No grade set'}`;
+          item.append(name, document.createElement('br'), details);
           listEl.appendChild(item);
         });
       }
@@ -142,7 +144,7 @@
         }
 
         setStatus('Adding student…');
-        const { data, error } = await client.rpc('create_education_student', {
+        const { error } = await client.rpc('create_education_student', {
           p_student_name: payload.student_name,
           p_student_email: payload.student_email,
           p_school: payload.school || null,
@@ -155,7 +157,7 @@
           return;
         }
 
-        setStatus('Student added successfully.');
+        setStatus('Student added successfully. Share the student sign-in page and have them register using this email address.');
         form.reset();
         await loadStudents();
       });
