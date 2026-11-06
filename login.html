@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Sign in or create a ConfigKit account using email, GitHub, or Microsoft.">
+  <meta name="description" content="Sign in or create a ConfigKit account using email, GitHub, or Microsoft, including an education profile.">
   <title>Log in or Sign up — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,720px);margin:auto}header{padding:24px 0}header a,footer a{color:var(--green-dark);font-weight:650;text-decoration:none}header a:hover,footer a:hover{text-decoration:underline}main{padding:20px 0 56px}.card{max-width:480px;margin:auto;padding:32px;background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 40px #17231f0a}h1{font-size:clamp(1.7rem,5vw,2.1rem);line-height:1.2;margin:0 0 12px}.muted{color:var(--muted);font-size:.94rem}.setup{margin:18px 0;padding:14px;background:var(--gold);border:1px solid #f1e4c9;border-radius:10px}.tabs{display:flex;gap:8px;margin:22px 0 16px}.tab{flex:1;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--white);font:inherit;font-weight:650;cursor:pointer}.tab[aria-selected="true"]{border-color:var(--green);background:var(--mint);color:var(--green-dark)}label{display:block;margin:14px 0 5px;font-weight:650}input{width:100%;padding:11px 12px;border:1px solid #cbd6cf;border-radius:9px;font:inherit}.text-button{display:block;margin:9px 0 0 auto;padding:0;border:0;background:none;color:var(--green-dark);font:inherit;text-decoration:underline;cursor:pointer}.form-actions{margin-top:18px}.provider{width:100%;padding:11px 14px;border:1px solid var(--green);border-radius:9px;background:var(--green);color:#fff;font:inherit;font-weight:650;cursor:pointer}.provider:hover{background:var(--green-dark)}.provider:disabled,.tab:disabled{opacity:.55;cursor:not-allowed}.secondary{background:var(--white);color:var(--green-dark);border-color:var(--line)}.secondary:hover{background:var(--mint)}.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:.9rem}.divider:before,.divider:after{content:"";height:1px;flex:1;background:var(--line)}.providers{display:grid;grid-template-columns:1fr 1fr;gap:10px}.status{margin:18px 0 0;color:var(--muted);font-size:.92rem}.status.error{color:var(--red)}.account{margin-top:18px;padding:14px;background:var(--mint);border-radius:10px}.fine-print{margin-top:22px;font-size:.82rem}footer{padding:16px 0 28px}footer nav{display:flex;gap:18px;flex-wrap:wrap}[hidden]{display:none!important}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 40px,680px);margin-inline:auto}header{padding:24px 0;border-bottom:1px solid var(--line)}header a,footer a{color:var(--green);font-weight:700;text-decoration:none}main{padding:44px 0 56px}.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:clamp(22px,5vw,36px);box-shadow:0 12px 32px #17231f0a}h1{font-size:clamp(2rem,6vw,2.7rem);line-height:1.15;margin:0 0 8px}.muted{color:var(--muted)}label{display:block;font-weight:650;margin:14px 0 6px}input,select{width:100%;padding:12px;border:1px solid #cbd6cf;border-radius:9px;font:inherit;color:var(--ink);background:#fff}input:focus,select:focus,button:focus-visible,a:focus-visible{outline:3px solid #76b89a;outline-offset:2px}.tabs,.providers,.form-actions{display:flex;gap:10px;margin:20px 0}.tab,.provider{flex:1;padding:11px 14px;border:1px solid var(--green);border-radius:9px;background:var(--green);color:white;font:inherit;font-weight:700;cursor:pointer}.tab{background:#fff;color:var(--green)}.tab[aria-selected="true"]{background:var(--green);color:#fff}.secondary{background:#fff;color:var(--green)}button:disabled{opacity:.55;cursor:not-allowed}.education-note,.setup{padding:12px 14px;border-radius:9px;background:var(--mint);margin:14px 0}.setup{background:var(--gold)}.divider{text-align:center;color:var(--muted);margin:18px 0}.status{min-height:26px;margin:18px 0 8px}.error{color:var(--red)}.text-button{display:block;border:0;background:none;color:var(--green);text-decoration:underline;padding:8px 0;cursor:pointer;font:inherit}.fine-print{font-size:.9rem}.account{padding:14px;background:var(--mint);border-radius:9px}.account a{color:var(--green)}footer{border-top:1px solid var(--line);padding:20px 0 32px;color:var(--muted)}footer nav{display:flex;gap:18px;flex-wrap:wrap}@media(max-width:480px){.providers{flex-direction:column}.tabs{gap:6px}}
   </style>
 </head>
 <body>
@@ -15,8 +15,14 @@
   <main>
     <section class="card" aria-labelledby="title">
       <h1 id="title">Log in or sign up</h1>
-      <p class="muted">Use your email and password, or continue with a provider. The first successful sign-in creates your account.</p>
+      <p class="muted">Use your email and password, or continue with a provider. The first successful provider sign-in creates your account.</p>
       <div class="setup" id="setup" hidden><strong>Sign-in setup is not complete.</strong> The site needs its Supabase project URL and publishable/anon key in <code>auth-config.js</code>. See <a href="AUTH-SETUP.md">the setup guide</a>.</div>
+      <div class="education-note">
+        <label for="accountType">Account type</label>
+        <select id="accountType" name="accountType"><option value="personal">Personal account</option><option value="education">Education account</option></select>
+        <div id="institutionField" hidden><label for="institution">School or educational institution</label><input id="institution" name="institution" maxlength="120" autocomplete="organization" placeholder="Name of your school or institution"></div>
+        <small class="muted">Education status and institution are self-declared and are not verified. This selection does not grant student discounts or special access.</small>
+      </div>
       <div class="tabs" role="tablist" aria-label="Account action">
         <button class="tab" id="loginTab" type="button" role="tab" aria-selected="true">Log in</button>
         <button class="tab" id="signupTab" type="button" role="tab" aria-selected="false">Sign up</button>
@@ -31,13 +37,13 @@
       </form>
       <div class="divider">or continue with</div>
       <div class="providers">
-        <button class="provider secondary" id="github" type="button" disabled>GitHub</button>
-        <button class="provider secondary" id="microsoft" type="button" disabled>Microsoft</button>
+        <button class="provider secondary" id="github" type="button" disabled>Continue with GitHub</button>
+        <button class="provider secondary" id="microsoft" type="button" disabled>Continue with Microsoft</button>
       </div>
       <p class="status" id="status" role="status" aria-live="polite">Checking sign-in configuration…</p>
       <div class="account" id="account" hidden></div>
       <button class="provider secondary" id="signout" type="button" hidden>Sign out</button>
-      <p class="muted fine-print">Authentication is handled by Supabase and your selected identity provider. Never share your password, access tokens, or recovery codes. See our <a href="privacy.html">Privacy Policy</a>.</p>
+      <p class="muted fine-print">Authentication is handled by Supabase and your selected identity provider. Never share your password, access tokens, or recovery codes. See our <a href="privacy.html">privacy policy</a>.</p>
     </section>
   </main>
   <footer><nav aria-label="Footer"><a href="index.html">Home</a><a href="safety.html">Safety &amp; contact</a><a href="terms.html">Terms</a></nav></footer>
@@ -58,6 +64,9 @@
       const resetPassword = document.getElementById('resetPassword');
       const loginTab = document.getElementById('loginTab');
       const signupTab = document.getElementById('signupTab');
+      const accountType = document.getElementById('accountType');
+      const institution = document.getElementById('institution');
+      const institutionField = document.getElementById('institutionField');
       let mode = 'login';
       let redirecting = false;
       const config = window.CONFIGKIT_AUTH || {};
@@ -69,17 +78,24 @@
 
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
       const callbackUrl = new URL('login.html', window.location.href).href;
+      const educationIntentKey = 'configkit_education_oauth_intent';
+      function selectedMetadata() {
+        const metadata = {account_type:accountType.value};
+        if (accountType.value === 'education' && institution.value.trim()) metadata.institution = institution.value.trim();
+        return metadata;
+      }
       function setBusy(busy) {
-        emailSubmit.disabled = busy;
-        github.disabled = busy;
-        microsoft.disabled = busy;
-        resetPassword.disabled = busy;
-        loginTab.disabled = busy;
-        signupTab.disabled = busy;
+        emailSubmit.disabled = busy; github.disabled = busy; microsoft.disabled = busy;
+        resetPassword.disabled = busy; loginTab.disabled = busy; signupTab.disabled = busy;
       }
       function setStatus(message, isError=false) {
         status.className = isError ? 'status error' : 'status';
         status.textContent = message;
+      }
+      function updateInstitutionField() {
+        const isEducation = accountType.value === 'education';
+        institutionField.hidden = !isEducation;
+        institution.required = isEducation;
       }
       function setMode(nextMode) {
         mode = nextMode;
@@ -95,14 +111,23 @@
         const {data, error} = await client.auth.getSession();
         if (error) { setStatus('Could not read the sign-in session. Please try again.', true); return; }
         if (data.session) {
-          if (!redirecting) {
-            redirecting = true;
-            window.location.replace('dashboard.html');
+          const pendingEducation = sessionStorage.getItem(educationIntentKey);
+          if (pendingEducation) {
+            sessionStorage.removeItem(educationIntentKey);
+            try {
+              const details = JSON.parse(pendingEducation);
+              const update = {account_type:'education'};
+              if (details.institution) update.institution = details.institution;
+              const {error:metadataError} = await client.auth.updateUser({data:update});
+              if (metadataError) throw metadataError;
+            } catch (error) {
+              setStatus(`Signed in, but the education profile could not be saved: ${error.message || 'Please try again in account settings.'}`, true);
+              return;
+            }
           }
+          if (!redirecting) { redirecting = true; window.location.replace('dashboard.html'); }
         } else {
-          account.hidden = true;
-          signout.hidden = true;
-          form.hidden = false;
+          account.hidden = true; signout.hidden = true; form.hidden = false;
           document.querySelector('.tabs').hidden = false;
           document.querySelector('.divider').hidden = false;
           document.querySelector('.providers').hidden = false;
@@ -112,16 +137,24 @@
         setStatus(`Connecting to ${provider === 'azure' ? 'Microsoft' : 'GitHub'}…`);
         setBusy(true);
         try {
+          if (accountType.value === 'education') {
+            if (!institution.value.trim()) throw new Error('Enter your school or institution name first.');
+            sessionStorage.setItem(educationIntentKey, JSON.stringify({institution:institution.value.trim()}));
+          } else {
+            sessionStorage.removeItem(educationIntentKey);
+          }
           const options = {provider, options:{redirectTo:callbackUrl}};
           if (provider === 'azure') options.options.scopes = 'openid email profile';
           const {error} = await client.auth.signInWithOAuth(options);
           if (error) throw error;
         } catch (error) {
+          sessionStorage.removeItem(educationIntentKey);
           setStatus(`Sign-in could not start: ${error.message || 'Please try again.'}`, true);
           setBusy(false);
         }
       }
 
+      accountType.addEventListener('change', updateInstitutionField);
       loginTab.addEventListener('click', () => setMode('login'));
       signupTab.addEventListener('click', () => setMode('signup'));
       form.addEventListener('submit', async event => {
@@ -131,40 +164,31 @@
         setStatus(mode === 'signup' ? 'Creating your account…' : 'Logging in…');
         try {
           const result = mode === 'signup'
-            ? await client.auth.signUp({email:email.value.trim(), password:password.value, options:{emailRedirectTo:callbackUrl}})
+            ? await client.auth.signUp({email:email.value.trim(), password:password.value, options:{emailRedirectTo:callbackUrl, data:selectedMetadata()}})
             : await client.auth.signInWithPassword({email:email.value.trim(), password:password.value});
           if (result.error) throw result.error;
           if (mode === 'signup' && !result.data.session) {
             setStatus('Account created. Check your email for a confirmation link, then return here to log in.');
-            form.reset();
+            form.reset(); updateInstitutionField();
           } else {
             setStatus(mode === 'signup' ? 'Account created and signed in.' : 'Logged in successfully.');
             password.value = '';
             await renderSession();
           }
-        } catch (error) {
-          setStatus(error.message || 'Authentication failed. Please try again.', true);
-        } finally {
-          setBusy(false);
-        }
+        } catch (error) { setStatus(error.message || 'Authentication failed. Please try again.', true); }
+        finally { setBusy(false); }
       });
       resetPassword.addEventListener('click', async () => {
         if (!email.value.trim() || !email.checkValidity()) {
-          email.focus();
-          setStatus('Enter a valid email address first, and then choose “Forgot password?”.', true);
-          return;
+          email.focus(); setStatus('Enter a valid email address first, and then choose “Forgot password?”.', true); return;
         }
-        setBusy(true);
-        setStatus('Sending password reset email…');
+        setBusy(true); setStatus('Sending password reset email…');
         try {
           const {error} = await client.auth.resetPasswordForEmail(email.value.trim(), {redirectTo:callbackUrl});
           if (error) throw error;
           setStatus('If an account exists for that email, a password reset link will be sent.');
-        } catch (error) {
-          setStatus(error.message || 'Could not send a password reset email.', true);
-        } finally {
-          setBusy(false);
-        }
+        } catch (error) { setStatus(error.message || 'Could not send a password reset email.', true); }
+        finally { setBusy(false); }
       });
       github.addEventListener('click', () => startOAuth('github'));
       microsoft.addEventListener('click', () => startOAuth('azure'));
@@ -173,18 +197,16 @@
         const {error} = await client.auth.signOut();
         signout.disabled = false;
         if (error) { setStatus('Could not sign out. Please try again.', true); return; }
-        setMode('login');
-        await renderSession();
+        setMode('login'); await renderSession();
       });
-      github.disabled = false;
-      microsoft.disabled = false;
-      client.auth.onAuthStateChange((_event, session) => {
-        if (session) void renderSession();
-      });
+      github.disabled = false; microsoft.disabled = false;
+      client.auth.onAuthStateChange((_event, session) => { if (session) void renderSession(); });
       const params = new URLSearchParams(window.location.search);
-      if (params.has('error_description') || params.has('error')) setStatus('The identity provider could not complete sign-in. Check the provider setup and try again.', true);
-      setMode('login');
-      void renderSession();
+      if (params.has('error_description') || params.has('error')) {
+        sessionStorage.removeItem(educationIntentKey);
+        setStatus('The identity provider could not complete sign-in. Check the provider setup and try again.', true);
+      }
+      updateInstitutionField(); setMode('login'); void renderSession();
     })();
   </script>
 </body>
