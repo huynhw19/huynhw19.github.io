@@ -6,8 +6,8 @@
   <meta name="description" content="Your ConfigKit dashboard for profile tools, groups, and account shortcuts.">
   <title>Dashboard — ConfigKit</title>
   <style>
-    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030;--shadow:0 12px 40px #17231f0a}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,960px);margin:auto}header{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650}a:hover{text-decoration-thickness:2px}.brand{font-size:1.08rem;text-decoration:none}.header-actions{display:flex;align-items:center;gap:16px}.header-actions a{text-decoration:none}.header-actions a:hover{text-decoration:underline}button{min-height:42px;padding:9px 16px;border:1px solid var(--green);border-radius:10px;background:var(--green);color:#fff;font:inherit;font-weight:650;cursor:pointer}button:disabled{opacity:.6;cursor:wait}main{padding:34px 0 56px}.status{padding:16px;background:var(--white);border:1px solid var(--line);border-radius:12px}.status.error{color:var(--red)}.welcome{padding:28px;background:var(--mint);border:1px solid #d5e9dc;border-radius:18px}.eyebrow{color:var(--green-dark);font-size:.78rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:8px 0}h2{font-size:1.2rem;margin:0 0 8px}.muted,.card p{color:var(--muted)}.section-title{margin:32px 0 14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:16px}.card{padding:22px;background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.card p{margin:0 0 14px}.card a{display:inline-block}.group-card{border-color:#b9d8c6;background:linear-gradient(145deg,#fff 55%,var(--mint))}.group-card h2{color:var(--green-dark)}.notice{margin-top:24px;padding:14px 16px;background:var(--gold);border:1px solid #f1e4c9;border-radius:12px;color:#62512d}footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted)}.footer-links{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px}@media(max-width:520px){header{align-items:flex-start;padding:16px 0}.header-actions{align-items:flex-end;flex-direction:column;gap:8px}.welcome{padding:22px}}
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px rgba(23,35,31,.08}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(1100px,calc(100% - 32px));margin:auto}header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 0}a{color:var(--green-dark);font-weight:650}.header-actions,.footer-links{display:flex;flex-wrap:wrap;align-items:center;gap:16px}button{border:0;border-radius:10px;background:var(--green);color:white;padding:10px 14px;font:inherit;font-weight:650;cursor:pointer}.secondary{background:#edf3ef;color:var(--ink)}button:disabled{opacity:.55;cursor:not-allowed}main{padding:12px 0 56px}.status,.welcome,.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}.status{margin:16px 0}.status.error{color:var(--red)}.welcome{margin:16px 0 32px}.welcome h1{margin:4px 0;font-size:clamp(2rem,5vw,3rem);line-height:1.15}.muted{color:var(--muted)}.eyebrow{color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.8rem}.section-title{margin:28px 0 12px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}.card h2{margin:0 0 8px;font-size:1.15rem}.card p{color:var(--muted)}footer{padding:0 0 28px;color:var(--muted)}[hidden]{display:none!important}@media(max-width:600px){header{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
 <body>
@@ -29,8 +29,8 @@
       </section>
       <h2 class="section-title">Create and review</h2>
       <section class="grid" aria-label="ConfigKit tools">
-        <article class="card"><h2>Mobileconfig Studio</h2><p>Combine Wi-Fi, web clip, and encrypted DNS payloads in one profile, then download it locally or share a description with the community.</p><a href="mobileconfig-builder.html">Open Mobileconfig Studio →</a></article>
-        <article class="card"><h2>Mobileconfig Tips Assistant</h2><p>Get practical, private guidance about Wi-Fi, web clips, DNS, installation, and profile safety.</p><a href="mobileconfig-tips.html">Ask for mobileconfig tips →</a></article>
+        <article class="card"><h2>Mobileconfig Studio</h2><p>Combine Wi-Fi, web clip, and encrypted DNS payloads in one profile.</p><a href="mobileconfig-builder.html">Open Mobileconfig Studio →</a></article>
+        <article class="card"><h2>Mobileconfig Tips Assistant</h2><p>Get practical, private guidance about Wi-Fi, web clips, DNS, installation, and profile safety.</p><a href="mobileconfig-tips.html">Open tips assistant →</a></article>
         <article class="card"><h2>Wi-Fi profile builder</h2><p>Create a Wi-Fi configuration profile in your browser and download it for review.</p><a href="index.html#wifi-builder">Build a Wi-Fi profile →</a></article>
         <article class="card"><h2>DNS profile builder</h2><p>Configure a DNS-over-HTTPS or DNS-over-TLS resolver.</p><a href="dns-builder.html">Open DNS builder →</a></article>
         <article class="card"><h2>Web clip builder</h2><p>Create a Home Screen shortcut profile for a website you trust.</p><a href="webclip-builder.html">Open web clip builder →</a></article>
@@ -40,44 +40,78 @@
       </section>
       <h2 class="section-title">Work together</h2>
       <section class="grid" aria-label="Collaboration tools">
-        <article class="card group-card"><h2>Your ConfigKit groups</h2><p>Create a group, join with an invite code, or see the groups you already belong to. Groups coordinate profile work; they do not store or share your profile files.</p><a href="groups.html">Open groups →</a></article>
+        <article class="card"><h2>Your ConfigKit groups</h2><p>Create a group, join with an invite code, or see the groups you already belong to.</p><a href="groups.html">Open your groups →</a></article>
+      </section>
+      <h2 class="section-title">Education tools</h2>
+      <section class="grid" aria-label="Education tools">
+        <article class="card"><h2>Education dashboard</h2><p>Create and manage students for your education account.</p><a href="Education-dashboard.html">Open education dashboard →</a></article>
       </section>
       <h2 class="section-title">Your account</h2>
       <section class="grid" aria-label="Account shortcuts">
         <article class="card"><h2>Account settings</h2><p>Update your display name, manage connected sign-in providers, or review your sessions.</p><a href="account-settings.html">Manage account →</a></article>
         <article class="card"><h2>Saved profiles</h2><p>Profiles are generated and downloaded locally. ConfigKit does not store your profiles in an account.</p><a href="index.html">Return to ConfigKit →</a></article>
       </section>
-      <p class="notice"><strong>Privacy note:</strong> Profile content is generated in your browser. Community sharing posts only the title and description you enter—not profile XML, Wi-Fi credentials, or resolver settings. Avoid sharing or installing configuration profiles unless you trust their contents and source.</p>
+      <p class="muted"><strong>Privacy note:</strong> Profile content is generated in your browser. ConfigKit does not store your profile XML or Wi-Fi credentials.</p>
     </div>
   </main>
-  <footer><span>ConfigKit · Independent mobileconfig builder demo</span><nav class="footer-links" aria-label="Footer"><a href="index.html">Home</a><a href="groups.html">Your groups</a><a href="safety.html">Safety &amp; contact</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></nav></footer>
+  <footer><span>ConfigKit · Independent mobileconfig builder demo</span> · <a href="safety.html">Safety &amp; contact</a></footer>
   <script src="auth-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    (()=>{
-      const status=document.getElementById('status'),dashboard=document.getElementById('dashboard'),signout=document.getElementById('signout'),config=window.CONFIGKIT_AUTH||{};
-      const setStatus=(message,isError=false)=>{status.hidden=false;status.classList.toggle('error',isError);status.textContent=message;};
-      if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.',true);return;}
-      const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-      async function renderSession(){
-        const {data,error}=await client.auth.getSession();
-        if(error){setStatus('Could not check your sign-in. Please refresh and try again.',true);return;}
-        if(!data.session){dashboard.hidden=true;signout.hidden=true;setStatus('You are signed out. ');const link=document.createElement('a');link.href='login.html';link.textContent='Go to sign in';status.append(link);return;}
-        const user=data.session.user,metadata=user.user_metadata||{},name=metadata.display_name||metadata.full_name||metadata.name||metadata.preferred_username;
-        document.getElementById('welcome-title').textContent=name?`Welcome, ${name}`:'Welcome to ConfigKit';
-        document.getElementById('account-label').textContent=user.email?`Signed in as ${user.email}`:'You are signed in to your ConfigKit account.';
-        status.hidden=true;dashboard.hidden=false;signout.hidden=false;
+    (() => {
+      const status = document.getElementById('status');
+      const dashboard = document.getElementById('dashboard');
+      const signout = document.getElementById('signout');
+      const config = window.CONFIGKIT_AUTH || {};
+      const setStatus = (message, isError = false) => {
+        status.hidden = false;
+        status.classList.toggle('error', isError);
+        status.textContent = message;
+      };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+        setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true);
+        return;
       }
-      signout.addEventListener('click',async()=>{signout.disabled=true;const {error}=await client.auth.signOut();signout.disabled=false;if(error){setStatus('Could not sign out. Please try again.',true);return;}window.location.replace('login.html');});
-      client.auth.onAuthStateChange((_event,session)=>{if(!session){window.location.replace('login.html');return;}void renderSession();});
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+        auth: {persistSession: true, autoRefreshToken: true, detectSessionInUrl: true}
+      });
+      async function renderSession() {
+        try {
+          const {data, error} = await client.auth.getSession();
+          if (error) throw error;
+          if (!data.session) {
+            dashboard.hidden = true;
+            signout.hidden = true;
+            setStatus('You are signed out. ');
+            const link = document.createElement('a');
+            link.href = 'login.html';
+            link.textContent = 'Go to sign in';
+            status.append(link);
+            return;
+          }
+          const user = data.session.user;
+          const metadata = user.user_metadata || {};
+          const name = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username;
+          document.getElementById('welcome-title').textContent = name ? `Welcome, ${name}` : 'Welcome to ConfigKit';
+          document.getElementById('account-label').textContent = user.email ? `Signed in as ${user.email}` : 'You are signed in to your ConfigKit account.';
+          status.hidden = true;
+          dashboard.hidden = false;
+          signout.hidden = false;
+        } catch (error) {
+          setStatus(error.message || 'Could not check your sign-in. Please refresh and try again.', true);
+        }
+      }
+      signout.addEventListener('click', async () => {
+        signout.disabled = true;
+        const {error} = await client.auth.signOut();
+        signout.disabled = false;
+        if (error) { setStatus('Could not sign out. Please try again.', true); return; }
+        window.location.replace('login.html');
+      });
+      client.auth.onAuthStateChange((_event, session) => {
+        if (!session) window.location.replace('login.html');
+      });
       void renderSession();
-      <section class="grid" aria-label="Education tools">
-  <article class="card">
-    <h2>Education dashboard</h2>
-    <p>Create and manage students for your education account.</p>
-    <a href="education-dashboard.html">Open education dashboard →</a>
-  </article>
-</section>
     })();
   </script>
 </body>
