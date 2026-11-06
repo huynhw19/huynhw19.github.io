@@ -71,6 +71,13 @@
       signout.addEventListener('click',async()=>{signout.disabled=true;const {error}=await client.auth.signOut();signout.disabled=false;if(error){setStatus('Could not sign out. Please try again.',true);return;}window.location.replace('login.html');});
       client.auth.onAuthStateChange((_event,session)=>{if(!session){window.location.replace('login.html');return;}void renderSession();});
       void renderSession();
+      <section class="grid" aria-label="Education tools">
+  <article class="card">
+    <h2>Education dashboard</h2>
+    <p>Create and manage students for your education account.</p>
+    <a href="education-dashboard.html">Open education dashboard →</a>
+  </article>
+</section>
     })();
   </script>
 </body>
