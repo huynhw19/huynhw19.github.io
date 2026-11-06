@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,1">
+  <title>Education Dashboard — ConfigKit</title>
+  <style>
+    body { font-family: sans-serif; margin: 24px; background: #f5f7f6; color: #17231f; }
+    .card { background: white; border: 1px solid #dfe9e5; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    form { display: grid; gap: 10px; max-width: 540px; }
+    input, textarea, select { padding: 10px; border: 1px solid #cfd9d4; border-radius: 8px; }
+    button { padding: 10px 14px; border: 0; border-radius: 8px; background: #226b51; color: white; cursor: pointer; }
+    .status { margin-top: 12px; color: #174b39; }
+    .error { color: #9b3030; }
+    .student-list { list-style: none; padding: 0; }
+    .student-item { background: #fff; border: 1px solid #e5ece8; border-radius: 10px; padding: 12px; margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="dashboard.html">← Dashboard</a>
+  </header>
+
+  <main>
+    <section class="card">
+      <h1>Education dashboard</h1>
+      <p id="account-label" class="muted">Loading…</p>
+    </section>
+
+    <section class="card">
+      <h2>Create student</h2>
+      <form id="student-form">
+        <label>
+          Student name
+          <input id="student_name" name="student_name" required maxlength="120">
+        </label>
+
+        <label>
+          Student email
+          <input id="student_email" name="student_email" type="email" required maxlength="255">
+        </label>
+
+        <label>
+          School
+          <input id="school" name="school" maxlength="120">
+        </label>
+
+        <label>
+          Grade / level
+          <input id="grade" name="grade" maxlength="80">
+        </label>
+
+        <label>
+          Notes
+          <textarea id="notes" name="notes" rows="4" maxlength="500"></textarea>
+        </label>
+
+        <button type="submit">Add student</button>
+      </form>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2>Students</h2>
+      <ul id="student-list" class="student-list"></ul>
+    </section>
+  </main>
+
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (() => {
+      const statusEl = document.getElementById('status');
+      const listEl = document.getElementById('student-list');
+      const accountLabel = document.getElementById('account-label');
+      const config = window.CONFIGKIT_AUTH || {};
+      const setStatus = (message, isError = false) => {
+        statusEl.textContent = message;
+        statusEl.className = 'status' + (isError ? ' error' : '');
+      };
+
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+        setStatus('Authentication is not configured.', true);
+        return;
+      }
+
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      });
+
+      async function loadStudents() {
+        listEl.innerHTML = '';
+
+        const { data: sessionData, error: sessionError } = await client.auth.getSession();
+        if (sessionError || !sessionData.session) {
+          listEl.innerHTML = '<li class="student-item">Please sign in first.</li>';
+          return;
+        }
+
+        const { data, error } = await client
+          .from('education_students')
+          .select('*')
+          .eq('user_id', sessionData.session.user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          setStatus(error.message || 'Could not load students.', true);
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          listEl.innerHTML = '<li class=\"student-item\">No students added yet.</li>';
+          return;
+        }
+
+        data.forEach(student => {
+          const item = document.createElement('li');
+          item.className = 'student-item';
+          item.innerHTML = `
+            <strong>${student.student_name}</strong><br>
+            ${student.student_email}<br>
+            ${student.school || 'No school set'} · ${student.grade || 'No grade set'}
+          `;
+          listEl.appendChild(item);
+        });
+      }
+
+      document.getElementById('student-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const payload = {
+          student_name: document.getElementById('student_name').value.trim(),
+          student_email: document.getElementById('student_email').value.trim(),
+          school: document.getElementById('school').value.trim(),
+          grade: document.getElementById('grade').value.trim(),
+          notes: document.getElementById('notes').value.trim()
+        };
+
+        if (!payload.student_name || !payload.student_email) {
+          setStatus('Name and email are required.', true);
+          return;
+        }
+
+        setStatus('Adding student…');
+        const { data, error } = await client.rpc('create_education_student', {
+          p_student_name: payload.student_name,
+          p_student_email: payload.student_email,
+          p_school: payload.school || null,
+          p_grade: payload.grade || null,
+          p_notes: payload.notes || null
+        });
+
+        if (error) {
+          setStatus(error.message || 'Could not create student.', true);
+          return;
+        }
+
+        setStatus('Student added successfully.');
+        form.reset();
+        await loadStudents();
+      });
+
+      async function init() {
+        const { data, error } = await client.auth.getSession();
+        if (error || !data.session) {
+          window.location.href = 'login.html';
+          return;
+        }
+
+        const metadata = data.session.user.user_metadata || {};
+        const accountType = metadata.account_type || 'personal';
+        accountLabel.textContent = accountType === 'education'
+          ? 'Education account active'
+          : 'This page is for education accounts only.';
+
+        if (accountType !== 'education') {
+          setStatus('This dashboard is only available for education accounts.', true);
+          return;
+        }
+
+        await loadStudents();
+      }
+
+      client.auth.onAuthStateChange((_event, session) => {
+        if (!session) window.location.replace('login.html');
+      });
+
+      init();
+    })();
+  </script>
+</body>
+</html>
