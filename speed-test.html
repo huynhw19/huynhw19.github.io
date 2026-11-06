@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Measure your internet connection with a mobileconfig profile enabled, then compare before and after.">
+  <title>Connection Speed Test — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 36px,800px);margin:auto}header{padding:20px 0}header a,footer a{color:var(--green)}header a{text-decoration:none;font-weight:700}main{padding:30px 0 56px}h1{font-size:clamp(2rem,6vw,3rem);line-height:1.1;margin:.4em 0}h2{font-size:1.2rem}.muted{color:var(--muted)}.panel{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:clamp(20px,5vw,36px);box-shadow:0 12px 28px rgba(17,35,30,.06);margin:24px 0}.notice{background:var(--mint);border-left:4px solid var(--green);padding:14px 16px;border-radius:8px}.privacy{font-size:.92rem;color:var(--muted)}button{appearance:none;border:0;border-radius:9px;background:var(--green);color:white;padding:13px 20px;font:inherit;font-weight:700;cursor:pointer}button:hover{background:var(--green-dark)}button:focus-visible,a:focus-visible{outline:3px solid #73b89b;outline-offset:3px}button:disabled{opacity:.6;cursor:wait}.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0}.metric{border:1px solid var(--line);border-radius:12px;padding:18px}.metric strong{display:block;font-size:1.7rem;color:var(--green-dark)}.metric span{color:var(--muted);font-size:.92rem}#status{min-height:1.6em;margin-top:16px}#status.error{color:var(--red)}footer{padding:0 0 28px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header><a href="./">⌘ ConfigKit</a></header>
+  <main>
+    <p class="muted">A browser-based network check</p>
+    <h1>Mobileconfig connection speed test</h1>
+    <p>Check the internet connection your device is using while a profile is installed. For a useful comparison, run the test once before installing a profile and again afterward, using the same device and network.</p>
+    <div class="notice"><strong>What this measures:</strong> your device’s current connection, not the mobileconfig file itself. A profile is settings data; it does not have a speed. DNS, VPN, proxy, or filtering settings in a profile may affect connectivity, but results vary with signal, server load, and other conditions.</div>
+    <section class="panel" aria-labelledby="test-title">
+      <h2 id="test-title">Run a connection test</h2>
+      <p>The test measures latency, download speed, and upload speed against Cloudflare’s public speed-test service. It sends test data only—not your profile or its settings.</p>
+      <button id="start-test" type="button">Start speed test</button>
+      <p id="status" role="status" aria-live="polite">Ready when you are.</p>
+      <div id="results" class="results" hidden aria-label="Speed test results">
+        <div class="metric"><strong id="latency">—</strong><span>Latency (average)</span></div>
+        <div class="metric"><strong id="download">—</strong><span>Download</span></div>
+        <div class="metric"><strong id="upload">—</strong><span>Upload</span></div>
+      </div>
+      <p class="privacy">Privacy: starting the test contacts <code>speed.cloudflare.com</code>. Cloudflare may receive your IP address and standard request metadata. The test runs only after you press the button; no results are saved by this page.</p>
+    </section>
+    <p class="muted">This is an approximate browser test, not a guarantee of performance or profile compatibility. For better comparisons, pause other downloads and repeat the test several times.</p>
+  </main>
+  <footer>ConfigKit · Independent mobileconfig builder demo · <a href="safety.html">Safety &amp; contact</a> · <a href="privacy.html">Privacy</a></footer>
+  <script>
+    (() => {
+      const button = document.getElementById('start-test');
+      const status = document.getElementById('status');
+      const results = document.getElementById('results');
+      const endpoint = 'https://speed.cloudflare.com';
+      const setStatus = (message, isError = false) => {
+        status.textContent = message;
+        status.classList.toggle('error', isError);
+      };
+      const timedFetch = async (url, options = {}) => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 20000);
+        try {
+          return await fetch(url, {...options, signal: controller.signal, cache: 'no-store', mode: 'cors'});
+        } finally {
+          clearTimeout(timeout);
+        }
+      };
+      const measureDownload = async bytes => {
+        const started = performance.now();
+        const response = await timedFetch(`${endpoint}/__down?bytes=${bytes}&r=${crypto.randomUUID?.() || Math.random()}`);
+        if (!response.ok) throw new Error('Download test failed.');
+        const data = await response.arrayBuffer();
+        const seconds = (performance.now() - started) / 1000;
+        return {bytes: data.byteLength, seconds};
+      };
+      const measureUpload = async bytes => {
+        const body = new Uint8Array(bytes);
+        if (crypto.getRandomValues) crypto.getRandomValues(body);
+        const started = performance.now();
+        const response = await timedFetch(`${endpoint}/__up`, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=UTF-8'}, body});
+        if (!response.ok) throw new Error('Upload test failed.');
+        await response.arrayBuffer();
+        return {bytes, seconds: (performance.now() - started) / 1000};
+      };
+      const mbps = ({bytes, seconds}) => `${(bytes * 8 / seconds / 1e6).toFixed(1)} Mbps`;
+
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        results.hidden = true;
+        status.classList.remove('error');
+        try {
+          setStatus('Measuring latency…');
+          const pings = [];
+          for (let i = 0; i < 5; i++) {
+            const started = performance.now();
+            const response = await timedFetch(`${endpoint}/__down?bytes=0&r=${Math.random()}`);
+            if (!response.ok) throw new Error('Latency test failed.');
+            await response.arrayBuffer();
+            pings.push(performance.now() - started);
+          }
+          const latency = pings.reduce((sum, value) => sum + value, 0) / pings.length;
+          setStatus('Measuring download speed…');
+          const download = await measureDownload(8000000);
+          setStatus('Measuring upload speed…');
+          const upload = await measureUpload(2000000);
+          document.getElementById('latency').textContent = `${Math.round(latency)} ms`;
+          document.getElementById('download').textContent = mbps(download);
+          document.getElementById('upload').textContent = mbps(upload);
+          results.hidden = false;
+          setStatus('Test complete. Run again to compare another network or profile state.');
+        } catch (error) {
+          const message = error?.name === 'AbortError' ? 'The test timed out. Check your connection and try again.' : 'The test could not reach the speed-test service. Check your connection or try again later.';
+          setStatus(message, true);
+        } finally {
+          button.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
