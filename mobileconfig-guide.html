@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A beginner-friendly guide to Apple configuration profiles: mobileconfig structure, payloads, installation, and safety.">
+  <title>Learn about mobileconfig — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--mint:#e8f4ed;--gold:#fff7e8}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif}header{background:var(--white);border-bottom:1px solid var(--line);padding:16px 0}.wrap{width:min(100% - 36px,800px);margin:auto}header a,.content a{color:var(--green)}header a{font-weight:700;text-decoration:none}.content{padding:42px 0 64px}h1,h2,h3{line-height:1.25}h1{font-size:clamp(2rem,6vw,3rem);margin:.35em 0}h2{margin-top:2em}h3{margin-top:1.5em}.eyebrow,.muted{color:var(--muted)}.intro{font-size:1.15rem;color:var(--muted);max-width:65ch}.callout{background:var(--mint);border-left:4px solid var(--green);padding:14px 18px;border-radius:8px;margin:24px 0}.warning{background:var(--gold);border-left-color:#b67816}.panel{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:18px 0}code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}code{background:#eef2ef;padding:.12em .35em;border-radius:4px}pre{overflow:auto;background:#17231f;color:#f7f9f6;padding:18px;border-radius:10px;font-size:.88rem}.button{display:inline-block;background:var(--green);color:white!important;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:650;margin:6px 8px 6px 0}li{padding-left:4px;margin:.45em 0}table{border-collapse:collapse;width:100%;margin:16px 0}th,td{text-align:left;vertical-align:top;padding:10px;border-bottom:1px solid var(--line)}footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header><div class="wrap"><a href="./">⌘ ConfigKit</a></div></header>
+  <main class="wrap content">
+    <span class="eyebrow">A beginner’s guide</span>
+    <h1>Learn about mobileconfig</h1>
+    <p class="intro">A <code>.mobileconfig</code> file is an Apple configuration profile. It packages settings that a compatible iPhone, iPad, or Mac can apply, such as Wi-Fi or DNS settings. This guide explains the basics and how to review a profile safely.</p>
+    <p><a class="button" href="./examples.html">Explore examples</a><a class="button" href="./prepare-profile.html">Inspect a profile</a><a class="button" href="./mobileconfig-builder.html">Open the builder</a></p>
+
+    <div class="callout"><strong>Important:</strong> A profile can change important device or network settings. Only install one from a source you trust, and inspect its contents before accepting it. ConfigKit is an independent demo, not an Apple service.</div>
+
+    <h2>Profiles and payloads</h2>
+    <p>A configuration profile is a container. It has profile-level information and one or more <strong>payloads</strong>. Each payload describes a particular type of setting. For example, a profile might contain a Wi-Fi payload and a web clip payload. The device decides whether it supports each payload and setting.</p>
+    <p>A common downloadable profile uses the <code>.mobileconfig</code> filename extension and is represented as an XML property list (plist). The extension alone does not guarantee that the contents are valid, safe, signed, or supported by your device.</p>
+
+    <h2>How the file is organized</h2>
+    <p>At a high level, an XML profile is a plist dictionary. The outer configuration identifies the profile and contains an array of payload dictionaries:</p>
+    <pre><code>&lt;plist version="1.0"&gt;
+  &lt;dict&gt;
+    &lt;key&gt;PayloadType&lt;/key&gt;
+    &lt;string&gt;Configuration&lt;/string&gt;
+    &lt;key&gt;PayloadIdentifier&lt;/key&gt;
+    &lt;string&gt;com.example.profile&lt;/string&gt;
+    &lt;key&gt;PayloadUUID&lt;/key&gt;
+    &lt;string&gt;A-UNIQUE-UUID-VALUE&lt;/string&gt;
+    &lt;key&gt;PayloadContent&lt;/key&gt;
+    &lt;array&gt;
+      &lt;!-- One or more payload dictionaries go here. --&gt;
+    &lt;/array&gt;
+  &lt;/dict&gt;
+&lt;/plist&gt;</code></pre>
+    <p>This is a teaching outline, not a complete installable profile. Real payloads require the keys and values defined for their specific payload type. XML must also be correctly escaped and formatted.</p>
+    <div class="panel"><strong>Common fields</strong><ul>
+      <li><code>PayloadType</code> tells the operating system what kind of profile or payload it is.</li>
+      <li><code>PayloadIdentifier</code> is a reverse-DNS-style identifier used to identify the profile or payload. Choose a stable, distinctive value for your own profiles.</li>
+      <li><code>PayloadUUID</code> is a unique identifier for that profile or payload. A profile and its payloads have their own identifiers.</li>
+      <li><code>PayloadVersion</code> indicates the payload format version; the expected value is defined by the payload specification.</li>
+      <li><code>PayloadContent</code> holds the profile’s payloads.</li>
+    </ul></div>
+
+    <h2>Examples of payloads</h2>
+    <table><thead><tr><th>Payload</th><th>What it can configure</th><th>What to review</th></tr></thead><tbody>
+      <tr><td>Wi-Fi</td><td>Network name and connection/security options.</td><td>SSID, security type, whether credentials are included, and auto-join behavior.</td></tr>
+      <tr><td>Web clip</td><td>A website shortcut, often displayed on the Home Screen.</td><td>The complete destination URL, hostname, and label.</td></tr>
+      <tr><td>DNS</td><td>DNS resolution through a configured resolver, depending on platform support.</td><td>Resolver provider, URL or hostname, privacy terms, and which queries may be routed there.</td></tr>
+      <tr><td>VPN, certificates, restrictions, and other settings</td><td>May affect network traffic, trust, accounts, or device behavior.</td><td>Every setting and its impact. These require particular care and may be restricted to managed devices.</td></tr>
+    </tbody></table>
+    <p>Examples on this site are educational starting points, not a promise that every setting works on every OS version or device-management setup. Consult the current platform documentation for the exact payload requirements.</p>
+
+    <h2>Unsigned and signed profiles</h2>
+    <p>A profile can be unsigned or cryptographically signed. Signing can help a recipient verify who signed the profile and whether it changed after signing; it does not make an unsafe configuration safe. A valid signature also does not replace reviewing the settings and trusting the source. ConfigKit’s browser builders generate unsigned examples.</p>
+
+    <h2>Review before installing</h2>
+    <ol>
+      <li>Confirm who provided the file and why you need it. Don’t install unexpected profiles or profiles from untrusted links.</li>
+      <li>Inspect the profile using a trusted device interface or a local inspection tool. Check every payload, identifier, URL, server, certificate, and restriction.</li>
+      <li>Look for sensitive information. Wi-Fi passwords and other secrets may be present in a profile file; treat it like a credential and do not post or share it publicly.</li>
+      <li>Check compatibility and impact for your exact OS version and whether your device is personally owned or organization-managed.</li>
+      <li>Install only if you understand and accept what it changes. Follow the prompts on your device and verify the resulting settings afterward.</li>
+    </ol>
+    <div class="callout warning"><strong>Do not use a sample as a deployment recipe.</strong> Profiles that affect certificates, VPNs, proxies, filters, restrictions, or managed-device enrollment can have significant security and privacy consequences.</div>
+
+    <h2>Removing a profile</h2>
+    <p>When appropriate, remove a profile through your device’s profile or device-management settings. The exact menus vary by OS version. Removing a profile may also remove settings it installed, and a profile managed by an employer or school may be controlled by that organization. Check with the administrator before removing a managed profile.</p>
+
+    <h2>Learn more and continue</h2>
+    <ul>
+      <li><a href="./examples.html">Browse illustrative profile and payload examples</a>.</li>
+      <li><a href="./prepare-profile.html">Prepare or inspect a profile locally</a>.</li>
+      <li><a href="./how-to.html">Read the ConfigKit quick start</a>.</li>
+      <li>For production or managed deployments, use Apple’s current platform and device-management documentation and validate the profile on the intended OS versions.</li>
+    </ul>
+    <p class="muted">This guide is general educational information, not security, legal, or device-management advice. Features and behavior can change between operating-system versions.</p>
+    <a href="./">← Back to ConfigKit home</a>
+  </main>
+  <footer><div class="wrap">ConfigKit · Independent mobileconfig builder demo · <a href="safety.html">Safety &amp; contact</a> · <a href="privacy.html">Privacy</a></div></footer>
+</body>
+</html>
