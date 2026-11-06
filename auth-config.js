@@ -114,6 +114,17 @@ window.CONFIGKIT_AUTH = {
     if (!client?.auth || client.auth.__configKitCaptcha) return client;
     const auth = client.auth;
     auth.__configKitCaptcha = true;
+
+    // Supabase auth callbacks run while its internal auth lock is held. Defer
+    // consumer work to the next task so handlers may safely call getSession()
+    // without waiting on the same lock (notably during OAuth callback restore).
+    if (typeof auth.onAuthStateChange === 'function') {
+      const originalOnAuthStateChange = auth.onAuthStateChange.bind(auth);
+      auth.onAuthStateChange = callback => originalOnAuthStateChange((event, session) => {
+        setTimeout(() => callback(event, session), 0);
+      });
+    }
+
     if (typeof auth.signUp === 'function') {
       const original = auth.signUp.bind(auth);
       auth.signUp = withCaptcha(original, args => args[0]?.options || {}, (args, captchaToken, options) => {
