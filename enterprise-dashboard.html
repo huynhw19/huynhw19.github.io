@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Enterprise workspace dashboard for ConfigKit profile tools.">
+  <title>Enterprise dashboard — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px rgba(23,35,31,.08)}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(100% - 32px,1000px);margin:0 auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}.brand{font-weight:700;text-decoration:none;color:var(--ink)}nav{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}button{font:inherit;font-weight:600;border:1px solid var(--line);border-radius:.7rem;padding:.65rem .9rem;background:var(--white);color:var(--ink);cursor:pointer}button:hover{border-color:var(--green)}main{padding:2rem 0 3rem}.status,.card,.welcome{background:var(--white);border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow)}.status{padding:1rem;margin:1rem 0}.error{color:var(--red)}.welcome{padding:clamp(1.25rem,4vw,2.5rem);margin-bottom:1.5rem}.eyebrow{display:inline-block;color:var(--green);font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.badge{display:inline-block;margin-left:.5rem;padding:.2rem .65rem;border-radius:99px;background:var(--mint);color:var(--green-dark);font-size:.85rem;font-weight:700}h1{line-height:1.2;margin:.5rem 0}h2{line-height:1.3}.muted{color:var(--muted)}.notice{padding:1rem;border-left:4px solid var(--green);background:var(--mint);border-radius:.5rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem}.card{padding:1.2rem}.card h2{margin:.1rem 0 .5rem;font-size:1.15rem}.card p{color:var(--muted)}footer{padding:1rem 0 2rem;color:var(--muted);font-size:.9rem}@media(max-width:600px){header{align-items:flex-start;padding:1rem 0;flex-direction:column}nav{gap:.7rem}}
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="index.html">⌘ ConfigKit</a>
+    <nav aria-label="Account navigation">
+      <a href="dashboard.html">Main dashboard</a>
+      <a href="account-settings.html">Account settings</a>
+      <button id="signout" type="button" hidden>Sign out</button>
+    </nav>
+  </header>
+  <main>
+    <p id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</p>
+    <div id="enterprise-dashboard" hidden>
+      <section class="welcome" aria-labelledby="welcome-title">
+        <span class="eyebrow">Enterprise workspace</span>
+        <span class="badge">Enterprise account</span>
+        <h1 id="welcome-title">Welcome to your ConfigKit workspace</h1>
+        <p id="enterprise-label" class="muted"></p>
+        <p class="muted">A central starting point for creating, reviewing, and preparing configuration profiles.</p>
+        <div class="notice"><strong>Account scope:</strong> Enterprise account type and organization name are self-declared profile details. This dashboard does not verify organizations, manage members or devices, or grant organization-managed access.</div>
+      </section>
+
+      <h2>Enterprise profile tools</h2>
+      <section class="grid" aria-label="Enterprise profile tools">
+        <article class="card"><h2>Mobileconfig Studio</h2><p>Combine supported Wi-Fi, web clip, and encrypted DNS payloads into a profile.</p><a href="mobileconfig-builder.html">Open Mobileconfig Studio →</a></article>
+        <article class="card"><h2>Wi-Fi profile builder</h2><p>Create a Wi-Fi configuration in your browser and download it for review.</p><a href="index.html#wifi-builder">Open Wi-Fi builder →</a></article>
+        <article class="card"><h2>DNS profile builder</h2><p>Configure a DNS-over-HTTPS or DNS-over-TLS resolver.</p><a href="dns-builder.html">Open DNS builder →</a></article>
+        <article class="card"><h2>Inspect a profile</h2><p>Review local XML, profile metadata, and payload types before use.</p><a href="prepare-profile.html">Open profile inspector →</a></article>
+        <article class="card"><h2>Examples and safety</h2><p>Review example payloads and guidance before testing or sharing a profile.</p><a href="examples.html">Browse examples →</a></article>
+        <article class="card"><h2>Groups</h2><p>Use ConfigKit groups to coordinate. Groups are separate from enterprise membership.</p><a href="groups.html">Open groups →</a></article>
+        <article class="card"><h2>Account settings</h2><p>Review your sign-in and profile details.</p><a href="account-settings.html">Manage account →</a></article>
+      </section>
+      <p class="muted"><strong>Privacy reminder:</strong> Generated profiles stay in your browser. Review profile contents before installing or sharing, and use your organization's approved device-management channels.</p>
+    </div>
+  </main>
+  <footer>ConfigKit · Independent mobileconfig builder demo · <a href="safety.html">Safety &amp; contact</a></footer>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (() => {
+      const status = document.getElementById('status');
+      const dashboard = document.getElementById('enterprise-dashboard');
+      const signout = document.getElementById('signout');
+      const config = window.CONFIGKIT_AUTH || {};
+      const setStatus = (message, isError = false) => {
+        status.hidden = false;
+        status.classList.toggle('error', isError);
+        status.textContent = message;
+      };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+        setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true);
+        return;
+      }
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+        auth: {persistSession: true, autoRefreshToken: true, detectSessionInUrl: true}
+      });
+      async function renderSession() {
+        try {
+          const {data, error} = await client.auth.getSession();
+          if (error) throw error;
+          if (!data.session) {
+            window.location.replace('login.html');
+            return;
+          }
+          const user = data.session.user;
+          const metadata = user.user_metadata || {};
+          if (metadata.account_type !== 'organization' && metadata.account_type !== 'enterprise') {
+            setStatus('This page is available only to accounts marked as enterprise accounts. Account types are self-declared.');
+            const link = document.createElement('a');
+            link.href = 'dashboard.html';
+            link.textContent = ' Return to the main dashboard.';
+            status.append(link);
+            return;
+          }
+          const name = metadata.display_name || metadata.full_name || metadata.name;
+          document.getElementById('welcome-title').textContent = name ? `Welcome, ${name}` : 'Welcome to your ConfigKit workspace';
+          document.getElementById('enterprise-label').textContent = metadata.organization_name
+            ? `Enterprise: ${metadata.organization_name}`
+            : (user.email ? `Signed in as ${user.email}` : 'Enterprise account signed in.');
+          status.hidden = true;
+          dashboard.hidden = false;
+          signout.hidden = false;
+        } catch (error) {
+          setStatus(error.message || 'Could not check your sign-in. Please refresh and try again.', true);
+        }
+      }
+      signout.addEventListener('click', async () => {
+        signout.disabled = true;
+        const {error} = await client.auth.signOut();
+        signout.disabled = false;
+        if (error) {
+          setStatus('Could not sign out. Please try again.', true);
+          return;
+        }
+        window.location.replace('login.html');
+      });
+      client.auth.onAuthStateChange((_event, session) => {
+        if (!session) window.location.replace('login.html');
+      });
+      void renderSession();
+    })();
+  </script>
+</body>
+</html>
