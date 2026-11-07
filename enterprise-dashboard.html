@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Enterprise workspace, free-trial preview, and getting-started resources for ConfigKit.">
+  <title>Enterprise workspace — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030;--shadow:0 12px 32px rgba(23,75,57,.08)}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(1040px,calc(100% - 32px));margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}.brand{font-weight:750;color:var(--ink);text-decoration:none;font-size:1.1rem}nav{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}button,.button{font:inherit;border:1px solid var(--line);border-radius:.7rem;padding:.65rem .9rem;background:var(--white);color:var(--ink);cursor:pointer;text-decoration:none;font-weight:650}button:hover,.button:hover{border-color:var(--green)}main{padding:2rem 0 3rem}.status,.card,.welcome,.trial{background:var(--white);border:1px solid var(--line);border-radius:1rem;padding:1.2rem 1.4rem;box-shadow:var(--shadow)}.status{margin:1rem 0}.status.error{color:var(--red)}.welcome{padding:2rem;margin-bottom:1rem;background:linear-gradient(135deg,#fff 50%,var(--mint))}.eyebrow,.badge{display:inline-block;color:var(--green-dark);background:var(--mint);border-radius:999px;padding:.25rem .7rem;font-size:.85rem;font-weight:700}.badge{margin-left:.35rem}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.12;margin:.6rem 0}.muted{color:var(--muted)}.trial{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin:1rem 0;border-color:#ead6aa;background:var(--gold)}.trial h2{margin:.1rem 0}.trial p{margin:.25rem 0}.notice{font-size:.9rem}.section-title{margin:2rem 0 .7rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem}.card h2{font-size:1.15rem;margin:.1rem 0 .5rem}.card p{color:var(--muted);margin:.2rem 0 .8rem}.steps li{margin:.7rem 0}footer{padding:1rem 0 2rem;color:var(--muted);font-size:.9rem}@media(max-width:600px){header{padding:.75rem 0;align-items:flex-start;flex-direction:column}.trial{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="index.html">⌘ ConfigKit · Enterprise</a>
+    <nav aria-label="Account navigation"><a href="dashboard.html">Main dashboard</a><a href="account-settings.html">Account settings</a><button id="signout" type="button" hidden>Sign out</button></nav>
+  </header>
+  <main>
+    <p id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</p>
+    <div id="enterprise-dashboard" hidden>
+      <section class="welcome" aria-labelledby="welcome-title">
+        <span class="eyebrow">Enterprise workspace</span><span class="badge">Team profile</span>
+        <h1 id="welcome-title">Welcome to your workspace</h1>
+        <p id="enterprise-label" class="muted"></p>
+        <p>Build, review, and prepare configuration profiles for your organization.</p>
+      </section>
+      <section class="trial" aria-labelledby="trial-title">
+        <div><h2 id="trial-title">Your 14-day free trial</h2><p id="trial-status" aria-live="polite">Preparing trial details…</p><p class="notice">Trial preview only. This static site has no billing, paid-plan enforcement, or server-verified trial state. Do not rely on this display for subscription or access control.</p></div>
+        <a class="button" href="safety.html">Contact &amp; support</a>
+      </section>
+      <section class="card" aria-labelledby="getting-started-title">
+        <h2 id="getting-started-title">Getting started with ConfigKit for your enterprise</h2>
+        <p class="muted">A practical checklist for creating profiles and reviewing them before using them with a team.</p>
+        <ol class="steps">
+          <li><strong>Choose a builder.</strong> Start with <a href="mobileconfig-builder.html">Mobileconfig Studio</a>, or use the <a href="index.html#wifi-builder">Wi-Fi</a>, <a href="dns-builder.html">DNS</a>, or <a href="webclip-builder.html">web clip</a> builder.</li>
+          <li><strong>Review before use.</strong> Inspect the file with <a href="prepare-profile.html">Prepare or inspect a profile</a> and consult <a href="examples.html">examples and safety guidance</a>.</li>
+          <li><strong>Test on a non-production device.</strong> Confirm the profile settings and expected device behavior before distributing it.</li>
+          <li><strong>Share through approved channels.</strong> Use your organization's device-management process. Never share credentials or sensitive profile content through unapproved channels.</li>
+          <li><strong>Keep sensitive information protected.</strong> Profile generation happens in your browser; ConfigKit does not store generated profile XML or Wi-Fi credentials.</li>
+        </ol>
+        <p class="muted notice"><strong>Account scope:</strong> Enterprise identity and organization name are self-declared profile details. This demo does not verify organizations, provision seats, manage team members, or administer devices.</p>
+      </section>
+      <h2 class="section-title">Enterprise tools</h2>
+      <section class="grid" aria-label="Enterprise tools">
+        <article class="card"><h2>Mobileconfig Studio</h2><p>Combine supported Wi-Fi, web clip, and encrypted DNS payloads.</p><a href="mobileconfig-builder.html">Open Studio →</a></article>
+        <article class="card"><h2>Profile inspector</h2><p>Review local XML, profile metadata, and payload types before use.</p><a href="prepare-profile.html">Inspect a profile →</a></article>
+        <article class="card"><h2>Groups</h2><p>Use the existing community group tools; they are separate from enterprise membership.</p><a href="groups.html">Open groups →</a></article>
+        <article class="card"><h2>Account settings</h2><p>Review your sign-in and profile details.</p><a href="account-settings.html">Manage account →</a></article>
+      </section>
+    </div>
+  </main>
+  <footer>ConfigKit · Independent mobileconfig builder demo · <a href="safety.html">Safety &amp; contact</a></footer>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (() => {
+      const status = document.getElementById('status');
+      const dashboard = document.getElementById('enterprise-dashboard');
+      const signout = document.getElementById('signout');
+      const config = window.CONFIGKIT_AUTH || {};
+      const setStatus = (message, isError = false) => { status.hidden = false; status.classList.toggle('error', isError); status.textContent = message; };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true); return; }
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      const trialLengthMs = 14 * 24 * 60 * 60 * 1000;
+      const dateLabel = date => new Intl.DateTimeFormat(undefined,{dateStyle:'medium'}).format(date);
+      async function renderSession() {
+        try {
+          const {data,error} = await client.auth.getSession();
+          if (error) throw error;
+          if (!data.session) { window.location.replace('login.html'); return; }
+          const user = data.session.user;
+          let metadata = user.user_metadata || {};
+          // Existing Organization accounts are accepted as the enterprise account type for compatibility.
+          if (!['enterprise','organization'].includes(metadata.account_type)) {
+            setStatus('This workspace is for Enterprise or Organization accounts. Account types are self-declared.');
+            const link = document.createElement('a'); link.href = 'login.html'; link.textContent = ' Return to sign in.'; status.append(link); return;
+          }
+          // Prototype-only trial clock stored in user metadata; production trials need a trusted server and billing provider.
+          if (!metadata.free_trial_started_at) {
+            const startedAt = new Date().toISOString();
+            const {data:updated,error:updateError} = await client.auth.updateUser({data:{free_trial_started_at:startedAt}});
+            if (updateError) throw updateError;
+            metadata = updated.user.user_metadata || {...metadata,free_trial_started_at:startedAt};
+          }
+          const start = new Date(metadata.free_trial_started_at);
+          const validStart = Number.isFinite(start.getTime()) ? start : new Date();
+          const end = new Date(validStart.getTime() + trialLengthMs);
+          const daysLeft = Math.max(0,Math.ceil((end.getTime()-Date.now())/(24*60*60*1000)));
+          document.getElementById('welcome-title').textContent = metadata.display_name ? `Welcome, ${metadata.display_name}` : 'Welcome to your workspace';
+          document.getElementById('enterprise-label').textContent = metadata.organization_name ? `Organization: ${metadata.organization_name}` : (user.email ? `Signed in as ${user.email}` : 'Enterprise account signed in.');
+          document.getElementById('trial-status').textContent = daysLeft ? `${daysLeft} day${daysLeft === 1 ? '' : 's'} remaining · trial ends ${dateLabel(end)}.` : `Trial preview ended ${dateLabel(end)}. Contact support to discuss access.`;
+          status.hidden = true; dashboard.hidden = false; signout.hidden = false;
+        } catch (error) { setStatus(error.message || 'Could not load your workspace. Please refresh and try again.', true); }
+      }
+      signout.addEventListener('click', async () => { signout.disabled = true; const {error} = await client.auth.signOut(); signout.disabled = false; if (error) { setStatus('Could not sign out. Please try again.', true); return; } window.location.replace('login.html'); });
+      client.auth.onAuthStateChange((_event,session) => { if (!session) window.location.replace('login.html'); });
+      void renderSession();
+    })();
+  </script>
+</body>
+</html>
