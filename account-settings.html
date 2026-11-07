@@ -7,7 +7,7 @@
   <title>Account settings — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8;--shadow:0 12px 32px #17231f12}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(760px,calc(100% - 32px));margin:auto}header{padding:24px 0}header a,footer a{color:var(--green-dark);font-weight:650}main{padding:12px 0 56px}h1{font-size:clamp(2rem,5vw,2.7rem);line-height:1.15;margin:0 0 8px}h2{font-size:1.2rem;margin:0 0 8px}.muted{color:var(--muted)}.card{background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px;margin-top:20px}.field{display:grid;gap:6px;margin:14px 0}label{font-weight:650}input,select{width:100%;font:inherit;padding:11px 12px;border:1px solid #cbd6cf;border-radius:10px;background:#fff;color:var(--ink)}button{font:inherit;font-weight:650;border:0;border-radius:10px;padding:11px 16px;background:var(--green);color:#fff;cursor:pointer}button:hover{background:var(--green-dark)}button:disabled{opacity:.6;cursor:wait}.secondary{background:#edf3ef;color:var(--green-dark)}.danger{background:#fff0f0;color:var(--red)}.status,.notice{padding:12px 14px;border-radius:12px;background:var(--mint);margin:16px 0}.status.error{background:#fff0f0;color:var(--red)}.notice{background:var(--gold)}.notice p{margin:4px 0 0}.provider{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.provider:last-child{border-bottom:0}.actions{display:flex;flex-wrap:wrap;gap:10px}footer{padding:0 0 28px} [hidden]{display:none!important}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,820px);margin-inline:auto}header{padding:22px 0}header a,footer a{color:var(--green-dark);font-weight:650}main{padding:20px 0 56px}h1{font-size:clamp(2rem,5vw,2.7rem);line-height:1.15;margin:8px 0}h2{font-size:1.3rem;margin:0 0 12px}.muted{color:var(--muted)}.status,.notice{padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--white)}.status{margin:20px 0}.status.error{color:var(--red);border-color:#e7bcbc;background:#fff8f8}.notice{background:var(--gold);margin:14px 0}.notice p{margin:5px 0 0}.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;margin:18px 0;box-shadow:var(--shadow)}.field{margin:16px 0}label{display:block;font-weight:650;margin-bottom:6px}input,select{width:100%;padding:11px 12px;border:1px solid #cbd6d0;border-radius:9px;background:#fff;color:var(--ink);font:inherit}input:focus,select:focus,button:focus-visible,a:focus-visible{outline:3px solid #83bca2;outline-offset:2px}button{border:0;border-radius:9px;padding:11px 16px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer}button:hover{background:var(--green-dark)}button:disabled{opacity:.55;cursor:not-allowed}.secondary{background:#edf4ef;color:var(--green-dark)}.secondary:hover{background:#dcebe1}.danger{background:#9b3030}.danger:hover{background:#762424}.provider{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}.provider:last-child{border-bottom:0}.actions{display:flex;flex-wrap:wrap;gap:10px}footer{padding:18px 0 30px;border-top:1px solid var(--line)}[hidden]{display:none!important}
   </style>
 </head>
 <body>
@@ -24,12 +24,10 @@
         <div id="organization-account-summary" class="notice" hidden><strong>Organization profile type</strong><p>This is a self-declared ConfigKit profile label. It does not create a GitHub organization, represent legal status, or grant special access.</p></div>
         <form id="profile-form">
           <div class="field"><label for="display-name">Display name</label><input id="display-name" name="displayName" maxlength="80" autocomplete="name"></div>
-          <div class="field"><label for="account-type">Account type</label><select id="account-type" name="accountType"><option value="personal">Personal account</option><option value="education">Education account</option><option value="work">Work account</option><option value="organization">Organization account</option></select></div>
+          <div class="field"><label for="account-type">Account type</label><select id="account-type" name="accountType"><option value="personal">Personal account</option><option value="developer">Developer account</option><option value="education">Education account</option><option value="work">Work account</option><option value="organization">Organization account</option></select></div>
           <div class="field" id="workplace-field" hidden><label for="workplace">Company or workplace</label><input id="workplace" name="workplace" maxlength="120" autocomplete="organization" placeholder="Name of your company or workplace"></div>
           <div class="field" id="institution-field" hidden><label for="institution">School or educational institution</label><input id="institution" name="institution" maxlength="120" autocomplete="organization" placeholder="Name of your school or institution"></div>
           <div class="field" id="organization-field" hidden><label for="organization-name">Organization name</label><input id="organization-name" name="organizationName" maxlength="120" autocomplete="organization" placeholder="Name of your organization"></div>
-          - <select id="account-type" name="accountType">…</select>
-+ <select id="account-type" name="accountType">…<option value="developer">Developer account</option></select>
           <button type="submit" id="save-profile">Save profile</button>
         </form>
       </section>
@@ -57,17 +55,34 @@
       const providers = document.getElementById('providers');
       const providerNote = document.getElementById('provider-note');
       const config = window.CONFIGKIT_AUTH || {};
-      const setStatus = (message, isError = false) => { status.hidden = false; status.textContent = message; status.classList.toggle('error', isError); };
-      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true); return; }
+      const setStatus = (message, isError = false) => {
+        status.hidden = false;
+        status.textContent = message;
+        status.classList.toggle('error', isError);
+      };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+        setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true);
+        return;
+      }
+
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
       const {data:sessionData, error:sessionError} = await client.auth.getSession();
       if (sessionError) { setStatus('Could not check your session. Please try again.', true); return; }
-      if (!sessionData.session) { setStatus('You are signed out. '); const login = document.createElement('a'); login.href = 'login.html'; login.textContent = 'Go to sign in'; status.append(login); return; }
+      if (!sessionData.session) {
+        setStatus('You are signed out. ');
+        const login = document.createElement('a');
+        login.href = 'login.html';
+        login.textContent = 'Go to sign in';
+        status.append(login);
+        return;
+      }
       const {data:userData, error:userError} = await client.auth.getUser();
       if (userError || !userData.user) { setStatus('Could not load your account details. Please sign in again.', true); return; }
+
       const user = userData.user;
       const metadata = user.user_metadata || {};
-      settings.hidden = false; status.hidden = true;
+      settings.hidden = false;
+      status.hidden = true;
       document.getElementById('email').textContent = user.email ? `Signed in as ${user.email}` : 'Signed in with your provider.';
       const displayNameInput = document.getElementById('display-name');
       const accountTypeInput = document.getElementById('account-type');
@@ -75,11 +90,12 @@
       const institutionInput = document.getElementById('institution');
       const organizationNameInput = document.getElementById('organization-name');
       displayNameInput.value = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username || '';
-      const validAccountTypes = ['personal','education','work','organization'];
+      const validAccountTypes = ['personal', 'developer', 'education', 'work', 'organization'];
       accountTypeInput.value = validAccountTypes.includes(metadata.account_type) ? metadata.account_type : 'personal';
       workplaceInput.value = metadata.workplace || '';
       institutionInput.value = metadata.institution || '';
       organizationNameInput.value = metadata.organization_name || '';
+
       const updateProfileFields = () => {
         const type = accountTypeInput.value;
         const isWork = type === 'work';
@@ -98,54 +114,97 @@
       updateProfileFields();
 
       const identityList = user.identities || [];
-      if (!identityList.length) { const note = document.createElement('p'); note.className = 'muted'; note.textContent = 'No provider identities were returned for this account.'; providers.append(note); }
+      if (!identityList.length) {
+        const note = document.createElement('p');
+        note.className = 'muted';
+        note.textContent = 'No provider identities were returned for this account.';
+        providers.append(note);
+      }
       for (const identity of identityList) {
-        const row = document.createElement('div'); row.className = 'provider';
+        const row = document.createElement('div');
+        row.className = 'provider';
         const label = document.createElement('span');
         const providerName = identity.provider === 'azure' ? 'Microsoft' : identity.provider.charAt(0).toUpperCase() + identity.provider.slice(1);
         label.textContent = `${providerName}${identity.identity_data?.email ? ` · ${identity.identity_data.email}` : ''}`;
-        const button = document.createElement('button'); button.type = 'button'; button.className = 'secondary'; button.textContent = 'Disconnect';
-        if (identityList.length < 2) { button.disabled = true; button.title = 'Keep at least one sign-in provider connected.'; providerNote.hidden = false; providerNote.textContent = 'You can only disconnect a provider when another sign-in method is connected.'; }
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'secondary';
+        button.textContent = 'Disconnect';
+        if (identityList.length < 2) {
+          button.disabled = true;
+          button.title = 'Keep at least one sign-in provider connected.';
+          providerNote.hidden = false;
+          providerNote.textContent = 'You can only disconnect a provider after connecting another sign-in method.';
+        }
         button.addEventListener('click', async () => {
           if (identityList.length < 2 || !window.confirm(`Disconnect ${providerName} from your ConfigKit account? You may no longer be able to sign in with it.`)) return;
           button.disabled = true;
           const {error} = await client.auth.unlinkIdentity(identity);
           if (error) { button.disabled = false; setStatus(`Could not disconnect ${providerName}: ${error.message}`, true); return; }
-          setStatus(`${providerName} disconnected.`, false); window.location.reload();
+          setStatus(`${providerName} disconnected.`);
+          window.location.reload();
         });
-        row.append(label, button); providers.append(row);
+        row.append(label, button);
+        providers.append(row);
       }
 
       document.getElementById('profile-form').addEventListener('submit', async event => {
         event.preventDefault();
         if (!event.currentTarget.reportValidity()) return;
-        const button = document.getElementById('save-profile'); button.disabled = true;
+        const button = document.getElementById('save-profile');
+        button.disabled = true;
         const updatedMetadata = {...user.user_metadata, display_name:displayNameInput.value.trim(), account_type:accountTypeInput.value};
-        if (accountTypeInput.value === 'work') { updatedMetadata.workplace = workplaceInput.value.trim(); delete updatedMetadata.institution; delete updatedMetadata.organization_name; }
-        else if (accountTypeInput.value === 'education') { updatedMetadata.institution = institutionInput.value.trim(); delete updatedMetadata.workplace; delete updatedMetadata.organization_name; }
-        else if (accountTypeInput.value === 'organization') { updatedMetadata.organization_name = organizationNameInput.value.trim(); delete updatedMetadata.workplace; delete updatedMetadata.institution; }
-        else { delete updatedMetadata.workplace; delete updatedMetadata.institution; delete updatedMetadata.organization_name; }
-        const {data, error} = await client.auth.updateUser({data:updatedMetadata});
-        button.disabled = false;
-        if (error) { setStatus(`Could not save your profile: ${error.message}`, true); return; }
-        user.user_metadata = data.user?.user_metadata || updatedMetadata;
-        setStatus('Profile saved.', false);
-        updateProfileFields();
+        if (accountTypeInput.value === 'work') {
+          updatedMetadata.workplace = workplaceInput.value.trim();
+          delete updatedMetadata.institution;
+          delete updatedMetadata.organization_name;
+        } else if (accountTypeInput.value === 'education') {
+          updatedMetadata.institution = institutionInput.value.trim();
+          delete updatedMetadata.workplace;
+          delete updatedMetadata.organization_name;
+        } else if (accountTypeInput.value === 'organization') {
+          updatedMetadata.organization_name = organizationNameInput.value.trim();
+          delete updatedMetadata.workplace;
+          delete updatedMetadata.institution;
+        } else {
+          delete updatedMetadata.workplace;
+          delete updatedMetadata.institution;
+          delete updatedMetadata.organization_name;
+        }
+        try {
+          const {data, error} = await client.auth.updateUser({data:updatedMetadata});
+          if (error) throw error;
+          user.user_metadata = data.user?.user_metadata || updatedMetadata;
+          setStatus('Profile saved.');
+          updateProfileFields();
+        } catch (error) {
+          setStatus(`Could not save your profile: ${error.message || 'Please try again.'}`, true);
+        } finally {
+          button.disabled = false;
+        }
       });
+
       document.getElementById('signout-current').addEventListener('click', async event => {
-        const button = event.currentTarget; button.disabled = true;
+        const button = event.currentTarget;
+        button.disabled = true;
         const {error} = await client.auth.signOut({scope:'local'});
         if (error) { button.disabled = false; setStatus(`Could not sign out: ${error.message}`, true); return; }
         window.location.replace('login.html');
       });
       document.getElementById('signout-all').addEventListener('click', async event => {
         if (!window.confirm('Sign out of ConfigKit on all devices?')) return;
-        const button = event.currentTarget; button.disabled = true;
+        const button = event.currentTarget;
+        button.disabled = true;
         const {error} = await client.auth.signOut({scope:'global'});
         if (error) { button.disabled = false; setStatus(`Could not sign out all sessions: ${error.message}`, true); return; }
         window.location.replace('login.html');
       });
-    })();
+    })().catch(error => {
+      const status = document.getElementById('status');
+      status.hidden = false;
+      status.textContent = `Account settings could not be loaded: ${error.message || 'Please try again.'}`;
+      status.classList.add('error');
+    });
   </script>
 </body>
 </html>
