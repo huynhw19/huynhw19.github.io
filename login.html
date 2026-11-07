@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Sign in or create a ConfigKit account using email, GitHub, or Microsoft, including an education profile.">
+  <meta name="description" content="Sign in or create a ConfigKit account using email, GitHub, or Microsoft, including education and work profiles.">
   <title>Log in or Sign up — ConfigKit</title>
   <style>
-    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 40px,680px);margin-inline:auto}header{padding:24px 0;border-bottom:1px solid var(--line)}header a,footer a{color:var(--green);font-weight:700;text-decoration:none}main{padding:44px 0 56px}.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:clamp(22px,5vw,36px);box-shadow:0 12px 32px #17231f0a}h1{font-size:clamp(2rem,6vw,2.7rem);line-height:1.15;margin:0 0 8px}.muted{color:var(--muted)}label{display:block;font-weight:650;margin:14px 0 6px}input,select{width:100%;padding:12px;border:1px solid #cbd6cf;border-radius:9px;font:inherit;color:var(--ink);background:#fff}input:focus,select:focus,button:focus-visible,a:focus-visible{outline:3px solid #76b89a;outline-offset:2px}.tabs,.providers,.form-actions{display:flex;gap:10px;margin:20px 0}.tab,.provider{flex:1;padding:11px 14px;border:1px solid var(--green);border-radius:9px;background:var(--green);color:white;font:inherit;font-weight:700;cursor:pointer}.tab{background:#fff;color:var(--green)}.tab[aria-selected="true"]{background:var(--green);color:#fff}.secondary{background:#fff;color:var(--green)}button:disabled{opacity:.55;cursor:not-allowed}.education-note,.setup{padding:12px 14px;border-radius:9px;background:var(--mint);margin:14px 0}.setup{background:var(--gold)}.divider{text-align:center;color:var(--muted);margin:18px 0}.status{min-height:26px;margin:18px 0 8px}.error{color:var(--red)}.text-button{display:block;border:0;background:none;color:var(--green);text-decoration:underline;padding:8px 0;cursor:pointer;font:inherit}.fine-print{font-size:.9rem}.account{padding:14px;background:var(--mint);border-radius:9px}.account a{color:var(--green)}footer{border-top:1px solid var(--line);padding:20px 0 32px;color:var(--muted)}footer nav{display:flex;gap:18px;flex-wrap:wrap}@media(max-width:480px){.providers{flex-direction:column}.tabs{gap:6px}}
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8;--shadow:0 12px 32px #17231f12}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,footer{padding:18px max(20px,calc((100% - 760px)/2))}header a,footer a{color:var(--green);font-weight:700}main{max-width:760px;margin:5vh auto;padding:0 20px}.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:clamp(22px,5vw,40px);box-shadow:var(--shadow)}h1{margin:0 0 8px;font-size:clamp(1.7rem,5vw,2.2rem);line-height:1.2}.muted{color:var(--muted)}label{display:block;margin:14px 0 5px;font-weight:650}input,select{width:100%;padding:11px 12px;border:1px solid #cbd6d0;border-radius:8px;font:inherit;color:var(--ink);background:#fff}input:focus,select:focus,button:focus-visible,a:focus-visible{outline:3px solid #84c8a9;outline-offset:2px}.education-note{margin:22px 0;padding:16px;background:var(--mint);border-radius:10px}.education-note small{display:block;margin-top:8px}.tabs{display:flex;gap:8px;margin:22px 0 16px}.tab{flex:1;padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-weight:700;cursor:pointer}.tab[aria-selected=true]{background:var(--green);border-color:var(--green);color:#fff}button{font:inherit}.provider{width:100%;padding:11px 14px;border:0;border-radius:8px;background:var(--green);color:#fff;font-weight:700;cursor:pointer}.provider:hover{background:var(--green-dark)}.provider:disabled,.tab:disabled{opacity:.6;cursor:wait}.secondary{background:#fff;border:1px solid var(--line);color:var(--ink)}.secondary:hover{background:var(--mint)}.form-actions{margin-top:16px}.text-button{display:block;margin:8px 0 0 auto;padding:4px 0;border:0;background:none;color:var(--green);text-decoration:underline;cursor:pointer}.divider{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--muted)}.divider:before,.divider:after{content:"";height:1px;flex:1;background:var(--line)}.providers{display:grid;grid-template-columns:1fr 1fr;gap:10px}.status{margin-top:18px;padding:12px;border-radius:8px;background:var(--mint)}.status.error,.setup{background:#fff0ed;color:var(--red)}.setup{padding:12px;border-radius:8px;margin:18px 0}.account{padding:14px;margin:14px 0;background:var(--mint);border-radius:8px}.fine-print{font-size:.9rem;margin-top:24px}footer nav{display:flex;gap:18px;flex-wrap:wrap}@media(max-width:520px){.providers{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -19,9 +19,10 @@
       <div class="setup" id="setup" hidden><strong>Sign-in setup is not complete.</strong> The site needs its Supabase project URL and publishable/anon key in <code>auth-config.js</code>. See <a href="AUTH-SETUP.md">the setup guide</a>.</div>
       <div class="education-note">
         <label for="accountType">Account type</label>
-        <select id="accountType" name="accountType"><option value="personal">Personal account</option><option value="education">Education account</option></select>
+        <select id="accountType" name="accountType"><option value="personal">Personal account</option><option value="education">Education account</option><option value="work">Work account</option></select>
         <div id="institutionField" hidden><label for="institution">School or educational institution</label><input id="institution" name="institution" maxlength="120" autocomplete="organization" placeholder="Name of your school or institution"></div>
-        <small class="muted">Education status and institution are self-declared and are not verified. This selection does not grant student discounts or special access.</small>
+        <div id="workplaceField" hidden><label for="workplace">Company or workplace</label><input id="workplace" name="workplace" maxlength="120" autocomplete="organization" placeholder="Name of your company or workplace"></div>
+        <small class="muted">Education and work details are self-declared and are not verified. Selecting an account type does not grant special access.</small>
       </div>
       <div class="tabs" role="tablist" aria-label="Account action">
         <button class="tab" id="loginTab" type="button" role="tab" aria-selected="true">Log in</button>
@@ -43,7 +44,7 @@
       <p class="status" id="status" role="status" aria-live="polite">Checking sign-in configuration…</p>
       <div class="account" id="account" hidden></div>
       <button class="provider secondary" id="signout" type="button" hidden>Sign out</button>
-      <p class="muted fine-print">Authentication is handled by Supabase and your selected identity provider. Never share your password, access tokens, or recovery codes. See our <a href="privacy.html">privacy policy</a>.</p>
+      <p class="muted fine-print">Authentication is handled by Supabase and your selected identity provider. Work account selection stores a self-declared profile label; it does not enable employer-managed sign-in or verify employment. Never share your password, access tokens, or recovery codes. See our <a href="privacy.html">privacy policy</a>.</p>
     </section>
   </main>
   <footer><nav aria-label="Footer"><a href="index.html">Home</a><a href="safety.html">Safety &amp; contact</a><a href="terms.html">Terms</a></nav></footer>
@@ -67,6 +68,8 @@
       const accountType = document.getElementById('accountType');
       const institution = document.getElementById('institution');
       const institutionField = document.getElementById('institutionField');
+      const workplace = document.getElementById('workplace');
+      const workplaceField = document.getElementById('workplaceField');
       let mode = 'login';
       let redirecting = false;
       const config = window.CONFIGKIT_AUTH || {};
@@ -78,10 +81,12 @@
 
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
       const callbackUrl = new URL('login.html', window.location.href).href;
-      const educationIntentKey = 'configkit_education_oauth_intent';
+      const accountIntentKey = 'configkit_account_oauth_intent';
       function selectedMetadata() {
-        const metadata = {account_type:accountType.value};
-        if (accountType.value === 'education' && institution.value.trim()) metadata.institution = institution.value.trim();
+        const type = accountType.value;
+        const metadata = {account_type:type};
+        if (type === 'education' && institution.value.trim()) metadata.institution = institution.value.trim();
+        if (type === 'work' && workplace.value.trim()) metadata.workplace = workplace.value.trim();
         return metadata;
       }
       function setBusy(busy) {
@@ -92,10 +97,13 @@
         status.className = isError ? 'status error' : 'status';
         status.textContent = message;
       }
-      function updateInstitutionField() {
+      function updateAccountFields() {
         const isEducation = accountType.value === 'education';
+        const isWork = accountType.value === 'work';
         institutionField.hidden = !isEducation;
         institution.required = isEducation;
+        workplaceField.hidden = !isWork;
+        workplace.required = isWork;
       }
       function setMode(nextMode) {
         mode = nextMode;
@@ -111,17 +119,15 @@
         const {data, error} = await client.auth.getSession();
         if (error) { setStatus('Could not read the sign-in session. Please try again.', true); return; }
         if (data.session) {
-          const pendingEducation = sessionStorage.getItem(educationIntentKey);
-          if (pendingEducation) {
-            sessionStorage.removeItem(educationIntentKey);
+          const pendingIntent = sessionStorage.getItem(accountIntentKey);
+          if (pendingIntent) {
+            sessionStorage.removeItem(accountIntentKey);
             try {
-              const details = JSON.parse(pendingEducation);
-              const update = {account_type:'education'};
-              if (details.institution) update.institution = details.institution;
-              const {error:metadataError} = await client.auth.updateUser({data:update});
+              const metadata = JSON.parse(pendingIntent);
+              const {error:metadataError} = await client.auth.updateUser({data:metadata});
               if (metadataError) throw metadataError;
             } catch (error) {
-              setStatus(`Signed in, but the education profile could not be saved: ${error.message || 'Please try again in account settings.'}`, true);
+              setStatus(`Signed in, but the account profile could not be saved: ${error.message || 'Please try again in account settings.'}`, true);
               return;
             }
           }
@@ -137,24 +143,22 @@
         setStatus(`Connecting to ${provider === 'azure' ? 'Microsoft' : 'GitHub'}…`);
         setBusy(true);
         try {
-          if (accountType.value === 'education') {
-            if (!institution.value.trim()) throw new Error('Enter your school or institution name first.');
-            sessionStorage.setItem(educationIntentKey, JSON.stringify({institution:institution.value.trim()}));
-          } else {
-            sessionStorage.removeItem(educationIntentKey);
-          }
+          const type = accountType.value;
+          if (type === 'education' && !institution.value.trim()) throw new Error('Enter your school or institution name first.');
+          if (type === 'work' && !workplace.value.trim()) throw new Error('Enter your company or workplace name first.');
+          sessionStorage.setItem(accountIntentKey, JSON.stringify(selectedMetadata()));
           const options = {provider, options:{redirectTo:callbackUrl}};
           if (provider === 'azure') options.options.scopes = 'openid email profile';
           const {error} = await client.auth.signInWithOAuth(options);
           if (error) throw error;
         } catch (error) {
-          sessionStorage.removeItem(educationIntentKey);
+          sessionStorage.removeItem(accountIntentKey);
           setStatus(`Sign-in could not start: ${error.message || 'Please try again.'}`, true);
           setBusy(false);
         }
       }
 
-      accountType.addEventListener('change', updateInstitutionField);
+      accountType.addEventListener('change', updateAccountFields);
       loginTab.addEventListener('click', () => setMode('login'));
       signupTab.addEventListener('click', () => setMode('signup'));
       form.addEventListener('submit', async event => {
@@ -169,7 +173,7 @@
           if (result.error) throw result.error;
           if (mode === 'signup' && !result.data.session) {
             setStatus('Account created. Check your email for a confirmation link, then return here to log in.');
-            form.reset(); updateInstitutionField();
+            form.reset(); updateAccountFields();
           } else {
             setStatus(mode === 'signup' ? 'Account created and signed in.' : 'Logged in successfully.');
             password.value = '';
@@ -203,10 +207,10 @@
       client.auth.onAuthStateChange((_event, session) => { if (session) void renderSession(); });
       const params = new URLSearchParams(window.location.search);
       if (params.has('error_description') || params.has('error')) {
-        sessionStorage.removeItem(educationIntentKey);
+        sessionStorage.removeItem(accountIntentKey);
         setStatus('The identity provider could not complete sign-in. Check the provider setup and try again.', true);
       }
-      updateInstitutionField(); setMode('login'); void renderSession();
+      updateAccountFields(); setMode('login'); void renderSession();
     })();
   </script>
 </body>
