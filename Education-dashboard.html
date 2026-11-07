@@ -41,6 +41,17 @@
       </div>
     </section>
 
+    <section class="card" id="getting-started" hidden>
+      <h2>Getting started</h2>
+      <ol>
+        <li>Use <a href="index.html">ConfigKit</a> to build a profile. Review the settings and generated profile before installing it on any device.</li>
+        <li>Add each student below with their name and email address. Use an email they can access; they must register with this same email.</li>
+        <li>Share the <a href="student-login.html">student sign-in page</a>. Students sign up, confirm their email, then sign in to view their student dashboard.</li>
+        <li>To enable student record linking, first complete the <a href="STUDENT-LOGIN-SETUP.md">student login database setup</a> in your Supabase project.</li>
+      </ol>
+      <p class="muted">The site QR code opens ConfigKit for students. Education status is self-declared, and teachers should never ask for or set a student's password. Test with sample data before using real student information.</p>
+    </section>
+
     <section class="card">
       <h2>Create student</h2>
       <form id="student-form">
@@ -89,6 +100,7 @@
       const statusEl = document.getElementById('status');
       const listEl = document.getElementById('student-list');
       const accountLabel = document.getElementById('account-label');
+      const gettingStarted = document.getElementById('getting-started');
       const showQrButton = document.getElementById('show-qr');
       const hideQrButton = document.getElementById('hide-qr');
       const qrPanel = document.getElementById('qr-panel');
@@ -231,6 +243,7 @@
           return;
         }
 
+        gettingStarted.hidden = false;
         showQrButton.hidden = false;
         await loadStudents();
       }
