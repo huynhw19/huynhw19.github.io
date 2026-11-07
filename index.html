@@ -3,57 +3,634 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Build Wi-Fi, DNS, and web clip mobileconfig profiles locally with ConfigKit.">
+  <meta name="description" content="Build Wi‑Fi, DNS, and web clip mobileconfig profiles locally with ConfigKit.">
   <title>ConfigKit — Mobileconfig Studio</title>
   <style>
-    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030;--shadow:0 12px 28px rgba(17,35,30,.08)}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green);text-decoration:none}a:hover{text-decoration:underline}.wrap{max-width:1100px;margin:0 auto;padding:0 20px}.topbar{position:sticky;top:0;z-index:10;background:rgba(247,249,246,.9);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}.topbar .wrap{display:flex;align-items:center;justify-content:space-between;min-height:72px;gap:1rem}.brand{display:inline-flex;align-items:center;gap:.7rem;font-weight:700;font-size:1.15rem;color:var(--ink)}.brand-mark{display:inline-grid;place-items:center;width:1.8rem;height:1.8rem;border-radius:.6rem;background:var(--green);color:var(--white);font-size:1.1rem}nav{display:flex;flex-wrap:wrap;align-items:center;gap:1rem;font-size:.96rem}nav a{color:var(--ink);opacity:.82}nav a:hover{opacity:1}.hero{padding:72px 0 28px}.eyebrow{display:inline-block;padding:.35rem .7rem;border-radius:999px;background:var(--mint);color:var(--green-dark);font-weight:600;font-size:.8rem;letter-spacing:.02em}.hero h1{margin:.9rem 0 .7rem;font-size:clamp(2.2rem,5vw,4rem);line-height:1.08;max-width:720px}p{margin:0 0 1rem}.hero p{max-width:700px;color:var(--muted);font-size:1.08rem}.cta-row{display:flex;flex-wrap:wrap;gap:.85rem;margin-top:1.5rem}.button{display:inline-flex;align-items:center;justify-content:center;padding:.85rem 1.1rem;border-radius:.8rem;border:1px solid var(--line);background:var(--white);color:var(--ink);font-weight:600;box-shadow:0 6px 16px rgba(23,75,57,.06)}.button.primary{background:var(--green);border-color:var(--green);color:var(--white)}.button:hover{text-decoration:none;filter:brightness(.99)}.section-title{margin:0 0 1rem;font-size:1.7rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1.2rem 0 3rem}.card{background:var(--white);border:1px solid var(--line);border-radius:1rem;padding:1.1rem 1.2rem;box-shadow:var(--shadow)}.card h2{margin:.15rem 0 .65rem;font-size:1.15rem}.card p{margin:0 0 .9rem;color:var(--muted)}.card a{font-weight:600}.panel{background:var(--white);border:1px solid var(--line);border-radius:1rem;padding:1.25rem 1.2rem;box-shadow:var(--shadow)}.builder{margin:1rem 0 3rem;padding:1.5rem}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}.field{display:flex;flex-direction:column;gap:.45rem}.field label{font-weight:600}.field input,.field select{padding:.75rem .8rem;border:1px solid var(--line);border-radius:.75rem;font:inherit;background:#fff}.field input:focus,.field select:focus{outline:3px solid rgba(34,107,81,.15);outline-offset:1px}.status{margin-top:1rem;padding:.8rem .9rem;border-radius:.75rem;background:var(--mint);color:var(--green-dark);border:1px solid rgba(34,107,81,.12)}.status.error{background:#fff2f2;color:var(--red);border-color:rgba(155,48,48,.12)}.status.success{background:#eefaf4;color:var(--green-dark);border-color:rgba(34,107,81,.12)}.footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem;padding:0 0 2rem;color:var(--muted)}.footer-links{display:flex;flex-wrap:wrap;gap:1rem}.hidden{display:none!important}@media (max-width:640px){.topbar .wrap{padding-top:14px;padding-bottom:14px;align-items:flex-start;flex-direction:column}.hero{padding-top:42px}}</style>
+    :root {
+      color-scheme: light;
+      --ink: #17231f;
+      --muted: #66736d;
+      --line: #e4eae6;
+      --paper: #f7f9f6;
+      --white: #fff;
+      --green: #226b51;
+      --green-dark: #174b39;
+      --mint: #e8f4ed;
+      --gold: #fff7e8;
+      --red: #9b3030;
+      --shadow: 0 12px 28px rgba(17, 35, 30, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: var(--green); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(247, 249, 246, 0.9);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 72px;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: .7rem;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--ink);
+    }
+    .brand-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 1.8rem;
+      height: 1.8rem;
+      border-radius: .6rem;
+      background: var(--green);
+      color: var(--white);
+      font-size: 1.1rem;
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      font-size: .96rem;
+    }
+    nav a {
+      color: var(--ink);
+      opacity: .82;
+    }
+    nav a:hover { opacity: 1; }
+
+    .lang-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      margin-left: auto;
+    }
+    .lang-switch label {
+      font-size: .85rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .lang-switch select {
+      padding: .6rem .8rem;
+      border-radius: .8rem;
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: var(--ink);
+      font: inherit;
+      outline: none;
+    }
+    .lang-switch select:focus {
+      outline: 3px solid rgba(34, 107, 81, 0.15);
+      outline-offset: 1px;
+    }
+
+    .hero {
+      padding: 72px 0 28px;
+    }
+    .eyebrow {
+      display: inline-block;
+      padding: .35rem .7rem;
+      border-radius: 999px;
+      background: var(--mint);
+      color: var(--green-dark);
+      font-weight: 600;
+      font-size: .8rem;
+      letter-spacing: .02em;
+    }
+    .hero h1 {
+      margin: .9rem 0 .7rem;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 1.08;
+      max-width: 720px;
+    }
+    .hero p {
+      margin: 0;
+      max-width: 700px;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .85rem;
+      margin-top: 1.4rem;
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: .85rem 1.1rem;
+      border-radius: .8rem;
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: var(--ink);
+      font-weight: 600;
+      box-shadow: 0 6px 16px rgba(23, 75, 57, 0.06);
+    }
+    .button.primary {
+      background: var(--green);
+      border-color: var(--green);
+      color: var(--white);
+    }
+
+    .section-title {
+      margin: 0 0 1rem;
+      font-size: 1.7rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      padding: 1.1rem 1.2rem;
+      box-shadow: var(--shadow);
+    }
+    .card h2 {
+      margin: .15rem 0 .65rem;
+      font-size: 1.15rem;
+    }
+    .card p {
+      margin: 0 0 .9rem;
+      color: var(--muted);
+      font-size: .98rem;
+    }
+    .card a {
+      font-weight: 600;
+    }
+    .card.button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.2rem;
+      min-height: 100%;
+      font-size: 1.05rem;
+    }
+
+    .panel {
+      margin-top: 3rem;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      padding: 1.2rem 1.2rem 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: .45rem;
+    }
+    .field label {
+      font-weight: 600;
+    }
+    .field input, .field select {
+      padding: .75rem .8rem;
+      border: 1px solid var(--line);
+      border-radius: .75rem;
+      background: #fff;
+      font: inherit;
+      color: var(--ink);
+    }
+    .field input:focus, .field select:focus {
+      outline: 3px solid rgba(34, 107, 81, 0.15);
+      outline-offset: 1px;
+    }
+    .status {
+      margin-top: 1rem;
+      padding: .8rem .9rem;
+      border-radius: .75rem;
+      background: var(--mint);
+      color: var(--green-dark);
+      border: 1px solid rgba(34, 107, 81, 0.12);
+    }
+    .status.error {
+      background: #fff2f2;
+      color: var(--red);
+      border-color: rgba(155, 48, 48, 0.12);
+    }
+    .status.success {
+      background: #eefaf3;
+      color: var(--green-dark);
+      border-color: rgba(34, 107, 81, 0.12);
+    }
+
+    .footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 2rem 0 3rem;
+      color: var(--muted);
+    }
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .topbar .wrap {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding-top: .75rem;
+        padding-bottom: .75rem;
+      }
+      nav { justify-content: center; }
+      .lang-switch { margin-left: 0; }
+      .footer { justify-content: center; }
+    }
+  </style>
 </head>
 <body>
-  <header class="topbar"><div class="wrap"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">⌘</span> ConfigKit</a><nav aria-label="Main navigation"><a href="#builders">Builders</a><a href="mobileconfig-guide.html">Beginner guide</a><a href="how-to.html">Quick start</a><a href="examples.html">Examples</a></nav></div></header>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">⌘</span>
+        <span>ConfigKit</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#builders" data-i18n="navBuilders">Builders</a>
+        <a href="mobileconfig-guide.html" data-i18n="navGuide">Beginner guide</a>
+        <a href="how-to.html" data-i18n="navQuickStart">Quick start</a>
+        <a href="examples.html" data-i18n="navExamples">Examples</a>
+      </nav>
+      <div class="lang-switch" aria-label="Language selector">
+        <label for="lang-select">Language</label>
+        <select id="lang-select" aria-label="Select language">
+          <option value="en">EN</option>
+          <option value="es">ES</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
   <main class="wrap">
-    <section class="hero"><span class="eyebrow">Configuration, made simple</span><h1>Build and review mobileconfig profiles.</h1><p>Create a basic Wi-Fi profile right here, or open a dedicated builder for DNS, web clips, and other scenarios. Start with the beginner guide if you’re new to profiles or skip straight to the local generator.</p><div class="cta-row"><a class="button primary" href="#wifi-builder">Open Wi‑Fi builder</a><a class="button" href="mobileconfig-guide.html">Beginner guide</a></div></section>
-    <section id="builders" aria-labelledby="builders-title"><h2 class="section-title" id="builders-title">Profile builders &amp; tools</h2><div class="grid">
-      <article class="card"><h2>Beginner guide</h2><p>Learn what a .mobileconfig file is, how payloads work, and what to check before installing a profile.</p><a href="mobileconfig-guide.html">Read the beginner guide →</a></article>
-      <article class="card"><h2>Wi‑Fi profile builder</h2><p>Create an unsigned Wi‑Fi configuration profile locally. Treat profiles containing passwords as sensitive.</p><a href="#wifi-builder">Build a Wi‑Fi profile →</a></article>
-      <article class="card"><h2>DNS profile builder</h2><p>Configure a DNS-over-HTTPS or DNS-over-TLS resolver, then download the profile for review.</p><a href="dns-builder.html">Open DNS builder →</a></article>
-      <article class="card"><h2>Web clip builder</h2><p>Create a Home Screen shortcut profile for a website you trust.</p><a href="webclip-builder.html">Open web clip builder →</a></article>
-      <article class="card"><h2>Prepare or inspect a profile</h2><p>Check XML locally, inspect profile metadata, and review payload types before you decide whether to install.</p><a href="prepare-profile.html">Open profile inspector →</a></article>
-      <article class="card"><h2>Examples</h2><p>Read illustrative mobileconfig payload fragments for Wi‑Fi, web clips, DNS, and more.</p><a href="examples.html">Browse examples →</a></article>
-      <article class="card"><h2>Credits</h2><p>See project acknowledgements and references to Apple’s configuration documentation.</p><a href="credits.html">View credits →</a></article>
-      <article class="button" href="mobileconfig-speed-test.html">Mobileconfig speed test →</a>
-    </div></section>
-    <section class="panel builder" id="wifi-builder" aria-labelledby="wifi-title"><span class="eyebrow">Local generator</span><h2 id="wifi-title">Build a Wi‑Fi profile</h2><p>Enter your network details and generate a local mobileconfig file. This tool creates an unsigned profile for educational review and testing.</p>
-      <form id="wifi-form"><div class="form-grid"><div class="field"><label for="profile-name">Profile name</label><input id="profile-name" value="My Wi‑Fi Profile" maxlength="100" required></div><div class="field"><label for="ssid">Network name (SSID)</label><input id="ssid" value="ExampleWiFi" maxlength="100" required></div><div class="field"><label for="security">Security</label><select id="security"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="None">Open network</option></select></div><div class="field" id="password-wrap"><label for="password">Password</label><input id="password" type="password" value="ExamplePassword" maxlength="200"></div><div class="field"><label for="auto-join">Auto-join</label><select id="auto-join"><option value="true">Yes</option><option value="false">No</option></select></div></div><button class="button primary" type="submit">Generate &amp; download profile</button></form>
-      <div id="status" class="status" role="status" aria-live="polite">Ready to generate a profile.</div>
+    <section class="hero">
+      <span class="eyebrow" data-i18n="heroEyebrow">Configuration, made simple</span>
+      <h1 data-i18n="heroTitle">Build and review mobileconfig profiles.</h1>
+      <p data-i18n="heroText">Create a basic Wi‑Fi profile right here, or open a dedicated builder for DNS, web clips, and other scenarios. Start with the beginner guide if you're new to profiles or skip straight to the local generator.</p>
+      <div class="cta-row">
+        <a class="button primary" href="#wifi-builder" data-i18n="openWifi">Open Wi‑Fi builder</a>
+        <a class="button" href="mobileconfig-guide.html" data-i18n="beginnerGuideButton">Beginner guide</a>
+      </div>
+    </section>
+
+    <section id="builders" aria-labelledby="builders-title">
+      <h2 class="section-title" id="builders-title" data-i18n="buildersTitle">Profile builders &amp; tools</h2>
+      <div class="grid">
+        <article class="card">
+          <h2 data-i18n="cardGuideTitle">Beginner guide</h2>
+          <p data-i18n="cardGuideText">Learn what a .mobileconfig file is, how payloads work, and what to check before installing a profile.</p>
+          <a href="mobileconfig-guide.html" data-i18n="cardGuideLink">Read the beginner guide →</a>
+        </article>
+
+        <article class="card">
+          <h2 data-i18n="cardWifiTitle">Wi‑Fi profile builder</h2>
+          <p data-i18n="cardWifiText">Create an unsigned Wi‑Fi configuration profile locally. Treat profiles containing passwords as sensitive.</p>
+          <a href="#wifi-builder" data-i18n="cardWifiLink">Build a Wi‑Fi profile →</a>
+        </article>
+
+        <article class="card">
+          <h2 data-i18n="cardDnsTitle">DNS profile builder</h2>
+          <p data-i18n="cardDnsText">Configure a DNS-over-HTTPS or DNS-over-TLS resolver, then download the profile for review.</p>
+          <a href="dns-builder.html" data-i18n="cardDnsLink">Open DNS builder →</a>
+        </article>
+
+        <article class="card">
+          <h2 data-i18n="cardWebclipTitle">Web clip builder</h2>
+          <p data-i18n="cardWebclipText">Create a Home Screen shortcut profile for a website you trust.</p>
+          <a href="webclip-builder.html" data-i18n="cardWebclipLink">Open web clip builder →</a>
+        </article>
+
+        <article class="card">
+          <h2 data-i18n="cardPrepareTitle">Prepare or inspect a profile</h2>
+          <p data-i18n="cardPrepareText">Check XML locally, inspect profile metadata, and review payload types before you decide whether to install.</p>
+          <a href="prepare-profile.html" data-i18n="cardPrepareLink">Open profile inspector →</a>
+        </article>
+
+        <article class="card">
+          <h2 data-i18n="cardExamplesTitle">Examples</h2>
+          <p data-i18n="cardExamplesText">Read illustrative mobileconfig payload fragments for Wi‑Fi, web clips, DNS, and more.</p>
+          <a href="examples.html" data-i18n="cardExamplesLink">Browse examples →</a>
+        </article>
+
+        <article class="card">
+          <h2 data-i18n="cardCreditsTitle">Credits</h2>
+          <p data-i18n="cardCreditsText">See project acknowledgements and references to Apple’s configuration documentation.</p>
+          <a href="credits.html" data-i18n="cardCreditsLink">View credits →</a>
+        </article>
+
+        <a class="card button" href="mobileconfig-speed-test.html" data-i18n="speedTestLink">Mobileconfig speed test →</a>
+      </div>
+    </section>
+
+    <section class="panel builder" id="wifi-builder" aria-labelledby="wifi-title">
+      <span class="eyebrow" data-i18n="localGenerator">Local generator</span>
+      <h2 id="wifi-title" data-i18n="wifiTitle">Build a Wi‑Fi profile</h2>
+      <p data-i18n="wifiText">Enter your network details and generate a local mobileconfig file. This tool creates an unsigned profile for educational review and testing.</p>
+
+      <form id="wifi-form">
+        <div class="form-grid">
+          <div class="field">
+            <label for="profile-name" data-i18n="profileName">Profile name</label>
+            <input id="profile-name" value="My Wi‑Fi Profile" maxlength="100" required>
+          </div>
+
+          <div class="field">
+            <label for="ssid" data-i18n="networkName">Network name (SSID)</label>
+            <input id="ssid" value="ExampleWiFi" maxlength="100" required>
+          </div>
+
+          <div class="field">
+            <label for="security" data-i18n="security">Security</label>
+            <select id="security">
+              <option value="WPA" data-i18n="securityWPA">WPA/WPA2</option>
+              <option value="WEP" data-i18n="securityWEP">WEP</option>
+              <option value="None" data-i18n="securityOpen">Open network</option>
+            </select>
+          </div>
+
+          <div class="field" id="password-wrap">
+            <label for="password" data-i18n="password">Password</label>
+            <input id="password" type="password" value="ExamplePassword" maxlength="200">
+          </div>
+
+          <div class="field">
+            <label for="auto-join" data-i18n="autoJoin">Auto-join</label>
+            <select id="auto-join">
+              <option value="true" data-i18n="yesOption">Yes</option>
+              <option value="false" data-i18n="noOption">No</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="button primary" type="submit" data-i18n="generateButton">Generate &amp; download profile</button>
+      </form>
+
+      <div id="status" class="status" role="status" aria-live="polite" data-i18n="statusReady">Ready to generate a profile.</div>
     </section>
   </main>
-  <footer class="wrap footer"><span>ConfigKit · Independent mobileconfig builder demo</span><div class="footer-links"><a href="login.html">Log in / Sign up</a><a href="safety.html">Safety &amp; contact</a><a href="privacy.html">Privacy</a></div></footer>
+
+  <footer class="wrap footer">
+    <span data-i18n="footerText">ConfigKit · Independent mobileconfig builder demo</span>
+    <div class="footer-links">
+      <a href="login.html" data-i18n="footerLogin">Log in / Sign up</a>
+      <a href="safety.html" data-i18n="footerSafety">Safety &amp; contact</a>
+      <a href="privacy.html" data-i18n="footerPrivacy">Privacy</a>
+    </div>
+  </footer>
+
   <script>
+    const translations = {
+      en: {
+        navBuilders: 'Builders',
+        navGuide: 'Beginner guide',
+        navQuickStart: 'Quick start',
+        navExamples: 'Examples',
+        heroEyebrow: 'Configuration, made simple',
+        heroTitle: 'Build and review mobileconfig profiles.',
+        heroText: 'Create a basic Wi‑Fi profile right here, or open a dedicated builder for DNS, web clips, and other scenarios. Start with the beginner guide if you\'re new to profiles or skip straight to the local generator.',
+        openWifi: 'Open Wi‑Fi builder',
+        beginnerGuideButton: 'Beginner guide',
+        buildersTitle: 'Profile builders & tools',
+        cardGuideTitle: 'Beginner guide',
+        cardGuideText: 'Learn what a .mobileconfig file is, how payloads work, and what to check before installing a profile.',
+        cardGuideLink: 'Read the beginner guide →',
+        cardWifiTitle: 'Wi‑Fi profile builder',
+        cardWifiText: 'Create an unsigned Wi‑Fi configuration profile locally. Treat profiles containing passwords as sensitive.',
+        cardWifiLink: 'Build a Wi‑Fi profile →',
+        cardDnsTitle: 'DNS profile builder',
+        cardDnsText: 'Configure a DNS-over-HTTPS or DNS-over-TLS resolver, then download the profile for review.',
+        cardDnsLink: 'Open DNS builder →',
+        cardWebclipTitle: 'Web clip builder',
+        cardWebclipText: 'Create a Home Screen shortcut profile for a website you trust.',
+        cardWebclipLink: 'Open web clip builder →',
+        cardPrepareTitle: 'Prepare or inspect a profile',
+        cardPrepareText: 'Check XML locally, inspect profile metadata, and review payload types before you decide whether to install.',
+        cardPrepareLink: 'Open profile inspector →',
+        cardExamplesTitle: 'Examples',
+        cardExamplesText: 'Read illustrative mobileconfig payload fragments for Wi‑Fi, web clips, DNS, and more.',
+        cardExamplesLink: 'Browse examples →',
+        cardCreditsTitle: 'Credits',
+        cardCreditsText: 'See project acknowledgements and references to Apple’s configuration documentation.',
+        cardCreditsLink: 'View credits →',
+        speedTestLink: 'Mobileconfig speed test →',
+        localGenerator: 'Local generator',
+        wifiTitle: 'Build a Wi‑Fi profile',
+        wifiText: 'Enter your network details and generate a local mobileconfig file. This tool creates an unsigned profile for educational review and testing.',
+        profileName: 'Profile name',
+        networkName: 'Network name (SSID)',
+        security: 'Security',
+        securityWPA: 'WPA/WPA2',
+        securityWEP: 'WEP',
+        securityOpen: 'Open network',
+        password: 'Password',
+        autoJoin: 'Auto-join',
+        yesOption: 'Yes',
+        noOption: 'No',
+        generateButton: 'Generate & download profile',
+        statusReady: 'Ready to generate a profile.',
+        footerText: 'ConfigKit · Independent mobileconfig builder demo',
+        footerLogin: 'Log in / Sign up',
+        footerSafety: 'Safety & contact',
+        footerPrivacy: 'Privacy'
+      },
+      es: {
+        navBuilders: 'Constructores',
+        navGuide: 'Guía para principiantes',
+        navQuickStart: 'Inicio rápido',
+        navExamples: 'Ejemplos',
+        heroEyebrow: 'Configuración, simplificada',
+        heroTitle: 'Crea y revisa perfiles mobileconfig.',
+        heroText: 'Crea un perfil básico de Wi‑Fi aquí mismo, o abre un generador específico para DNS, web clips y otros escenarios. Empieza con la guía para principiantes si eres nuevo o salta directamente al generador local.',
+        openWifi: 'Abrir generador Wi‑Fi',
+        beginnerGuideButton: 'Guía para principiantes',
+        buildersTitle: 'Generadores y herramientas',
+        cardGuideTitle: 'Guía para principiantes',
+        cardGuideText: 'Aprende qué es un archivo .mobileconfig, cómo funcionan las cargas útiles y qué revisar antes de instalar un perfil.',
+        cardGuideLink: 'Leer la guía →',
+        cardWifiTitle: 'Generador de Wi‑Fi',
+        cardWifiText: 'Crea un perfil de configuración Wi‑Fi no firmado de forma local. Trata los perfiles con contraseñas como información sensible.',
+        cardWifiLink: 'Crear un perfil Wi‑Fi →',
+        cardDnsTitle: 'Generador de DNS',
+        cardDnsText: 'Configura un resolutor DNS-over-HTTPS o DNS-over-TLS y luego descarga el perfil para revisarlo.',
+        cardDnsLink: 'Abrir generador DNS →',
+        cardWebclipTitle: 'Generador de web clip',
+        cardWebclipText: 'Crea un perfil de acceso directo en la pantalla de inicio para un sitio web de confianza.',
+        cardWebclipLink: 'Abrir generador web clip →',
+        cardPrepareTitle: 'Preparar o inspeccionar un perfil',
+        cardPrepareText: 'Revisa el XML localmente, inspecciona metadatos y comprueba los tipos de payload antes de decidir si lo instalas.',
+        cardPrepareLink: 'Abrir inspector de perfiles →',
+        cardExamplesTitle: 'Ejemplos',
+        cardExamplesText: 'Lee fragmentos ilustrativos de payloads mobileconfig para Wi‑Fi, web clips, DNS y más.',
+        cardExamplesLink: 'Explorar ejemplos →',
+        cardCreditsTitle: 'Créditos',
+        cardCreditsText: 'Consulta los agradecimientos del proyecto y las referencias a la documentación de configuración de Apple.',
+        cardCreditsLink: 'Ver créditos →',
+        speedTestLink: 'Prueba de velocidad mobileconfig →',
+        localGenerator: 'Generador local',
+        wifiTitle: 'Crear un perfil Wi‑Fi',
+        wifiText: 'Introduce los detalles de tu red y genera un archivo mobileconfig local. Esta herramienta crea un perfil no firmado para revisión educativa y pruebas.',
+        profileName: 'Nombre del perfil',
+        networkName: 'Nombre de la red (SSID)',
+        security: 'Seguridad',
+        securityWPA: 'WPA/WPA2',
+        securityWEP: 'WEP',
+        securityOpen: 'Red abierta',
+        password: 'Contraseña',
+        autoJoin: 'Unirse automáticamente',
+        yesOption: 'Sí',
+        noOption: 'No',
+        generateButton: 'Generar y descargar perfil',
+        statusReady: 'Listo para generar un perfil.',
+        footerText: 'ConfigKit · Demostración independiente de generación mobileconfig',
+        footerLogin: 'Iniciar sesión / Registrarse',
+        footerSafety: 'Seguridad y contacto',
+        footerPrivacy: 'Privacidad'
+      }
+    };
+
+    const select = document.getElementById('lang-select');
+    const status = document.getElementById('status');
+
+    function applyLanguage(lang) {
+      const t = translations[lang] || translations.en;
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-i18n]').forEach((node) => {
+        const key = node.dataset.i18n;
+        if (t[key]) {
+          node.textContent = t[key];
+        }
+      });
+      if (select) select.value = lang;
+    }
+
+    if (select) {
+      const saved = localStorage.getItem('configkit-lang') || 'en';
+      select.value = saved;
+      applyLanguage(saved);
+      select.addEventListener('change', (event) => {
+        const lang = event.target.value;
+        localStorage.setItem('configkit-lang', lang);
+        applyLanguage(lang);
+      });
+    }
+
     (() => {
-      const form=document.getElementById('wifi-form'),security=document.getElementById('security'),password=document.getElementById('password'),passwordWrap=document.getElementById('password-wrap'),status=document.getElementById('status');
-      function updateSecurity(){const open=security.value==='None';passwordWrap.hidden=open;password.required=!open;if(open){password.value='';} }
-      security.addEventListener('change',updateSecurity);
+      const form = document.getElementById('wifi-form');
+      const security = document.getElementById('security');
+      const password = document.getElementById('password');
+      const passwordWrap = document.getElementById('password-wrap');
+
+      function updateSecurity() {
+        const open = security.value === 'None';
+        passwordWrap.hidden = open;
+        password.required = !open;
+        if (open) password.value = '';
+      }
+
+      security.addEventListener('change', updateSecurity);
       updateSecurity();
-      const uuid=()=> 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16)}).toUpperCase();
-      const xmlEscape=value=>String(value).replace(/[<>&'\"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c]));
-      form.addEventListener('submit',event=>{
+
+      const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 3 | 8)).toString(16).toUpperCase();
+      });
+
+      const xmlEscape = (value) => String(value).replace(/[<>&'\"]/g, (c) => ({
+        '<': '&lt;',
+        '>': '&gt;',
+        '&': '&amp;',
+        "'": '&apos;',
+        '"': '&quot;'
+      }[c]));
+
+      form.addEventListener('submit', (event) => {
         event.preventDefault();
-        const name=document.getElementById('profile-name').value.trim();
-        const ssid=document.getElementById('ssid').value.trim();
-        const type=security.value;
-        const passwordValue=password.value.trim();
-        if(!name || !ssid){status.className='status error';status.textContent='Please provide a profile name and Wi‑Fi network name.';return;}
-        if(type!=='None' && !passwordValue){status.className='status error';status.textContent='Please enter a password for secured networks.';return;}
-        const profileId=uuid();
-        const payloadId=uuid();
-        const plist=`<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n\t<key>PayloadContent</key>\n\t<array>\n\t\t<dict>\n\t\t\t<key>AutoJoin</key>\n\t\t\t<true/>\n\t\t\t<key>CaptiveBypass</key>\n\t\t\t<false/>\n\t\t\t<key>EncryptionType</key>\n\t\t\t<string>${type}</string>\n\t\t\t<key>HIDDEN_NETWORK</key>\n\t\t\t<false/>\n\t\t\t<key>IsHotspot</key>\n\t\t\t<false/>\n\t\t\t<key>Password</key>\n\t\t\t<string>${xmlEscape(passwordValue)}</string>\n\t\t\t<key>PayloadDescription</key>\n\t\t\t<string>Configures Wi-Fi settings</string>\n\t\t\t<key>PayloadDisplayName</key>\n\t\t\t<string>${xmlEscape(ssid)}</string>\n\t\t\t<key>PayloadIdentifier</key>\n\t\t\t<string>com.configkit.wifi.${payloadId}</string>\n\t\t\t<key>PayloadType</key>\n\t\t\t<string>com.apple.wifi.managed</string>\n\t\t\t<key>PayloadUUID</key>\n\t\t\t<string>${payloadId}</string>\n\t\t\t<key>PayloadVersion</key>\n\t\t\t<integer>1</integer>\n\t\t\t<key>SSID_STR</key>\n\t\t\t<string>${xmlEscape(ssid)}</string>\n\t\t</dict>\n\t</array>\n\t<key>PayloadDescription</key>\n\t<string>Configures Wi-Fi settings</string>\n\t<key>PayloadDisplayName</key>\n\t<string>${xmlEscape(name)}</string>\n\t<key>PayloadIdentifier</key>\n\t<string>com.configkit.profile.${profileId}</string>\n\t<key>PayloadRemovalDisallowed</key>\n\t<false/>\n\t<key>PayloadType</key>\n\t<string>Configuration</string>\n\t<key>PayloadUUID</key>\n\t<string>${profileId}</string>\n\t<key>PayloadVersion</key>\n\t<integer>1</integer>\n</dict>\n</plist>\n`;
-        const blob=new Blob([plist],{type:'application/x-apple-aspen-plist'});
-        const url=URL.createObjectURL(blob);
-        const link=document.createElement('a');
-        link.href=url;link.download=`${name.replace(/[^a-z0-9-_]+/gi,'-').toLowerCase() || 'wifi-profile'}.mobileconfig`;link.click();
+
+        const name = document.getElementById('profile-name').value.trim();
+        const ssid = document.getElementById('ssid').value.trim();
+        const type = security.value;
+        const passwordValue = password.value.trim();
+        const locale = document.documentElement.lang || 'en';
+        const messages = {
+          en: {
+            missing: 'Please provide a profile name and Wi‑Fi network name.',
+            password: 'Please enter a password for secured networks.',
+            success: 'Profile downloaded. Review it before installing on a device.'
+          },
+          es: {
+            missing: 'Proporciona un nombre de perfil y un nombre de red Wi‑Fi.',
+            password: 'Introduce una contraseña para redes protegidas.',
+            success: 'Perfil descargado. Revísalo antes de instalarlo en un dispositivo.'
+          }
+        };
+
+        if (!name || !ssid) {
+          status.className = 'status error';
+          status.textContent = messages[locale]?.missing || messages.en.missing;
+          return;
+        }
+
+        if (type !== 'None' && !passwordValue) {
+          status.className = 'status error';
+          status.textContent = messages[locale]?.password || messages.en.password;
+          return;
+        }
+
+        const profileId = uuid();
+        const payloadId = uuid();
+        const plist = `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n\t<key>PayloadContent</key>\n\t<array>\n\t\t<dict>\n\t\t\t<key>AutoJoin</key>\n\t\t\t<true/>\n\t\t\t<key>CaptiveBypass</key>\n\t\t\t<false/>\n\t\t\t<key>EncryptionType</key>\n\t\t\t<string>${type}</string>\n\t\t\t<key>HIDDEN_NETWORK</key>\n\t\t\t<false/>\n\t\t\t<key>Password</key>\n\t\t\t<string>${xmlEscape(passwordValue)}</string>\n\t\t\t<key>PayloadDescription</key>\n\t\t\t<string>Configures Wi‑Fi settings</string>\n\t\t\t<key>PayloadDisplayName</key>\n\t\t\t<string>${xmlEscape(ssid)}</string>\n\t\t\t<key>PayloadIdentifier</key>\n\t\t\t<string>com.configkit.wifi.${payloadId}</string>\n\t\t\t<key>PayloadType</key>\n\t\t\t<string>com.apple.wifi.managed</string>\n\t\t\t<key>PayloadUUID</key>\n\t\t\t<string>${payloadId}</string>\n\t\t\t<key>PayloadVersion</key>\n\t\t\t<integer>1</integer>\n\t\t\t<key>SSID_STR</key>\n\t\t\t<string>${xmlEscape(ssid)}</string>\n\t\t</dict>\n\t</array>\n\t<key>PayloadDescription</key>\n\t<string>Configures Wi‑Fi settings</string>\n\t<key>PayloadDisplayName</key>\n\t<string>${xmlEscape(name)}</string>\n\t<key>PayloadIdentifier</key>\n\t<string>com.configkit.profile.${profileId}</string>\n\t<key>PayloadRemovalDisallowed</key>\n\t<false/>\n\t<key>PayloadType</key>\n\t<string>Configuration</string>\n\t<key>PayloadUUID</key>\n\t<string>${profileId}</string>\n\t<key>PayloadVersion</key>\n\t<integer>1</integer>\n</dict>\n</plist>`;
+
+        const blob = new Blob([plist], { type: 'application/x-apple-aspen-plist' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${name.replace(/[^a-z0-9-_]+/gi, '-').toLowerCase() || 'wifi-profile'}.mobileconfig`;
+        link.click();
         URL.revokeObjectURL(url);
-        status.className='status success';status.textContent='Profile downloaded. Review it before installing on a device.';
+
+        status.className = 'status success';
+        status.textContent = messages[locale]?.success || messages.en.success;
       });
     })();
   </script>
