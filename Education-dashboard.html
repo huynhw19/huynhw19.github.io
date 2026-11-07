@@ -10,11 +10,17 @@
     form { display: grid; gap: 10px; max-width: 540px; }
     input, textarea, select { padding: 10px; border: 1px solid #cfd9d4; border-radius: 8px; }
     button { padding: 10px 14px; border: 0; border-radius: 8px; background: #226b51; color: white; cursor: pointer; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #76b89a; outline-offset: 2px; }
     .status { margin-top: 12px; color: #174b39; }
     .error { color: #9b3030; }
     .student-list { list-style: none; padding: 0; }
     .student-item { background: #fff; border: 1px solid #e5ece8; border-radius: 10px; padding: 12px; margin: 8px 0; }
     .muted { color: #56645e; }
+    .qr-panel { margin-top: 16px; padding: 16px; border: 1px solid #dfe9e5; border-radius: 10px; width: fit-content; max-width: 100%; }
+    #site-qr { display: inline-block; padding: 12px; background: white; }
+    #site-qr img, #site-qr canvas { display: block; max-width: 100%; height: auto; }
+    .qr-url { overflow-wrap: anywhere; }
+    [hidden] { display: none !important; }
   </style>
 </head>
 <body>
@@ -26,6 +32,13 @@
     <section class="card">
       <h1>Education dashboard</h1>
       <p id="account-label" class="muted">Loading…</p>
+      <button id="show-qr" type="button" aria-expanded="false" aria-controls="qr-panel" hidden>Show site QR code</button>
+      <div id="qr-panel" class="qr-panel" hidden>
+        <h2>Scan to open ConfigKit</h2>
+        <div id="site-qr" role="img" aria-label="QR code linking to ConfigKit"></div>
+        <p class="muted qr-url">https://huynhw19.github.io/</p>
+        <button id="hide-qr" type="button">Hide QR code</button>
+      </div>
     </section>
 
     <section class="card">
@@ -70,11 +83,16 @@
 
   <script src="auth-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
     (() => {
       const statusEl = document.getElementById('status');
       const listEl = document.getElementById('student-list');
       const accountLabel = document.getElementById('account-label');
+      const showQrButton = document.getElementById('show-qr');
+      const hideQrButton = document.getElementById('hide-qr');
+      const qrPanel = document.getElementById('qr-panel');
+      const qrContainer = document.getElementById('site-qr');
       const config = window.CONFIGKIT_AUTH || {};
       const setStatus = (message, isError = false) => {
         statusEl.textContent = message;
@@ -89,6 +107,30 @@
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
       });
+
+      function toggleQr(show) {
+        qrPanel.hidden = !show;
+        showQrButton.setAttribute('aria-expanded', String(show));
+        if (show) hideQrButton.focus();
+        else showQrButton.focus();
+      }
+
+      showQrButton.addEventListener('click', () => {
+        if (typeof window.QRCode !== 'function') {
+          setStatus('The QR code could not be loaded. Check your connection and refresh the page.', true);
+          return;
+        }
+        if (!qrContainer.hasChildNodes()) {
+          new window.QRCode(qrContainer, {
+            text: 'https://huynhw19.github.io/',
+            width: 220,
+            height: 220,
+            correctLevel: window.QRCode.CorrectLevel.M
+          });
+        }
+        toggleQr(true);
+      });
+      hideQrButton.addEventListener('click', () => toggleQr(false));
 
       async function loadStudents() {
         listEl.innerHTML = '';
@@ -144,22 +186,22 @@
         }
 
         setStatus('Adding student…');
-const { data: sessionData, error: sessionError } = await client.auth.getSession();
-if (sessionError || !sessionData.session) {
-  setStatus('Please sign in again.', true);
-  return;
-}
+        const { data: sessionData, error: sessionError } = await client.auth.getSession();
+        if (sessionError || !sessionData.session) {
+          setStatus('Please sign in again.', true);
+          return;
+        }
 
-const { error } = await client
-  .from('education_students')
-  .insert({
-    user_id: sessionData.session.user.id,
-    student_name: payload.student_name,
-    student_email: payload.student_email.toLowerCase(),
-    school: payload.school || null,
-    grade: payload.grade || null,
-    notes: payload.notes || null
-  });
+        const { error } = await client
+          .from('education_students')
+          .insert({
+            user_id: sessionData.session.user.id,
+            student_name: payload.student_name,
+            student_email: payload.student_email.toLowerCase(),
+            school: payload.school || null,
+            grade: payload.grade || null,
+            notes: payload.notes || null
+          });
 
         if (error) {
           setStatus(error.message || 'Could not create student.', true);
@@ -189,6 +231,7 @@ const { error } = await client
           return;
         }
 
+        showQrButton.hidden = false;
         await loadStudents();
       }
 
