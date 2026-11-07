@@ -26,6 +26,53 @@ window.CONFIGKIT_AUTH = {
       header.prepend(logo);
     }
 
+    const accountType = document.getElementById('accountType');
+    const educationNote = document.querySelector('.education-note');
+    if (accountType && !accountType.querySelector('option[value="organization"]')) {
+      const option = document.createElement('option');
+      option.value = 'organization';
+      option.textContent = 'Organization account';
+      accountType.append(option);
+    }
+    if (accountType && educationNote && !document.getElementById('organizationField')) {
+      const field = document.createElement('div');
+      field.id = 'organizationField';
+      field.hidden = true;
+      field.innerHTML = '<label for="organizationName">Organization name</label><input id="organizationName" name="organizationName" maxlength="120" autocomplete="organization" placeholder="Name of your organization">';
+      const note = educationNote.querySelector('small');
+      if (note) educationNote.insertBefore(field, note);
+      else educationNote.append(field);
+      const input = field.querySelector('input');
+      const updateOrganizationField = () => {
+        const selected = accountType.value === 'organization';
+        field.hidden = !selected;
+        input.required = selected;
+      };
+      accountType.addEventListener('change', updateOrganizationField);
+      updateOrganizationField();
+    }
+
+    // Preserve the organization name through OAuth's redirect-based sign-in flow.
+    const originalSetItem = Storage.prototype.setItem;
+    if (!Storage.prototype.setItem.__configKitOrganization) {
+      const setItem = function(key, value) {
+        if (this === window.sessionStorage && key === 'configkit_account_oauth_intent') {
+          try {
+            const intent = JSON.parse(value);
+            const accountType = document.getElementById('accountType');
+            const organizationName = document.getElementById('organizationName');
+            if (accountType?.value === 'organization' && organizationName?.value.trim()) {
+              intent.organization_name = organizationName.value.trim();
+              value = JSON.stringify(intent);
+            }
+          } catch (_) { /* Keep the original value if it is not valid JSON. */ }
+        }
+        return originalSetItem.call(this, key, value);
+      };
+      setItem.__configKitOrganization = true;
+      Storage.prototype.setItem = setItem;
+    }
+
     const account = document.getElementById('account');
     if (!account || account.dataset.accountObserver) return;
     account.dataset.accountObserver = 'true';
@@ -34,10 +81,12 @@ window.CONFIGKIT_AUTH = {
       const dashboardLink = account.querySelector('.dashboard-link');
       const discussionLink = account.querySelector('.builder-discussion-link');
       const settingsLink = account.querySelector('.account-settings-link');
+      const organizationLink = account.querySelector('.organization-dashboard-link');
       if (account.hidden) {
         dashboardLink?.remove();
         discussionLink?.remove();
         settingsLink?.remove();
+        organizationLink?.remove();
         return;
       }
       if (!dashboardLink) {
@@ -61,6 +110,14 @@ window.CONFIGKIT_AUTH = {
         link.className = 'account-settings-link';
         link.href = 'account-settings.html';
         link.textContent = 'Account settings →';
+        link.style.cssText = 'display:block;margin-top:6px;font-weight:600';
+        account.append(document.createElement('br'), link);
+      }
+      if (!organizationLink) {
+        const link = document.createElement('a');
+        link.className = 'organization-dashboard-link';
+        link.href = 'organization-dashboard.html';
+        link.textContent = 'Organization dashboard →';
         link.style.cssText = 'display:block;margin-top:6px;font-weight:600';
         account.append(document.createElement('br'), link);
       }
@@ -127,9 +184,27 @@ window.CONFIGKIT_AUTH = {
 
     if (typeof auth.signUp === 'function') {
       const original = auth.signUp.bind(auth);
-      auth.signUp = withCaptcha(original, args => args[0]?.options || {}, (args, captchaToken, options) => {
+      const captchaSignUp = withCaptcha(original, args => args[0]?.options || {}, (args, captchaToken, options) => {
         args[0] = {...args[0], options:{...options, captchaToken}};
       });
+      auth.signUp = async credentials => {
+        const accountType = document.getElementById('accountType');
+        const organizationName = document.getElementById('organizationName');
+        if (accountType?.value === 'organization' && organizationName?.value.trim()) {
+          credentials = {
+            ...credentials,
+            options: {
+              ...(credentials.options || {}),
+              data: {
+                ...(credentials.options?.data || {}),
+                account_type: 'organization',
+                organization_name: organizationName.value.trim()
+              }
+            }
+          };
+        }
+        return captchaSignUp(credentials);
+      };
     }
     if (typeof auth.signInWithPassword === 'function') {
       const original = auth.signInWithPassword.bind(auth);
@@ -211,4 +286,21 @@ window.CONFIGKIT_AUTH = {
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupWidget, {once:true});
   else setupWidget();
+})();
+
+// Add a discoverable link on the signed-in dashboard; the destination still
+// checks that the current user's self-declared account type is organization.
+(() => {
+  if (!/dashboard\.html$/.test(window.location.pathname) || /organization-dashboard\.html$/.test(window.location.pathname)) return;
+  const addLink = () => {
+    const nav = document.querySelector('header nav');
+    if (!nav || nav.querySelector('.organization-dashboard-link')) return;
+    const link = document.createElement('a');
+    link.className = 'organization-dashboard-link';
+    link.href = 'organization-dashboard.html';
+    link.textContent = 'Organization dashboard';
+    nav.prepend(link);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addLink, {once:true});
+  else addLink();
 })();
