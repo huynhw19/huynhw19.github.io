@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Sign in or create a ConfigKit account using email, GitHub, or Microsoft, including education and work profiles.">
+  <meta name="description" content="Sign in or create a ConfigKit account using email, GitHub, or Microsoft, including education, work, and enterprise profiles.">
   <title>Log in or Sign up — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8;--shadow:0 12px 32px #17231f12}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,footer{padding:18px max(20px,calc((100% - 760px)/2))}header a,footer a{color:var(--green);font-weight:700}main{max-width:760px;margin:5vh auto;padding:0 20px}.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:clamp(22px,5vw,40px);box-shadow:var(--shadow)}h1{margin:0 0 8px;font-size:clamp(1.7rem,5vw,2.2rem);line-height:1.2}.muted{color:var(--muted)}label{display:block;margin:14px 0 5px;font-weight:650}input,select{width:100%;padding:11px 12px;border:1px solid #cbd6d0;border-radius:8px;font:inherit;color:var(--ink);background:#fff}input:focus,select:focus,button:focus-visible,a:focus-visible{outline:3px solid #84c8a9;outline-offset:2px}.education-note{margin:22px 0;padding:16px;background:var(--mint);border-radius:10px}.education-note small{display:block;margin-top:8px}.tabs{display:flex;gap:8px;margin:22px 0 16px}.tab{flex:1;padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-weight:700;cursor:pointer}.tab[aria-selected=true]{background:var(--green);border-color:var(--green);color:#fff}button{font:inherit}.provider{width:100%;padding:11px 14px;border:0;border-radius:8px;background:var(--green);color:#fff;font-weight:700;cursor:pointer}.provider:hover{background:var(--green-dark)}.provider:disabled,.tab:disabled{opacity:.6;cursor:wait}.secondary{background:#fff;border:1px solid var(--line);color:var(--ink)}.secondary:hover{background:var(--mint)}.form-actions{margin-top:16px}.text-button{display:block;margin:8px 0 0 auto;padding:4px 0;border:0;background:none;color:var(--green);text-decoration:underline;cursor:pointer}.divider{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--muted)}.divider:before,.divider:after{content:"";height:1px;flex:1;background:var(--line)}.providers{display:grid;grid-template-columns:1fr 1fr;gap:10px}.status{margin-top:18px;padding:12px;border-radius:8px;background:var(--mint)}.status.error,.setup{background:#fff0ed;color:var(--red)}.setup{padding:12px;border-radius:8px;margin:18px 0}.account{padding:14px;margin:14px 0;background:var(--mint);border-radius:8px}.fine-print{font-size:.9rem;margin-top:24px}footer nav{display:flex;gap:18px;flex-wrap:wrap}@media(max-width:520px){.providers{grid-template-columns:1fr}}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,footer{padding:1rem max(1rem,calc((100% - 42rem)/2));background:var(--white)}header a,footer a{color:var(--green)}main{max-width:42rem;margin:2rem auto;padding:0 1rem}.card{background:var(--white);border:1px solid var(--line);border-radius:1rem;padding:clamp(1.25rem,4vw,2rem);box-shadow:var(--shadow)}h1{line-height:1.2}.muted{color:var(--muted)}label{display:block;font-weight:600;margin:.8rem 0 .25rem}input,select,button{font:inherit}input,select{width:100%;padding:.7rem;border:1px solid #b9c8c0;border-radius:.45rem;background:var(--white);color:var(--ink)}button{cursor:pointer;border:0;border-radius:.5rem;padding:.7rem 1rem;background:var(--green);color:white;font-weight:650}button:hover{background:var(--green-dark)}button:disabled{opacity:.6;cursor:wait}.tabs,.providers,.form-actions{display:flex;gap:.65rem;margin:1rem 0}.tab,.secondary{background:var(--mint);color:var(--green-dark)}.tab[aria-selected="true"]{background:var(--green);color:white}.provider{width:100%}.education-note,.setup,.notice{padding:1rem;border-radius:.6rem;background:var(--mint);margin:1rem 0}.setup,.status.error{background:var(--gold);color:var(--red)}.divider{text-align:center;color:var(--muted);margin:1rem 0}.text-button{background:transparent;color:var(--green);padding:.4rem 0}.fine-print{font-size:.875rem}footer nav{display:flex;gap:1rem;flex-wrap:wrap}
   </style>
 </head>
 <body>
@@ -19,10 +19,11 @@
       <div class="setup" id="setup" hidden><strong>Sign-in setup is not complete.</strong> The site needs its Supabase project URL and publishable/anon key in <code>auth-config.js</code>. See <a href="AUTH-SETUP.md">the setup guide</a>.</div>
       <div class="education-note">
         <label for="accountType">Account type</label>
-        <select id="accountType" name="accountType"><option value="personal">Personal account</option><option value="education">Education account</option><option value="work">Work account</option></select>
+        <select id="accountType" name="accountType"><option value="personal">Personal account</option><option value="education">Education account</option><option value="work">Work account</option><option value="organization">Enterprise account</option></select>
         <div id="institutionField" hidden><label for="institution">School or educational institution</label><input id="institution" name="institution" maxlength="120" autocomplete="organization" placeholder="Name of your school or institution"></div>
         <div id="workplaceField" hidden><label for="workplace">Company or workplace</label><input id="workplace" name="workplace" maxlength="120" autocomplete="organization" placeholder="Name of your company or workplace"></div>
-        <small class="muted">Education and work details are self-declared and are not verified. Selecting an account type does not grant special access.</small>
+        <div id="organizationField" hidden><label for="organizationName">Organization name</label><input id="organizationName" name="organizationName" maxlength="120" autocomplete="organization" placeholder="Name of your enterprise"></div>
+        <small class="muted">Education, work, and enterprise details are self-declared and are not verified. Choosing an account type does not provide organization-managed access or special privileges.</small>
       </div>
       <div class="tabs" role="tablist" aria-label="Account action">
         <button class="tab" id="loginTab" type="button" role="tab" aria-selected="true">Log in</button>
@@ -44,7 +45,7 @@
       <p class="status" id="status" role="status" aria-live="polite">Checking sign-in configuration…</p>
       <div class="account" id="account" hidden></div>
       <button class="provider secondary" id="signout" type="button" hidden>Sign out</button>
-      <p class="muted fine-print">Authentication is handled by Supabase and your selected identity provider. Work account selection stores a self-declared profile label; it does not enable employer-managed sign-in or verify employment. Never share your password, access tokens, or recovery codes. See our <a href="privacy.html">privacy policy</a>.</p>
+      <p class="muted fine-print">Authentication is handled by Supabase and your selected identity provider. Work and enterprise account selections save self-declared profile labels; they do not enable employer-managed sign-in or verify employment or organizational affiliation. Never share your password, access tokens, or recovery codes. See our <a href="privacy.html">privacy policy</a>.</p>
     </section>
   </main>
   <footer><nav aria-label="Footer"><a href="index.html">Home</a><a href="safety.html">Safety &amp; contact</a><a href="terms.html">Terms</a></nav></footer>
@@ -70,6 +71,8 @@
       const institutionField = document.getElementById('institutionField');
       const workplace = document.getElementById('workplace');
       const workplaceField = document.getElementById('workplaceField');
+      const organizationName = document.getElementById('organizationName');
+      const organizationField = document.getElementById('organizationField');
       let mode = 'login';
       let redirecting = false;
       const config = window.CONFIGKIT_AUTH || {};
@@ -87,6 +90,7 @@
         const metadata = {account_type:type};
         if (type === 'education' && institution.value.trim()) metadata.institution = institution.value.trim();
         if (type === 'work' && workplace.value.trim()) metadata.workplace = workplace.value.trim();
+        if (type === 'organization' && organizationName.value.trim()) metadata.organization_name = organizationName.value.trim();
         return metadata;
       }
       function setBusy(busy) {
@@ -100,10 +104,13 @@
       function updateAccountFields() {
         const isEducation = accountType.value === 'education';
         const isWork = accountType.value === 'work';
+        const isOrganization = accountType.value === 'organization';
         institutionField.hidden = !isEducation;
         institution.required = isEducation;
         workplaceField.hidden = !isWork;
         workplace.required = isWork;
+        organizationField.hidden = !isOrganization;
+        organizationName.required = isOrganization;
       }
       function setMode(nextMode) {
         mode = nextMode;
@@ -146,6 +153,7 @@
           const type = accountType.value;
           if (type === 'education' && !institution.value.trim()) throw new Error('Enter your school or institution name first.');
           if (type === 'work' && !workplace.value.trim()) throw new Error('Enter your company or workplace name first.');
+          if (type === 'organization' && !organizationName.value.trim()) throw new Error('Enter your organization name first.');
           sessionStorage.setItem(accountIntentKey, JSON.stringify(selectedMetadata()));
           const options = {provider, options:{redirectTo:callbackUrl}};
           if (provider === 'azure') options.options.scopes = 'openid email profile';
