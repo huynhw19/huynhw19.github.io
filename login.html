@@ -19,7 +19,13 @@
       <div class="setup" id="setup" hidden><strong>Sign-in setup is not complete.</strong> The site needs its Supabase project URL and publishable/anon key in <code>auth-config.js</code>. See <a href="AUTH-SETUP.md">the setup guide</a>.</div>
       <div class="education-note">
         <label for="accountType">Account type</label>
-        <select id="accountType" name="accountType"><option value="personal">Personal account</option><option value="education">Education account</option><option value="work">Work account</option><option value="organization">Enterprise account</option></select>
+        <select id="accountType" name="accountType">
+  <option value="personal">Personal account</option>
+  <option value="developer">Developer account</option>
+  <option value="education">Education account</option>
+  <option value="work">Work account</option>
+  <option value="organization">Organization account</option>
+</select>
         <div id="institutionField" hidden><label for="institution">School or educational institution</label><input id="institution" name="institution" maxlength="120" autocomplete="organization" placeholder="Name of your school or institution"></div>
         <div id="workplaceField" hidden><label for="workplace">Company or workplace</label><input id="workplace" name="workplace" maxlength="120" autocomplete="organization" placeholder="Name of your company or workplace"></div>
         <div id="organizationField" hidden><label for="organizationName">Organization name</label><input id="organizationName" name="organizationName" maxlength="120" autocomplete="organization" placeholder="Name of your enterprise"></div>
