@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Manage your ConfigKit account, connected sign-in providers, and sessions.">
+  <meta name="description" content="Manage your ConfigKit account, work profile, connected sign-in providers, and sessions.">
   <title>Account settings — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8;--shadow:0 12px 32px #17231f12}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(760px,calc(100% - 32px));margin:auto}header{padding:24px 0}header a,footer a{color:var(--green-dark);font-weight:650}main{padding:12px 0 56px}h1{font-size:clamp(2rem,5vw,2.7rem);line-height:1.15;margin:0 0 8px}h2{font-size:1.2rem;margin:0 0 8px}.muted{color:var(--muted)}.card{background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px;margin-top:20px}.field{display:grid;gap:6px;margin:14px 0}label{font-weight:650}input{width:100%;border:1px solid #cbd6cf;border-radius:10px;padding:12px;font:inherit;color:var(--ink);background:#fff}button{border:0;border-radius:10px;background:var(--green);color:white;padding:10px 14px;font:inherit;font-weight:650;cursor:pointer}button:hover{background:var(--green-dark)}button:disabled{opacity:.55;cursor:not-allowed}.secondary{background:#edf3ef;color:var(--ink)}.secondary:hover{background:#dce9e1}.danger{background:#9b3030}.danger:hover{background:#762424}.provider{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}.provider:first-of-type{margin-top:12px}.status{padding:12px;border-radius:10px;background:var(--mint)}.status.error{background:#fff0f0;color:var(--red)}.notice{padding:12px;border-radius:10px;background:var(--gold)}[hidden]{display:none!important}footer{padding:0 0 28px}.actions{display:flex;flex-wrap:wrap;gap:10px}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #81b99e;outline-offset:2px}@media(max-width:540px){.card{padding:18px}.provider{align-items:flex-start;flex-direction:column}}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(760px,calc(100% - 32px));margin:auto}header{padding:24px 0}header a,footer a{color:var(--green-dark);font-weight:650}main{padding:12px 0 56px}h1{font-size:clamp(2rem,5vw,2.7rem);line-height:1.15;margin:0 0 8px}h2{font-size:1.2rem;margin:0 0 8px}.muted{color:var(--muted)}.card{background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px;margin-top:20px}.field{display:grid;gap:6px;margin:14px 0}label{font-weight:650}input,select{width:100%;border:1px solid #cbd6cf;border-radius:10px;padding:12px;font:inherit;background:#fff;color:var(--ink)}button{border:0;border-radius:10px;background:var(--green);color:#fff;padding:10px 14px;font:inherit;font-weight:650;cursor:pointer}button:hover{background:var(--green-dark)}button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ef;color:var(--ink)}.secondary:hover{background:#dce9e1}.danger{background:#9b3030}.danger:hover{background:#762424}.provider{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}.provider:first-of-type{margin-top:12px}.status,.notice{padding:12px;border-radius:10px;background:var(--mint)}.status.error{background:#fff0f0;color:var(--red)}.notice{background:var(--gold)}.actions{display:flex;flex-wrap:wrap;gap:10px}[hidden]{display:none!important}footer{padding:0 0 28px}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #81b99e;outline-offset:2px}@media(max-width:540px){.card{padding:18px}.provider{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
 <body>
-  <header><a href="login.html">← Account</a></header>
+  <header><a href="dashboard.html">← Dashboard</a></header>
   <main>
     <h1>Account settings</h1>
     <p class="muted">Manage your ConfigKit sign-in and account preferences.</p>
@@ -20,9 +20,13 @@
       <section class="card" aria-labelledby="profile-title">
         <h2 id="profile-title">Profile</h2>
         <p id="email" class="muted"></p>
+        <div id="work-account-summary" class="notice" hidden><strong>Local work account</strong><p>Your workplace information is a self-declared profile detail. This is not employer-managed authentication and does not verify employment.</p></div>
         <form id="profile-form">
           <div class="field"><label for="display-name">Display name</label><input id="display-name" name="displayName" maxlength="80" autocomplete="name"></div>
-          <button type="submit" id="save-profile">Save display name</button>
+          <div class="field"><label for="account-type">Account type</label><select id="account-type" name="accountType"><option value="personal">Personal account</option><option value="education">Education account</option><option value="work">Work account</option></select></div>
+          <div class="field" id="workplace-field" hidden><label for="workplace">Company or workplace</label><input id="workplace" name="workplace" maxlength="120" autocomplete="organization" placeholder="Name of your company or workplace"></div>
+          <div class="field" id="institution-field" hidden><label for="institution">School or educational institution</label><input id="institution" name="institution" maxlength="120" autocomplete="organization" placeholder="Name of your school or institution"></div>
+          <button type="submit" id="save-profile">Save profile</button>
         </form>
       </section>
       <section class="card" aria-labelledby="providers-title">
@@ -49,57 +53,53 @@
       const providers = document.getElementById('providers');
       const providerNote = document.getElementById('provider-note');
       const config = window.CONFIGKIT_AUTH || {};
-      const setStatus = (message, isError = false) => {
-        status.hidden = false;
-        status.textContent = message;
-        status.classList.toggle('error', isError);
-      };
-      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
-        setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true);
-        return;
-      }
-
+      const setStatus = (message, isError = false) => { status.hidden = false; status.textContent = message; status.classList.toggle('error', isError); };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true); return; }
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
       const {data:sessionData, error:sessionError} = await client.auth.getSession();
       if (sessionError) { setStatus('Could not check your session. Please try again.', true); return; }
-      if (!sessionData.session) {
-        setStatus('You are signed out. ', false);
-        const login = document.createElement('a'); login.href = 'login.html'; login.textContent = 'Go to sign in'; status.append(login);
-        return;
-      }
-
+      if (!sessionData.session) { setStatus('You are signed out. ', false); const login = document.createElement('a'); login.href = 'login.html'; login.textContent = 'Go to sign in'; status.append(login); return; }
       const {data:userData, error:userError} = await client.auth.getUser();
       if (userError || !userData.user) { setStatus('Could not load your account details. Please sign in again.', true); return; }
       const user = userData.user;
-      settings.hidden = false;
-      status.hidden = true;
+      const metadata = user.user_metadata || {};
+      settings.hidden = false; status.hidden = true;
       document.getElementById('email').textContent = user.email ? `Signed in as ${user.email}` : 'Signed in with your provider.';
       const displayNameInput = document.getElementById('display-name');
-      displayNameInput.value = user.user_metadata?.display_name || user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.preferred_username || '';
+      const accountTypeInput = document.getElementById('account-type');
+      const workplaceInput = document.getElementById('workplace');
+      const institutionInput = document.getElementById('institution');
+      displayNameInput.value = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username || '';
+      accountTypeInput.value = ['personal','education','work'].includes(metadata.account_type) ? metadata.account_type : 'personal';
+      workplaceInput.value = metadata.workplace || '';
+      institutionInput.value = metadata.institution || '';
+      const updateProfileFields = () => {
+        const isWork = accountTypeInput.value === 'work';
+        const isEducation = accountTypeInput.value === 'education';
+        document.getElementById('workplace-field').hidden = !isWork;
+        workplaceInput.required = isWork;
+        document.getElementById('institution-field').hidden = !isEducation;
+        institutionInput.required = isEducation;
+        document.getElementById('work-account-summary').hidden = !isWork;
+      };
+      accountTypeInput.addEventListener('change', updateProfileFields);
+      updateProfileFields();
 
       const identityList = user.identities || [];
-      if (!identityList.length) {
-        const note = document.createElement('p'); note.className = 'muted'; note.textContent = 'No provider identities were returned for this account.'; providers.append(note);
-      }
+      if (!identityList.length) { const note = document.createElement('p'); note.className = 'muted'; note.textContent = 'No provider identities were returned for this account.'; providers.append(note); }
       for (const identity of identityList) {
         const row = document.createElement('div'); row.className = 'provider';
         const label = document.createElement('span');
         const providerName = identity.provider === 'azure' ? 'Microsoft' : identity.provider.charAt(0).toUpperCase() + identity.provider.slice(1);
         label.textContent = `${providerName}${identity.identity_data?.email ? ` · ${identity.identity_data.email}` : ''}`;
         const button = document.createElement('button'); button.type = 'button'; button.className = 'secondary'; button.textContent = 'Disconnect';
-        if (identityList.length < 2) {
-          button.disabled = true;
-          button.title = 'Keep at least one sign-in provider connected.';
-          providerNote.hidden = false;
-          providerNote.textContent = 'You can only disconnect a provider when another sign-in method remains connected, so you do not lock yourself out.';
-        }
+        if (identityList.length < 2) { button.disabled = true; button.title = 'Keep at least one sign-in provider connected.'; providerNote.hidden = false; providerNote.textContent = 'You can only disconnect a provider when another sign-in method remains connected, so you do not lock yourself out.'; }
         button.addEventListener('click', async () => {
           if (identityList.length < 2 || !window.confirm(`Disconnect ${providerName} from your ConfigKit account? You may no longer be able to sign in with it.`)) return;
           button.disabled = true;
           const {error} = await client.auth.unlinkIdentity(identity);
           if (error) { button.disabled = false; setStatus(`Could not disconnect ${providerName}: ${error.message}`, true); return; }
-          setStatus(`${providerName} disconnected.`, false);
-          window.location.reload();
+          setStatus(`${providerName} disconnected.`, false); window.location.reload();
         });
         row.append(label, button); providers.append(row);
       }
@@ -107,13 +107,17 @@
       document.getElementById('profile-form').addEventListener('submit', async event => {
         event.preventDefault();
         const button = document.getElementById('save-profile'); button.disabled = true;
-        const displayName = displayNameInput.value.trim();
-        const {error} = await client.auth.updateUser({data:{...user.user_metadata, display_name:displayName}});
+        const updatedMetadata = {...user.user_metadata, display_name:displayNameInput.value.trim(), account_type:accountTypeInput.value};
+        if (accountTypeInput.value === 'work') { updatedMetadata.workplace = workplaceInput.value.trim(); delete updatedMetadata.institution; }
+        else if (accountTypeInput.value === 'education') { updatedMetadata.institution = institutionInput.value.trim(); delete updatedMetadata.workplace; }
+        else { delete updatedMetadata.workplace; delete updatedMetadata.institution; }
+        const {data, error} = await client.auth.updateUser({data:updatedMetadata});
         button.disabled = false;
-        if (error) { setStatus(`Could not save your display name: ${error.message}`, true); return; }
-        setStatus('Display name saved.', false);
+        if (error) { setStatus(`Could not save your profile: ${error.message}`, true); return; }
+        user.user_metadata = data.user?.user_metadata || updatedMetadata;
+        setStatus('Profile saved.', false);
+        updateProfileFields();
       });
-
       document.getElementById('signout-current').addEventListener('click', async event => {
         const button = event.currentTarget; button.disabled = true;
         const {error} = await client.auth.signOut({scope:'local'});
