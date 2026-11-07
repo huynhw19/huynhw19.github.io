@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Discuss ConfigKit builders and review shared mobileconfig files from the community.">
+  <meta name="description" content="Discuss ConfigKit builders, review shared mobileconfig files, and browse enterprise job listings.">
   <title>Builder discussion — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px #17231f12}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,980px);margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650;text-decoration:none}a:hover{text-decoration:underline}main{padding:28px 0 56px}.muted{color:var(--muted)}.panel,.thread,.profile-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}.status{padding:12px 14px;border-radius:10px;background:#fff;border:1px solid var(--line)}.status.error{border-color:#f0b7b7;background:#fff7f7;color:var(--red)}.field{margin:14px 0}.field label{display:block;font-weight:650;margin-bottom:6px}input,textarea,button{font:inherit}input,textarea{width:100%;padding:11px 12px;border:1px solid #cbd6cf;border-radius:9px;background:#fff;color:var(--ink)}textarea{min-height:110px;resize:vertical}button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 16px;border:1px solid var(--green);border-radius:10px;background:var(--green);color:#fff;cursor:pointer;font-weight:650}button.secondary{background:#fff;color:var(--green-dark);border-color:var(--line)}button.inline{padding:8px 12px;min-height:36px}button:disabled{opacity:.55;cursor:wait}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 12px}.toolbar h2{margin:0}.meta{color:var(--muted);font-size:.92rem;margin:8px 0}.thread,.profile-card{margin-top:16px}.thread-body{margin:12px 0}.comment-list{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.comment{padding:10px 0;border-bottom:1px solid var(--line)}.comment:last-child{border-bottom:none}.comment-form{display:flex;gap:8px;flex-direction:column;margin-top:12px}.comment-form textarea{min-height:80px}.profile-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:8px}.download-link{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 12px;border-radius:10px;background:var(--mint);border:1px solid #cfe7d5;color:var(--green-dark);font-weight:650}.download-link:hover{text-decoration:none}.empty{color:var(--muted);padding:12px 0}footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted)}[hidden]{display:none!important}@media(max-width:560px){.toolbar{flex-direction:column;align-items:flex-start}.profile-actions{align-items:flex-start}.comment-form{gap:10px}}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(980px,calc(100% - 32px));margin:auto}header{padding:20px 0}header a,footer a{color:var(--green-dark);font-weight:650}main{padding:12px 0 48px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:12px 0}h2{font-size:1.3rem;margin:0 0 12px}h3{margin:0 0 5px}p{margin:8px 0}.muted,.meta{color:var(--muted)}.panel,.thread,.profile-card,.job-card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);margin:18px 0}.field{display:grid;gap:6px;margin:12px 0}.field label,label{font-weight:600}input,textarea,select{width:100%;font:inherit;padding:10px 12px;border:1px solid #bac8c0;border-radius:9px;background:#fff;color:var(--ink)}textarea{min-height:110px;resize:vertical}button,.button{font:inherit;font-weight:650;color:white;background:var(--green);border:0;border-radius:9px;padding:10px 16px;cursor:pointer;text-decoration:none;display:inline-block}button:hover,.button:hover{background:var(--green-dark)}button:disabled{opacity:.6;cursor:wait}.secondary{background:#e8f0eb;color:var(--green-dark)}.status{padding:12px;border-radius:10px;background:var(--mint);margin:14px 0}.status.error{background:#fff0f0;color:var(--red)}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:30px}.empty{color:var(--muted);padding:10px 0}.meta{font-size:.9rem}.thread-body,.job-description{white-space:pre-wrap;overflow-wrap:anywhere}.comment-list{border-top:1px solid var(--line);margin-top:16px;padding-top:10px}.comment{border-left:3px solid var(--line);padding:4px 12px;margin:10px 0}.comment-form{display:grid;gap:8px;margin-top:12px}.comment-form textarea{min-height:68px}.profile-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.download-link{color:var(--green-dark);font-weight:650}.job-card a{overflow-wrap:anywhere}footer{padding:20px 0 32px;border-top:1px solid var(--line)}[hidden]{display:none!important}
   </style>
 </head>
 <body>
@@ -24,9 +24,25 @@
         <button id="publish" type="submit">Post discussion</button>
       </form>
 
-      <div class="toolbar"><h2>Shared profiles</h2> <button id="refresh" class="secondary" type="button">Refresh</button></div>
-      <div id="profiles" aria-live="polite"></div>
+      <section id="jobs-section" class="panel" hidden aria-labelledby="jobs-title">
+        <h2 id="jobs-title">Jobs</h2>
+        <p class="muted">Browse opportunities and post a listing for your enterprise or organization. Account type is self-declared; listings are visible to signed-in users.</p>
+        <form id="job-form">
+          <div class="field"><label for="job-company">Company or organization</label><input id="job-company" maxlength="120" required></div>
+          <div class="field"><label for="job-title">Job title</label><input id="job-title" maxlength="120" required></div>
+          <div class="field"><label for="job-location">Location</label><input id="job-location" maxlength="120" placeholder="Remote, city, or region"></div>
+          <div class="field"><label for="job-type">Employment type</label><input id="job-type" maxlength="80" placeholder="Full-time, contract, internship…"></div>
+          <div class="field"><label for="job-description">Description</label><textarea id="job-description" maxlength="5000" required></textarea></div>
+          <div class="field"><label for="job-url">Application URL (optional)</label><input id="job-url" type="url" maxlength="2048" placeholder="https://example.com/careers"></div>
+          <button id="job-submit" type="submit">Post job</button>
+          <p id="job-status" class="status" role="status" aria-live="polite" hidden></p>
+        </form>
+        <div class="toolbar"><h3>Recent job listings</h3><button id="jobs-refresh" class="secondary" type="button">Refresh jobs</button></div>
+        <div id="jobs" aria-live="polite"></div>
+      </section>
 
+      <div class="toolbar"><h2>Shared profiles</h2><button id="refresh" class="secondary" type="button">Refresh</button></div>
+      <div id="profiles" aria-live="polite"></div>
       <div class="toolbar"><h2>Recent discussions</h2></div>
       <div id="threads" aria-live="polite"></div>
     </section>
@@ -40,6 +56,8 @@
       const discussion = document.getElementById('discussion');
       const threads = document.getElementById('threads');
       const profiles = document.getElementById('profiles');
+      const jobsSection = document.getElementById('jobs-section');
+      const jobs = document.getElementById('jobs');
       const config = window.CONFIGKIT_AUTH || {};
       const setStatus = (message, error = false) => {
         status.textContent = message;
@@ -55,14 +73,14 @@
       if (error) { setStatus('Could not check your sign-in. Please try again.', true); return; }
       if (!data.session) {
         setStatus('Please sign in to join the builder discussion.');
-        const login = document.createElement('a');
-        login.href = 'login.html';
-        login.textContent = 'Go to sign in';
-        status.append(' ', login);
+        const login = document.createElement('a'); login.href = 'login.html'; login.textContent = 'Go to sign in'; status.append(' ', login);
         return;
       }
       const user = data.session.user;
+      const accountType = user.user_metadata?.account_type;
+      const canPostJobs = accountType === 'enterprise' || accountType === 'organization';
       discussion.hidden = false;
+      jobsSection.hidden = !canPostJobs;
       status.hidden = true;
       const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.preferred_username || user.email || 'Community member';
       const escapeDate = value => new Date(value).toLocaleString();
@@ -73,147 +91,84 @@
         if (followError) throw followError;
         return new Set((follows || []).map(item => item.following_id));
       }
-
       async function toggleFollow(followingId, button) {
-        const followed = button.dataset.following === 'true';
-        button.disabled = true;
+        const followed = button.dataset.following === 'true'; button.disabled = true;
         try {
-          if (followed) {
-            const {error: deleteError} = await client.from('user_follows').delete().eq('follower_id', user.id).eq('following_id', followingId);
-            if (deleteError) throw deleteError;
-            button.dataset.following = 'false';
-            button.textContent = 'Follow';
-          } else {
-            const {error: insertError} = await client.from('user_follows').insert({follower_id:user.id, following_id:followingId});
-            if (insertError) throw insertError;
-            button.dataset.following = 'true';
-            button.textContent = 'Following';
-          }
-        } catch (error) {
-          showError(error);
-        } finally {
-          button.disabled = false;
-        }
+          const result = followed
+            ? await client.from('user_follows').delete().eq('follower_id', user.id).eq('following_id', followingId)
+            : await client.from('user_follows').insert({follower_id:user.id, following_id:followingId});
+          if (result.error) throw result.error;
+          button.dataset.following = String(!followed); button.textContent = followed ? 'Follow' : 'Following';
+        } catch (error) { showError(error); }
+        finally { button.disabled = false; }
       }
-
       async function loadSharedProfiles() {
         profiles.replaceChildren();
-        const {data: posts, error: postError} = await client.from('mobileconfig_posts').select('id,user_id,title,description,filename,storage_path,created_at').order('created_at', {ascending:false}).limit(20);
+        const {data: posts, error: postError} = await client.from('mobileconfig_posts').select('id,user_id,title,description,filename,storage_path,created_at').order('created_at', {ascending:false}).limit(50);
         if (postError) { showError(postError); return; }
-
-        if (!posts || !posts.length) {
-          const empty = document.createElement('p');
-          empty.className = 'empty';
-          empty.textContent = 'No shared profiles yet. The next upload will appear here.';
-          profiles.append(empty);
-          return;
-        }
-
+        if (!posts?.length) { const empty=document.createElement('p'); empty.className='empty'; empty.textContent='No shared profiles yet. The next upload will appear here.'; profiles.append(empty); return; }
         let followedUsers = new Set();
-        try {
-          followedUsers = await loadFollowedUsers();
-        } catch (error) {
-          showError(error);
-        }
-
+        try { followedUsers = await loadFollowedUsers(); } catch (error) { showError(error); }
         for (const post of posts) {
-          const item = document.createElement('article');
-          item.className = 'profile-card';
-          const creatorName = post.user_id === user.id ? displayName : 'Community member';
-          const title = document.createElement('h3');
-          title.textContent = post.title;
-          const meta = document.createElement('p');
-          meta.className = 'meta';
-          meta.textContent = `Posted by ${creatorName} · ${escapeDate(post.created_at)}`;
-          const description = document.createElement('p');
-          description.textContent = post.description;
-          const actions = document.createElement('div');
-          actions.className = 'profile-actions';
-          const download = document.createElement('a');
-          const publicUrl = client.storage.from('mobileconfig-shares').getPublicUrl(post.storage_path).data.publicUrl;
-          download.className = 'download-link';
-          download.href = publicUrl;
-          download.target = '_blank';
-          download.rel = 'noopener noreferrer';
-          download.download = post.filename;
-          download.textContent = `Download ${post.filename}`;
-
-          actions.append(download);
-
-          if (post.user_id !== user.id) {
-            const followButton = document.createElement('button');
-            followButton.type = 'button';
-            followButton.className = 'secondary inline';
-            const isFollowing = followedUsers.has(post.user_id);
-            followButton.dataset.following = String(isFollowing);
-            followButton.textContent = isFollowing ? 'Following' : 'Follow';
-            followButton.addEventListener('click', () => toggleFollow(post.user_id, followButton));
-            actions.append(followButton);
-          }
-
-          item.append(title, meta, description, actions);
-          profiles.append(item);
+          const item=document.createElement('article'); item.className='profile-card';
+          const title=document.createElement('h3'); title.textContent=post.title;
+          const meta=document.createElement('p'); meta.className='meta'; meta.textContent=`Posted by ${post.user_id===user.id?displayName:'Community member'} · ${escapeDate(post.created_at)}`;
+          const description=document.createElement('p'); description.textContent=post.description;
+          const actions=document.createElement('div'); actions.className='profile-actions';
+          const download=document.createElement('a'); download.className='download-link'; download.href=client.storage.from('mobileconfig-shares').getPublicUrl(post.storage_path).data.publicUrl; download.target='_blank'; download.rel='noopener noreferrer'; download.download=post.filename; download.textContent=`Download ${post.filename}`; actions.append(download);
+          if (post.user_id!==user.id) { const follow=document.createElement('button'); follow.type='button'; follow.className='secondary'; follow.dataset.following=String(followedUsers.has(post.user_id)); follow.textContent=followedUsers.has(post.user_id)?'Following':'Follow'; follow.addEventListener('click',()=>toggleFollow(post.user_id,follow)); actions.append(follow); }
+          item.append(title,meta,description,actions); profiles.append(item);
         }
       }
-
       async function loadThreads() {
         threads.replaceChildren();
-        const {data: posts, error: postError} = await client.from('builder_discussions').select('id,user_id,title,body,created_at').order('created_at', {ascending:false}).limit(50);
-        if (postError) { showError(postError); return; }
-        if (!posts.length) {
-          const empty = document.createElement('p'); empty.className = 'empty'; empty.textContent = 'No discussions yet. Start the first one!'; threads.append(empty); return;
+        const {data: posts, error: postError}=await client.from('builder_discussions').select('id,user_id,title,body,created_at').order('created_at',{ascending:false}).limit(50);
+        if(postError){showError(postError);return;}
+        if(!posts?.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='No discussions yet. Start the first one!';threads.append(empty);return;}
+        const {data: comments,error:commentError}=await client.from('builder_discussion_comments').select('id,discussion_id,user_id,body,created_at').in('discussion_id',posts.map(post=>post.id)).order('created_at',{ascending:true});
+        if(commentError){showError(commentError);return;}
+        const commentsByPost=new Map(posts.map(post=>[post.id,[]]));
+        for(const comment of comments||[])commentsByPost.get(comment.discussion_id)?.push(comment);
+        for(const post of posts){
+          const article=document.createElement('article');article.className='thread';
+          const heading=document.createElement('h3');heading.textContent=post.title;
+          const meta=document.createElement('p');meta.className='meta';meta.textContent=`Posted by ${post.user_id===user.id?displayName:'a community member'} · ${escapeDate(post.created_at)}`;
+          const body=document.createElement('p');body.className='thread-body';body.textContent=post.body;
+          const commentSection=document.createElement('section');commentSection.className='comment-list';
+          const commentsHeading=document.createElement('h4');commentsHeading.textContent=`Comments (${(commentsByPost.get(post.id)||[]).length})`;commentSection.append(commentsHeading);
+          for(const comment of commentsByPost.get(post.id)||[]){const item=document.createElement('div');item.className='comment';const text=document.createElement('p');text.textContent=comment.body;const byline=document.createElement('small');byline.className='meta';byline.textContent=`${comment.user_id===user.id?displayName:'Community member'} · ${escapeDate(comment.created_at)}`;item.append(text,byline);commentSection.append(item);}
+          const form=document.createElement('form');form.className='comment-form';const label=document.createElement('label');label.textContent='Add a comment';const input=document.createElement('textarea');input.required=true;input.maxLength=2000;input.placeholder='Write a helpful reply…';const button=document.createElement('button');button.type='submit';button.textContent='Comment';form.append(label,input,button);
+          form.addEventListener('submit',async event=>{event.preventDefault();button.disabled=true;const {error:insertError}=await client.from('builder_discussion_comments').insert({discussion_id:post.id,user_id:user.id,body:input.value.trim()});button.disabled=false;if(insertError){showError(insertError);return;}await loadThreads();});
+          article.append(heading,meta,body,commentSection,form);threads.append(article);
         }
-        const {data: comments, error: commentError} = await client.from('builder_discussion_comments').select('id,discussion_id,user_id,body,created_at').in('discussion_id', posts.map(post => post.id));
-        if (commentError) { showError(commentError); return; }
-        const commentsByPost = new Map(posts.map(post => [post.id, []]));
-        for (const comment of comments || []) commentsByPost.get(comment.discussion_id)?.push(comment);
-
-        for (const post of posts) {
-          const article = document.createElement('article'); article.className = 'thread';
-          const heading = document.createElement('h3'); heading.textContent = post.title;
-          const meta = document.createElement('p'); meta.className = 'meta'; meta.textContent = `Posted by ${post.user_id === user.id ? displayName : 'a community member'} · ${escapeDate(post.created_at)}`;
-          const body = document.createElement('p'); body.className = 'thread-body'; body.textContent = post.body;
-          const commentSection = document.createElement('section'); commentSection.className = 'comment-list';
-          const commentsHeading = document.createElement('h4'); commentsHeading.textContent = `Comments (${(commentsByPost.get(post.id) || []).length})`; commentSection.append(commentsHeading);
-          for (const comment of commentsByPost.get(post.id) || []) {
-            const item = document.createElement('div'); item.className = 'comment';
-            const text = document.createElement('p'); text.textContent = comment.body;
-            const byline = document.createElement('small'); byline.className = 'meta'; byline.textContent = `${comment.user_id === user.id ? displayName : 'Community member'} · ${escapeDate(comment.created_at)}`;
-            item.append(text, byline); commentSection.append(item);
-          }
-          const form = document.createElement('form'); form.className = 'comment-form';
-          const label = document.createElement('label'); label.textContent = 'Add a comment';
-          const input = document.createElement('textarea'); input.required = true; input.maxLength = 2000; input.placeholder = 'Write a helpful reply…';
-          const button = document.createElement('button'); button.type = 'submit'; button.textContent = 'Comment';
-          form.append(label, input, button);
-          form.addEventListener('submit', async event => {
-            event.preventDefault(); button.disabled = true;
-            const {error: insertError} = await client.from('builder_discussion_comments').insert({discussion_id:post.id, user_id:user.id, body:input.value.trim()});
-            button.disabled = false;
-            if (insertError) { showError(insertError); return; }
-            await loadThreads();
-          });
-          article.append(heading, meta, body, commentSection, form); threads.append(article);
+      }
+      async function loadJobs() {
+        if (!canPostJobs) return;
+        jobs.replaceChildren();
+        const {data:listings,error:jobsError}=await client.from('enterprise_jobs').select('id,user_id,company_name,title,location,employment_type,description,application_url,created_at').order('created_at',{ascending:false}).limit(50);
+        if(jobsError){const message=document.getElementById('job-status');message.textContent='Could not load jobs. Confirm the enterprise_jobs table and row-level security policies are configured using ENTERPRISE-JOBS-SETUP.md.';message.classList.add('error');message.hidden=false;return;}
+        if(!listings?.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='No job listings yet.';jobs.append(empty);return;}
+        for(const listing of listings){const card=document.createElement('article');card.className='job-card';const heading=document.createElement('h3');heading.textContent=listing.title;const company=document.createElement('p');company.className='meta';company.textContent=[listing.company_name,listing.location,listing.employment_type].filter(Boolean).join(' · ');const description=document.createElement('p');description.className='job-description';description.textContent=listing.description;const posted=document.createElement('p');posted.className='meta';posted.textContent=`Posted ${escapeDate(listing.created_at)}`;card.append(heading,company,description,posted);
+          if(listing.application_url){const apply=document.createElement('a');apply.href=listing.application_url;apply.target='_blank';apply.rel='noopener noreferrer';apply.textContent='View application details';card.append(apply);}
+          jobs.append(card);
         }
       }
 
-      document.getElementById('new-thread').addEventListener('submit', async event => {
+      document.getElementById('new-thread').addEventListener('submit',async event=>{event.preventDefault();const button=document.getElementById('publish');button.disabled=true;const title=document.getElementById('title').value.trim();const body=document.getElementById('body').value.trim();const {error:insertError}=await client.from('builder_discussions').insert({user_id:user.id,title,body});button.disabled=false;if(insertError){showError(insertError);return;}event.target.reset();await loadThreads();});
+      document.getElementById('job-form').addEventListener('submit',async event=>{
         event.preventDefault();
-        const button = document.getElementById('publish'); button.disabled = true;
-        const title = document.getElementById('title').value.trim();
-        const body = document.getElementById('body').value.trim();
-        const {error: insertError} = await client.from('builder_discussions').insert({user_id:user.id, title, body});
-        button.disabled = false;
-        if (insertError) { showError(insertError); return; }
-        event.target.reset();
-        await loadThreads();
+        if(!canPostJobs)return;
+        const button=document.getElementById('job-submit');const message=document.getElementById('job-status');button.disabled=true;message.hidden=false;message.classList.remove('error');message.textContent='Posting job…';
+        const applicationUrl=document.getElementById('job-url').value.trim();
+        if(applicationUrl){try{const parsed=new URL(applicationUrl);if(!['http:','https:'].includes(parsed.protocol))throw new Error();}catch(_){message.textContent='Enter a valid http or https application URL.';message.classList.add('error');button.disabled=false;return;}}
+        const listing={user_id:user.id,company_name:document.getElementById('job-company').value.trim(),title:document.getElementById('job-title').value.trim(),location:document.getElementById('job-location').value.trim(),employment_type:document.getElementById('job-type').value.trim(),description:document.getElementById('job-description').value.trim(),application_url:applicationUrl};
+        const {error:insertError}=await client.from('enterprise_jobs').insert(listing);button.disabled=false;
+        if(insertError){message.textContent='Could not post the listing. Confirm the enterprise_jobs table and row-level security policies are configured.';message.classList.add('error');return;}
+        event.target.reset();message.textContent='Job posted.';await loadJobs();
       });
-      document.getElementById('refresh').addEventListener('click', async () => {
-        await loadSharedProfiles();
-        await loadThreads();
-      });
-      await loadSharedProfiles();
-      await loadThreads();
+      document.getElementById('jobs-refresh').addEventListener('click',loadJobs);
+      document.getElementById('refresh').addEventListener('click',async()=>{await loadSharedProfiles();await loadThreads();await loadJobs();});
+      await Promise.all([loadSharedProfiles(),loadThreads(),loadJobs()]);
     })();
   </script>
 </body>
