@@ -6,8 +6,8 @@
   <meta name="description" content="Your ConfigKit dashboard for profile tools, groups, and account shortcuts.">
   <title>Dashboard — ConfigKit</title>
   <style>
-    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px rgba(23,35,31,.08}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(1100px,calc(100% - 32px));margin:auto}header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 0}a{color:var(--green-dark);font-weight:650}.header-actions,.footer-links{display:flex;flex-wrap:wrap;align-items:center;gap:16px}button{border:0;border-radius:10px;background:var(--green);color:white;padding:10px 14px;font:inherit;font-weight:650;cursor:pointer}.secondary{background:#edf3ef;color:var(--ink)}button:disabled{opacity:.55;cursor:not-allowed}main{padding:12px 0 56px}.status,.welcome,.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}.status{margin:16px 0}.status.error{color:var(--red)}.welcome{margin:16px 0 32px}.welcome h1{margin:4px 0;font-size:clamp(2rem,5vw,3rem);line-height:1.15}.muted{color:var(--muted)}.eyebrow{color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.8rem}.section-title{margin:28px 0 12px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}.card h2{margin:0 0 8px;font-size:1.15rem}.card p{color:var(--muted)}footer{padding:0 0 28px;color:var(--muted)}[hidden]{display:none!important}@media(max-width:600px){header{align-items:flex-start;flex-direction:column}}
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px rgba(23,35,31,.08)}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(1100px,calc(100% - 32px));margin:auto}header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 0}.brand{font-weight:800;color:var(--green-dark);text-decoration:none;font-size:1.2rem}.header-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.header-actions a,footer a{color:var(--green-dark)}button{border:0;border-radius:9px;padding:10px 14px;background:var(--green);color:white;font:inherit;font-weight:650;cursor:pointer}.secondary{background:#edf3ef;color:var(--ink)}button:disabled{opacity:.55;cursor:wait}main{padding:22px 0 56px}.welcome,.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}.welcome{background:var(--mint)}.eyebrow,.badge{display:inline-block;color:var(--green-dark);font-size:.84rem;font-weight:750;letter-spacing:.04em;text-transform:uppercase}.badge{padding:4px 9px;border-radius:999px;background:#d7eadf;letter-spacing:0;text-transform:none}.welcome h1{margin:5px 0;font-size:clamp(1.8rem,5vw,2.4rem);line-height:1.2}.muted{color:var(--muted)}.section-title{margin:30px 0 12px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.card h2{margin:0 0 6px;font-size:1.08rem}.card p{margin:0 0 10px;color:var(--muted)}.card a{color:var(--green-dark);font-weight:700}.workspace{margin-top:16px;border-left:4px solid var(--green);background:#fff;padding:14px 16px;border-radius:8px}.status{padding:12px;border-radius:9px;background:var(--mint)}.status.error{background:#fff0ed;color:var(--red)}footer{padding:0 0 24px;color:var(--muted)}[hidden]{display:none!important}@media(max-width:600px){header{align-items:flex-start;flex-direction:column}.header-actions{gap:12px}}
   </style>
 </head>
 <body>
@@ -25,7 +25,9 @@
       <section class="welcome" aria-labelledby="welcome-title">
         <span class="eyebrow">Your workspace</span>
         <h1 id="welcome-title">Welcome to ConfigKit</h1>
+        <span id="account-type-badge" class="badge" hidden></span>
         <p id="account-label" class="muted"></p>
+        <div id="workspace-details" class="workspace" hidden><strong>Work account workspace</strong><div id="workplace-label" class="muted"></div><small class="muted">This is a local profile label. It is not employer-managed access or verification.</small></div>
       </section>
       <h2 class="section-title">Create and review</h2>
       <section class="grid" aria-label="ConfigKit tools">
@@ -41,6 +43,7 @@
       <h2 class="section-title">Work together</h2>
       <section class="grid" aria-label="Collaboration tools">
         <article class="card"><h2>Your ConfigKit groups</h2><p>Create a group, join with an invite code, or see the groups you already belong to.</p><a href="groups.html">Open your groups →</a></article>
+        <article class="card" id="work-collaboration-card" hidden><h2>Work collaboration</h2><p>Manage your workplace profile and use ConfigKit collaboration tools. Your workplace name is only a local profile detail.</p><a href="account-settings.html">Manage work profile →</a></article>
       </section>
       <h2 class="section-title">Education tools</h2>
       <section class="grid" aria-label="Education tools">
@@ -48,7 +51,7 @@
       </section>
       <h2 class="section-title">Your account</h2>
       <section class="grid" aria-label="Account shortcuts">
-        <article class="card"><h2>Account settings</h2><p>Update your display name, manage connected sign-in providers, or review your sessions.</p><a href="account-settings.html">Manage account →</a></article>
+        <article class="card"><h2>Account settings</h2><p>Update your display name and local account profile, manage connected sign-in providers, or review your sessions.</p><a href="account-settings.html">Manage account →</a></article>
         <article class="card"><h2>Saved profiles</h2><p>Profiles are generated and downloaded locally. ConfigKit does not store your profiles in an account.</p><a href="index.html">Return to ConfigKit →</a></article>
       </section>
       <p class="muted"><strong>Privacy note:</strong> Profile content is generated in your browser. ConfigKit does not store your profile XML or Wi-Fi credentials.</p>
@@ -63,54 +66,40 @@
       const dashboard = document.getElementById('dashboard');
       const signout = document.getElementById('signout');
       const config = window.CONFIGKIT_AUTH || {};
-      const setStatus = (message, isError = false) => {
-        status.hidden = false;
-        status.classList.toggle('error', isError);
-        status.textContent = message;
-      };
-      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
-        setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true);
-        return;
-      }
-      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
-        auth: {persistSession: true, autoRefreshToken: true, detectSessionInUrl: true}
-      });
+      const setStatus = (message, isError = false) => { status.hidden = false; status.classList.toggle('error', isError); status.textContent = message; };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true); return; }
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
       async function renderSession() {
         try {
           const {data, error} = await client.auth.getSession();
           if (error) throw error;
           if (!data.session) {
-            dashboard.hidden = true;
-            signout.hidden = true;
-            setStatus('You are signed out. ');
-            const link = document.createElement('a');
-            link.href = 'login.html';
-            link.textContent = 'Go to sign in';
-            status.append(link);
-            return;
+            dashboard.hidden = true; signout.hidden = true; setStatus('You are signed out. ');
+            const link = document.createElement('a'); link.href = 'login.html'; link.textContent = 'Go to sign in'; status.append(link); return;
           }
           const user = data.session.user;
           const metadata = user.user_metadata || {};
           const name = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username;
+          const type = metadata.account_type || 'personal';
           document.getElementById('welcome-title').textContent = name ? `Welcome, ${name}` : 'Welcome to ConfigKit';
           document.getElementById('account-label').textContent = user.email ? `Signed in as ${user.email}` : 'You are signed in to your ConfigKit account.';
-          status.hidden = true;
-          dashboard.hidden = false;
-          signout.hidden = false;
-        } catch (error) {
-          setStatus(error.message || 'Could not check your sign-in. Please refresh and try again.', true);
-        }
+          const badge = document.getElementById('account-type-badge');
+          badge.textContent = type === 'work' ? 'Work account' : type === 'education' ? 'Education account' : 'Personal account';
+          badge.hidden = false;
+          const isWork = type === 'work';
+          document.getElementById('workspace-details').hidden = !isWork;
+          document.getElementById('workplace-label').textContent = metadata.workplace ? `Company or workplace: ${metadata.workplace}` : 'No company or workplace name has been added.';
+          document.getElementById('work-collaboration-card').hidden = !isWork;
+          status.hidden = true; dashboard.hidden = false; signout.hidden = false;
+        } catch (error) { setStatus(error.message || 'Could not check your sign-in. Please refresh and try again.', true); }
       }
       signout.addEventListener('click', async () => {
         signout.disabled = true;
-        const {error} = await client.auth.signOut();
-        signout.disabled = false;
+        const {error} = await client.auth.signOut(); signout.disabled = false;
         if (error) { setStatus('Could not sign out. Please try again.', true); return; }
         window.location.replace('login.html');
       });
-      client.auth.onAuthStateChange((_event, session) => {
-        if (!session) window.location.replace('login.html');
-      });
+      client.auth.onAuthStateChange((_event, session) => { if (!session) window.location.replace('login.html'); });
       void renderSession();
     })();
   </script>
