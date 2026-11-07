@@ -45,4 +45,5 @@ document.getElementById('student-form').addEventListener('submit', async (event)
   setStatus('Student added successfully. Share the student sign-in page and have them register using this email address.');
   form.reset();
   await loadStudents();
+.eq('user_id', sessionData.session.user.id)
 });
