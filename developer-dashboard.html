@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ConfigKit developer dashboard with an in-browser XML editor for writing, checking, formatting, and downloading .mobileconfig profiles.">
+  <title>Developer dashboard — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff4d6;--amber:#8a5a00;--red:#9b3030;--rose:#fbeaea;--code:#0f1a16;--code-ink:#e6f1eb;--code-muted:#6f8a7e;--shadow:0 12px 32px rgba(23,35,31,.08)}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(100% - 32px,1100px);margin:0 auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}.brand{font-weight:700;text-decoration:none;color:var(--ink)}nav{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+    button,select{font:inherit;font-weight:600;border:1px solid var(--line);border-radius:.7rem;padding:.55rem .85rem;background:var(--white);color:var(--ink);cursor:pointer}button:hover,select:hover{border-color:var(--green)}button.primary{background:var(--green);border-color:var(--green);color:var(--white)}button.primary:hover{background:var(--green-dark)}button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #9fd1b9;outline-offset:2px}
+    main{padding:2rem 0 3rem}.status,.card,.welcome,.editor-card{background:var(--white);border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow)}.status{padding:1rem;margin:1rem 0}.status.error{color:var(--red)}.welcome{padding:1.5rem;margin:1rem 0 1.25rem}.eyebrow{display:inline-block;padding:.3rem .7rem;border-radius:999px;background:var(--mint);color:var(--green-dark);font-size:.85rem;font-weight:700}.badge{display:inline-block;margin:.4rem 0;padding:.25rem .65rem;background:var(--mint);border-radius:999px;color:var(--green-dark);font-size:.85rem;font-weight:700}.muted{color:var(--muted)}h1{margin:.65rem 0;font-size:clamp(2rem,5vw,3rem);line-height:1.15}h2{margin:.1rem 0 .6rem}.section-title{margin-top:1.75rem}
+    .editor-card{padding:1.2rem;margin:1rem 0}.toolbar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.75rem 0}.toolbar .spacer{flex:1}.toolbar label{font-weight:600;font-size:.9rem}
+    .editor{display:flex;border-radius:.8rem;overflow:hidden;background:var(--code);border:1px solid var(--code);height:min(60vh,520px)}.gutter{margin:0;padding:.9rem .6rem .9rem .9rem;min-width:3.2rem;text-align:right;color:var(--code-muted);background:#0b1411;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden;user-select:none;white-space:pre}textarea{flex:1;margin:0;border:0;resize:none;padding:.9rem;background:var(--code);color:var(--code-ink);font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:2;white-space:pre;overflow:auto;caret-color:#7fe0b0}textarea::placeholder{color:var(--code-muted)}
+    .meta{display:flex;flex-wrap:wrap;gap:1rem;font-size:.85rem;color:var(--muted);margin-top:.5rem}
+    .results{margin-top:1rem}.results ul{list-style:none;padding:0;margin:.5rem 0}.results li{padding:.55rem .8rem;border-radius:.6rem;margin:.35rem 0;font-size:.95rem}.results li.ok{background:var(--mint);color:var(--green-dark)}.results li.warn{background:var(--gold);color:var(--amber)}.results li.error{background:var(--rose);color:var(--red)}
+    table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:.5rem}th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600}td code{font-size:.85rem;word-break:break-all}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1rem 0 2rem}.card{padding:1.2rem}.card p{margin:.35rem 0 .8rem;color:var(--muted)}
+    .toast{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%);background:var(--ink);color:var(--white);padding:.6rem 1rem;border-radius:.7rem;font-size:.9rem;box-shadow:var(--shadow)}
+    footer{padding:1.5rem 0 2rem;color:var(--muted)}[hidden]{display:none!important}
+    @media(max-width:600px){header{padding:.8rem 0;align-items:flex-start;flex-direction:column}nav{gap:.65rem}.gutter{display:none}.editor{height:55vh}.toolbar .spacer{display:none}}
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="index.html">⌘ ConfigKit</a>
+    <nav class="header-actions" aria-label="Account navigation">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="account-settings.html">Account settings</a>
+      <button id="signout" type="button" hidden>Sign out</button>
+    </nav>
+  </header>
+  <main>
+    <div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
+    <div id="dashboard" hidden>
+      <section class="welcome" aria-labelledby="welcome-title">
+        <span class="eyebrow">Developer workspace</span>
+        <h1 id="welcome-title">Developer dashboard</h1>
+        <span id="account-type-badge" class="badge" hidden></span>
+        <p id="account-label" class="muted"></p>
+        <p class="muted">Write and edit raw profile XML, check it for mistakes, tidy it up, and download it as a <code>.mobileconfig</code> file. Everything stays in your browser.</p>
+      </section>
+
+      <section class="editor-card" aria-labelledby="editor-title">
+        <h2 id="editor-title">XML editor</h2>
+        <div class="toolbar" role="toolbar" aria-label="XML editor actions">
+          <label for="template">Start from</label>
+          <select id="template" aria-label="Start from a template">
+            <option value="">Choose a template…</option>
+            <option value="empty">Empty profile</option>
+            <option value="wifi">Wi-Fi network</option>
+            <option value="webclip">Web clip</option>
+            <option value="dns">Encrypted DNS (HTTPS)</option>
+          </select>
+          <button id="open-file" type="button">Open file</button>
+          <input id="file-input" type="file" accept=".mobileconfig,.xml,.plist,application/xml,text/xml" hidden>
+          <span class="spacer"></span>
+          <button id="insert-uuid" type="button" title="Insert a new UUID where your cursor is">Insert UUID</button>
+          <button id="format" type="button">Format</button>
+          <button id="validate" type="button" class="primary">Check XML</button>
+        </div>
+        <div class="editor">
+          <pre id="gutter" class="gutter" aria-hidden="true">1</pre>
+          <textarea id="xml-editor" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Profile XML" placeholder="Choose a template, open a file, or paste profile XML here…"></textarea>
+        </div>
+        <div class="meta"><span id="stats">0 lines · 0 characters</span><span>Tip: Ctrl/⌘ + Enter checks the XML.</span></div>
+        <div class="toolbar">
+          <button id="copy" type="button">Copy XML</button>
+          <button id="download-xml" type="button">Download .xml</button>
+          <button id="download-profile" type="button" class="primary">Download .mobileconfig</button>
+          <span class="spacer"></span>
+          <button id="clear" type="button">Clear</button>
+        </div>
+        <div id="results" class="results" aria-live="polite" hidden>
+          <h3 id="results-title">Check results</h3>
+          <ul id="results-list"></ul>
+          <div id="payloads" hidden>
+            <h3>Payloads in this profile</h3>
+            <table><thead><tr><th>#</th><th>Type</th><th>Name</th><th>Identifier</th></tr></thead><tbody id="payload-rows"></tbody></table>
+          </div>
+        </div>
+        <p class="muted"><small>Profiles made here are unsigned. Checking only looks at the XML structure and required keys — it is not a security review and does not guarantee the profile will install.</small></p>
+      </section>
+
+      <h2 class="section-title">Developer tools</h2>
+      <section class="grid" aria-label="Developer tools">
+        <article class="card"><h2>Mobileconfig Studio</h2><p>Combine Wi-Fi, web clip, and encrypted DNS payloads with a guided form.</p><a href="mobileconfig-builder.html">Open Mobileconfig Studio →</a></article>
+        <article class="card"><h2>Profile viewer</h2><p>Open an existing profile and read its settings in a friendly layout.</p><a href="profile-viewer.html">Open profile viewer →</a></article>
+        <article class="card"><h2>Prepare or inspect</h2><p>Review profile metadata and payload types before installing.</p><a href="prepare-profile.html">Inspect a profile →</a></article>
+        <article class="card"><h2>Examples</h2><p>Browse sample payloads you can copy into the editor.</p><a href="examples.html">Browse examples →</a></article>
+        <article class="card"><h2>Apple reference</h2><p>Official documentation for every payload type and key.</p><a href="https://developer.apple.com/documentation/devicemanagement/profile-specific-payload-keys" target="_blank" rel="noopener noreferrer">Open Apple docs ↗</a></article>
+      </section>
+      <p class="muted"><strong>Privacy note:</strong> The editor runs entirely in your browser. ConfigKit does not upload or store your profile XML or Wi-Fi credentials.</p>
+    </div>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <footer><span>ConfigKit · Independent mobileconfig builder demo</span> · <a href="safety.html">Safety &amp; contact</a></footer>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (() => {
+      const status = document.getElementById('status');
+      const dashboard = document.getElementById('dashboard');
+      const signout = document.getElementById('signout');
+      const config = window.CONFIGKIT_AUTH || {};
+      const setStatus = (message, isError = false) => { status.hidden = false; status.classList.toggle('error', isError); status.textContent = message; };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true); return; }
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      async function renderSession() {
+        try {
+          const {data, error} = await client.auth.getSession();
+          if (error) throw error;
+          if (!data.session) {
+            dashboard.hidden = true; signout.hidden = true; setStatus('You are signed out. ');
+            const link = document.createElement('a'); link.href = 'login.html'; link.textContent = 'Go to sign in'; status.append(link); return;
+          }
+          const user = data.session.user;
+          const metadata = user.user_metadata || {};
+          const name = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username;
+          const type = metadata.account_type || 'personal';
+          document.getElementById('welcome-title').textContent = name ? `Developer dashboard — ${name}` : 'Developer dashboard';
+          document.getElementById('account-label').textContent = user.email ? `Signed in as ${user.email}` : 'You are signed in to your ConfigKit account.';
+          const badge = document.getElementById('account-type-badge');
+          badge.textContent = type === 'developer' ? 'Developer account' : type === 'work' ? 'Work account' : type === 'education' ? 'Education account' : (type === 'organization' || type === 'enterprise') ? 'Enterprise account' : 'Personal account';
+          badge.hidden = false;
+          status.hidden = true; dashboard.hidden = false; signout.hidden = false;
+        } catch (error) { setStatus(error.message || 'Could not check your sign-in. Please refresh and try again.', true); }
+      }
+      signout.addEventListener('click', async () => {
+        signout.disabled = true;
+        const {error} = await client.auth.signOut(); signout.disabled = false;
+        if (error) { setStatus('Could not sign out. Please try again.', true); return; }
+        window.location.replace('login.html');
+      });
+      client.auth.onAuthStateChange((_event, session) => { if (!session) window.location.replace('login.html'); });
+      void renderSession();
+    })();
+
+    (() => {
+      const editor = document.getElementById('xml-editor');
+      const gutter = document.getElementById('gutter');
+      const stats = document.getElementById('stats');
+      const results = document.getElementById('results');
+      const resultsTitle = document.getElementById('results-title');
+      const resultsList = document.getElementById('results-list');
+      const payloads = document.getElementById('payloads');
+      const payloadRows = document.getElementById('payload-rows');
+      const toastEl = document.getElementById('toast');
+      const fileInput = document.getElementById('file-input');
+      const PLIST_HEAD = '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n';
+      const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); })).toUpperCase();
+      const esc = (v) => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
+      let toastTimer;
+      const toast = (msg) => { toastEl.textContent = msg; toastEl.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { toastEl.hidden = true; }, 2200); };
+
+      const payloadDict = (type, id, name, extra) => `\t\t<dict>\n${extra}\t\t\t<key>PayloadDisplayName</key>\n\t\t\t<string>${name}</string>\n\t\t\t<key>PayloadIdentifier</key>\n\t\t\t<string>com.configkit.dev.${id}</string>\n\t\t\t<key>PayloadType</key>\n\t\t\t<string>${type}</string>\n\t\t\t<key>PayloadUUID</key>\n\t\t\t<string>${id}</string>\n\t\t\t<key>PayloadVersion</key>\n\t\t\t<integer>1</integer>\n\t\t</dict>\n`;
+      const profile = (name, content) => { const id = uuid(); return `${PLIST_HEAD}<plist version="1.0">\n<dict>\n\t<key>PayloadContent</key>\n\t<array>\n${content}\t</array>\n\t<key>PayloadDisplayName</key>\n\t<string>${name}</string>\n\t<key>PayloadIdentifier</key>\n\t<string>com.configkit.dev.profile.${id}</string>\n\t<key>PayloadType</key>\n\t<string>Configuration</string>\n\t<key>PayloadUUID</key>\n\t<string>${id}</string>\n\t<key>PayloadVersion</key>\n\t<integer>1</integer>\n</dict>\n</plist>\n`; };
+      const templates = {
+        empty: () => profile('My profile', ''),
+        wifi: () => profile('Wi-Fi profile', payloadDict('com.apple.wifi.managed', uuid(), 'Wi-Fi', '\t\t\t<key>AutoJoin</key>\n\t\t\t<true/>\n\t\t\t<key>EncryptionType</key>\n\t\t\t<string>WPA2</string>\n\t\t\t<key>HIDDEN_NETWORK</key>\n\t\t\t<false/>\n\t\t\t<key>Password</key>\n\t\t\t<string>change-me</string>\n\t\t\t<key>SSID_STR</key>\n\t\t\t<string>MyNetwork</string>\n')),
+        webclip: () => profile('Web clip profile', payloadDict('com.apple.webClip.managed', uuid(), 'Web clip', '\t\t\t<key>FullScreen</key>\n\t\t\t<false/>\n\t\t\t<key>IsRemovable</key>\n\t\t\t<true/>\n\t\t\t<key>Label</key>\n\t\t\t<string>My site</string>\n\t\t\t<key>URL</key>\n\t\t\t<string>https://example.com</string>\n')),
+        dns: () => profile('Encrypted DNS profile', payloadDict('com.apple.dnsSettings.managed', uuid(), 'Encrypted DNS', '\t\t\t<key>DNSSettings</key>\n\t\t\t<dict>\n\t\t\t\t<key>DNSProtocol</key>\n\t\t\t\t<string>HTTPS</string>\n\t\t\t\t<key>ServerURL</key>\n\t\t\t\t<string>https://dns.example.com/dns-query</string>\n\t\t\t</dict>\n')),
+      };
+
+      function refresh() {
+        const lines = editor.value === '' ? 1 : editor.value.split('\n').length;
+        let nums = ''; for (let i = 1; i <= lines; i++) nums += i + '\n';
+        gutter.textContent = nums;
+        stats.textContent = `${editor.value === '' ? 0 : lines} line${lines === 1 ? '' : 's'} · ${editor.value.length.toLocaleString()} characters · ${(new Blob([editor.value]).size / 1024).toFixed(1)} KB`;
+        gutter.scrollTop = editor.scrollTop;
+      }
+      const setValue = (text) => { editor.value = text; refresh(); results.hidden = true; };
+
+      function parse(text) {
+        const doc = new DOMParser().parseFromString(text, 'application/xml');
+        const err = doc.querySelector('parsererror');
+        if (err) {
+          const raw = (err.textContent || '').replace(/\s+/g, ' ').trim();
+          const line = raw.match(/line (\d+)/i);
+          return {error: line ? `The XML is not well-formed near line ${line[1]}: ${raw.replace(/^.*?error on line \d+ at column \d+:\s*/i, '').replace(/Below is a rendering.*$/i, '').trim()}` : `The XML is not well-formed: ${raw.slice(0, 200)}`};
+        }
+        return {doc};
+      }
+      const kids = (el) => [...el.children];
+      function readDict(dict) {
+        const map = new Map(); const c = kids(dict);
+        for (let i = 0; i < c.length; i++) if (c[i].localName === 'key') { map.set(c[i].textContent.trim(), c[i + 1] || null); i++; }
+        return map;
+      }
+      const textOf = (el) => el ? el.textContent.trim() : '';
+      const uuidRe = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/;
+
+      function validate() {
+        const text = editor.value.trim();
+        const out = []; const rows = [];
+        const add = (level, msg) => out.push({level, msg});
+        if (!text) add('error', 'The editor is empty. Choose a template or paste profile XML first.');
+        else {
+          const {doc, error} = parse(text);
+          if (error) add('error', error);
+          else {
+            const root = doc.documentElement;
+            const dict = root.localName === 'plist' ? kids(root).find(c => c.localName === 'dict') : null;
+            if (root.localName !== 'plist') add('error', `The top-level element must be <plist>, but found <${root.localName}>.`);
+            else if (!dict) add('error', 'The <plist> element must contain a <dict>.');
+            else {
+              add('ok', 'The XML is well-formed and has a plist dictionary.');
+              if (!/^<\?xml/.test(text)) add('warn', 'Add the XML declaration (<?xml version="1.0" encoding="UTF-8"?>) at the very top.');
+              const top = readDict(dict);
+              const need = (map, key, where, tag) => { const el = map.get(key); if (!el) { add('error', `${where} is missing ${key}.`); return null; } if (tag && el.localName !== tag) add('error', `${where}: ${key} should be <${tag}>, not <${el.localName}>.`); return el; };
+              const t = need(top, 'PayloadType', 'The profile', 'string');
+              if (t && textOf(t) !== 'Configuration') add('error', `The profile's PayloadType must be "Configuration", not "${textOf(t)}".`);
+              need(top, 'PayloadIdentifier', 'The profile', 'string');
+              const u = need(top, 'PayloadUUID', 'The profile', 'string');
+              if (u && !uuidRe.test(textOf(u))) add('warn', `The profile's PayloadUUID "${textOf(u)}" doesn't look like a UUID.`);
+              need(top, 'PayloadVersion', 'The profile', 'integer');
+              if (!top.get('PayloadDisplayName')) add('warn', 'Add a PayloadDisplayName so people can recognise the profile when installing.');
+              const ids = new Map(); const uuids = new Map();
+              const track = (map, value, label) => { if (!value) return; if (map.has(value)) add('error', `${label} "${value}" is used more than once — each must be unique.`); map.set(value, true); };
+              track(ids, textOf(top.get('PayloadIdentifier')), 'PayloadIdentifier'); track(uuids, textOf(top.get('PayloadUUID')), 'PayloadUUID');
+              const content = top.get('PayloadContent');
+              if (!content) add('warn', 'The profile has no PayloadContent, so it will not change any settings.');
+              else if (content.localName !== 'array') add('error', 'PayloadContent should be an <array> of payload dictionaries.');
+              else {
+                const items = kids(content);
+                if (!items.length) add('warn', 'PayloadContent is empty, so the profile will not change any settings.');
+                items.forEach((item, i) => {
+                  const where = `Payload ${i + 1}`;
+                  if (item.localName !== 'dict') { add('error', `${where} should be a <dict>, not <${item.localName}>.`); return; }
+                  const p = readDict(item);
+                  need(p, 'PayloadType', where, 'string'); need(p, 'PayloadIdentifier', where, 'string');
+                  const pu = need(p, 'PayloadUUID', where, 'string'); need(p, 'PayloadVersion', where, 'integer');
+                  if (pu && !uuidRe.test(textOf(pu))) add('warn', `${where}: PayloadUUID "${textOf(pu)}" doesn't look like a UUID.`);
+                  track(ids, textOf(p.get('PayloadIdentifier')), 'PayloadIdentifier'); track(uuids, textOf(p.get('PayloadUUID')), 'PayloadUUID');
+                  if (p.get('Password') && /change-me/.test(textOf(p.get('Password')))) add('warn', `${where}: replace the placeholder password before sharing.`);
+                  rows.push([i + 1, textOf(p.get('PayloadType')) || '—', textOf(p.get('PayloadDisplayName')) || '—', textOf(p.get('PayloadIdentifier')) || '—']);
+                });
+              }
+            }
+          }
+        }
+        const errors = out.filter(o => o.level === 'error').length; const warns = out.filter(o => o.level === 'warn').length;
+        resultsTitle.textContent = errors ? `${errors} problem${errors === 1 ? '' : 's'} to fix` : warns ? `Looks valid — ${warns} suggestion${warns === 1 ? '' : 's'}` : 'Looks valid';
+        if (!errors && !warns) out.push({level: 'ok', msg: 'All required profile and payload keys are present.'});
+        resultsList.innerHTML = out.map(o => `<li class="${o.level}">${esc(o.msg)}</li>`).join('');
+        payloadRows.innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td><code>${esc(r[1])}</code></td><td>${esc(r[2])}</td><td><code>${esc(r[3])}</code></td></tr>`).join('');
+        payloads.hidden = !rows.length; results.hidden = false;
+        return errors === 0;
+      }
+
+      function serialize(node, depth) {
+        const pad = '\t'.repeat(depth);
+        if (node.nodeType === Node.COMMENT_NODE) return `${pad}<!--${node.nodeValue}-->\n`;
+        if (node.nodeType !== Node.ELEMENT_NODE) return '';
+        const attrs = [...node.attributes].map(a => ` ${a.name}="${esc(a.value)}"`).join('');
+        const children = [...node.childNodes].filter(n => n.nodeType === Node.ELEMENT_NODE || n.nodeType === Node.COMMENT_NODE);
+        if (!children.length) { const txt = node.textContent; return txt === '' ? `${pad}<${node.nodeName}${attrs}/>\n` : `${pad}<${node.nodeName}${attrs}>${esc(txt).replace(/&apos;/g, "'").replace(/&quot;/g, '"')}</${node.nodeName}>\n`; }
+        return `${pad}<${node.nodeName}${attrs}>\n${children.map(c => serialize(c, depth + 1)).join('')}${pad}</${node.nodeName}>\n`;
+      }
+      function format() {
+        const {doc, error} = parse(editor.value.trim());
+        if (error) { validate(); toast('Fix the XML errors before formatting.'); return; }
+        const dt = doc.doctype;
+        const head = '<?xml version="1.0" encoding="UTF-8"?>\n' + (dt ? `<!DOCTYPE ${dt.name}${dt.publicId ? ` PUBLIC "${dt.publicId}"` : ''}${dt.systemId ? ` "${dt.systemId}"` : ''}>\n` : '');
+        const pre = [...doc.childNodes].filter(n => n.nodeType === Node.COMMENT_NODE).map(c => serialize(c, 0)).join('');
+        setValue(head + pre + serialize(doc.documentElement, 0));
+        toast('XML formatted');
+      }
+
+      function fileName(ext) {
+        const {doc} = parse(editor.value.trim());
+        let name = 'profile';
+        if (doc) { const d = kids(doc.documentElement).find(c => c.localName === 'dict'); const n = d && textOf(readDict(d).get('PayloadDisplayName')); if (n) name = n; }
+        return (name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'profile') + ext;
+      }
+      function download(ext, type) {
+        if (!editor.value.trim()) { toast('The editor is empty.'); return; }
+        if (ext === '.mobileconfig' && !validate()) { toast('Fix the problems listed below before downloading.'); return; }
+        const url = URL.createObjectURL(new Blob([editor.value], {type}));
+        const a = document.createElement('a'); a.href = url; a.download = fileName(ext); document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast(`Downloaded ${a.download}`);
+      }
+
+      editor.addEventListener('input', refresh);
+      editor.addEventListener('scroll', () => { gutter.scrollTop = editor.scrollTop; });
+      editor.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); editor.setRangeText('\t', editor.selectionStart, editor.selectionEnd, 'end'); refresh(); }
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); validate(); }
+      });
+      document.getElementById('template').addEventListener('change', (e) => {
+        const key = e.target.value; if (!key) return;
+        if (editor.value.trim() && !confirm('Replace the current XML with this template?')) { e.target.value = ''; return; }
+        setValue(templates[key]()); e.target.value = ''; toast('Template loaded with fresh UUIDs');
+      });
+      document.getElementById('open-file').addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', async () => {
+        const file = fileInput.files[0]; fileInput.value = ''; if (!file) return;
+        const text = await file.text();
+        if (text.startsWith('bplist')) { toast('Binary plist files are not supported. Convert it to XML first.'); return; }
+        if (!/<plist[\s>]/.test(text)) { toast('This file has no readable XML. Signed profiles cannot be edited here.'); return; }
+        setValue(text.slice(text.indexOf('<')));
+        toast(`Opened ${file.name}`);
+      });
+      document.getElementById('insert-uuid').addEventListener('click', () => { editor.focus(); editor.setRangeText(uuid(), editor.selectionStart, editor.selectionEnd, 'end'); refresh(); });
+      document.getElementById('format').addEventListener('click', format);
+      document.getElementById('validate').addEventListener('click', validate);
+      document.getElementById('copy').addEventListener('click', async () => {
+        if (!editor.value) { toast('The editor is empty.'); return; }
+        try { await navigator.clipboard.writeText(editor.value); toast('XML copied'); } catch { editor.select(); toast('Press Ctrl/⌘ + C to copy'); }
+      });
+      document.getElementById('download-xml').addEventListener('click', () => download('.xml', 'application/xml'));
+      document.getElementById('download-profile').addEventListener('click', () => download('.mobileconfig', 'application/x-apple-aspen-config'));
+      document.getElementById('clear').addEventListener('click', () => { if (!editor.value || confirm('Clear the editor?')) setValue(''); });
+      refresh();
+    })();
+  </script>
+</body>
+</html>

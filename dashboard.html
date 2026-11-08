@@ -55,6 +55,7 @@
       <section class="grid" aria-label="Collaboration tools">
         <article class="card"><h2>Your ConfigKit groups</h2><p>Create a group, join with an invite code, or see the groups you already belong to.</p><a href="groups.html">Open your groups →</a></article>
         <article class="card" id="work-collaboration-card" hidden><h2>Work collaboration</h2><p>Manage your workplace profile and use ConfigKit collaboration tools. Your workplace name is only a local profile detail.</p><a href="account-settings.html">Manage work profile →</a></article>
+        <article class="card" id="developer-dashboard-card" hidden><h2>Developer dashboard</h2><p>Write, check, format, and download raw profile XML in the built-in XML editor.</p><a href="developer-dashboard.html">Open developer dashboard →</a></article>
         <article class="card" id="enterprise-dashboard-card" hidden><h2>Enterprise dashboard</h2><p>Open your enterprise workspace for profile-building and review tools.</p><a href="enterprise-dashboard.html">Open enterprise dashboard →</a></article>
       </section>
       <h2 class="section-title">Education tools</h2>
@@ -96,7 +97,7 @@
           document.getElementById('welcome-title').textContent = name ? `Welcome, ${name}` : 'Welcome to ConfigKit';
           document.getElementById('account-label').textContent = user.email ? `Signed in as ${user.email}` : 'You are signed in to your ConfigKit account.';
           const badge = document.getElementById('account-type-badge');
-          badge.textContent = type === 'work' ? 'Work account' : type === 'education' ? 'Education account' : (type === 'organization' || type === 'enterprise') ? 'Enterprise account' : 'Personal account';
+          badge.textContent = type === 'developer' ? 'Developer account' : type === 'work' ? 'Work account' : type === 'education' ? 'Education account' : (type === 'organization' || type === 'enterprise') ? 'Enterprise account' : 'Personal account';
           badge.hidden = false;
           const isWork = type === 'work';
           const isEnterprise = type === 'enterprise' || type === 'organization';
@@ -105,6 +106,7 @@
           document.getElementById('work-collaboration-card').hidden = !isWork;
           document.getElementById('work-getting-started').hidden = !isWork;
           document.getElementById('enterprise-dashboard-card').hidden = !isEnterprise;
+          document.getElementById('developer-dashboard-card').hidden = type !== 'developer';
           status.hidden = true; dashboard.hidden = false; signout.hidden = false;
         } catch (error) { setStatus(error.message || 'Could not check your sign-in. Please refresh and try again.', true); }
       }

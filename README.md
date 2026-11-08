@@ -16,6 +16,7 @@ ConfigKit is a static GitHub Pages toolkit for creating and reviewing Apple `.mo
 - Choose personal, education, work, or organization as a self-declared account profile type.
 - Use signed-in groups and community discussion features when their Supabase setup is complete.
 - View an organization-specific dashboard and getting-started checklist at [`organization-dashboard.html`](organization-dashboard.html).
+- Write, check, format, and download raw profile XML in the developer dashboard's XML editor at [`developer-dashboard.html`](developer-dashboard.html).
 
 Start at [`index.html`](index.html) and choose a builder or tool. Generated profiles are unsigned. Review the XML and all profile settings before installing anything.
 
