@@ -52,7 +52,15 @@
       }
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
       let user;
-      const showError = error => setStatus(error?.message || 'Something went wrong. Please try again.', true);
+      const friendlyError = error => {
+        const message = error?.message || '';
+        if (/gen_random_bytes|is ambiguous|42883|42702/i.test(message + (error?.code || ''))) return 'Groups need a one-time database update before they work. Site owner: run GROUPS-REPAIR.sql in the Supabase SQL Editor (see fixgroup.md).';
+        if (error?.code === 'PGRST202' || /could not find the function/i.test(message)) return 'Groups are not set up yet. Site owner: run the SQL in GROUPS-SETUP.md in Supabase.';
+        if (/invite code not found/i.test(message)) return 'That invite code wasn’t found. Check you copied the whole code and try again.';
+        if (/sign in is required|jwt|not authenticated/i.test(message)) return 'Your sign-in has expired. Please sign in again.';
+        return message || 'Something went wrong. Please try again.';
+      };
+      const showError = error => setStatus(friendlyError(error), true);
       async function loadGroups() {
         list.replaceChildren();
         const {data: memberships, error: membershipError} = await client.from('configkit_group_members').select('group_id').eq('user_id', user.id);
@@ -105,7 +113,7 @@
         panel.append(label, code, copy); document.getElementById('create-form').reset(); setStatus('Group created. Share its invite code privately.'); await loadGroups();
       });
       document.getElementById('join-form').addEventListener('submit', async event => {
-        event.preventDefault(); const button = document.getElementById('join-button'); const invite = document.getElementById('invite-code').value.trim();
+        event.preventDefault(); const button = document.getElementById('join-button'); const invite = document.getElementById('invite-code').value.replace(/\s+/g, '').toLowerCase();
         if (!invite) return;
         button.disabled = true; setStatus('Checking invite code…');
         const {data, error} = await client.rpc('join_configkit_group', {invite_code:invite}); button.disabled = false;

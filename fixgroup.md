@@ -2,6 +2,10 @@
 
 Use this guide if `groups.html` is not showing groups you created, or if group creation/joining is failing. The groups feature depends on both the static site configuration and Supabase database setup; adding this document by itself does not change either service.
 
+## Quick fix (most common)
+
+If **Create group** shows `function gen_random_bytes(integer) does not exist`, or **Join group** shows `column reference "group_id" is ambiguous`, the group functions in Supabase need updating. In the Supabase Dashboard open **SQL Editor**, choose the project used by the site, paste the whole of [`GROUPS-REPAIR.sql`](GROUPS-REPAIR.sql), and click **Run**. Then reload `groups.html` and try again.
+
 ## 1. Sign in and check the page
 
 1. Open the deployed site and sign in at `login.html`.
