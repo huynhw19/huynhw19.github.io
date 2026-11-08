@@ -8,3 +8,5 @@ The login page uses Cloudflare Turnstile for Supabase email sign-up, password si
 4. Deploy and test sign-up, password sign-in, and password reset on the configured hostname. The challenge must complete for each request because tokens expire and are single-use.
 
 If the site key is missing, email/password authentication is intentionally blocked rather than silently proceeding without verification. GitHub and Microsoft OAuth buttons are separate flows and are not protected by this page's Turnstile token integration; use Supabase/provider abuse controls for those flows.
+
+This request is done.
