@@ -16,6 +16,16 @@ To get started, for the prompt.
 5. WELCOME TO MOBILECPNFIG!!!!
 
    
+***Person account***
 
+For personal account can access their dashboard and more.
+
+Only enter your personal account information. Do not share password and information to other people because THEY can stolen YOUR information.
+
+***Education**
+
+For all education, You can create a at code to this link and create a student.
+
+For students, told them to sign up and watch the information.
 
 
