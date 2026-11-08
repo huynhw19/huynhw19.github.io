@@ -7,7 +7,7 @@
   <title>Builder discussion — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px #17231f12}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(980px,calc(100% - 32px));margin:auto}header{padding:20px 0}header a,footer a{color:var(--green-dark);font-weight:650}main{padding:12px 0 48px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:12px 0}h2{font-size:1.3rem;margin:0 0 12px}h3{margin:0 0 5px}p{margin:8px 0}.muted,.meta{color:var(--muted)}.panel,.thread,.profile-card,.job-card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);margin:18px 0}.field{display:grid;gap:6px;margin:12px 0}.field label,label{font-weight:600}input,textarea,select{width:100%;font:inherit;padding:10px 12px;border:1px solid #bac8c0;border-radius:9px;background:#fff;color:var(--ink)}textarea{min-height:110px;resize:vertical}button,.button{font:inherit;font-weight:650;color:white;background:var(--green);border:0;border-radius:9px;padding:10px 16px;cursor:pointer;text-decoration:none;display:inline-block}button:hover,.button:hover{background:var(--green-dark)}button:disabled{opacity:.6;cursor:wait}.secondary{background:#e8f0eb;color:var(--green-dark)}.status{padding:12px;border-radius:10px;background:var(--mint);margin:14px 0}.status.error{background:#fff0f0;color:var(--red)}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:30px}.empty{color:var(--muted);padding:10px 0}.meta{font-size:.9rem}.thread-body,.job-description{white-space:pre-wrap;overflow-wrap:anywhere}.comment-list{border-top:1px solid var(--line);margin-top:16px;padding-top:10px}.comment{border-left:3px solid var(--line);padding:4px 12px;margin:10px 0}.comment-form{display:grid;gap:8px;margin-top:12px}.comment-form textarea{min-height:68px}.profile-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.download-link{color:var(--green-dark);font-weight:650}.job-card a{overflow-wrap:anywhere}footer{padding:20px 0 32px;border-top:1px solid var(--line)}[hidden]{display:none!important}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(980px,calc(100% - 32px));margin:auto}header{padding:20px 0}header a,footer a{color:var(--green-dark);font-weight:650}main{padding:12px 0 48px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:12px 0}h2{font-size:1.3rem;margin:0 0 12px}h3{margin:0 0 5px}p{margin:8px 0}.muted,.meta{color:var(--muted)}.panel,.thread,.profile-card,.job-card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);margin:18px 0}.field{display:grid;gap:6px;margin:12px 0}.field label,label{font-weight:600}input,textarea,select{width:100%;font:inherit;padding:10px 12px;border:1px solid #bac8c0;border-radius:9px;background:#fff;color:var(--ink)}textarea{min-height:110px;resize:vertical}button,.button{font:inherit;font-weight:650;color:white;background:var(--green);border:0;border-radius:9px;padding:10px 16px;cursor:pointer;text-decoration:none;display:inline-block}button:hover,.button:hover{background:var(--green-dark)}button:disabled{opacity:.6;cursor:wait}.secondary{background:#e8f0eb;color:var(--green-dark)}.status{padding:12px;border-radius:10px;background:var(--mint);margin:14px 0}.status.error{background:#fff0f0;color:var(--red)}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:30px}.empty{color:var(--muted);padding:10px 0}.meta{font-size:.9rem}.thread-body,.job-description{white-space:pre-wrap;overflow-wrap:anywhere}.comment-list{border-top:1px solid var(--line);margin-top:16px;padding-top:10px}.comment{border-left:3px solid var(--line);padding:4px 12px;margin:10px 0}.comment-form{display:grid;gap:8px;margin-top:12px}.comment-form textarea{min-height:68px}.profile-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.download-link{color:var(--green-dark);font-weight:650}.job-card a{overflow-wrap:anywhere}.check{display:flex;gap:10px;align-items:flex-start;font-weight:500;margin:12px 0}.check input{width:auto;margin-top:5px}.handoff{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 12px;border-radius:10px;background:var(--mint);margin:12px 0}.handoff button{padding:6px 12px}footer{padding:20px 0 32px;border-top:1px solid var(--line)}[hidden]{display:none!important}
   </style>
 </head>
 <body>
@@ -22,6 +22,18 @@
         <div class="field"><label for="title">Topic</label><input id="title" name="title" maxlength="120" required placeholder="e.g. Could the DNS builder support…"></div>
         <div class="field"><label for="body">Details</label><textarea id="body" name="body" maxlength="5000" required placeholder="Describe your question or idea"></textarea></div>
         <button id="publish" type="submit">Post discussion</button>
+      </form>
+
+      <form id="share-profile" class="panel" aria-labelledby="share-profile-title">
+        <h2 id="share-profile-title">Share a profile with the community</h2>
+        <p class="muted">Upload an unsigned <code>.mobileconfig</code> or XML profile so other signed-in members can download it. Profiles with Wi-Fi passwords, private keys, or certificates can't be shared.</p>
+        <div id="share-handoff" class="handoff" hidden><span id="share-handoff-label">Using the profile from your XML editor</span><button id="share-handoff-clear" class="secondary" type="button">Choose a file instead</button></div>
+        <div class="field" id="share-file-field"><label for="share-file">Profile file</label><input id="share-file" type="file" accept=".mobileconfig,.xml,.plist,application/x-apple-aspen-config,application/xml,text/xml"></div>
+        <div class="field"><label for="share-title">Title</label><input id="share-title" maxlength="120" required placeholder="e.g. Cloudflare DNS over HTTPS"></div>
+        <div class="field"><label for="share-description">Description</label><textarea id="share-description" maxlength="5000" required placeholder="What does this profile do, and which devices have you tested it on?"></textarea></div>
+        <label class="check"><input id="share-confirm" type="checkbox" required> <span>I checked this profile and it contains no passwords, private information, or anything I'm not allowed to share.</span></label>
+        <button id="share-submit" type="submit">Share profile</button>
+        <p id="share-status" class="status" role="status" aria-live="polite" hidden></p>
       </form>
 
       <section id="jobs-section" class="panel" hidden aria-labelledby="jobs-title">
@@ -41,7 +53,7 @@
         <div id="jobs" aria-live="polite"></div>
       </section>
 
-      <div class="toolbar"><h2>Shared profiles</h2><button id="refresh" class="secondary" type="button">Refresh</button></div>
+      <div class="toolbar" id="shared-profiles"><h2>Shared profiles</h2><button id="refresh" class="secondary" type="button">Refresh</button></div>
       <div id="profiles" aria-live="polite"></div>
       <div class="toolbar"><h2>Recent discussions</h2></div>
       <div id="threads" aria-live="polite"></div>
@@ -154,6 +166,68 @@
         }
       }
 
+
+      const SHARE_BUCKET='mobileconfig-shares', SHARE_MAX=2*1024*1024, HANDOFF_KEY='configkit-share-profile';
+      const shareForm=document.getElementById('share-profile'), shareFile=document.getElementById('share-file'), shareTitle=document.getElementById('share-title'), shareDescription=document.getElementById('share-description'), shareConfirm=document.getElementById('share-confirm'), shareSubmit=document.getElementById('share-submit'), shareStatus=document.getElementById('share-status'), shareHandoff=document.getElementById('share-handoff'), shareFileField=document.getElementById('share-file-field');
+      let handoff=null;
+      try { handoff=JSON.parse(sessionStorage.getItem(HANDOFF_KEY)||'null'); } catch (_) { handoff=null; }
+      const setShareStatus=(message,isError=false)=>{shareStatus.hidden=false;shareStatus.textContent=message;shareStatus.classList.toggle('error',isError);};
+      const profileName=(xml)=>{try{const doc=new DOMParser().parseFromString(xml,'application/xml');const dict=[...doc.documentElement.children].find(c=>c.localName==='dict');if(!dict)return '';const kids=[...dict.children];for(let i=0;i<kids.length;i++)if(kids[i].localName==='key'&&kids[i].textContent.trim()==='PayloadDisplayName')return (kids[i+1]?.textContent||'').trim();}catch(_){}return '';};
+      function checkProfile(text){
+        if(text.startsWith('bplist'))return 'Binary plist files can’t be shared. Save the profile as XML first.';
+        const start=text.indexOf('<');
+        if(start<0||!/<plist[\s>]/.test(text))return 'Only unsigned XML profiles can be shared, so they can be checked for passwords first. Signed profiles aren’t supported.';
+        const doc=new DOMParser().parseFromString(text.slice(start),'application/xml');
+        if(doc.querySelector('parsererror'))return 'This file isn’t valid XML. Check it in the developer dashboard’s XML editor first.';
+        if(doc.documentElement.localName!=='plist')return 'This file isn’t a configuration profile.';
+        for(const key of doc.getElementsByTagName('key')){
+          const name=key.textContent.trim(), value=key.nextElementSibling;
+          if(/^(Password|PrivateKey|PayloadContent)$/.test(name)&&value&&value.localName==='data')return 'This profile contains embedded certificate or key data, which can’t be shared.';
+          if(/^(Password|UserPassword|PrivateKey|Secret|SharedSecret|PSK)$/i.test(name)&&value&&value.localName==='string'&&value.textContent.trim())return `This profile contains a ${name} value. Remove it before sharing.`;
+        }
+        for(const str of doc.getElementsByTagName('string'))if(/^com\.apple\.security\.(pkcs12|pkcs1|pem|root)$/.test(str.textContent.trim()))return 'This profile contains a certificate payload, which can’t be shared.';
+        return '';
+      }
+      function showHandoff(){
+        const active=!!handoff?.xml;
+        shareHandoff.hidden=!active; shareFileField.hidden=active;
+        if(active){document.getElementById('share-handoff-label').textContent=`Using ${handoff.filename||'your profile'} from your XML editor`;if(!shareTitle.value)shareTitle.value=profileName(handoff.xml).slice(0,120);}
+      }
+      document.getElementById('share-handoff-clear').addEventListener('click',()=>{handoff=null;sessionStorage.removeItem(HANDOFF_KEY);showHandoff();});
+      shareFile.addEventListener('change',async()=>{const file=shareFile.files[0];shareStatus.hidden=true;if(!file||shareTitle.value)return;try{shareTitle.value=(profileName(await file.text())||file.name.replace(/\.[^.]+$/,'')).slice(0,120);}catch(_){}});
+      showHandoff();
+      if(location.hash==='#share')setTimeout(()=>shareForm.scrollIntoView({behavior:'smooth',block:'start'}),50);
+      shareForm.addEventListener('submit',async event=>{
+        event.preventDefault();
+        let text, filename;
+        if(handoff?.xml){text=handoff.xml;filename=handoff.filename||'profile.mobileconfig';}
+        else{const file=shareFile.files[0];if(!file){setShareStatus('Choose a profile file to share.',true);return;}if(file.size>SHARE_MAX){setShareStatus('That file is larger than 2 MB.',true);return;}text=await file.text();filename=file.name;}
+        if(new Blob([text]).size>SHARE_MAX){setShareStatus('That profile is larger than 2 MB.',true);return;}
+        const problem=checkProfile(text); if(problem){setShareStatus(problem,true);return;}
+        if(!shareConfirm.checked){setShareStatus('Please confirm the profile is safe to share.',true);return;}
+        const title=shareTitle.value.trim(), description=shareDescription.value.trim();
+        if(!title||!description){setShareStatus('Add a title and description.',true);return;}
+        const safeName=(filename.replace(/\.[^.]+$/,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'profile').slice(0,60)+(/\.xml$/i.test(filename)?'.xml':'.mobileconfig');
+        const mime=safeName.endsWith('.xml')?'application/xml':'application/x-apple-aspen-config';
+        const path=`${user.id}/${(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36))}-${safeName}`;
+        shareSubmit.disabled=true; setShareStatus('Uploading your profile…');
+        try{
+          const xml=text.slice(text.indexOf('<'));
+          const {error:uploadError}=await client.storage.from(SHARE_BUCKET).upload(path,new Blob([xml],{type:mime}),{contentType:mime,upsert:false});
+          if(uploadError){
+            if(/bucket not found/i.test(uploadError.message||''))throw new Error('Profile sharing isn’t switched on yet: the site owner needs to create the “mobileconfig-shares” storage bucket (see BUILDER-DISCUSSION-SETUP.md).');
+            if(/row-level security|policy|unauthorized/i.test(uploadError.message||''))throw new Error('Uploads aren’t allowed yet: the site owner needs to add the storage upload policy (see BUILDER-DISCUSSION-SETUP.md).');
+            throw uploadError;
+          }
+          const {error:insertError}=await client.from('mobileconfig_posts').insert({user_id:user.id,title,description,filename:safeName,storage_path:path,mime_type:mime,file_size:new Blob([xml]).size});
+          if(insertError){await client.storage.from(SHARE_BUCKET).remove([path]).catch(()=>{});throw insertError;}
+          shareForm.reset(); handoff=null; sessionStorage.removeItem(HANDOFF_KEY); showHandoff();
+          setShareStatus('Shared! Your profile is now in the community list below.');
+          await loadSharedProfiles();
+          document.getElementById('shared-profiles').scrollIntoView({behavior:'smooth',block:'start'});
+        }catch(error){setShareStatus(error?.message||'Could not share the profile. Please try again.',true);}
+        finally{shareSubmit.disabled=false;}
+      });
       document.getElementById('new-thread').addEventListener('submit',async event=>{event.preventDefault();const button=document.getElementById('publish');button.disabled=true;const title=document.getElementById('title').value.trim();const body=document.getElementById('body').value.trim();const {error:insertError}=await client.from('builder_discussions').insert({user_id:user.id,title,body});button.disabled=false;if(insertError){showError(insertError);return;}event.target.reset();await loadThreads();});
       document.getElementById('job-form').addEventListener('submit',async event=>{
         event.preventDefault();

@@ -2,6 +2,34 @@
 
 The discussion page is available to signed-in users and stores posts/comments in the Supabase project used for OAuth. It also supports a signed-in community file feed for `.mobileconfig` uploads.
 
+## Turn on profile sharing (quick setup)
+
+Signed-in members of any account type can share a profile from **Builder discussion → Share a profile with the community** (also linked from the dashboard and the developer dashboard's XML editor). Uploads need the `mobileconfig-shares` storage bucket. Run this once in the Supabase SQL Editor after the tables in step 1 exist:
+
+```sql
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('mobileconfig-shares', 'mobileconfig-shares', true, 2097152,
+        array['application/x-apple-aspen-config', 'application/xml', 'text/xml'])
+on conflict (id) do nothing;
+
+drop policy if exists "Public read profile files" on storage.objects;
+create policy "Public read profile files"
+  on storage.objects for select
+  using (bucket_id = 'mobileconfig-shares');
+
+drop policy if exists "Members upload profiles to their own folder" on storage.objects;
+create policy "Members upload profiles to their own folder"
+  on storage.objects for insert to authenticated
+  with check (bucket_id = 'mobileconfig-shares' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "Members delete their own profile files" on storage.objects;
+create policy "Members delete their own profile files"
+  on storage.objects for delete to authenticated
+  using (bucket_id = 'mobileconfig-shares' and (storage.foldername(name))[1] = auth.uid()::text);
+```
+
+The share form only accepts unsigned XML profiles up to 2 MB and blocks files that contain passwords, private keys, or certificate payloads.
+
 ## 1) Enable the tables
 
 In the Supabase SQL Editor, run:
