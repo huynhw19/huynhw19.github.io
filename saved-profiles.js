@@ -12,7 +12,7 @@
     'prepare-profile.html': 'Profile inspector',
     'mobileconfig-builder.html': 'Mobileconfig Studio',
     'developer-dashboard.html': 'Developer XML studio'
-  }[location.pathname.split('/').pop()] || 'ConfigKit');
+  }[location.pathname.split('/').pop() || 'index.html'] || 'ConfigKit');
   const notify = message => {
     let node = document.getElementById('saved-profile-notice');
     if (!node) {
