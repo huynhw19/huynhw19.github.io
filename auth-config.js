@@ -186,6 +186,24 @@ window.CONFIGKIT_AUTH = {
       const original = auth.signUp.bind(auth);
       const captchaSignUp = withCaptcha(original, args => args[0]?.options || {}, (args, captchaToken, options) => {
         args[0] = {...args[0], options:{...options, captchaToken}};
+        // Protect passkey authentication with Turnstile CAPTCHA.
+if (typeof auth.signInWithPasskey === 'function') {
+  const original = auth.signInWithPasskey.bind(auth);
+
+  auth.signInWithPasskey = withCaptcha(
+    original,
+    args => args[0]?.options || {},
+    (args, captchaToken, options) => {
+      args[0] = {
+        ...(args[0] || {}),
+        options: {
+          ...options,
+          captchaToken
+        }
+      };
+    }
+  );
+}
       });
       auth.signUp = async credentials => {
         const accountType = document.getElementById('accountType');
