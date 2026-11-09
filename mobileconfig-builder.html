@@ -87,5 +87,8 @@
       document.getElementById('share-form').addEventListener('submit',async event=>{event.preventDefault();const status=document.getElementById('share-status'),button=document.getElementById('share-button'),title=document.getElementById('share-heading').value.trim(),description=document.getElementById('share-description').value.trim();status.classList.remove('error');if(!currentUser){status.textContent='Please sign in again before posting.';status.classList.add('error');return;}if(!document.getElementById('share-confirm').checked||!title||!description){status.textContent='Confirm the safety note and enter a title and description.';status.classList.add('error');return;}button.disabled=true;status.textContent='Posting your description…';try{const {error}=await client.from('builder_discussions').insert({user_id:currentUser.id,title,body:description});if(error)throw error;event.target.reset();status.textContent='Posted to the community. Only your title and description were shared; the profile and its settings stayed on your device.';}catch(error){status.textContent=error.message||'Could not post. Make sure community discussions are configured, then try again.';status.classList.add('error');}finally{button.disabled=false;}});
     })();
   </script>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="saved-profiles.js"></script>
 </body>
 </html>
