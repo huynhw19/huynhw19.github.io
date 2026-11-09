@@ -43,6 +43,7 @@
         <button class="text-button" id="resetPassword" type="button">Forgot password?</button>
         <div class="form-actions"><button class="provider" id="emailSubmit" type="submit">Log in with email</button></div>
       </form>
+      <div class="form-actions"><button class="provider secondary" id="passkeyLogin" type="button">Sign in with a passkey</button></div>
       <div class="divider">or continue with</div>
       <div class="providers">
         <button class="provider secondary" id="github" type="button" disabled>Continue with GitHub</button>
@@ -56,7 +57,7 @@
   </main>
   <footer><nav aria-label="Footer"><a href="index.html">Home</a><a href="safety.html">Safety &amp; contact</a><a href="terms.html">Terms</a></nav></footer>
   <script src="auth-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.105.0"></script>
   <script>
     (() => {
       const status = document.getElementById('status');
@@ -70,6 +71,7 @@
       const password = document.getElementById('password');
       const emailSubmit = document.getElementById('emailSubmit');
       const resetPassword = document.getElementById('resetPassword');
+      const passkeyLogin = document.getElementById('passkeyLogin');
       const loginTab = document.getElementById('loginTab');
       const signupTab = document.getElementById('signupTab');
       const accountType = document.getElementById('accountType');
@@ -88,7 +90,7 @@
         return;
       }
 
-      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,experimental:{passkey:true}}});
       const callbackUrl = new URL('login.html', window.location.href).href;
       const accountIntentKey = 'configkit_account_oauth_intent';
       function selectedMetadata() {
@@ -101,7 +103,7 @@
       }
       function setBusy(busy) {
         emailSubmit.disabled = busy; github.disabled = busy; microsoft.disabled = busy;
-        resetPassword.disabled = busy; loginTab.disabled = busy; signupTab.disabled = busy;
+        resetPassword.disabled = busy; passkeyLogin.disabled = busy; loginTab.disabled = busy; signupTab.disabled = busy;
       }
       function setStatus(message, isError=false) {
         status.className = isError ? 'status error' : 'status';
@@ -214,6 +216,17 @@
         } catch (error) { setStatus(error.message || 'Could not send a password reset email.', true); }
         finally { setBusy(false); }
       });
+      passkeyLogin.addEventListener('click', async () => {
+        setBusy(true); setStatus('Waiting for your passkey…');
+        try {
+          const {data, error} = await client.auth.signInWithPasskey();
+          if (error) throw error;
+          if (!data?.session) throw new Error('Passkey sign-in did not return a session.');
+          setStatus('Signed in with your passkey.');
+          await renderSession();
+        } catch (error) { setStatus(`Passkey sign-in failed: ${error.message || 'Please try again.'}`, true); }
+        finally { setBusy(false); }
+      });
       github.addEventListener('click', () => startOAuth('github'));
       microsoft.addEventListener('click', () => startOAuth('azure'));
       signout.addEventListener('click', async () => {
@@ -223,7 +236,7 @@
         if (error) { setStatus('Could not sign out. Please try again.', true); return; }
         setMode('login'); await renderSession();
       });
-      github.disabled = false; microsoft.disabled = false;
+      github.disabled = false; microsoft.disabled = false; passkeyLogin.disabled = false;
       client.auth.onAuthStateChange((_event, session) => { if (session) void renderSession(); });
       const params = new URLSearchParams(window.location.search);
       if (params.has('error_description') || params.has('error')) {
