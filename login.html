@@ -29,7 +29,7 @@
         <div id="institutionField" hidden><label for="institution">School or educational institution</label><input id="institution" name="institution" maxlength="120" autocomplete="organization" placeholder="Name of your school or institution"></div>
         <div id="workplaceField" hidden><label for="workplace">Company or workplace</label><input id="workplace" name="workplace" maxlength="120" autocomplete="organization" placeholder="Name of your company or workplace"></div>
         <div id="organizationField" hidden><label for="organizationName">Organization name</label><input id="organizationName" name="organizationName" maxlength="120" autocomplete="organization" placeholder="Name of your enterprise"></div>
-        <small class="muted">Education, work, and enterprise details are self-declared and are not verified. Choosing an account type does not provide organization-managed access or special privileges.</small>
+        <small class="muted">Account types and profile details are self-declared and are not verified. Choosing an account type does not provide organization-managed access or special privileges.</small>
       </div>
       <div class="tabs" role="tablist" aria-label="Account action">
         <button class="tab" id="loginTab" type="button" role="tab" aria-selected="true">Log in</button>
@@ -185,6 +185,12 @@
             ? await client.auth.signUp({email:email.value.trim(), password:password.value, options:{emailRedirectTo:callbackUrl, data:selectedMetadata()}})
             : await client.auth.signInWithPassword({email:email.value.trim(), password:password.value});
           if (result.error) throw result.error;
+          // Existing users can opt into the self-declared Developer account label at login.
+          // Do not overwrite existing metadata when the default Personal option is left selected.
+          if (mode === 'login' && accountType.value === 'developer') {
+            const {error:metadataError} = await client.auth.updateUser({data:selectedMetadata()});
+            if (metadataError) throw metadataError;
+          }
           if (mode === 'signup' && !result.data.session) {
             setStatus('Account created. Check your email for a confirmation link, then return here to log in.');
             form.reset(); updateAccountFields();
