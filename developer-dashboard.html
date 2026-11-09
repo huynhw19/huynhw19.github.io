@@ -119,6 +119,12 @@
           const metadata = user.user_metadata || {};
           const name = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username;
           const type = metadata.account_type || 'personal';
+          if (type !== 'developer') {
+            dashboard.hidden = true; signout.hidden = false;
+            setStatus('Developer Studio is available to developer accounts. Switch to a developer account or return to your dashboard.');
+            const link = document.createElement('a'); link.href = 'dashboard.html'; link.textContent = ' Return to dashboard'; status.append(link);
+            return;
+          }
           document.getElementById('welcome-title').textContent = name ? `Developer dashboard — ${name}` : 'Developer dashboard';
           document.getElementById('account-label').textContent = user.email ? `Signed in as ${user.email}` : 'You are signed in to your ConfigKit account.';
           const badge = document.getElementById('account-type-badge');
