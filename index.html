@@ -267,6 +267,52 @@
       gap: 1rem;
     }
 
+    .newsletter {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      gap: 1.5rem;
+      align-items: center;
+      background: var(--mint);
+      border-color: rgba(34, 107, 81, 0.15);
+    }
+    .newsletter .eyebrow { background: var(--white); }
+    .newsletter h2 { margin: .7rem 0 .4rem; font-size: 1.5rem; }
+    .newsletter p { margin: 0; color: var(--muted); }
+    .newsletter-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .7rem;
+    }
+    .newsletter-form input {
+      flex: 1 1 180px;
+      min-height: 46px;
+      padding: .75rem .8rem;
+      border: 1px solid var(--line);
+      border-radius: .75rem;
+      background: var(--white);
+      font: inherit;
+      color: var(--ink);
+    }
+    .newsletter-form input:focus {
+      outline: 3px solid rgba(34, 107, 81, 0.15);
+      outline-offset: 1px;
+    }
+    .newsletter-form .button { flex: 0 0 auto; cursor: pointer; font: inherit; font-weight: 600; }
+    .newsletter-form .button[disabled] { opacity: .65; cursor: wait; }
+    .newsletter .status { flex-basis: 100%; margin-top: .2rem; }
+    .newsletter .status:empty { display: none; }
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px; height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+    @media (max-width: 760px) {
+      .newsletter { grid-template-columns: 1fr; }
+      .newsletter-form .button { flex: 1 1 100%; }
+    }
+
     @media (max-width: 640px) {
       .topbar .wrap {
         flex-wrap: wrap;
@@ -408,6 +454,23 @@
 
       <div id="status" class="status" role="status" aria-live="polite" data-i18n="statusReady">Ready to generate a profile.</div>
     </section>
+    <section class="panel newsletter" id="newsletter" aria-labelledby="newsletter-title">
+      <div>
+        <span class="eyebrow" data-i18n="newsletterEyebrow">Newsletter</span>
+        <h2 id="newsletter-title" data-i18n="newsletterTitle">Get ConfigKit updates</h2>
+        <p data-i18n="newsletterText">New builders, profile tips and safety notes, sent now and then. No spam, and you can unsubscribe any time.</p>
+      </div>
+      <form id="newsletter-form" class="newsletter-form" action="https://formspree.io/f/moeeynvr" method="POST" novalidate>
+        <label for="newsletter-name" class="visually-hidden" data-i18n="newsletterNameLabel">Name (optional)</label>
+        <input id="newsletter-name" name="name" type="text" autocomplete="name" maxlength="100" placeholder="Your name (optional)" data-i18n-placeholder="newsletterNamePlaceholder">
+        <label for="newsletter-email" class="visually-hidden" data-i18n="newsletterEmailLabel">Email address</label>
+        <input id="newsletter-email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="Your email address" data-i18n-placeholder="newsletterEmailPlaceholder" required>
+        <input type="hidden" name="_subject" value="New newsletter subscriber">
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="visually-hidden" aria-hidden="true">
+        <button class="button primary" type="submit" data-i18n="newsletterButton">Subscribe</button>
+        <div id="newsletter-status" class="status" role="status" aria-live="polite"></div>
+      </form>
+    </section>
   </main>
 
   <footer class="wrap footer">
@@ -416,6 +479,7 @@
       <a href="login.html" data-i18n="footerLogin">Log in / Sign up</a>
       <a href="safety.html" data-i18n="footerSafety">Safety &amp; contact</a>
       <a href="privacy.html" data-i18n="footerPrivacy">Privacy</a>
+      <a href="#newsletter" data-i18n="footerNewsletter">Newsletter</a>
     </div>
   </footer>
 
@@ -472,7 +536,20 @@
         footerText: 'ConfigKit · Independent mobileconfig builder demo',
         footerLogin: 'Log in / Sign up',
         footerSafety: 'Safety & contact',
-        footerPrivacy: 'Privacy'
+        footerPrivacy: 'Privacy',
+        footerNewsletter: 'Newsletter',
+        newsletterEyebrow: 'Newsletter',
+        newsletterTitle: 'Get ConfigKit updates',
+        newsletterText: 'New builders, profile tips and safety notes, sent now and then. No spam, and you can unsubscribe any time.',
+        newsletterNameLabel: 'Name (optional)',
+        newsletterNamePlaceholder: 'Your name (optional)',
+        newsletterEmailLabel: 'Email address',
+        newsletterEmailPlaceholder: 'Your email address',
+        newsletterButton: 'Subscribe',
+        newsletterSending: 'Subscribing…',
+        newsletterSuccess: 'Thanks! You\'re subscribed.',
+        newsletterInvalid: 'Please enter a valid email address.',
+        newsletterError: 'Sorry, we couldn\'t subscribe you right now. Please try again later.'
       },
       es: {
         navBuilders: 'Constructores',
@@ -525,7 +602,20 @@
         footerText: 'ConfigKit · Demostración independiente de generación mobileconfig',
         footerLogin: 'Iniciar sesión / Registrarse',
         footerSafety: 'Seguridad y contacto',
-        footerPrivacy: 'Privacidad'
+        footerPrivacy: 'Privacidad',
+        footerNewsletter: 'Boletín',
+        newsletterEyebrow: 'Boletín',
+        newsletterTitle: 'Recibe novedades de ConfigKit',
+        newsletterText: 'Nuevos generadores, consejos sobre perfiles y notas de seguridad de vez en cuando. Sin spam, y puedes darte de baja cuando quieras.',
+        newsletterNameLabel: 'Nombre (opcional)',
+        newsletterNamePlaceholder: 'Tu nombre (opcional)',
+        newsletterEmailLabel: 'Correo electrónico',
+        newsletterEmailPlaceholder: 'Tu correo electrónico',
+        newsletterButton: 'Suscribirse',
+        newsletterSending: 'Suscribiendo…',
+        newsletterSuccess: '¡Gracias! Ya estás suscrito.',
+        newsletterInvalid: 'Introduce un correo electrónico válido.',
+        newsletterError: 'Lo sentimos, no pudimos suscribirte ahora. Inténtalo de nuevo más tarde.'
       }
     };
 
@@ -540,6 +630,10 @@
         if (t[key]) {
           node.textContent = t[key];
         }
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach((node) => {
+        const key = node.dataset.i18nPlaceholder;
+        if (t[key]) node.placeholder = t[key];
       });
       if (select) select.value = lang;
     }
@@ -631,6 +725,57 @@
 
         status.className = 'status success';
         status.textContent = messages[locale]?.success || messages.en.success;
+      });
+    })();
+
+    (() => {
+      const form = document.getElementById('newsletter-form');
+      if (!form) return;
+      const email = document.getElementById('newsletter-email');
+      const button = form.querySelector('button[type="submit"]');
+      const note = document.getElementById('newsletter-status');
+      const text = (key) => {
+        const lang = document.documentElement.lang || 'en';
+        return (translations[lang] && translations[lang][key]) || translations.en[key];
+      };
+      const show = (kind, key) => {
+        note.className = 'status ' + kind;
+        note.textContent = text(key);
+      };
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        email.value = email.value.trim();
+        if (!email.value || !email.checkValidity()) {
+          show('error', 'newsletterInvalid');
+          email.focus();
+          return;
+        }
+        button.disabled = true;
+        button.textContent = text('newsletterSending');
+        note.className = 'status';
+        note.textContent = '';
+        try {
+          const response = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { Accept: 'application/json' }
+          });
+          const data = await response.json().catch(() => ({}));
+          if (response.ok && data.ok !== false) {
+            form.reset();
+            show('success', 'newsletterSuccess');
+          } else {
+            console.error('Newsletter sign-up failed', response.status, data);
+            show('error', 'newsletterError');
+          }
+        } catch (error) {
+          console.error('Newsletter sign-up failed', error);
+          show('error', 'newsletterError');
+        } finally {
+          button.disabled = false;
+          button.textContent = text('newsletterButton');
+        }
       });
     })();
   </script>
