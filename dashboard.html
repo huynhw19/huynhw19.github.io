@@ -68,6 +68,12 @@
         <article class="card"><h2>Account settings</h2><p>Update your display name and local account profile, manage connected sign-in providers, or review your sessions.</p><a href="account-settings.html">Manage account →</a></article>
         <article class="card"><h2>Saved profiles</h2><p>Profiles are generated and downloaded locally. ConfigKit does not store your profiles in an account.</p><a href="index.html">Return to ConfigKit →</a></article>
       </section>
+      <section class="card" id="saved-profiles" aria-labelledby="saved-profiles-title" style="padding:1.2rem;margin:1rem 0 2rem">
+        <h2 id="saved-profiles-title">Saved profile downloads</h2>
+        <p class="muted">A private history of profiles you downloaded while signed in. The actual .mobileconfig file stays on your device; this list stores only its name, filename, tool and download date.</p>
+        <p id="saved-profiles-empty" class="muted" role="status">Loading your saved profiles…</p>
+        <div id="saved-profiles-list"></div>
+      </section>
       <p class="muted"><strong>Privacy note:</strong> Profile content is generated in your browser. ConfigKit does not store your profile XML or Wi-Fi credentials.</p>
     </div>
   </main>
@@ -121,5 +127,8 @@
       void renderSession();
     })();
   </script>
-</body>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="saved-profiles.js"></script>
+ </body>
 </html>
