@@ -283,6 +283,7 @@
       function download(ext, type) {
         if (!editor.value.trim()) { toast('The editor is empty.'); return; }
         if (ext === '.mobileconfig' && !validate()) { toast('Fix the problems listed below before downloading.'); return; }
+        if (ext === '.mobileconfig') { const filename = fileName(ext); const profileName = filename.replace(/\\.mobileconfig$/i, '').replace(/-/g, ' '); window.ConfigKitSavedProfiles?.save({profileName, filename, tool:'Developer XML studio'}); }
         const url = URL.createObjectURL(new Blob([editor.value], {type}));
         const a = document.createElement('a'); a.href = url; a.download = fileName(ext); document.body.append(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -329,5 +330,8 @@
     })();
   </script>
   <script src="developer-studio.js"></script>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="saved-profiles.js"></script>
 </body>
 </html>
