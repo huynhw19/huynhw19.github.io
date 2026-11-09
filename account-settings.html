@@ -31,6 +31,13 @@
           <button type="submit" id="save-profile">Save profile</button>
         </form>
       </section>
+      <section class="card" aria-labelledby="passkeys-title">
+        <h2 id="passkeys-title">Passkeys</h2>
+        <p class="muted">Use Face ID, Touch ID, Windows Hello, your device PIN, or a security key to sign in without a password. Add a passkey while signed in, then use it from the login page.</p>
+        <div class="actions"><button id="add-passkey" type="button">Add a passkey</button></div>
+        <div id="passkey-list" aria-live="polite"><p class="muted">Loading passkeys…</p></div>
+        <p class="muted">Passkeys are stored by your device or password manager. You can remove a passkey here if you no longer use that device.</p>
+      </section>
       <section class="card" aria-labelledby="providers-title">
         <h2 id="providers-title">Connected sign-in providers</h2>
         <p class="muted">Disconnecting removes the provider from your ConfigKit account. It does not revoke ConfigKit's access in your GitHub or Microsoft account settings.</p>
@@ -47,7 +54,7 @@
   </main>
   <footer><a href="index.html">Home</a> · <a href="builder-discussion.html">Builder discussion</a> · <a href="privacy.html">Privacy</a></footer>
   <script src="auth-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
   <script>
     (async () => {
       const status = document.getElementById('status');
@@ -65,7 +72,7 @@
         return;
       }
 
-      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,experimental:{passkey:true}}});
       const {data:sessionData, error:sessionError} = await client.auth.getSession();
       if (sessionError) { setStatus('Could not check your session. Please try again.', true); return; }
       if (!sessionData.session) {
@@ -80,6 +87,76 @@
       if (userError || !userData.user) { setStatus('Could not load your account details. Please sign in again.', true); return; }
 
       const user = userData.user;
+      const passkeyList = document.getElementById('passkey-list');
+      const addPasskeyButton = document.getElementById('add-passkey');
+      async function refreshPasskeys() {
+        passkeyList.replaceChildren();
+        const {data:passkeys, error} = await client.auth.passkey.list();
+        if (error) {
+          const note = document.createElement('p');
+          note.className = 'notice';
+          note.textContent = error.message || 'Could not load passkeys. Check that passkey authentication is enabled for this Supabase project.';
+          passkeyList.append(note);
+          return;
+        }
+        if (!passkeys?.length) {
+          const note = document.createElement('p');
+          note.className = 'muted';
+          note.textContent = 'No passkeys registered yet.';
+          passkeyList.append(note);
+          return;
+        }
+        for (const passkey of passkeys) {
+          const row = document.createElement('div');
+          row.className = 'provider';
+          const details = document.createElement('div');
+          const name = document.createElement('strong');
+          name.textContent = passkey.friendly_name || 'Passkey';
+          const date = document.createElement('div');
+          date.className = 'muted';
+          date.textContent = `Added ${new Date(passkey.created_at).toLocaleDateString()}${passkey.last_used_at ? ` · Last used ${new Date(passkey.last_used_at).toLocaleDateString()}` : ''}`;
+          details.append(name, date);
+          const actions = document.createElement('div');
+          actions.className = 'actions';
+          const rename = document.createElement('button');
+          rename.type = 'button'; rename.className = 'secondary'; rename.textContent = 'Rename';
+          rename.addEventListener('click', async () => {
+            const nextName = window.prompt('Name this passkey (up to 120 characters):', passkey.friendly_name || 'My passkey');
+            if (nextName === null) return;
+            if (!nextName.trim() || nextName.trim().length > 120) { setStatus('Enter a name between 1 and 120 characters.', true); return; }
+            rename.disabled = true;
+            const {error:updateError} = await client.auth.passkey.update({passkeyId:passkey.id,friendlyName:nextName.trim()});
+            rename.disabled = false;
+            if (updateError) { setStatus(`Could not rename passkey: ${updateError.message}`, true); return; }
+            setStatus('Passkey renamed.'); await refreshPasskeys();
+          });
+          const remove = document.createElement('button');
+          remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Remove';
+          remove.addEventListener('click', async () => {
+            if (!window.confirm('Remove this passkey from your ConfigKit account? You will no longer be able to sign in with it.')) return;
+            remove.disabled = true;
+            const {error:deleteError} = await client.auth.passkey.delete({passkeyId:passkey.id});
+            if (deleteError) { remove.disabled = false; setStatus(`Could not remove passkey: ${deleteError.message}`, true); return; }
+            setStatus('Passkey removed.'); await refreshPasskeys();
+          });
+          actions.append(rename, remove);
+          row.append(details, actions);
+          passkeyList.append(row);
+        }
+      }
+      addPasskeyButton.addEventListener('click', async () => {
+        if (!window.isSecureContext || !navigator.credentials) { setStatus('Passkeys require a supported browser on HTTPS.', true); return; }
+        addPasskeyButton.disabled = true; setStatus('Follow your device prompt to create a passkey…');
+        try {
+          const {data, error} = await client.auth.registerPasskey();
+          if (error) throw error;
+          setStatus(`Passkey added${data?.friendly_name ? `: ${data.friendly_name}` : ''}.`);
+          await refreshPasskeys();
+        } catch (error) {
+          setStatus(error.message || 'Could not register a passkey. Make sure passkey authentication is enabled in Supabase.', true);
+        } finally { addPasskeyButton.disabled = false; }
+      });
+      await refreshPasskeys();
       const metadata = user.user_metadata || {};
       settings.hidden = false;
       status.hidden = true;
