@@ -15,6 +15,10 @@
     .error { color: #9b3030; }
     .student-list { list-style: none; padding: 0; }
     .student-item { background: #fff; border: 1px solid #e5ece8; border-radius: 10px; padding: 12px; margin: 8px 0; }
+    .student-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .student-actions button.secondary { background: #e8efeb; color: #20372d; }
+    .student-actions button.danger { background: #a83232; color: white; }
+    .form-actions { display: flex; flex-wrap: wrap; gap: 8px; }
     .muted { color: #56645e; }
     .qr-panel { margin-top: 16px; padding: 16px; border: 1px solid #dfe9e5; border-radius: 10px; width: fit-content; max-width: 100%; }
     #site-qr { display: inline-block; padding: 12px; background: white; }
@@ -53,7 +57,7 @@
     </section>
 
     <section class="card">
-      <h2>Create student</h2>
+      <h2 id="student-form-title">Create student</h2>
       <form id="student-form">
         <label>
           Student name
@@ -80,7 +84,10 @@
           <textarea id="notes" name="notes" rows="4" maxlength="500"></textarea>
         </label>
 
-        <button type="submit">Add student</button>
+        <div class="form-actions">
+          <button id="student-submit" type="submit">Add student</button>
+          <button id="cancel-edit" class="secondary" type="button" hidden>Cancel</button>
+        </div>
       </form>
       <div id="status" class="status" role="status" aria-live="polite"></div>
     </section>
@@ -105,6 +112,12 @@
       const hideQrButton = document.getElementById('hide-qr');
       const qrPanel = document.getElementById('qr-panel');
       const qrContainer = document.getElementById('site-qr');
+      const studentForm = document.getElementById('student-form');
+      const formTitle = document.getElementById('student-form-title');
+      const submitButton = document.getElementById('student-submit');
+      const cancelEditButton = document.getElementById('cancel-edit');
+      let editingStudentId = null;
+      let currentUserId = null;
       const config = window.CONFIGKIT_AUTH || {};
       const setStatus = (message, isError = false) => {
         statusEl.textContent = message;
@@ -144,19 +157,31 @@
       });
       hideQrButton.addEventListener('click', () => toggleQr(false));
 
+      function resetStudentForm() {
+        studentForm.reset();
+        editingStudentId = null;
+        formTitle.textContent = 'Create student';
+        submitButton.textContent = 'Add student';
+        cancelEditButton.hidden = true;
+      }
+
       async function loadStudents() {
-        listEl.innerHTML = '';
+        listEl.replaceChildren();
 
         const { data: sessionData, error: sessionError } = await client.auth.getSession();
         if (sessionError || !sessionData.session) {
-          listEl.innerHTML = '<li class="student-item">Please sign in first.</li>';
+          const item = document.createElement('li');
+          item.className = 'student-item';
+          item.textContent = 'Please sign in first.';
+          listEl.appendChild(item);
           return;
         }
+        currentUserId = sessionData.session.user.id;
 
         const { data, error } = await client
           .from('education_students')
           .select('*')
-          .eq('user_id', sessionData.session.user.id)
+          .eq('user_id', currentUserId)
           .order('created_at', { ascending: false });
 
         if (error) {
@@ -165,7 +190,10 @@
         }
 
         if (!data || data.length === 0) {
-          listEl.innerHTML = '<li class="student-item">No students added yet.</li>';
+          const item = document.createElement('li');
+          item.className = 'student-item';
+          item.textContent = 'No students added yet.';
+          listEl.appendChild(item);
           return;
         }
 
@@ -173,20 +201,88 @@
           const item = document.createElement('li');
           item.className = 'student-item';
           const name = document.createElement('strong');
-          name.textContent = student.student_name;
+          name.textContent = student.student_name || 'Unnamed student';
           const details = document.createElement('div');
-          details.textContent = `${student.student_email} · ${student.school || 'No school set'} · ${student.grade || 'No grade set'}`;
+          details.textContent = [
+            student.student_email || 'No email',
+            student.school || 'No school set',
+            student.grade || 'No grade set'
+          ].join(' · ');
           item.append(name, document.createElement('br'), details);
+
+          if (student.notes) {
+            const notes = document.createElement('p');
+            notes.className = 'muted';
+            notes.textContent = student.notes;
+            item.appendChild(notes);
+          }
+
+          const actions = document.createElement('div');
+          actions.className = 'student-actions';
+          const editButton = document.createElement('button');
+          editButton.type = 'button';
+          editButton.className = 'secondary';
+          editButton.textContent = 'Edit';
+          editButton.addEventListener('click', () => {
+            if (student.id === undefined || student.id === null) {
+              setStatus('This student record has no ID, so it cannot be edited safely.', true);
+              return;
+            }
+            editingStudentId = student.id;
+            document.getElementById('student_name').value = student.student_name || '';
+            document.getElementById('student_email').value = student.student_email || '';
+            document.getElementById('school').value = student.school || '';
+            document.getElementById('grade').value = student.grade || '';
+            document.getElementById('notes').value = student.notes || '';
+            formTitle.textContent = 'Edit student';
+            submitButton.textContent = 'Save changes';
+            cancelEditButton.hidden = false;
+            studentForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('student_name').focus();
+            setStatus('Editing ' + (student.student_name || 'student') + '.');
+          });
+
+          const deleteButton = document.createElement('button');
+          deleteButton.type = 'button';
+          deleteButton.className = 'danger';
+          deleteButton.textContent = 'Delete';
+          deleteButton.addEventListener('click', async () => {
+            if (student.id === undefined || student.id === null) {
+              setStatus('This student record has no ID, so it cannot be deleted safely.', true);
+              return;
+            }
+            if (!window.confirm('Delete ' + (student.student_name || 'this student') + '? This cannot be undone.')) return;
+            setStatus('Deleting student…');
+            const { error: deleteError } = await client
+              .from('education_students')
+              .delete()
+              .eq('id', student.id)
+              .eq('user_id', currentUserId);
+            if (deleteError) {
+              setStatus(deleteError.message || 'Could not delete student. Check your database permissions.', true);
+              return;
+            }
+            if (editingStudentId === student.id) resetStudentForm();
+            setStatus('Student deleted.');
+            await loadStudents();
+          });
+
+          actions.append(editButton, deleteButton);
+          item.appendChild(actions);
           listEl.appendChild(item);
         });
       }
 
-      document.getElementById('student-form').addEventListener('submit', async (event) => {
+      cancelEditButton.addEventListener('click', () => {
+        resetStudentForm();
+        setStatus('Editing cancelled.');
+      });
+
+      studentForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const form = event.currentTarget;
         const payload = {
           student_name: document.getElementById('student_name').value.trim(),
-          student_email: document.getElementById('student_email').value.trim(),
+          student_email: document.getElementById('student_email').value.trim().toLowerCase(),
           school: document.getElementById('school').value.trim(),
           grade: document.getElementById('grade').value.trim(),
           notes: document.getElementById('notes').value.trim()
@@ -197,31 +293,45 @@
           return;
         }
 
-        setStatus('Adding student…');
+        setStatus(editingStudentId === null ? 'Adding student…' : 'Saving student changes…');
         const { data: sessionData, error: sessionError } = await client.auth.getSession();
         if (sessionError || !sessionData.session) {
           setStatus('Please sign in again.', true);
           return;
         }
+        currentUserId = sessionData.session.user.id;
 
-        const { error } = await client
-          .from('education_students')
-          .insert({
-            user_id: sessionData.session.user.id,
-            student_name: payload.student_name,
-            student_email: payload.student_email.toLowerCase(),
-            school: payload.school || null,
-            grade: payload.grade || null,
-            notes: payload.notes || null
-          });
+        const record = {
+          student_name: payload.student_name,
+          student_email: payload.student_email,
+          school: payload.school || null,
+          grade: payload.grade || null,
+          notes: payload.notes || null
+        };
 
-        if (error) {
-          setStatus(error.message || 'Could not create student.', true);
+        let saveError;
+        if (editingStudentId !== null) {
+          const result = await client
+            .from('education_students')
+            .update(record)
+            .eq('id', editingStudentId)
+            .eq('user_id', currentUserId);
+          saveError = result.error;
+        } else {
+          const result = await client
+            .from('education_students')
+            .insert({ ...record, user_id: currentUserId });
+          saveError = result.error;
+        }
+
+        if (saveError) {
+          setStatus(saveError.message || 'Could not save student. Check your database permissions.', true);
           return;
         }
 
-        setStatus('Student added successfully. Share the student sign-in page and have them register using this email address.');
-        form.reset();
+        const wasEditing = editingStudentId !== null;
+        resetStudentForm();
+        setStatus(wasEditing ? 'Student updated successfully.' : 'Student added successfully. Share the student sign-in page and have them register using this email address.');
         await loadStudents();
       });
 
