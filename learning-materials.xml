@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learningMaterials
+    xmlns="https://huynhw19.github.io/schemas/learning-materials"
+    version="1.0"
+    language="en">
+  <course>
+    <title>ConfigKit Learning Materials</title>
+    <description>
+      Introduction to mobile configuration profiles using ConfigKit, including Wi-Fi,
+      DNS, and web clip profiles.
+    </description>
+    <audience>Students</audience>
+    <site>https://huynhw19.github.io/</site>
+    <prerequisites>
+      <item>Access to a web browser and the ConfigKit website.</item>
+      <item>Follow your teacher's instructions for any device or account setup.</item>
+    </prerequisites>
+  </course>
+
+  <learningObjectives>
+    <objective id="LO1">Explain what a mobile configuration profile is and what it can configure.</objective>
+    <objective id="LO2">Identify the purpose of Wi-Fi, DNS, and web clip profile settings.</objective>
+    <objective id="LO3">Create a practice configuration profile using teacher-approved example values.</objective>
+    <objective id="LO4">Review profile settings and consider privacy and security before installation.</objective>
+  </learningObjectives>
+
+  <modules>
+    <module id="M1" title="Getting started with ConfigKit">
+      <summary>Explore the ConfigKit website and learn the purpose of its profile-generation tools.</summary>
+      <topics>
+        <topic>Website navigation</topic>
+        <topic>What mobileconfig profiles are</topic>
+        <topic>Responsible use of configuration tools</topic>
+      </topics>
+      <activity>Visit the website and identify the available profile types.</activity>
+    </module>
+
+    <module id="M2" title="Wi-Fi profiles">
+      <summary>Learn how a Wi-Fi profile can store network connection settings.</summary>
+      <topics>
+        <topic>Network name (SSID)</topic>
+        <topic>Authentication and connection settings</topic>
+        <topic>Using teacher-provided test values</topic>
+      </topics>
+      <activity>Create a sample Wi-Fi profile with fictional classroom values. Do not use or submit a personal network password.</activity>
+    </module>
+
+    <module id="M3" title="DNS profiles">
+      <summary>Understand the role of DNS in translating domain names into network addresses.</summary>
+      <topics>
+        <topic>DNS basics</topic>
+        <topic>DNS server settings</topic>
+        <topic>Checking configuration values</topic>
+      </topics>
+      <activity>Describe what a DNS setting changes and record the example values supplied by your teacher.</activity>
+    </module>
+
+    <module id="M4" title="Web clip profiles">
+      <summary>Learn how a web clip can provide a home-screen shortcut to a website.</summary>
+      <topics>
+        <topic>Web clip title and URL</topic>
+        <topic>Website destination checks</topic>
+        <topic>Appropriate use of shortcuts</topic>
+      </topics>
+      <activity>Plan a web clip for a teacher-approved learning website.</activity>
+    </module>
+
+    <module id="M5" title="Review, privacy, and safety">
+      <summary>Check generated settings before installing or sharing a configuration profile.</summary>
+      <topics>
+        <topic>Reviewing profile contents</topic>
+        <topic>Protecting passwords and personal information</topic>
+        <topic>Installing profiles only when authorised</topic>
+        <topic>Removing practice profiles when instructed</topic>
+      </topics>
+      <activity>Use the safety checklist below to review a sample profile before use.</activity>
+    </module>
+  </modules>
+
+  <safetyChecklist>
+    <item>Use fictional or teacher-approved values for classroom practice.</item>
+    <item>Never include personal passwords, private network credentials, or sensitive student information.</item>
+    <item>Read and understand a profile before installing it.</item>
+    <item>Only install profiles on devices you own or are authorised to manage.</item>
+    <item>Ask your teacher or device administrator if a setting is unclear.</item>
+  </safetyChecklist>
+
+  <assessment>
+    <task>Explain the purpose of a mobile configuration profile in your own words.</task>
+    <task>Compare the purposes of Wi-Fi, DNS, and web clip profiles.</task>
+    <task>Identify at least three safety checks to complete before installing a profile.</task>
+  </assessment>
+
+  <teacherNotes>
+    <note>Adapt activities and example values to the class level and device-management policy.</note>
+    <note>This file is a starter learning resource. Add lesson-specific worksheets, links, and due dates as needed.</note>
+  </teacherNotes>
+</learningMaterials>
