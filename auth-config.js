@@ -344,6 +344,8 @@ window.CONFIGKIT_AUTH = {
             try {
               const {data, error} = await client.functions.invoke('email-2fa', {body:{action:'status'}});
               if (error || !data?.enabled || data.verified) return;
+              const {data: assurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+              if (assurance?.currentLevel === 'aal2') return;
               const destination = window.location.pathname.endsWith('account-settings.html') ? 'account-settings.html' : 'dashboard.html';
               window.location.replace('login.html?next=' + encodeURIComponent(destination));
             } catch (_) {
