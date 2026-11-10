@@ -129,7 +129,7 @@
       signout.addEventListener('click', async () => {
         sessionStorage.removeItem('configkit_passkey_session_user');
         signout.disabled = true;
-        const {error} = await client.auth.signOut(); signout.disabled = false;
+        const {error} = await client.auth.signOut({scope:'local'}); signout.disabled = false;
         if (error) { setStatus('Could not sign out. Please try again.', true); return; }
         window.location.replace('login.html');
       });
