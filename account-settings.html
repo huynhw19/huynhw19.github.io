@@ -189,15 +189,43 @@
           });
           row.append(detail,remove); mfaFactorList.append(row);
         }
+        const pending = (data.totp || []).filter(factor => factor.status === 'unverified');
+        for (const factor of pending) {
+          const row = document.createElement('div'); row.className = 'provider';
+          const detail = document.createElement('div');
+          const name = document.createElement('strong'); name.textContent = factor.friendly_name || 'Unfinished authenticator setup';
+          const state = document.createElement('div'); state.className = 'muted'; state.textContent = 'Setup not completed · Not active';
+          detail.append(name,state); row.append(detail); mfaFactorList.append(row);
+        }
         mfaAddButton.disabled = verified.length >= 10;
+        if (pending.length) {
+          const note = document.createElement('p'); note.className = 'muted';
+          note.textContent = 'An unfinished authenticator setup was found. Starting setup again will safely discard only the unfinished setup and create a fresh QR code.';
+          mfaFactorList.append(note);
+        }
         if (verified.length >= 10) {
           const note = document.createElement('p'); note.className = 'muted'; note.textContent = 'Supabase allows up to 10 enrolled factors.';
           mfaFactorList.append(note);
         }
       }
       mfaAddButton.addEventListener('click', async () => {
-        mfaAddButton.disabled = true; setStatus('Preparing your authenticator setup…');
+        mfaAddButton.disabled = true; setStatus('Checking for an unfinished authenticator setup…');
         try {
+          const {data:factorData,error:factorListError} = await client.auth.mfa.listFactors();
+          if (factorListError) throw factorListError;
+          const matchingFactors = (factorData.totp || []).filter(factor => factor.friendly_name === 'ConfigKit authenticator');
+          if (matchingFactors.some(factor => factor.status === 'verified')) {
+            throw new Error('A ConfigKit authenticator is already enabled. Use the existing authenticator, or remove it from this page before adding a replacement.');
+          }
+          // A TOTP secret is returned only during enrollment. An unverified factor
+          // from an abandoned attempt cannot be resumed, so remove that stale
+          // pending factor before creating a fresh QR code. Verified factors are
+          // never removed by this recovery path.
+          for (const factor of matchingFactors.filter(item => item.status === 'unverified')) {
+            const {error:cleanupError} = await client.auth.mfa.unenroll({factorId:factor.id});
+            if (cleanupError) throw cleanupError;
+          }
+          setStatus('Preparing a fresh authenticator setup…');
           const {data,error} = await client.auth.mfa.enroll({factorType:'totp',friendlyName:'ConfigKit authenticator'});
           if (error) throw error;
           pendingEnrollmentFactorId = data.id;
