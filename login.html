@@ -224,7 +224,11 @@
         }
         setBusy(true); setStatus('Waiting for your passkey…');
         try {
-          const {data, error} = await client.auth.signInWithPasskey();
+          const runWithCaptcha = window.CONFIGKIT_AUTH?.runWithCaptcha;
+          if (typeof runWithCaptcha !== 'function') throw new Error('Human verification is not initialized. Reload the page and try again.');
+          const {data, error} = await runWithCaptcha(captchaToken =>
+            client.auth.signInWithPasskey({options:{captchaToken}})
+          );
           if (error) throw error;
           if (!data.session) throw new Error('Passkey sign-in did not create a session. Please try again.');
           setStatus('Signed in with your passkey.'); await renderSession();
