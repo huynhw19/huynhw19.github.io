@@ -260,6 +260,7 @@
           document.getElementById('mfa-challenge').hidden = true;
           document.getElementById('email-mfa-challenge').hidden = true;
           emailChallengeSent = false;
+          emailMfaUseTotp = false;
           document.getElementById('mfa-code').value = '';
           account.hidden = true; signout.hidden = true; form.hidden = false;
           document.querySelector('.tabs').hidden = false;
@@ -347,6 +348,7 @@
         const {error} = await client.auth.signOut({scope:'local'});
         if (error) { setStatus('Could not cancel sign-in. Please try again.', true); return; }
         emailChallengeSent = false;
+        emailMfaUseTotp = false;
         document.getElementById('email-mfa-challenge').hidden = true;
         setMode('login');
         await renderSession();
