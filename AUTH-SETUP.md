@@ -15,6 +15,10 @@ The site is static GitHub Pages, so it must not contain OAuth client secrets or 
 
 ## 3. Enable Microsoft OAuth
 
+**Important:** Microsoft sign-in cannot be enabled from frontend code alone. Supabase requires an Azure/Microsoft Entra application registration with a client ID and client secret. Someone with permission to register applications in the relevant Entra tenant must create/provide these credentials and configure the Supabase Azure provider. Do not put the client secret in this GitHub repository.
+
+If you do not have Entra access or an administrator who can provide the credentials, leave Microsoft sign-in unavailable. Users can still create accounts and sign in with email/password or GitHub. The login page disables the Microsoft button and explains this limitation until the provider is configured.
+
 1. Register an application in Microsoft Entra ID (Azure). Configure its supported account types to match the audiences you want.
 2. Add the Supabase provider callback URL shown under **Authentication → Providers → Azure** as a Web redirect URI in Entra. Create a client secret there and enter the application client ID and secret in Supabase's Azure provider settings. Keep the secret only in Supabase.
 3. Enable the Azure provider. The login page requests `openid email profile` scopes.
