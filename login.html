@@ -67,7 +67,7 @@
         <form id="email-mfa-form">
           <label for="email-mfa-code">Email verification code</label>
           <input id="email-mfa-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{8}" minlength="8" maxlength="8" required>
-          <div class="form-actions"><button id="email-mfa-submit" type="submit">Verify and continue</button><button id="email-mfa-resend" class="secondary" type="button">Resend code and link</button><button id="email-mfa-cancel" class="secondary" type="button">Sign out</button></div>
+          <div class="form-actions"><button id="email-mfa-submit" type="submit">Verify and continue</button><button id="email-mfa-resend" class="secondary" type="button">Resend code and link</button><button id="email-mfa-use-totp" class="secondary" type="button" hidden>Use authenticator instead</button><button id="email-mfa-cancel" class="secondary" type="button">Sign out</button></div>
         </form>
       </section>
       <div class="account" id="account" hidden></div>
@@ -106,6 +106,7 @@
       let pendingMfaFactorId = '';
       let passkeyPrimaryPending = false;
       let emailChallengeSent = false;
+      let emailMfaUseTotp = false;
 
       const config = window.CONFIGKIT_AUTH || {};
       if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
@@ -198,7 +199,11 @@
             setStatus(error.message || 'Could not check email verification status.', true);
             return;
           }
-          if (emailMfa.enabled && !emailMfa.verified) {
+          const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+          if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
+          if (emailMfa.enabled && !emailMfa.verified && assurance.currentLevel !== 'aal2' && !emailMfaUseTotp) {
+            const {data: availableFactors} = await client.auth.mfa.listFactors();
+            document.getElementById('email-mfa-use-totp').hidden = !(availableFactors?.totp || []).some(factor => factor.status === 'verified');
             form.hidden = true;
             document.querySelector('.tabs').hidden = true;
             document.querySelector('.divider').hidden = true;
@@ -219,8 +224,6 @@
           }
           emailChallengeSent = false;
           document.getElementById('email-mfa-challenge').hidden = true;
-          const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
-          if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
           if (!emailMfa.verified && !passkeySession && assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
             const {data: factorData, error: factorError} = await client.auth.mfa.listFactors();
             if (factorError) { setStatus('Could not load your authenticator. Please try again.', true); return; }
@@ -332,6 +335,12 @@
         } catch (error) {
           setStatus(error.message || 'Could not resend the verification email.', true);
         } finally { button.disabled = false; }
+      });
+      document.getElementById('email-mfa-use-totp').addEventListener('click', async () => {
+        emailMfaUseTotp = true;
+        document.getElementById('email-mfa-challenge').hidden = true;
+        setStatus('Use your registered authenticator code to finish signing in.');
+        await renderSession();
       });
       document.getElementById('email-mfa-cancel').addEventListener('click', async () => {
         sessionStorage.removeItem(passkeySessionKey);
