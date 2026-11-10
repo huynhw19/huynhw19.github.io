@@ -189,10 +189,13 @@
           if (!redirecting) { redirecting = true; window.location.replace('dashboard.html'); }
         } else {
           passkeyPrimaryPending = false;
+          pendingMfaFactorId = '';
+          document.getElementById('mfa-challenge').hidden = true;
+          document.getElementById('mfa-code').value = '';
           account.hidden = true; signout.hidden = true; form.hidden = false;
           document.querySelector('.tabs').hidden = false;
           document.querySelector('.divider').hidden = false;
-          document.querySelector('.providers').hidden = false;
+          document.querySelectorAll('.providers').forEach(node => node.hidden = false);
         }
       }
       async function startOAuth(provider) {
@@ -238,7 +241,8 @@
       });
       document.getElementById('mfa-cancel').addEventListener('click', async () => {
         sessionStorage.removeItem(passkeySessionKey);
-        await client.auth.signOut();
+        const {error} = await client.auth.signOut({scope:'local'});
+        if (error) { setStatus('Could not cancel sign-in. Please try again.', true); return; }
         pendingMfaFactorId = '';
         document.getElementById('mfa-challenge').hidden = true;
         setMode('login');
@@ -310,7 +314,7 @@
       signout.addEventListener('click', async () => {
         sessionStorage.removeItem(passkeySessionKey);
         signout.disabled = true;
-        const {error} = await client.auth.signOut();
+        const {error} = await client.auth.signOut({scope:'local'});
         signout.disabled = false;
         if (error) { setStatus('Could not sign out. Please try again.', true); return; }
         setMode('login'); await renderSession();
