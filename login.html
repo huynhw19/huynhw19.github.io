@@ -118,7 +118,8 @@
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,experimental:{passkey:true}}});
       const requestedNext = new URLSearchParams(window.location.search).get('next');
       // Only allow known same-site destinations; never redirect to an arbitrary URL.
-      const postLoginDestination = requestedNext === 'account-settings.html' ? requestedNext : 'dashboard.html';
+      const allowedDestinations = new Set(['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html']);
+      const postLoginDestination = allowedDestinations.has(requestedNext) ? requestedNext : 'dashboard.html';
       const callbackUrlObject = new URL('login.html', window.location.href);
       if (postLoginDestination !== 'dashboard.html') callbackUrlObject.searchParams.set('next', postLoginDestination);
       const pendingEmail2FALink = new URLSearchParams(window.location.search).get('email_2fa_token');
