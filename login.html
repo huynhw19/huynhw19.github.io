@@ -170,7 +170,28 @@
         resetPassword.hidden = signingUp;
         setStatus(signingUp ? 'Create an account with your email and a password.' : 'Log in with your email and password.');
       }
+      // Auth events and explicit post-login calls can arrive together (especially
+      // after MFA verification). Serialize session rendering and rerun once if an
+      // auth event arrives mid-render, so stale AAL1 state cannot reopen the MFA UI.
+      let renderingSession = false;
+      let renderSessionAgain = false;
       async function renderSession() {
+        if (renderingSession) {
+          renderSessionAgain = true;
+          return;
+        }
+        renderingSession = true;
+        try {
+          do {
+            renderSessionAgain = false;
+            await renderSessionOnce();
+          } while (renderSessionAgain);
+        } finally {
+          renderingSession = false;
+        }
+      }
+
+      async function renderSessionOnce() {
         const {data, error} = await client.auth.getSession();
         if (error) { setStatus('Could not read the sign-in session. Please try again.', true); return; }
         if (data.session) {
