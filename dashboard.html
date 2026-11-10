@@ -97,6 +97,15 @@
             dashboard.hidden = true; signout.hidden = true; setStatus('You are signed out. ');
             const link = document.createElement('a'); link.href = 'login.html'; link.textContent = 'Go to sign in'; status.append(link); return;
           }
+          // Do not reveal protected dashboard content to an AAL1 session when
+          // the account has a verified second factor. The login page completes
+          // the pending TOTP challenge and returns here at AAL2.
+          const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+          if (assuranceError) throw assuranceError;
+          if (assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+            window.location.replace('login.html');
+            return;
+          }
           const user = data.session.user;
           const metadata = user.user_metadata || {};
           const name = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username;
