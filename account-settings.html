@@ -58,6 +58,23 @@
           <button id="change-password-button" type="submit">Update password</button>
         </form>
       </section>
+      <section class="card" aria-labelledby="mfa-settings-title">
+        <h2 id="mfa-settings-title">Two-factor authentication (2FA)</h2>
+        <p class="muted">Add an authenticator app as a second sign-in step. Compatible apps include Google Authenticator, Microsoft Authenticator, Authy, and 1Password.</p>
+        <div id="mfa-factor-list" aria-live="polite"><p class="muted">Loading authenticator settings…</p></div>
+        <div class="actions"><button id="mfa-add" type="button">Set up authenticator</button></div>
+        <div id="mfa-enrollment" class="notice" hidden>
+          <strong>Scan this QR code with your authenticator app</strong>
+          <div id="mfa-qr" style="margin:12px 0;max-width:220px"></div>
+          <p class="muted">If you cannot scan the QR code, enter this setup key manually:</p>
+          <p><code id="mfa-secret" style="overflow-wrap:anywhere"></code></p>
+          <form id="mfa-enroll-form">
+            <div class="field"><label for="mfa-enroll-code">Six-digit verification code</label><input id="mfa-enroll-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required></div>
+            <div class="actions"><button id="mfa-enable" type="submit">Verify and enable 2FA</button><button id="mfa-cancel-enroll" class="secondary" type="button">Cancel setup</button></div>
+          </form>
+        </div>
+        <p class="muted">Supabase does not provide recovery codes for this factor type. Consider enrolling a second authenticator on a separate device and keep its access secure.</p>
+      </section>
       <section class="card" aria-labelledby="passkeys-title">
         <h2 id="passkeys-title">Passkeys</h2>
         <p class="muted">Use Face ID, Touch ID, Windows Hello, your device PIN, or a security key to sign in without a password. Add a passkey while signed in, then use it from the login page.</p>
@@ -130,6 +147,100 @@
       const user = userData.user;
       const passkeyList = document.getElementById('passkey-list');
       const addPasskeyButton = document.getElementById('add-passkey');
+      const mfaFactorList = document.getElementById('mfa-factor-list');
+      const mfaEnrollment = document.getElementById('mfa-enrollment');
+      const mfaAddButton = document.getElementById('mfa-add');
+      let pendingEnrollmentFactorId = '';
+      async function refreshMfaFactors() {
+        mfaFactorList.replaceChildren();
+        const {data, error} = await client.auth.mfa.listFactors();
+        if (error) {
+          const note = document.createElement('p'); note.className = 'notice';
+          note.textContent = error.message || 'Could not load two-factor settings.';
+          mfaFactorList.append(note); return;
+        }
+        const verified = (data.totp || []).filter(factor => factor.status === 'verified');
+        if (!verified.length) {
+          const note = document.createElement('p'); note.className = 'muted';
+          note.textContent = 'Two-factor authentication is currently off.';
+          mfaFactorList.append(note);
+        }
+        for (const factor of verified) {
+          const row = document.createElement('div'); row.className = 'provider';
+          const detail = document.createElement('div');
+          const name = document.createElement('strong'); name.textContent = factor.friendly_name || 'Authenticator app';
+          const state = document.createElement('div'); state.className = 'muted'; state.textContent = 'Enabled · Authenticator app';
+          detail.append(name,state);
+          const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Remove';
+          remove.addEventListener('click', async () => {
+            if (!window.confirm('Remove this authenticator from your account? This will disable this second factor.')) return;
+            remove.disabled = true;
+            const {error:removeError} = await client.auth.mfa.unenroll({factorId:factor.id});
+            if (removeError) { remove.disabled = false; setStatus(`Could not remove authenticator: ${removeError.message}`,true); return; }
+            await client.auth.refreshSession();
+            setStatus('Authenticator removed.'); await refreshMfaFactors();
+          });
+          row.append(detail,remove); mfaFactorList.append(row);
+        }
+        mfaAddButton.disabled = verified.length >= 10;
+        if (verified.length >= 10) {
+          const note = document.createElement('p'); note.className = 'muted'; note.textContent = 'Supabase allows up to 10 enrolled factors.';
+          mfaFactorList.append(note);
+        }
+      }
+      mfaAddButton.addEventListener('click', async () => {
+        mfaAddButton.disabled = true; setStatus('Preparing your authenticator setup…');
+        try {
+          const {data,error} = await client.auth.mfa.enroll({factorType:'totp',friendlyName:'ConfigKit authenticator'});
+          if (error) throw error;
+          pendingEnrollmentFactorId = data.id;
+          const qr = document.getElementById('mfa-qr');
+          qr.replaceChildren();
+          const image = document.createElement('img');
+          image.alt = 'Authenticator setup QR code';
+          image.width = 200; image.height = 200; image.style.cssText = 'max-width:100%;background:white';
+          image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(data.totp.qr_code);
+          qr.append(image);
+          document.getElementById('mfa-secret').textContent = data.totp.secret;
+          document.getElementById('mfa-enroll-code').value = '';
+          mfaEnrollment.hidden = false;
+          setStatus('Scan the QR code, then enter the six-digit code from your authenticator app.');
+        } catch (error) {
+          setStatus(`Could not start authenticator setup: ${error.message || 'Please try again.'}`,true);
+          mfaAddButton.disabled = false;
+        }
+      });
+      document.getElementById('mfa-enroll-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const input = document.getElementById('mfa-enroll-code');
+        const button = document.getElementById('mfa-enable');
+        if (!pendingEnrollmentFactorId || !input.reportValidity()) return;
+        button.disabled = true;
+        try {
+          const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:pendingEnrollmentFactorId});
+          if (challengeError) throw challengeError;
+          const {error:verifyError} = await client.auth.mfa.verify({factorId:pendingEnrollmentFactorId,challengeId:challenge.id,code:input.value.trim()});
+          if (verifyError) throw verifyError;
+          pendingEnrollmentFactorId = '';
+          mfaEnrollment.hidden = true;
+          document.getElementById('mfa-secret').textContent = '';
+          setStatus('Two-factor authentication is now enabled for your account.');
+          await refreshMfaFactors();
+        } catch (error) {
+          setStatus(`Could not verify that code: ${error.message || 'Check the code and try again.'}`,true);
+        } finally { button.disabled = false; }
+      });
+      document.getElementById('mfa-cancel-enroll').addEventListener('click', async () => {
+        if (pendingEnrollmentFactorId) await client.auth.mfa.unenroll({factorId:pendingEnrollmentFactorId});
+        pendingEnrollmentFactorId = '';
+        mfaEnrollment.hidden = true;
+        document.getElementById('mfa-secret').textContent = '';
+        mfaAddButton.disabled = false;
+        setStatus('Authenticator setup cancelled.');
+        await refreshMfaFactors();
+      });
+      await refreshMfaFactors();
+
       async function refreshPasskeys() {
         passkeyList.replaceChildren();
         const {data:passkeys, error} = await client.auth.passkey.list();
