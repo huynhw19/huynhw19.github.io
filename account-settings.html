@@ -149,9 +149,13 @@
       const {data:userData, error:userError} = await client.auth.getUser();
       if (userError || !userData.user) { setStatus('Could not load your account details. Please sign in again.', true); return; }
 
+      // Match the dashboard's passkey handling: a successful passkey ceremony is
+      // accepted as the primary factor for this tab. This marker is only a UI
+      // routing hint; it is not a server-side AAL2 claim.
+      const passkeySession = sessionStorage.getItem('configkit_passkey_session_user') === userData.user.id;
       const {data:assuranceData,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
       if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
-      if (assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2') {
+      if (!passkeySession && assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2') {
         setStatus('Please complete two-factor authentication before managing account security. Redirecting to sign in…');
         window.location.replace('login.html');
         return;
