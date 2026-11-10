@@ -226,8 +226,10 @@ if (typeof auth.signInWithPasskey === 'function') {
     }
     if (typeof auth.signInWithPassword === 'function') {
       const original = auth.signInWithPassword.bind(auth);
-      auth.signInWithPassword = withCaptcha(original, args => args[0]?.options || {}, (args, captchaToken, options) => {
-        args[0] = {...args[0], options:{...options, captchaToken}};
+      auth.signInWithPassword = withCaptcha(original, () => ({}), (args, captchaToken) => {
+        // signInWithPassword expects captchaToken on the credentials object,
+        // unlike signUp which accepts it under options.captchaToken.
+        args[0] = {...args[0], captchaToken};
       });
     }
     if (typeof auth.resetPasswordForEmail === 'function') {
