@@ -177,13 +177,13 @@
         setStatus(error.message || 'Could not check email two-factor status.', true);
         return;
       }
-      if (email2FAStatus.enabled && !email2FAStatus.verified) {
-        setStatus('Please verify your email second factor before managing account security. Redirecting to sign in…');
+      const {data:assuranceData,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
+      if (email2FAStatus.enabled && !email2FAStatus.verified && assuranceData.currentLevel !== 'aal2') {
+        setStatus('Please verify your email or authenticator second factor before managing account security. Redirecting to sign in…');
         window.location.replace('login.html?next=account-settings.html');
         return;
       }
-      const {data:assuranceData,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
       if (!email2FAStatus.verified && !passkeySession && assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2') {
         setStatus('Please complete two-factor authentication before managing account security. Redirecting to sign in…');
         window.location.replace('login.html?next=account-settings.html');
