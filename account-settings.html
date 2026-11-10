@@ -80,6 +80,23 @@
         </div>
         <p class="muted">Supabase does not provide recovery codes for this factor type. Consider enrolling a second authenticator on a separate device and keep its access secure.</p>
       </section>
+      <section class="card" aria-labelledby="email-2fa-title">
+        <h2 id="email-2fa-title">Email verification as an alternative 2FA method</h2>
+        <p class="muted">When enabled, ConfigKit sends a one-time eight-digit code and a single-use verification link to your confirmed email after your primary sign-in. This can replace the authenticator challenge for that session. Verification expires after eight hours; the next sign-in will ask again.</p>
+        <p id="email-2fa-status" class="notice" aria-live="polite">Checking email verification settings…</p>
+        <div class="actions">
+          <button id="email-2fa-enable" type="button">Enable email 2FA</button>
+          <button id="email-2fa-disable" class="danger" type="button" hidden>Disable email 2FA</button>
+        </div>
+        <form id="email-2fa-enroll-form" hidden>
+          <div class="field">
+            <label for="email-2fa-enroll-code">Eight-digit email verification code</label>
+            <input id="email-2fa-enroll-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{8}" minlength="8" maxlength="8" required>
+          </div>
+          <div class="actions"><button id="email-2fa-enroll-verify" type="submit">Verify email and enable</button></div>
+        </form>
+        <p class="muted fine-print">Email 2FA is bound to your current sign-in session and enforced by database access policies. Keep your email account secure; anyone who can access your inbox may be able to complete this factor.</p>
+      </section>
       <section class="card" aria-labelledby="passkeys-title">
         <h2 id="passkeys-title">Passkeys</h2>
         <p class="muted">Use Face ID, Touch ID, Windows Hello, your device PIN, or a security key to sign in without a password. Add a passkey while signed in, then use it from the login page.</p>
@@ -153,14 +170,46 @@
       // accepted as the primary factor for this tab. This marker is only a UI
       // routing hint; it is not a server-side AAL2 claim.
       const passkeySession = sessionStorage.getItem('configkit_passkey_session_user') === userData.user.id;
+      let email2FAStatus;
+      try {
+        email2FAStatus = await invokeEmail2FA({action:'status'});
+      } catch (error) {
+        setStatus(error.message || 'Could not check email two-factor status.', true);
+        return;
+      }
+      if (email2FAStatus.enabled && !email2FAStatus.verified) {
+        setStatus('Please verify your email second factor before managing account security. Redirecting to sign in…');
+        window.location.replace('login.html?next=account-settings.html');
+        return;
+      }
       const {data:assuranceData,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
       if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
-      if (!passkeySession && assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2') {
+      if (!email2FAStatus.verified && !passkeySession && assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2') {
         setStatus('Please complete two-factor authentication before managing account security. Redirecting to sign in…');
         window.location.replace('login.html?next=account-settings.html');
         return;
       }
       const user = userData.user;
+      const email2FAStatusElement = document.getElementById('email-2fa-status');
+      const email2FAEnableButton = document.getElementById('email-2fa-enable');
+      const email2FADisableButton = document.getElementById('email-2fa-disable');
+      const email2FAEnrollForm = document.getElementById('email-2fa-enroll-form');
+      const email2FAEnrollCode = document.getElementById('email-2fa-enroll-code');
+      async function invokeEmail2FA(body) {
+        const {data, error} = await client.functions.invoke('email-2fa', {body});
+        if (error) throw new Error(data?.error || error.message || 'Email verification could not be completed.');
+        if (data?.error) throw new Error(data.error);
+        return data || {};
+      }
+      async function refreshEmail2FAStatus() {
+        const data = await invokeEmail2FA({action:'status'});
+        email2FAStatusElement.textContent = data.enabled
+          ? (data.verified ? 'Enabled · This browser session is verified.' : 'Enabled · This session still needs email verification.')
+          : 'Disabled · Your authenticator or passkey settings remain unchanged.';
+        email2FAEnableButton.hidden = data.enabled;
+        email2FADisableButton.hidden = !data.enabled;
+        return data;
+      }
       const passkeyList = document.getElementById('passkey-list');
       const addPasskeyButton = document.getElementById('add-passkey');
       const mfaFactorList = document.getElementById('mfa-factor-list');
@@ -169,6 +218,50 @@
       const mfaAddPasskeyFactorButton = document.getElementById('mfa-add-passkey-factor');
       const mfaWebauthnFactorList = document.getElementById('mfa-webauthn-factor-list');
       let pendingEnrollmentFactorId = '';
+      email2FAEnableButton.addEventListener('click', async () => {
+        email2FAEnableButton.disabled = true;
+        try {
+          const sent = await invokeEmail2FA({action:'enable'});
+          email2FAEnrollForm.hidden = false;
+          email2FAStatusElement.textContent = 'A verification code and one-time link were sent to ' + (sent.destination || user.email) + '. Enter the code below to enable email 2FA.';
+          email2FAEnrollCode.focus();
+        } catch (error) {
+          setStatus(error.message || 'Could not start email 2FA setup.', true);
+        } finally { email2FAEnableButton.disabled = false; }
+      });
+      email2FAEnrollForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!email2FAEnrollForm.reportValidity()) return;
+        const button = document.getElementById('email-2fa-enroll-verify');
+        button.disabled = true;
+        try {
+          await invokeEmail2FA({action:'verify', code:email2FAEnrollCode.value.trim()});
+          email2FAEnrollCode.value = '';
+          email2FAEnrollForm.hidden = true;
+          await refreshEmail2FAStatus();
+          setStatus('Email two-factor authentication is enabled for your account.');
+        } catch (error) {
+          setStatus(error.message || 'That email code could not be verified.', true);
+          email2FAEnrollCode.select();
+        } finally { button.disabled = false; }
+      });
+      email2FADisableButton.addEventListener('click', async () => {
+        if (!window.confirm('Disable email two-factor authentication? Your existing authenticator and passkey settings will remain unchanged.')) return;
+        email2FADisableButton.disabled = true;
+        try {
+          await invokeEmail2FA({action:'disable'});
+          await refreshEmail2FAStatus();
+          setStatus('Email two-factor authentication has been disabled.');
+        } catch (error) {
+          setStatus(error.message || 'Could not disable email 2FA.', true);
+        } finally { email2FADisableButton.disabled = false; }
+      });
+      try {
+        await refreshEmail2FAStatus();
+      } catch (error) {
+        email2FAStatusElement.textContent = error.message || 'Email 2FA settings could not be loaded.';
+        email2FAEnableButton.disabled = true;
+      }
       async function refreshMfaFactors() {
         mfaFactorList.replaceChildren();
         const {data, error} = await client.auth.mfa.listFactors();
