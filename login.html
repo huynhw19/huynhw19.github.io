@@ -105,7 +105,12 @@
       }
 
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,experimental:{passkey:true}}});
-      const callbackUrl = new URL('login.html', window.location.href).href;
+      const requestedNext = new URLSearchParams(window.location.search).get('next');
+      // Only allow known same-site destinations; never redirect to an arbitrary URL.
+      const postLoginDestination = requestedNext === 'account-settings.html' ? requestedNext : 'dashboard.html';
+      const callbackUrlObject = new URL('login.html', window.location.href);
+      if (postLoginDestination !== 'dashboard.html') callbackUrlObject.searchParams.set('next', postLoginDestination);
+      const callbackUrl = callbackUrlObject.href;
       const accountIntentKey = 'configkit_account_oauth_intent';
       const passkeySessionKey = 'configkit_passkey_session_user';
       function selectedMetadata() {
@@ -186,7 +191,7 @@
               return;
             }
           }
-          if (!redirecting) { redirecting = true; window.location.replace('dashboard.html'); }
+          if (!redirecting) { redirecting = true; window.location.replace(postLoginDestination); }
         } else {
           passkeyPrimaryPending = false;
           pendingMfaFactorId = '';
