@@ -198,7 +198,18 @@
       const email2FAEnrollCode = document.getElementById('email-2fa-enroll-code');
       async function invokeEmail2FA(body) {
         const {data, error} = await client.functions.invoke('email-2fa', {body});
-        if (error) throw new Error(data?.error || error.message || 'Email verification could not be completed.');
+        if (error) {
+          let detail = data?.error || data?.message;
+          // FunctionsHttpError keeps the non-2xx response body on error.context.
+          // Read it so server-side messages (including the resend cooldown) reach the UI.
+          if (!detail && error.context && typeof error.context.json === 'function') {
+            try {
+              const payload = await error.context.json();
+              detail = payload?.error || payload?.message;
+            } catch (_) { /* Fall back to the SDK error message. */ }
+          }
+          throw new Error(detail || error.message || 'Email verification could not be completed.');
+        }
         if (data?.error) throw new Error(data.error);
         return data || {};
       }
