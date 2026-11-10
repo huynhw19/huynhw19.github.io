@@ -109,13 +109,14 @@ Deno.serve(async (req: Request) => {
     if (action === "status") {
       return json({ enabled, verified: enabled ? await isVerified() : false, email: user.email ?? null });
     }
-    if (!user.email || !user.email_confirmed_at) {
+    const nativeAal2 = claims.aal === "aal2";
+    if ((!user.email || !user.email_confirmed_at) && !(action === "disable" && nativeAal2)) {
       return json({ error: "Confirm your email address before using email two-factor authentication." }, 403);
     }
 
     if (action === "disable") {
       if (!enabled) return json({ enabled: false, verified: false });
-      if (!(await isVerified())) return json({ error: "Verify your email challenge before disabling this factor." }, 403);
+      if (!(await isVerified()) && !nativeAal2) return json({ error: "Verify your email or authenticator second factor before disabling this factor." }, 403);
       const { error } = await admin.from("email_2fa_settings")
         .update({ enabled: false, updated_at: new Date().toISOString() }).eq("user_id", user.id);
       if (error) throw error;
