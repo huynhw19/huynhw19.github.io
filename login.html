@@ -316,7 +316,7 @@
         setMode('login'); await renderSession();
       });
       github.disabled = false; microsoft.disabled = true;
-      client.auth.onAuthStateChange((_event, session) => { if (session) void renderSession(); });
+      client.auth.onAuthStateChange((_event, session) => { if (session) queueMicrotask(() => { void renderSession(); }); });
       const params = new URLSearchParams(window.location.search);
       if (params.has('error_description') || params.has('error')) {
         sessionStorage.removeItem(accountIntentKey);
