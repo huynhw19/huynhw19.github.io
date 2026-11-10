@@ -95,6 +95,8 @@
       let mode = 'login';
       let redirecting = false;
       let pendingMfaFactorId = '';
+      let passkeyPrimaryPending = false;
+      let passkeyMfaInProgress = false;
       const config = window.CONFIGKIT_AUTH || {};
       if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
         setup.hidden = false;
@@ -143,6 +145,7 @@
         setStatus(signingUp ? 'Create an account with your email and a password.' : 'Log in with your email and password.');
       }
       async function renderSession() {
+        if (passkeyMfaInProgress) return;
         const {data, error} = await client.auth.getSession();
         if (error) { setStatus('Could not read the sign-in session. Please try again.', true); return; }
         if (data.session) {
@@ -152,7 +155,34 @@
             const {data: factorData, error: factorError} = await client.auth.mfa.listFactors();
             if (factorError) { setStatus('Could not load your authenticator. Please try again.', true); return; }
             const factor = (factorData.totp || []).find(item => item.status === 'verified');
-            if (!factor) { setStatus('Your account requires a verified second factor, but none is available. Contact support.', true); return; }
+            const passkeyFactor = (factorData.all || []).find(item => item.factor_type === 'webauthn' && item.status === 'verified');
+            if (passkeyPrimaryPending && passkeyFactor) {
+              passkeyMfaInProgress = true;
+              form.hidden = true;
+              document.querySelector('.tabs').hidden = true;
+              document.querySelector('.divider').hidden = true;
+              document.querySelectorAll('.providers').forEach(node => node.hidden = true);
+              document.getElementById('mfa-challenge').hidden = true;
+              setStatus('Verify your passkey again to complete the second sign-in step…');
+              try {
+                const {error:passkeyMfaError} = await client.auth.mfa.webauthn.authenticate({factorId:passkeyFactor.id});
+                if (passkeyMfaError) throw passkeyMfaError;
+                passkeyPrimaryPending = false;
+                const {data:verifiedAssurance,error:verifiedAssuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+                if (verifiedAssuranceError) throw verifiedAssuranceError;
+                if (verifiedAssurance.currentLevel !== 'aal2') throw new Error('Passkey verification did not complete the required second factor.');
+                passkeyMfaInProgress = false;
+                await renderSession();
+                return;
+              } catch (passkeyMfaError) {
+                passkeyPrimaryPending = false;
+                setStatus(`Passkey second-factor verification failed${passkeyMfaError.message ? `: ${passkeyMfaError.message}` : '.'} You can use your authenticator code instead.`, true);
+              } finally {
+                passkeyMfaInProgress = false;
+              }
+            }
+            passkeyPrimaryPending = false;
+            if (!factor) { setStatus('Your account requires a verified second factor, but no verified authenticator is available. Contact support.', true); return; }
             pendingMfaFactorId = factor.id;
             form.hidden = true;
             document.querySelector('.tabs').hidden = true;
@@ -178,6 +208,7 @@
           }
           if (!redirecting) { redirecting = true; window.location.replace('dashboard.html'); }
         } else {
+          passkeyPrimaryPending = false;
           account.hidden = true; signout.hidden = true; form.hidden = false;
           document.querySelector('.tabs').hidden = false;
           document.querySelector('.divider').hidden = false;
@@ -280,12 +311,14 @@
           return;
         }
         setBusy(true); setStatus('Waiting for your passkey…');
+        passkeyPrimaryPending = true;
         try {
           const {data, error} = await client.auth.signInWithPasskey();
           if (error) throw error;
           if (!data.session) throw new Error('Passkey sign-in did not create a session. Please try again.');
           setStatus('Signed in with your passkey.'); await renderSession();
         } catch (error) {
+          passkeyPrimaryPending = false;
           setStatus(error.message || 'Passkey sign-in failed. If this is your first time, sign in with email or a provider and add a passkey in Account settings.', true);
         } finally { setBusy(false); }
       });
