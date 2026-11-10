@@ -346,7 +346,8 @@ window.CONFIGKIT_AUTH = {
               if (error || !data?.enabled || data.verified) return;
               const {data: assurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
               if (assurance?.currentLevel === 'aal2') return;
-              const destination = window.location.pathname.endsWith('account-settings.html') ? 'account-settings.html' : 'dashboard.html';
+              const currentPage = window.location.pathname.split('/').pop();
+              const destination = ['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html'].includes(currentPage) ? currentPage : 'dashboard.html';
               window.location.replace('login.html?next=' + encodeURIComponent(destination));
             } catch (_) {
               // RLS still denies protected data if verification is missing.
