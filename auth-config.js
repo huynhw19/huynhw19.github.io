@@ -261,6 +261,9 @@ window.CONFIGKIT_AUTH = {
     const container = document.createElement('div');
     container.id = 'turnstile-container';
     container.style.cssText = 'margin:16px 0;min-height:65px';
+    const hint = document.createElement('p');
+    hint.className = 'muted';
+    hint.textContent = 'Complete this verification before using email/password or passkey sign-in.';
     const message = document.createElement('p');
     message.id = 'turnstile-help';
     message.className = 'muted';
@@ -269,6 +272,7 @@ window.CONFIGKIT_AUTH = {
     const actions = form.querySelector('.form-actions');
     if (actions) form.insertBefore(container, actions);
     else form.append(container);
+    form.insertBefore(hint, container);
     form.insertBefore(message, container.nextSibling);
 
     if (!config.turnstileSiteKey) {
