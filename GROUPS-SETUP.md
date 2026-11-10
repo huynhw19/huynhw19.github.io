@@ -1,6 +1,6 @@
 # Set up ConfigKit groups
 
-The signed-in groups page is `groups.html`. It lets authenticated users create a group, share a one-time invite code, join by code, view their memberships, and leave groups. The group feature stores group names and membership only; it does not share or save mobileconfig profiles. Configure Supabase first with `auth-config.js`. Never put a Supabase service-role key in browser code.
+The signed-in groups page is `groups.html`. It lets authenticated users create a group, share a one-time invite code, join by code, view their memberships, and leave groups. Group creators can also rename or permanently delete groups; only the creator is authorized to perform those actions. The group feature stores group names and membership only; it does not share or save mobileconfig profiles. Configure Supabase first with `auth-config.js`. Never put a Supabase service-role key in browser code.
 
 > **Already set up groups before November 2026?** Creating and joining groups failed with the old functions. Run [`GROUPS-REPAIR.sql`](GROUPS-REPAIR.sql) once to fix them — see [`fixgroup.md`](fixgroup.md).
 
@@ -90,6 +90,49 @@ begin
   return query select found_group.id, found_group.name;
 end;
 $$;
+
+create or replace function public.update_configkit_group(group_id uuid, group_name text)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  clean_name text := btrim(update_configkit_group.group_name);
+begin
+  if auth.uid() is null then raise exception 'Sign in is required.'; end if;
+  if clean_name is null or char_length(clean_name) < 1 or char_length(clean_name) > 80 then
+    raise exception 'Group name must be between 1 and 80 characters.';
+  end if;
+  update public.configkit_groups
+    set name = clean_name
+    where id = update_configkit_group.group_id
+      and created_by = auth.uid();
+  if not found then raise exception 'Only the group owner can edit this group.'; end if;
+  return true;
+end;
+$;
+
+create or replace function public.delete_configkit_group(group_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if auth.uid() is null then raise exception 'Sign in is required.'; end if;
+  delete from public.configkit_groups
+    where id = delete_configkit_group.group_id
+      and created_by = auth.uid();
+  if not found then raise exception 'Only the group owner can delete this group.'; end if;
+  return true;
+end;
+$;
+
+revoke all on function public.update_configkit_group(uuid, text) from public, anon;
+revoke all on function public.delete_configkit_group(uuid) from public, anon;
+grant execute on function public.update_configkit_group(uuid, text) to authenticated;
+grant execute on function public.delete_configkit_group(uuid) to authenticated;
 
 revoke all on function public.create_configkit_group(text) from public, anon;
 revoke all on function public.join_configkit_group(text) from public, anon;
