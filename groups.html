@@ -7,7 +7,7 @@
   <title>ConfigKit Groups</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,880px);margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650}main{padding:36px 0 56px}h1{font-size:clamp(2rem,6vw,3rem);line-height:1.15;margin:8px 0}h2{font-size:1.25rem;margin:0 0 10px}.lead,.muted{color:var(--muted)}.lead{font-size:1.1rem;max-width:680px}.notice{padding:14px 16px;background:var(--gold);border:1px solid #f1e4c9;border-radius:12px;color:#62512d;margin:20px 0}.status{padding:12px 14px;background:var(--white);border:1px solid var(--line);border-radius:10px}.error{color:var(--red)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin-top:22px}.panel,.group{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;margin:16px 0}.field{margin:14px 0}.field label{display:block;font-weight:650;margin-bottom:5px}input{width:100%;padding:11px 12px;border:1px solid #b9c9bf;border-radius:8px;font:inherit}button{padding:10px 15px;border:1px solid var(--green);border-radius:9px;background:var(--green);color:white;font:inherit;font-weight:650;cursor:pointer}button.secondary{background:white;color:var(--green-dark);border-color:var(--line)}button:disabled{opacity:.6;cursor:wait}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.code{font:700 1.05rem ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;overflow-wrap:anywhere}.group-list{list-style:none;padding:0}.group{margin:12px 0}.group h3{margin:0 0 6px}footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted)}[hidden]{display:none!important}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,880px);margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650}main{padding:36px 0 56px}h1{font-size:clamp(2rem,6vw,3rem);line-height:1.15;margin:8px 0}h2{font-size:1.25rem;margin:0 0 10px}.lead,.muted{color:var(--muted)}.lead{font-size:1.1rem;max-width:680px}.notice{padding:14px 16px;background:var(--gold);border:1px solid #f1e4c9;border-radius:12px;color:#62512d;margin:20px 0}.status{padding:12px 14px;background:var(--white);border:1px solid var(--line);border-radius:10px}.error{color:var(--red)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin-top:22px}.panel,.group{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;margin:16px 0}.field{margin:14px 0}.field label{display:block;font-weight:650;margin-bottom:5px}input{width:100%;padding:11px 12px;border:1px solid #b9c9bf;border-radius:8px;font:inherit}button{padding:10px 15px;border:1px solid var(--green);border-radius:9px;background:var(--green);color:white;font:inherit;font-weight:650;cursor:pointer}button.secondary{background:white;color:var(--green-dark);border-color:var(--line)}button:disabled{opacity:.6;cursor:wait}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.code{font:700 1.05rem ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;overflow-wrap:anywhere}.group-list{list-style:none;padding:0}.group{margin:12px 0}.group h3{margin:0 0 6px}.group-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.edit-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.edit-form input{flex:1;min-width:180px}.danger{background:#fff;color:var(--red);border-color:#e8caca}footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted)}[hidden]{display:none!important}
   </style>
 </head>
 <body>
@@ -69,21 +69,52 @@
           const item = document.createElement('li'); item.className = 'muted'; item.textContent = 'You have not joined any groups yet.'; list.append(item); return;
         }
         const ids = memberships.map(row => row.group_id);
-        const {data: groups, error: groupError} = await client.from('configkit_groups').select('id,name,created_at').in('id', ids).order('created_at', {ascending:false});
+        const {data: groups, error: groupError} = await client.from('configkit_groups').select('id,name,created_at,created_by').in('id', ids).order('created_at', {ascending:false});
         if (groupError) { showError(groupError); return; }
         for (const group of groups || []) {
           const item = document.createElement('li'); item.className = 'group';
           const heading = document.createElement('h3'); heading.textContent = group.name;
           const meta = document.createElement('p'); meta.className = 'muted'; meta.textContent = `Joined group · created ${new Date(group.created_at).toLocaleDateString()}`;
-          const leave = document.createElement('button'); leave.type = 'button'; leave.className = 'secondary'; leave.textContent = 'Leave group';
-          leave.addEventListener('click', async () => {
-            if (!window.confirm(`Leave “${group.name}”? You will need a new invite code to rejoin.`)) return;
-            leave.disabled = true;
-            const {error} = await client.from('configkit_group_members').delete().eq('group_id', group.id).eq('user_id', user.id);
-            if (error) { leave.disabled = false; showError(error); return; }
-            setStatus(`You left ${group.name}.`); await loadGroups();
-          });
-          item.append(heading, meta, leave); list.append(item);
+          const actions = document.createElement('div'); actions.className = 'group-actions';
+          if (group.created_by === user.id) {
+            const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'secondary'; edit.textContent = 'Edit group';
+            edit.addEventListener('click', () => {
+              if (item.querySelector('.edit-form')) return;
+              const form = document.createElement('form'); form.className = 'edit-form';
+              const input = document.createElement('input'); input.type = 'text'; input.maxLength = 80; input.required = true; input.value = group.name; input.setAttribute('aria-label', 'New group name');
+              const save = document.createElement('button'); save.type = 'submit'; save.textContent = 'Save name';
+              const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'secondary'; cancel.textContent = 'Cancel';
+              cancel.addEventListener('click', () => form.remove());
+              form.addEventListener('submit', async event => {
+                event.preventDefault(); const name = input.value.trim(); if (!name) return;
+                save.disabled = true;
+                const {error} = await client.rpc('update_configkit_group', {group_id:group.id, group_name:name});
+                if (error) { save.disabled = false; showError(error); return; }
+                setStatus('Group name updated.'); await loadGroups();
+              });
+              form.append(input, save, cancel); item.append(form); input.focus();
+            });
+            const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Delete group';
+            remove.addEventListener('click', async () => {
+              if (!window.confirm(`Permanently delete “${group.name}” and remove all its members? This cannot be undone.`)) return;
+              remove.disabled = true;
+              const {error} = await client.rpc('delete_configkit_group', {group_id:group.id});
+              if (error) { remove.disabled = false; showError(error); return; }
+              setStatus(`“${group.name}” was deleted.`); await loadGroups();
+            });
+            actions.append(edit, remove);
+          } else {
+            const leave = document.createElement('button'); leave.type = 'button'; leave.className = 'secondary'; leave.textContent = 'Leave group';
+            leave.addEventListener('click', async () => {
+              if (!window.confirm(`Leave “${group.name}”? You will need a new invite code to rejoin.`)) return;
+              leave.disabled = true;
+              const {error} = await client.from('configkit_group_members').delete().eq('group_id', group.id).eq('user_id', user.id);
+              if (error) { leave.disabled = false; showError(error); return; }
+              setStatus(`You left ${group.name}.`); await loadGroups();
+            });
+            actions.append(leave);
+          }
+          item.append(heading, meta, actions); list.append(item);
         }
       }
       async function start() {
