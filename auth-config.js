@@ -152,20 +152,30 @@ window.CONFIGKIT_AUTH = {
     if (turnstile && widgetId !== null) turnstile.reset(widgetId);
   };
 
-  const withCaptcha = (method, getOptions, setOptions) => async (...args) => {
+  // Run any authentication action with a fresh Turnstile token. The token is
+  // consumed once and the widget is reset after the request settles.
+  const runWithCaptcha = async action => {
     if (!config.turnstileSiteKey) {
-      throw new Error('Email sign-in requires Turnstile setup. Add the site key to auth-config.js and configure CAPTCHA in Supabase.');
+      throw new Error('Human verification is not configured. Add the Turnstile site key and configure CAPTCHA in Supabase.');
     }
     if (!token) throw new Error('Please complete the human verification challenge and try again.');
     const captchaToken = token;
     token = '';
-    setOptions(args, captchaToken, getOptions(args));
     try {
-      return await method(...args);
+      return await action(captchaToken);
     } finally {
       resetWidget();
     }
   };
+  // Passkey sign-in calls this explicitly so its challenge request receives
+  // options.captchaToken through the supported Supabase JS API.
+  window.CONFIGKIT_AUTH.runWithCaptcha = runWithCaptcha;
+
+  const withCaptcha = (method, getOptions, setOptions) => async (...args) =>
+    runWithCaptcha(captchaToken => {
+      setOptions(args, captchaToken, getOptions(args));
+      return method(...args);
+    });
 
   const protectClient = client => {
     if (!client?.auth || client.auth.__configKitCaptcha) return client;
@@ -205,20 +215,6 @@ window.CONFIGKIT_AUTH = {
         }
         return captchaSignUp(credentials);
       };
-    }
-    // Passkey authentication also sends its CAPTCHA token in options.
-    if (typeof auth.signInWithPasskey === 'function') {
-      const original = auth.signInWithPasskey.bind(auth);
-      auth.signInWithPasskey = withCaptcha(
-        original,
-        args => args[0]?.options || {},
-        (args, captchaToken, options) => {
-          args[0] = {
-            ...(args[0] || {}),
-            options: {...options, captchaToken}
-          };
-        }
-      );
     }
     if (typeof auth.signInWithPassword === 'function') {
       const original = auth.signInWithPassword.bind(auth);
