@@ -63,6 +63,11 @@
         <p class="muted">Add an authenticator app as a second sign-in step. Compatible apps include Google Authenticator, Microsoft Authenticator, Authy, and 1Password.</p>
         <div id="mfa-factor-list" aria-live="polite"><p class="muted">Loading authenticator settings…</p></div>
         <div class="actions"><button id="mfa-add" type="button">Set up authenticator</button></div>
+        <hr style="border:0;border-top:1px solid var(--line);margin:24px 0">
+        <h3>Passkey as a second factor</h3>
+        <p class="muted">Register a WebAuthn passkey specifically for two-factor authentication. After setup, passkey sign-ins can use this verified factor instead of asking for a six-digit TOTP code. GitHub and email/password sign-ins will still require their second step.</p>
+        <div id="mfa-webauthn-factor-list" aria-live="polite"><p class="muted">Loading passkey second-factor settings…</p></div>
+        <div class="actions"><button id="mfa-add-passkey-factor" type="button">Add passkey as second factor</button></div>
         <div id="mfa-enrollment" class="notice" hidden>
           <strong>Scan this QR code with your authenticator app</strong>
           <div id="mfa-qr" style="margin:12px 0;max-width:220px"></div>
@@ -157,6 +162,8 @@
       const mfaFactorList = document.getElementById('mfa-factor-list');
       const mfaEnrollment = document.getElementById('mfa-enrollment');
       const mfaAddButton = document.getElementById('mfa-add');
+      const mfaAddPasskeyFactorButton = document.getElementById('mfa-add-passkey-factor');
+      const mfaWebauthnFactorList = document.getElementById('mfa-webauthn-factor-list');
       let pendingEnrollmentFactorId = '';
       async function refreshMfaFactors() {
         mfaFactorList.replaceChildren();
@@ -189,6 +196,37 @@
           });
           row.append(detail,remove); mfaFactorList.append(row);
         }
+        const webauthnFactors = (data.all || []).filter(factor => factor.factor_type === 'webauthn');
+        mfaWebauthnFactorList.replaceChildren();
+        const verifiedWebauthnFactors = webauthnFactors.filter(factor => factor.status === 'verified');
+        if (!verifiedWebauthnFactors.length) {
+          const note = document.createElement('p'); note.className = 'muted';
+          note.textContent = 'No passkey second factors registered yet.';
+          mfaWebauthnFactorList.append(note);
+        }
+        for (const factor of verifiedWebauthnFactors) {
+          const row = document.createElement('div'); row.className = 'provider';
+          const detail = document.createElement('div');
+          const name = document.createElement('strong'); name.textContent = factor.friendly_name || 'Passkey second factor';
+          const state = document.createElement('div'); state.className = 'muted'; state.textContent = 'Enabled · WebAuthn passkey';
+          detail.append(name,state);
+          const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Remove';
+          remove.addEventListener('click', async () => {
+            if (!window.confirm('Remove this passkey second factor? Passkey sign-ins will then use your authenticator code again.')) return;
+            remove.disabled = true;
+            const {error:removeError} = await client.auth.mfa.unenroll({factorId:factor.id});
+            if (removeError) { remove.disabled = false; setStatus(`Could not remove passkey second factor: ${removeError.message}`,true); return; }
+            await client.auth.refreshSession();
+            setStatus('Passkey second factor removed.'); await refreshMfaFactors();
+          });
+          row.append(detail,remove); mfaWebauthnFactorList.append(row);
+        }
+        for (const factor of webauthnFactors.filter(item => item.status === 'unverified')) {
+          const note = document.createElement('p'); note.className = 'muted';
+          note.textContent = `${factor.friendly_name || 'Passkey second factor'} · Setup not completed`;
+          mfaWebauthnFactorList.append(note);
+        }
+        mfaAddPasskeyFactorButton.disabled = (data.all || []).filter(factor => factor.status === 'verified').length >= 10;
         const pending = (data.totp || []).filter(factor => factor.status === 'unverified');
         for (const factor of pending) {
           const row = document.createElement('div'); row.className = 'provider';
@@ -208,6 +246,24 @@
           mfaFactorList.append(note);
         }
       }
+      mfaAddPasskeyFactorButton.addEventListener('click', async () => {
+        if (!window.isSecureContext || !navigator.credentials) {
+          setStatus('Passkey second factors require a supported browser on HTTPS.', true);
+          return;
+        }
+        mfaAddPasskeyFactorButton.disabled = true;
+        setStatus('Follow your device prompt to register a passkey for two-factor authentication…');
+        try {
+          const {data,error} = await client.auth.mfa.webauthn.register({friendlyName:'ConfigKit passkey second factor'});
+          if (error) throw error;
+          setStatus('Passkey second factor registered and verified. You can now use it instead of a six-digit code after passkey sign-in.');
+          await refreshMfaFactors();
+        } catch (error) {
+          setStatus(`Could not register passkey second factor: ${error.message || 'Please try again.'}`,true);
+        } finally {
+          mfaAddPasskeyFactorButton.disabled = false;
+        }
+      });
       mfaAddButton.addEventListener('click', async () => {
         mfaAddButton.disabled = true; setStatus('Checking for an unfinished authenticator setup…');
         try {
