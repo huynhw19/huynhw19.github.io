@@ -39,7 +39,7 @@ Email delivery uses [Resend](https://resend.com/). Before enabling the feature:
 
 The migration creates private challenge/session tables and adds restrictive RLS policies to the current public tables (and Storage objects, if present). The browser cannot mark a session verified: the Edge Function validates the code/link and writes the short-lived verification record that RLS checks against the signed-in Supabase session ID.
 
-Users enable the email factor from **Account settings → Email verification as an alternative 2FA method**. Existing verified TOTP users must complete their current authenticator challenge before enrolling email as an alternative. After enrollment, email verification can replace the TOTP prompt for a session. The existing TOTP/passkey enrollment remains intact.
+Users enable the email factor from **Account settings → Email verification as an alternative 2FA method**. Existing verified TOTP users must complete their current authenticator challenge before enrolling email as an alternative. After enrollment, email verification can replace the TOTP prompt for a session. Users can still choose their existing authenticator code instead, and a native Supabase AAL2 session is accepted as the fallback. The existing TOTP/passkey enrollment remains intact.
 
 A one-time email link requires the user to be signed in to the same ConfigKit account in the browser where the link is opened. The link can verify another active session for that account, but it cannot create a signed-in session by itself.
 
