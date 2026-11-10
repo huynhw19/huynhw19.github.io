@@ -97,12 +97,12 @@
             dashboard.hidden = true; signout.hidden = true; setStatus('You are signed out. ');
             const link = document.createElement('a'); link.href = 'login.html'; link.textContent = 'Go to sign in'; status.append(link); return;
           }
-          // Do not reveal protected dashboard content to an AAL1 session when
-          // the account has a verified second factor. The login page completes
-          // the pending TOTP challenge and returns here at AAL2.
+          // A passkey sign-in is accepted as the primary factor for this tab.
+          // The marker is only a UI routing hint; it is not a server-side AAL2 claim.
+          const passkeySession = sessionStorage.getItem('configkit_passkey_session_user') === data.session.user.id;
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) throw assuranceError;
-          if (assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+          if (!passkeySession && assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
             window.location.replace('login.html');
             return;
           }
@@ -127,6 +127,7 @@
         } catch (error) { setStatus(error.message || 'Could not check your sign-in. Please refresh and try again.', true); }
       }
       signout.addEventListener('click', async () => {
+        sessionStorage.removeItem('configkit_passkey_session_user');
         signout.disabled = true;
         const {error} = await client.auth.signOut(); signout.disabled = false;
         if (error) { setStatus('Could not sign out. Please try again.', true); return; }
