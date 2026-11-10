@@ -345,7 +345,6 @@ window.CONFIGKIT_AUTH = {
               const {data, error} = await client.functions.invoke('email-2fa', {body:{action:'status'}});
               if (error || !data?.enabled || data.verified) return;
               const destination = window.location.pathname.endsWith('account-settings.html') ? 'account-settings.html' : 'dashboard.html';
-                ? 'account-settings.html' : 'dashboard.html';
               window.location.replace('login.html?next=' + encodeURIComponent(destination));
             } catch (_) {
               // RLS still denies protected data if verification is missing.
