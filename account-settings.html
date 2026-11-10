@@ -144,6 +144,13 @@
       const {data:userData, error:userError} = await client.auth.getUser();
       if (userError || !userData.user) { setStatus('Could not load your account details. Please sign in again.', true); return; }
 
+      const {data:assuranceData,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
+      if (assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2') {
+        setStatus('Please complete two-factor authentication before managing account security. Redirecting to sign in…');
+        window.location.replace('login.html');
+        return;
+      }
       const user = userData.user;
       const passkeyList = document.getElementById('passkey-list');
       const addPasskeyButton = document.getElementById('add-passkey');
