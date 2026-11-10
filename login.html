@@ -61,6 +61,15 @@
           <div class="form-actions"><button id="mfa-submit" type="submit">Verify and continue</button><button id="mfa-cancel" class="secondary" type="button">Sign out</button></div>
         </form>
       </section>
+      <section id="email-mfa-challenge" class="education-note" hidden aria-labelledby="email-mfa-title">
+        <h2 id="email-mfa-title">Verify your email</h2>
+        <p class="muted">Enter the eight-digit code sent to your verified email address, or open the one-time link in that email. This is an alternative to your authenticator code.</p>
+        <form id="email-mfa-form">
+          <label for="email-mfa-code">Email verification code</label>
+          <input id="email-mfa-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{8}" minlength="8" maxlength="8" required>
+          <div class="form-actions"><button id="email-mfa-submit" type="submit">Verify and continue</button><button id="email-mfa-resend" class="secondary" type="button">Resend code and link</button><button id="email-mfa-cancel" class="secondary" type="button">Sign out</button></div>
+        </form>
+      </section>
       <div class="account" id="account" hidden></div>
       <button class="provider secondary" id="signout" type="button" hidden>Sign out</button>
       <p class="muted fine-print">Authentication is handled by Supabase and your selected identity provider. Work and enterprise account selections save self-declared profile labels; they do not enable employer-managed sign-in or verify employment or organizational affiliation. Never share your password, access tokens, or recovery codes. See our <a href="privacy.html">privacy policy</a>.</p>
@@ -96,6 +105,7 @@
       let redirecting = false;
       let pendingMfaFactorId = '';
       let passkeyPrimaryPending = false;
+      let emailChallengeSent = false;
 
       const config = window.CONFIGKIT_AUTH || {};
       if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
@@ -129,6 +139,12 @@
         status.className = isError ? 'status error' : 'status';
         status.textContent = message;
       }
+      async function invokeEmail2FA(body) {
+        const {data, error} = await client.functions.invoke('email-2fa', {body});
+        if (error) throw new Error(data?.error || error.message || 'Email verification could not be completed.');
+        if (data?.error) throw new Error(data.error);
+        return data || {};
+      }
       function updateAccountFields() {
         const isEducation = accountType.value === 'education';
         const isWork = accountType.value === 'work';
@@ -161,9 +177,51 @@
             passkeyPrimaryPending = false;
           }
           const passkeySession = sessionStorage.getItem(passkeySessionKey) === data.session.user.id;
+          const tokenParams = new URLSearchParams(window.location.search);
+          const emailLinkToken = tokenParams.get('email_2fa_token');
+          if (emailLinkToken) {
+            try {
+              await invokeEmail2FA({action:'verify', token:emailLinkToken});
+              tokenParams.delete('email_2fa_token');
+              const cleaned = window.location.pathname + (tokenParams.toString() ? '?' + tokenParams.toString() : '') + window.location.hash;
+              window.history.replaceState({}, document.title, cleaned);
+              await client.auth.refreshSession();
+              setStatus('Email verification successful. Finishing sign-in…');
+            } catch (error) {
+              setStatus(error.message || 'This email verification link is invalid or expired. Request a new email.', true);
+            }
+          }
+          let emailMfa;
+          try {
+            emailMfa = await invokeEmail2FA({action:'status'});
+          } catch (error) {
+            setStatus(error.message || 'Could not check email verification status.', true);
+            return;
+          }
+          if (emailMfa.enabled && !emailMfa.verified) {
+            form.hidden = true;
+            document.querySelector('.tabs').hidden = true;
+            document.querySelector('.divider').hidden = true;
+            document.querySelectorAll('.providers').forEach(node => node.hidden = true);
+            document.getElementById('mfa-challenge').hidden = true;
+            document.getElementById('email-mfa-challenge').hidden = false;
+            if (!emailChallengeSent) {
+              emailChallengeSent = true;
+              try {
+                const sent = await invokeEmail2FA({action:'send'});
+                setStatus('A verification code and one-time link were sent to ' + (sent.destination || 'your verified email address') + '.');
+              } catch (error) {
+                setStatus(error.message || 'Could not send your email verification. You can try again.', true);
+              }
+            }
+            document.getElementById('email-mfa-code').focus();
+            return;
+          }
+          emailChallengeSent = false;
+          document.getElementById('email-mfa-challenge').hidden = true;
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
-          if (!passkeySession && assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+          if (!emailMfa.verified && !passkeySession && assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
             const {data: factorData, error: factorError} = await client.auth.mfa.listFactors();
             if (factorError) { setStatus('Could not load your authenticator. Please try again.', true); return; }
             const factor = (factorData.totp || []).find(item => item.status === 'verified');
@@ -179,6 +237,7 @@
             return;
           }
           document.getElementById('mfa-challenge').hidden = true;
+          document.getElementById('email-mfa-challenge').hidden = true;
           const pendingIntent = sessionStorage.getItem(accountIntentKey);
           if (pendingIntent) {
             sessionStorage.removeItem(accountIntentKey);
@@ -196,6 +255,8 @@
           passkeyPrimaryPending = false;
           pendingMfaFactorId = '';
           document.getElementById('mfa-challenge').hidden = true;
+          document.getElementById('email-mfa-challenge').hidden = true;
+          emailChallengeSent = false;
           document.getElementById('mfa-code').value = '';
           account.hidden = true; signout.hidden = true; form.hidden = false;
           document.querySelector('.tabs').hidden = false;
@@ -243,6 +304,43 @@
           setStatus(error.message || 'That code could not be verified. Check your authenticator and try again.', true);
           input.select();
         } finally { button.disabled = false; }
+      });
+      document.getElementById('email-mfa-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const input = document.getElementById('email-mfa-code');
+        const button = document.getElementById('email-mfa-submit');
+        if (!input.reportValidity()) return;
+        button.disabled = true;
+        try {
+          await invokeEmail2FA({action:'verify', code:input.value.trim()});
+          input.value = '';
+          emailChallengeSent = false;
+          setStatus('Email second-factor verification successful. Signing you in…');
+          await renderSession();
+        } catch (error) {
+          setStatus(error.message || 'That email code could not be verified. Try again or request a new one.', true);
+          input.select();
+        } finally { button.disabled = false; }
+      });
+      document.getElementById('email-mfa-resend').addEventListener('click', async event => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        try {
+          const sent = await invokeEmail2FA({action:'send'});
+          emailChallengeSent = true;
+          setStatus('A new verification code and link were sent to ' + (sent.destination || 'your verified email address') + '.');
+        } catch (error) {
+          setStatus(error.message || 'Could not resend the verification email.', true);
+        } finally { button.disabled = false; }
+      });
+      document.getElementById('email-mfa-cancel').addEventListener('click', async () => {
+        sessionStorage.removeItem(passkeySessionKey);
+        const {error} = await client.auth.signOut({scope:'local'});
+        if (error) { setStatus('Could not cancel sign-in. Please try again.', true); return; }
+        emailChallengeSent = false;
+        document.getElementById('email-mfa-challenge').hidden = true;
+        setMode('login');
+        await renderSession();
       });
       document.getElementById('mfa-cancel').addEventListener('click', async () => {
         sessionStorage.removeItem(passkeySessionKey);
