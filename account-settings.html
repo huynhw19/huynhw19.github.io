@@ -189,6 +189,7 @@
         window.location.replace('login.html?next=account-settings.html');
         return;
       }
+      const nativeMfaVerified = assuranceData.currentLevel === 'aal2';
       const user = userData.user;
       const email2FAStatusElement = document.getElementById('email-2fa-status');
       const email2FAEnableButton = document.getElementById('email-2fa-enable');
@@ -204,7 +205,7 @@
       async function refreshEmail2FAStatus() {
         const data = await invokeEmail2FA({action:'status'});
         email2FAStatusElement.textContent = data.enabled
-          ? (data.verified ? 'Enabled · This browser session is verified.' : 'Enabled · This session still needs email verification.')
+          ? ((data.verified || nativeMfaVerified) ? 'Enabled · This session is verified with your configured second factor.' : 'Enabled · This session still needs email verification.')
           : 'Disabled · Your authenticator or passkey settings remain unchanged.';
         email2FAEnableButton.hidden = data.enabled;
         email2FADisableButton.hidden = !data.enabled;
