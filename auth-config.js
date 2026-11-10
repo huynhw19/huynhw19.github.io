@@ -206,9 +206,20 @@ window.CONFIGKIT_AUTH = {
         return captchaSignUp(credentials);
       };
     }
-    // Passkey authentication uses WebAuthn's own challenge ceremony.
-    // Do not require or attach a Turnstile token here: CAPTCHA is applied
-    // only to the email/password flows documented by Supabase Auth.
+    // Passkey authentication also sends its CAPTCHA token in options.
+    if (typeof auth.signInWithPasskey === 'function') {
+      const original = auth.signInWithPasskey.bind(auth);
+      auth.signInWithPasskey = withCaptcha(
+        original,
+        args => args[0]?.options || {},
+        (args, captchaToken, options) => {
+          args[0] = {
+            ...(args[0] || {}),
+            options: {...options, captchaToken}
+          };
+        }
+      );
+    }
     if (typeof auth.signInWithPassword === 'function') {
       const original = auth.signInWithPassword.bind(auth);
       auth.signInWithPassword = withCaptcha(original, () => ({}), (args, captchaToken) => {
