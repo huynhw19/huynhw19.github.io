@@ -111,9 +111,10 @@
             if (friendlyName === null) return;
             const trimmed = friendlyName.trim(); if (!trimmed || trimmed.length > 120) { setStatus('Passkey names must be between 1 and 120 characters.', true); return; }
             rename.disabled = true;
-            const result = await client.auth.passkey.update({passkeyId:passkey.id,friendlyName:trimmed});
-            if (result.error) setStatus(`Could not rename passkey: ${result.error.message}`, true); else { setStatus('Passkey renamed.'); await loadPasskeys(); }
-            rename.disabled = false;
+            try {
+              const result = await client.auth.passkey.update({passkeyId:passkey.id,friendlyName:trimmed});
+              if (result.error) setStatus(`Could not rename passkey: ${result.error.message}`, true); else { setStatus('Passkey renamed.'); await loadPasskeys(); }
+            } finally { rename.disabled = false; }
           });
           const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Remove';
           remove.addEventListener('click', async () => {
