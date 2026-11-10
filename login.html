@@ -121,6 +121,8 @@
       const postLoginDestination = requestedNext === 'account-settings.html' ? requestedNext : 'dashboard.html';
       const callbackUrlObject = new URL('login.html', window.location.href);
       if (postLoginDestination !== 'dashboard.html') callbackUrlObject.searchParams.set('next', postLoginDestination);
+      const pendingEmail2FALink = new URLSearchParams(window.location.search).get('email_2fa_token');
+      if (pendingEmail2FALink) callbackUrlObject.searchParams.set('email_2fa_token', pendingEmail2FALink);
       const callbackUrl = callbackUrlObject.href;
       const accountIntentKey = 'configkit_account_oauth_intent';
       const passkeySessionKey = 'configkit_passkey_session_user';
