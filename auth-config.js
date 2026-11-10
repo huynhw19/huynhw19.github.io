@@ -322,3 +322,55 @@ window.CONFIGKIT_AUTH = {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addLink, {once:true});
   else addLink();
 })();
+
+
+// Route sessions with an enabled but unverified email second factor through
+// login.html. Database RLS remains the enforcement boundary; this is the
+// user-facing redirect that lets the user complete the email challenge.
+(() => {
+  const isLoginPage = () => /(?:^|\\/|)login(?:\\.html)?$/.test(window.location.pathname);
+  if (isLoginPage()) return;
+
+  const installGuard = sdk => {
+    if (!sdk?.createClient || sdk.createClient.__configKitEmail2FA) return;
+    const originalCreateClient = sdk.createClient.bind(sdk);
+    const wrappedCreateClient = (...args) => {
+      const client = originalCreateClient(...args);
+      if (client?.auth?.onAuthStateChange && !client.auth.__configKitEmail2FAGuard) {
+        client.auth.__configKitEmail2FAGuard = true;
+        client.auth.onAuthStateChange((_event, session) => {
+          if (!session) return;
+          setTimeout(async () => {
+            try {
+              const {data, error} = await client.functions.invoke('email-2fa', {body:{action:'status'}});
+              if (error || !data?.enabled || data.verified) return;
+              const destination = /account-settings\\.html$/.test(window.location.pathname)
+                ? 'account-settings.html' : 'dashboard.html';
+              window.location.replace('login.html?next=' + encodeURIComponent(destination));
+            } catch (_) {
+              // RLS still denies protected data if verification is missing.
+            }
+          }, 0);
+        });
+      }
+      return client;
+    };
+    wrappedCreateClient.__configKitEmail2FA = true;
+    sdk.createClient = wrappedCreateClient;
+  };
+
+  let sdkRef = window.supabase;
+  try {
+    Object.defineProperty(window, 'supabase', {
+      configurable: true,
+      get: () => sdkRef,
+      set: value => {
+        sdkRef = value;
+        installGuard(value);
+      }
+    });
+    installGuard(sdkRef);
+  } catch (error) {
+    console.error('Could not initialize the email second-factor redirect guard.', error);
+  }
+})();
