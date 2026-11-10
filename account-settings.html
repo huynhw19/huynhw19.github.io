@@ -31,6 +31,33 @@
           <button type="submit" id="save-profile">Save profile</button>
         </form>
       </section>
+      <section class="card" aria-labelledby="security-title">
+        <h2 id="security-title">Email and password</h2>
+        <p class="muted">Update the email address and password used to sign in to your ConfigKit account.</p>
+        <form id="change-email-form">
+          <div class="field">
+            <label for="new-email">New email address</label>
+            <input id="new-email" name="email" type="email" maxlength="254" autocomplete="email" required placeholder="you@example.com">
+          </div>
+          <button id="change-email-button" type="submit">Update email</button>
+          <p class="muted">For security, Supabase may send confirmation links to your current and new email addresses. Your email changes only after the required confirmation is completed.</p>
+        </form>
+        <hr style="border:0;border-top:1px solid var(--line);margin:24px 0">
+        <form id="change-password-form">
+          <div class="field">
+            <label for="new-password">New password</label>
+            <input id="new-password" name="password" type="password" minlength="8" autocomplete="new-password" required aria-describedby="password-help">
+            <p id="password-help" class="muted">Use at least 8 characters. Choose a password you do not use on other sites.</p>
+            <button class="secondary" type="button" data-toggle-password="new-password" style="margin-top:8px">Show password</button>
+          </div>
+          <div class="field">
+            <label for="confirm-password">Confirm new password</label>
+            <input id="confirm-password" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" required>
+            <button class="secondary" type="button" data-toggle-password="confirm-password" style="margin-top:8px">Show password</button>
+          </div>
+          <button id="change-password-button" type="submit">Update password</button>
+        </form>
+      </section>
       <section class="card" aria-labelledby="passkeys-title">
         <h2 id="passkeys-title">Passkeys</h2>
         <p class="muted">Use Face ID, Touch ID, Windows Hello, your device PIN, or a security key to sign in without a password. Add a passkey while signed in, then use it from the login page.</p>
@@ -273,6 +300,70 @@
         } finally {
           button.disabled = false;
         }
+      });
+
+      // Change the email address. Supabase handles the verification flow.
+      document.getElementById('change-email-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (!form.reportValidity()) return;
+        const button = document.getElementById('change-email-button');
+        const nextEmail = document.getElementById('new-email').value.trim();
+        if (nextEmail.toLowerCase() === (user.email || '').toLowerCase()) {
+          setStatus('That is already your current email address.', true);
+          return;
+        }
+        button.disabled = true;
+        try {
+          const {error} = await client.auth.updateUser({email:nextEmail});
+          if (error) throw error;
+          form.reset();
+          setStatus('Email change requested. Check your inboxes and follow the Supabase confirmation instructions to finish changing your email.');
+        } catch (error) {
+          setStatus(`Could not update your email: ${error.message || 'Please try again.'}`, true);
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      // Change the password without ever sending it to application tables.
+      document.getElementById('change-password-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (!form.reportValidity()) return;
+        const password = document.getElementById('new-password').value;
+        const confirmation = document.getElementById('confirm-password').value;
+        if (password !== confirmation) {
+          setStatus('The new password and confirmation do not match.', true);
+          document.getElementById('confirm-password').focus();
+          return;
+        }
+        const button = document.getElementById('change-password-button');
+        button.disabled = true;
+        try {
+          const {error} = await client.auth.updateUser({password});
+          if (error) throw error;
+          form.reset();
+          document.querySelectorAll('[data-toggle-password]').forEach(toggle => {
+            const field = document.getElementById(toggle.dataset.togglePassword);
+            field.type = 'password';
+            toggle.textContent = 'Show password';
+          });
+          setStatus('Your password has been updated.');
+        } catch (error) {
+          setStatus(`Could not update your password: ${error.message || 'Please try again.'}`, true);
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      document.querySelectorAll('[data-toggle-password]').forEach(toggle => {
+        toggle.addEventListener('click', () => {
+          const field = document.getElementById(toggle.dataset.togglePassword);
+          const showing = field.type === 'text';
+          field.type = showing ? 'password' : 'text';
+          toggle.textContent = showing ? 'Show password' : 'Hide password';
+        });
       });
 
       document.getElementById('signout-current').addEventListener('click', async event => {
