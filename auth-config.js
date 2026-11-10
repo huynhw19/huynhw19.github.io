@@ -9,7 +9,7 @@ window.CONFIGKIT_AUTH = {
 
 // Brand the OAuth page and expose account links only after sign-in.
 (() => {
-  const isLoginPage = () => /(?:^|\/|)login(?:\.html)?$/.test(window.location.pathname);
+  const isLoginPage = () => window.location.pathname.endsWith('/login.html') || window.location.pathname === '/login';
 
   const addLoginEnhancements = () => {
     if (!isLoginPage()) return;
@@ -138,7 +138,7 @@ window.CONFIGKIT_AUTH = {
 // Add Turnstile verification to the email/password auth flows on the login page.
 // Supabase validates the token using the secret configured in its Auth dashboard.
 (() => {
-  const isLoginPage = () => /(?:^|\/|)login(?:\.html)?$/.test(window.location.pathname);
+  const isLoginPage = () => window.location.pathname.endsWith('/login.html') || window.location.pathname === '/login';
   if (!isLoginPage()) return;
 
   const config = window.CONFIGKIT_AUTH || {};
@@ -328,7 +328,7 @@ window.CONFIGKIT_AUTH = {
 // login.html. Database RLS remains the enforcement boundary; this is the
 // user-facing redirect that lets the user complete the email challenge.
 (() => {
-  const isLoginPage = () => /(?:^|\\/|)login(?:\\.html)?$/.test(window.location.pathname);
+  const isLoginPage = () => window.location.pathname.endsWith('/login.html') || window.location.pathname === '/login';
   if (isLoginPage()) return;
 
   const installGuard = sdk => {
@@ -344,7 +344,7 @@ window.CONFIGKIT_AUTH = {
             try {
               const {data, error} = await client.functions.invoke('email-2fa', {body:{action:'status'}});
               if (error || !data?.enabled || data.verified) return;
-              const destination = /account-settings\\.html$/.test(window.location.pathname)
+              const destination = window.location.pathname.endsWith('account-settings.html') ? 'account-settings.html' : 'dashboard.html';
                 ? 'account-settings.html' : 'dashboard.html';
               window.location.replace('login.html?next=' + encodeURIComponent(destination));
             } catch (_) {
