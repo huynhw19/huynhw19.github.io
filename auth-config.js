@@ -186,24 +186,6 @@ window.CONFIGKIT_AUTH = {
       const original = auth.signUp.bind(auth);
       const captchaSignUp = withCaptcha(original, args => args[0]?.options || {}, (args, captchaToken, options) => {
         args[0] = {...args[0], options:{...options, captchaToken}};
-        // Protect passkey authentication with Turnstile CAPTCHA.
-if (typeof auth.signInWithPasskey === 'function') {
-  const original = auth.signInWithPasskey.bind(auth);
-
-  auth.signInWithPasskey = withCaptcha(
-    original,
-    args => args[0]?.options || {},
-    (args, captchaToken, options) => {
-      args[0] = {
-        ...(args[0] || {}),
-        options: {
-          ...options,
-          captchaToken
-        }
-      };
-    }
-  );
-}
       });
       auth.signUp = async credentials => {
         const accountType = document.getElementById('accountType');
@@ -224,12 +206,28 @@ if (typeof auth.signInWithPasskey === 'function') {
         return captchaSignUp(credentials);
       };
     }
+    // Passkey authentication also sends its CAPTCHA token in options.
+    if (typeof auth.signInWithPasskey === 'function') {
+      const original = auth.signInWithPasskey.bind(auth);
+      auth.signInWithPasskey = withCaptcha(
+        original,
+        args => args[0]?.options || {},
+        (args, captchaToken, options) => {
+          args[0] = {
+            ...(args[0] || {}),
+            options: {...options, captchaToken}
+          };
+        }
+      );
+    }
     if (typeof auth.signInWithPassword === 'function') {
       const original = auth.signInWithPassword.bind(auth);
       auth.signInWithPassword = withCaptcha(original, () => ({}), (args, captchaToken) => {
-        // signInWithPassword expects captchaToken on the credentials object,
-        // unlike signUp which accepts it under options.captchaToken.
-        args[0] = {...args[0], captchaToken};
+        // Supabase JS expects captchaToken inside credentials.options.
+        args[0] = {
+          ...args[0],
+          options: {...(args[0]?.options || {}), captchaToken}
+        };
       });
     }
     if (typeof auth.resetPasswordForEmail === 'function') {
