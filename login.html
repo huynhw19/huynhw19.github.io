@@ -326,6 +326,19 @@
           if (verifyError) throw verifyError;
           pendingMfaFactorId = '';
           input.value = '';
+          // MFA verification updates the session asynchronously in some client flows.
+          // Confirm the active JWT is AAL2 before routing away from the challenge page.
+          let {data:verifiedAssurance, error:verifiedAssuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+          if (verifiedAssuranceError) throw verifiedAssuranceError;
+          if (verifiedAssurance.currentLevel !== 'aal2') {
+            const {error:refreshError} = await client.auth.refreshSession();
+            if (refreshError) throw refreshError;
+            ({data:verifiedAssurance, error:verifiedAssuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel());
+            if (verifiedAssuranceError) throw verifiedAssuranceError;
+          }
+          if (verifiedAssurance.currentLevel !== 'aal2') {
+            throw new Error('Your code was accepted, but the verified session has not finished updating. Please try again.');
+          }
           setStatus('Two-factor authentication successful. Signing you in…');
           await renderSession();
         } catch (error) {
