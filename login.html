@@ -96,7 +96,7 @@
       let redirecting = false;
       let pendingMfaFactorId = '';
       let passkeyPrimaryPending = false;
-      let passkeyMfaInProgress = false;
+
       const config = window.CONFIGKIT_AUTH || {};
       if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
         setup.hidden = false;
@@ -107,6 +107,7 @@
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,experimental:{passkey:true}}});
       const callbackUrl = new URL('login.html', window.location.href).href;
       const accountIntentKey = 'configkit_account_oauth_intent';
+      const passkeySessionKey = 'configkit_passkey_session_user';
       function selectedMetadata() {
         const type = accountType.value;
         const metadata = {account_type:type};
@@ -145,43 +146,22 @@
         setStatus(signingUp ? 'Create an account with your email and a password.' : 'Log in with your email and password.');
       }
       async function renderSession() {
-        if (passkeyMfaInProgress) return;
         const {data, error} = await client.auth.getSession();
         if (error) { setStatus('Could not read the sign-in session. Please try again.', true); return; }
         if (data.session) {
+          // A successful passkey ceremony is the primary sign-in for this tab.
+          // Record only the user id, never a credential or token.
+          if (passkeyPrimaryPending) {
+            sessionStorage.setItem(passkeySessionKey, data.session.user.id);
+            passkeyPrimaryPending = false;
+          }
+          const passkeySession = sessionStorage.getItem(passkeySessionKey) === data.session.user.id;
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
-          if (assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+          if (!passkeySession && assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
             const {data: factorData, error: factorError} = await client.auth.mfa.listFactors();
             if (factorError) { setStatus('Could not load your authenticator. Please try again.', true); return; }
             const factor = (factorData.totp || []).find(item => item.status === 'verified');
-            const passkeyFactor = (factorData.all || []).find(item => item.factor_type === 'webauthn' && item.status === 'verified');
-            if (passkeyPrimaryPending && passkeyFactor) {
-              passkeyMfaInProgress = true;
-              form.hidden = true;
-              document.querySelector('.tabs').hidden = true;
-              document.querySelector('.divider').hidden = true;
-              document.querySelectorAll('.providers').forEach(node => node.hidden = true);
-              document.getElementById('mfa-challenge').hidden = true;
-              setStatus('Verify your passkey again to complete the second sign-in step…');
-              try {
-                const {error:passkeyMfaError} = await client.auth.mfa.webauthn.authenticate({factorId:passkeyFactor.id});
-                if (passkeyMfaError) throw passkeyMfaError;
-                passkeyPrimaryPending = false;
-                const {data:verifiedAssurance,error:verifiedAssuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
-                if (verifiedAssuranceError) throw verifiedAssuranceError;
-                if (verifiedAssurance.currentLevel !== 'aal2') throw new Error('Passkey verification did not complete the required second factor.');
-                passkeyMfaInProgress = false;
-                await renderSession();
-                return;
-              } catch (passkeyMfaError) {
-                passkeyPrimaryPending = false;
-                setStatus(`Passkey second-factor verification failed${passkeyMfaError.message ? `: ${passkeyMfaError.message}` : '.'} You can use your authenticator code instead.`, true);
-              } finally {
-                passkeyMfaInProgress = false;
-              }
-            }
-            passkeyPrimaryPending = false;
             if (!factor) { setStatus('Your account requires a verified second factor, but no verified authenticator is available. Contact support.', true); return; }
             pendingMfaFactorId = factor.id;
             form.hidden = true;
@@ -216,6 +196,7 @@
         }
       }
       async function startOAuth(provider) {
+        sessionStorage.removeItem(passkeySessionKey);
         setStatus(`Connecting to ${provider === 'azure' ? 'Microsoft' : 'GitHub'}…`);
         setBusy(true);
         try {
@@ -256,6 +237,7 @@
         } finally { button.disabled = false; }
       });
       document.getElementById('mfa-cancel').addEventListener('click', async () => {
+        sessionStorage.removeItem(passkeySessionKey);
         await client.auth.signOut();
         pendingMfaFactorId = '';
         document.getElementById('mfa-challenge').hidden = true;
@@ -269,6 +251,7 @@
       form.addEventListener('submit', async event => {
         event.preventDefault();
         if (!form.reportValidity()) return;
+        sessionStorage.removeItem(passkeySessionKey);
         setBusy(true);
         setStatus(mode === 'signup' ? 'Creating your account…' : 'Logging in…');
         try {
@@ -325,6 +308,7 @@
       github.addEventListener('click', () => startOAuth('github'));
       microsoft.addEventListener('click', () => startOAuth('azure'));
       signout.addEventListener('click', async () => {
+        sessionStorage.removeItem(passkeySessionKey);
         signout.disabled = true;
         const {error} = await client.auth.signOut();
         signout.disabled = false;
