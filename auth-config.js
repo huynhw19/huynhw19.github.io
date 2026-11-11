@@ -355,8 +355,8 @@ window.CONFIGKIT_AUTH = {
       const client = originalCreateClient(...args);
       if (client?.auth?.onAuthStateChange && !client.auth.__configKitEmail2FAGuard) {
         client.auth.__configKitEmail2FAGuard = true;
-        client.auth.onAuthStateChange((_event, session) => {
-          if (!session) return;
+        client.auth.onAuthStateChange((event, session) => {
+          if (!session) { if (event === 'SIGNED_OUT') window.CONFIGKIT_PASSKEY_SESSION?.clear(); return; }
           setTimeout(async () => {
             try {
               const {data, error} = await client.functions.invoke('email-2fa', {body:{action:'status'}});
@@ -364,7 +364,8 @@ window.CONFIGKIT_AUTH = {
               const recoveryVerified = !recoveryError && recovery?.verified;
               const emailVerified = !error && data?.enabled && data.verified;
               const emailNeedsVerification = !error && data?.enabled && !data.verified && !recoveryVerified;
-              const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(session.user.id) === true;\n              const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recoveryVerified && !emailVerified && !passkeySession;
+              const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(session.user.id) === true;
+              const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recoveryVerified && !emailVerified && !passkeySession;
               if (!emailNeedsVerification && !recoveryNeedsVerification) return;
               const {data: assurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
               if (assurance?.currentLevel === 'aal2') return;
