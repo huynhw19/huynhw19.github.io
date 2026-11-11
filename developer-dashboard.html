@@ -8,7 +8,7 @@
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff4d6;--amber:#8a5a00;--red:#9b3030;--rose:#fbeaea;--code:#0f1a16;--code-ink:#e6f1eb;--code-muted:#6f8a7e;--shadow:0 12px 32px rgba(23,35,31,.08)}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(100% - 32px,1100px);margin:0 auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}.brand{font-weight:700;text-decoration:none;color:var(--ink)}nav{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-    button,select{font:inherit;font-weight:600;border:1px solid var(--line);border-radius:.7rem;padding:.55rem .85rem;background:var(--white);color:var(--ink);cursor:pointer}button:hover,select:hover{border-color:var(--green)}button.primary{background:var(--green);border-color:var(--green);color:var(--white)}button.primary:hover{background:var(--green-dark)}button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #9fd1b9;outline-offset:2px}
+    button,select,.button-link{font:inherit;font-weight:600;border:1px solid var(--line);border-radius:.7rem;padding:.55rem .85rem;background:var(--white);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-block}.button-link:hover,button:hover,select:hover{border-color:var(--green)}button.primary{background:var(--green);border-color:var(--green);color:var(--white)}button.primary:hover{background:var(--green-dark)}button:focus-visible,select:focus-visible,textarea:focus-visible,.button-link:focus-visible{outline:3px solid #9fd1b9;outline-offset:2px}
     main{padding:2rem 0 3rem}.status,.card,.welcome,.editor-card{background:var(--white);border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow)}.status{padding:1rem;margin:1rem 0}.status.error{color:var(--red)}.welcome{padding:1.5rem;margin:1rem 0 1.25rem}.eyebrow{display:inline-block;padding:.3rem .7rem;border-radius:999px;background:var(--mint);color:var(--green-dark);font-size:.85rem;font-weight:700}.badge{display:inline-block;margin:.4rem 0;padding:.25rem .65rem;background:var(--mint);border-radius:999px;color:var(--green-dark);font-size:.85rem;font-weight:700}.muted{color:var(--muted)}h1{margin:.65rem 0;font-size:clamp(2rem,5vw,3rem);line-height:1.15}h2{margin:.1rem 0 .6rem}.section-title{margin-top:1.75rem}
     .editor-card{padding:1.2rem;margin:1rem 0}.toolbar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.75rem 0}.toolbar .spacer{flex:1}.toolbar label{font-weight:600;font-size:.9rem}
     .editor{display:flex;border-radius:.8rem;overflow:hidden;background:var(--code);border:1px solid var(--code);height:min(60vh,520px)}.gutter{margin:0;padding:.9rem .6rem .9rem .9rem;min-width:3.2rem;text-align:right;color:var(--code-muted);background:#0b1411;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden;user-select:none;white-space:pre}textarea{flex:1;margin:0;border:0;resize:none;padding:.9rem;background:var(--code);color:var(--code-ink);font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:2;white-space:pre;overflow:auto;caret-color:#7fe0b0}textarea::placeholder{color:var(--code-muted)}
@@ -67,7 +67,7 @@
         <div class="toolbar">
           <button id="copy" type="button">Copy XML</button>
           <button id="download-xml" type="button">Download .xml</button>
-          <button id="download-profile" type="button" class="primary">Download .mobileconfig</button>
+          <button id="download-profile" type="button" class="primary">Export .mobileconfig</button>
           <button id="share-community" type="button">Share to community</button>
           <span class="spacer"></span>
           <button id="clear" type="button">Clear</button>
@@ -80,7 +80,22 @@
             <table><thead><tr><th>#</th><th>Type</th><th>Name</th><th>Identifier</th></tr></thead><tbody id="payload-rows"></tbody></table>
           </div>
         </div>
-        <p class="muted"><small>Profiles made here are unsigned. Checking only looks at the XML structure and required keys — it is not a security review and does not guarantee the profile will install.</small></p>
+        <p class="muted"><small>Profiles made here are unsigned. Checking only looks at the XML structure and required keys — it is not a security review and does not guarantee the profile will install. ConfigKit cannot create Apple's signed provisioning profiles.</small></p>
+      </section>
+
+      <section class="editor-card" aria-labelledby="apple-tools-title">
+        <h2 id="apple-tools-title">Apple Developer tools</h2>
+        <p class="muted">Manage signed provisioning profiles in Apple's portal, or import an existing <code>.mobileprovision</code> file here to inspect its contents locally.</p>
+        <div class="toolbar">
+          <a class="button-link" href="https://developer.apple.com/account/resources/profiles/list" target="_blank" rel="noopener noreferrer">Open Certificates, Identifiers &amp; Profiles ↗</a>
+          <button id="import-provisioning" type="button">Import .mobileprovision</button>
+          <input id="provisioning-input" type="file" accept=".mobileprovision,application/octet-stream" hidden>
+        </div>
+        <div id="provisioning-inspection" class="results" aria-live="polite" hidden>
+          <h3 id="provisioning-title">Provisioning profile inspection</h3>
+          <ul id="provisioning-summary"></ul>
+          <p class="muted"><small>Inspection reads the embedded plist only. It does not verify Apple's CMS signature, certificate chain, revocation status, or whether the profile is currently accepted by Apple.</small></p>
+        </div>
       </section>
 
       <h2 class="section-title">Developer tools</h2>
@@ -325,6 +340,94 @@
         window.location.href = 'builder-discussion.html#share';
       });
       document.getElementById('clear').addEventListener('click', () => { if (!editor.value || confirm('Clear the editor?')) setValue(''); });
+
+      // Apple provisioning profiles are CMS-signed plist documents, not .mobileconfig files.
+      // This local-only inspector extracts the embedded XML plist for a readable summary.
+      const provisioningInput = document.getElementById('provisioning-input');
+      const provisioningPanel = document.getElementById('provisioning-inspection');
+      const provisioningTitle = document.getElementById('provisioning-title');
+      const provisioningSummary = document.getElementById('provisioning-summary');
+      document.getElementById('import-provisioning').addEventListener('click', () => provisioningInput.click());
+
+      function plistValue(node) {
+        if (!node) return '';
+        if (node.localName === 'array') return [...node.children].map(plistValue).filter(Boolean).join(', ');
+        if (node.localName === 'dict') {
+          const map = readDict(node);
+          return [...map.entries()].map(([key, value]) => key + ': ' + plistValue(value)).join('; ');
+        }
+        if (node.localName === 'true') return 'Yes';
+        if (node.localName === 'false') return 'No';
+        return textOf(node);
+      }
+      function provisioningField(map, key) {
+        const value = map.get(key);
+        if (!value) return '';
+        if (value.localName === 'date') {
+          const date = new Date(textOf(value));
+          return Number.isNaN(date.getTime()) ? textOf(value) : date.toLocaleString();
+        }
+        return plistValue(value);
+      }
+      provisioningInput.addEventListener('change', async () => {
+        const file = provisioningInput.files && provisioningInput.files[0];
+        provisioningInput.value = '';
+        if (!file) return;
+        provisioningPanel.hidden = false;
+        provisioningTitle.textContent = 'Inspecting ' + file.name;
+        provisioningSummary.replaceChildren();
+        try {
+          if (file.size > 10 * 1024 * 1024) throw new Error('The provisioning profile is larger than 10 MB.');
+          const bytes = new Uint8Array(await file.arrayBuffer());
+          // CMS DER wraps the plist in an OCTET STRING. Its XML bytes remain searchable
+          // even though the surrounding CMS envelope is binary.
+          const raw = new TextDecoder('utf-8', {fatal:false}).decode(bytes);
+          const plistStart = raw.indexOf('<plist');
+          const plistEnd = raw.indexOf('</plist>', plistStart);
+          if (plistStart < 0 || plistEnd < 0) {
+            throw new Error('No embedded XML plist was found. This file may use an unsupported binary plist representation or may not be a provisioning profile.');
+          }
+          const xmlStart = raw.lastIndexOf('<?xml', plistStart);
+          const xml = raw.slice(xmlStart >= 0 ? xmlStart : plistStart, plistEnd + '</plist>'.length);
+          const parsed = parse(xml);
+          if (parsed.error) throw new Error('The embedded plist could not be parsed: ' + parsed.error);
+          const rootDict = kids(parsed.doc.documentElement).find(node => node.localName === 'dict');
+          if (!rootDict) throw new Error('The embedded plist does not contain a dictionary.');
+          const map = readDict(rootDict);
+          const entitlements = map.get('Entitlements');
+          const entitlementMap = entitlements && entitlements.localName === 'dict' ? readDict(entitlements) : new Map();
+          const fields = [
+            ['Name', provisioningField(map, 'Name')],
+            ['UUID', provisioningField(map, 'UUID')],
+            ['Team identifier', provisioningField(map, 'TeamIdentifier')],
+            ['App identifier prefix', provisioningField(map, 'ApplicationIdentifierPrefix')],
+            ['Application identifier', provisioningField(entitlementMap, 'application-identifier')],
+            ['Expiration', provisioningField(map, 'ExpirationDate')],
+            ['Created', provisioningField(map, 'CreationDate')],
+            ['Platforms', provisioningField(map, 'Platform')],
+            ['Provisioned devices', map.get('ProvisionedDevices') ? String(kids(map.get('ProvisionedDevices')).length) : (map.get('ProvisionsAllDevices')?.localName === 'true' ? 'All devices' : 'Not listed')],
+            ['Development get-task-allow', provisioningField(entitlementMap, 'get-task-allow')]
+          ].filter(([, value]) => value !== '');
+          fields.forEach(([label, value]) => {
+            const li = document.createElement('li');
+            li.className = 'ok';
+            const strong = document.createElement('strong');
+            strong.textContent = label + ': ';
+            li.append(strong, document.createTextNode(value));
+            provisioningSummary.append(li);
+          });
+          provisioningTitle.textContent = 'Provisioning profile details';
+          if (!fields.length) throw new Error('The embedded plist was read, but no familiar provisioning profile fields were present.');
+          toast('Provisioning profile inspected locally');
+        } catch (error) {
+          provisioningTitle.textContent = 'Could not inspect provisioning profile';
+          const li = document.createElement('li');
+          li.className = 'error';
+          li.textContent = error.message || 'The file could not be inspected.';
+          provisioningSummary.append(li);
+        }
+      });
+
       refresh();
     })();
   </script>
