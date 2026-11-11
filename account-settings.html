@@ -267,7 +267,7 @@
         recoveryCodesGenerateButton.disabled = true;
         try {
           const result = await invokeRecoveryCodes({action:'generate'});
-          recoveryCodesList.textContent = result.codes.join('\\n');
+          recoveryCodesList.textContent = result.codes.join(String.fromCharCode(10));
           recoveryCodesDisplay.hidden = false;
           await refreshRecoveryCodesStatus();
           setStatus('Ten new recovery codes were generated. Save them now; they cannot be displayed again.');
