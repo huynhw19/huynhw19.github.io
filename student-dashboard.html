@@ -23,6 +23,7 @@
       <h1>Student dashboard</h1>
       <p id="status" class="status" role="status" aria-live="polite">Checking your sign in…</p>
       <div id="records"></div>
+      <section id="student-slideshows" aria-labelledby="student-slideshows-title" hidden><h2 id="student-slideshows-title">My lesson slideshows</h2><div id="student-slideshow-records"></div></section>
       <section id="assignments" aria-labelledby="assignments-title" hidden>
         <h2 id="assignments-title">My assignments</h2>
         <div id="assignment-records"></div>
@@ -37,6 +38,8 @@
       const status = document.getElementById('status');
       const records = document.getElementById('records');
       const assignmentsPanel = document.getElementById('assignments');
+      const slideshowsPanel = document.getElementById('student-slideshows');
+      const slideshowRecords = document.getElementById('student-slideshow-records');
       const assignmentRecords = document.getElementById('assignment-records');
       const signout = document.getElementById('signout');
       const config = window.CONFIGKIT_AUTH || {};
@@ -60,7 +63,7 @@
         signout.hidden = false;
         const { data: studentRecords, error: recordsError } = await client
           .from('education_students')
-          .select('student_name, school, grade, created_at')
+          .select('id, user_id, student_name, school, grade, created_at')
           .eq('student_user_id', data.session.user.id)
           .order('created_at', { ascending: false });
         if (recordsError) {
@@ -73,6 +76,36 @@
         }
         showStatus(`Signed in as ${data.session.user.email || 'student'}.`);
 
+        const teacherIds = [...new Set(studentRecords.map(student => student.user_id))];
+        const {data: publishedSlideshows, error: slideshowError} = await client.from('education_slideshows')
+          .select('id,title,description,slides,created_at,user_id')
+          .in('user_id', teacherIds).eq('status','published').order('created_at',{ascending:false});
+        slideshowsPanel.hidden = false;
+        slideshowRecords.replaceChildren();
+        if (slideshowError) {
+          const warning = document.createElement('p'); warning.className = 'error';
+          warning.textContent = 'Could not load lesson slideshows.'; slideshowRecords.append(warning);
+        } else if (!publishedSlideshows || !publishedSlideshows.length) {
+          const empty = document.createElement('p'); empty.textContent = 'Your teachers have not published any slideshows yet.'; slideshowRecords.append(empty);
+        } else {
+          publishedSlideshows.forEach(show => {
+            const article = document.createElement('article'); article.className = 'assignment';
+            const title = document.createElement('h3'); title.textContent = show.title; article.append(title);
+            if (show.description) { const desc = document.createElement('p'); desc.textContent = show.description; article.append(desc); }
+            (show.slides || []).forEach((slide,index) => {
+              const part = document.createElement('section'); part.className = 'record';
+              const heading = document.createElement('h4'); heading.textContent = 'Slide ' + (index + 1) + ': ' + (slide.title || '');
+              part.append(heading);
+              if (slide.content) { const body = document.createElement('p'); body.textContent = slide.content; part.append(body); }
+              if (slide.image_url && /^https:\/\//i.test(slide.image_url)) {
+                const img = document.createElement('img'); img.src = slide.image_url; img.alt = slide.title || 'Slideshow image';
+                img.loading = 'lazy'; img.style.cssText = 'display:block;max-width:100%;height:auto;border-radius:8px;margin:10px 0'; part.append(img);
+              }
+              article.append(part);
+            });
+            slideshowRecords.append(article);
+          });
+        }
         const studentIds = studentRecords.map(student => student.id);
         const { data: assignments, error: assignmentsError } = await client
           .from('education_assignments')
