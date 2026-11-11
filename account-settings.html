@@ -80,32 +80,6 @@
         </div>
         <p class="muted">Supabase does not provide recovery codes for this factor type. Consider enrolling a second authenticator on a separate device and keep its access secure.</p>
       </section>
-      <section class="card" aria-labelledby="phone-signin-title">
-        <h2 id="phone-signin-title">Phone number for SMS sign-in</h2>
-        <p class="muted">Link and verify a phone number on your account. Once verified, you can use it to sign in from the login page without a password. Use international E.164 format, for example +61412345678.</p>
-        <p id="phone-account-status" class="notice" aria-live="polite">Checking your verified phone number…</p>
-        <form id="phone-account-form">
-          <div class="field"><label for="phone-account-number">Phone number</label><input id="phone-account-number" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="+61412345678" required></div>
-          <div class="actions"><button id="phone-account-send" type="submit">Send phone verification code</button></div>
-        </form>
-        <form id="phone-account-verify-form" hidden>
-          <div class="field"><label for="phone-account-code">Six-digit SMS code</label><input id="phone-account-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required></div>
-          <div class="actions"><button id="phone-account-verify" type="submit">Verify phone number</button><button id="phone-account-resend" class="secondary" type="button">Resend code</button></div>
-        </form>
-      </section>
-      <section class="card" aria-labelledby="phone-mfa-title">
-        <h2 id="phone-mfa-title">Phone as a backup two-factor method</h2>
-        <p class="muted">Register a phone number and verify it by SMS. After setup, you can choose SMS instead of your authenticator code when signing in. Use international E.164 format, for example +61412345678.</p>
-        <div id="phone-mfa-list" aria-live="polite"><p class="muted">Loading phone security settings…</p></div>
-        <form id="phone-mfa-enroll-form">
-          <div class="field"><label for="phone-mfa-number">Phone number</label><input id="phone-mfa-number" type="tel" inputmode="tel" autocomplete="tel" placeholder="+61412345678" maxlength="16" required></div>
-          <div class="actions"><button id="phone-mfa-send" type="submit">Send verification SMS</button></div>
-        </form>
-        <form id="phone-mfa-verify-form" hidden>
-          <div class="field"><label for="phone-mfa-code">Six-digit SMS code</label><input id="phone-mfa-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required></div>
-          <div class="actions"><button id="phone-mfa-verify" type="submit">Verify and enable phone 2FA</button><button id="phone-mfa-resend" class="secondary" type="button">Resend SMS</button><button id="phone-mfa-cancel" class="secondary" type="button">Cancel</button></div>
-        </form>
-      </section>
       <section class="card" aria-labelledby="email-2fa-title">
         <h2 id="email-2fa-title">Email verification as an alternative 2FA method</h2>
         <p class="muted">When enabled, ConfigKit sends a one-time eight-digit code and a single-use verification link to your confirmed email after your primary sign-in. This can replace the authenticator challenge for that session. Verification expires after eight hours; the next sign-in will ask again.</p>
@@ -331,31 +305,6 @@
           });
           row.append(detail,remove); mfaFactorList.append(row);
         }
-        const verifiedPhoneFactors = (data.phone || []).filter(factor => factor.status === 'verified');
-        const phoneList = document.getElementById('phone-mfa-list');
-        phoneList.replaceChildren();
-        if (!verifiedPhoneFactors.length) {
-          const note = document.createElement('p'); note.className = 'muted';
-          note.textContent = 'No verified phone backup factor is registered.';
-          phoneList.append(note);
-        }
-        for (const factor of verifiedPhoneFactors) {
-          const row = document.createElement('div'); row.className = 'provider';
-          const detail = document.createElement('div');
-          const name = document.createElement('strong'); name.textContent = factor.phone || 'Phone number';
-          const state = document.createElement('div'); state.className = 'muted'; state.textContent = 'Enabled · SMS second factor';
-          detail.append(name,state);
-          const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Remove';
-          remove.addEventListener('click', async () => {
-            if (!window.confirm('Remove this phone number as a second factor? SMS will no longer be available as a backup sign-in step.')) return;
-            remove.disabled = true;
-            const {error:removeError} = await client.auth.mfa.unenroll({factorId:factor.id});
-            if (removeError) { remove.disabled = false; setStatus('Could not remove phone factor: ' + removeError.message,true); return; }
-            await client.auth.refreshSession();
-            setStatus('Phone backup factor removed.'); await refreshMfaFactors();
-          });
-          row.append(detail,remove); phoneList.append(row);
-        }
         const webauthnFactors = (data.all || []).filter(factor => factor.factor_type === 'webauthn');
         mfaWebauthnFactorList.replaceChildren();
         const verifiedWebauthnFactors = webauthnFactors.filter(factor => factor.status === 'verified');
@@ -417,104 +366,6 @@
           const {data,error} = await client.auth.mfa.webauthn.register({friendlyName:'ConfigKit passkey second factor'});
           if (error) throw error;
           setStatus('Passkey second factor registered and verified. You can now use it instead of a six-digit code after passkey sign-in.');
-          const phoneAccountStatus = document.getElementById('phone-account-status');
-      const phoneAccountForm = document.getElementById('phone-account-form');
-      const phoneAccountVerifyForm = document.getElementById('phone-account-verify-form');
-      const phoneAccountNumber = document.getElementById('phone-account-number');
-      const phoneAccountCode = document.getElementById('phone-account-code');
-      let pendingAccountPhone = '';
-      phoneAccountNumber.value = user.phone || '';
-      phoneAccountStatus.textContent = user.phone
-        ? 'Verified phone number on this account: ' + user.phone
-        : 'No verified phone number is linked to this account yet.';
-      async function requestPhoneAccountVerification() {
-        const phone = phoneAccountNumber.value.trim();
-        if (!/^\+[1-9]\d{7,14}$/.test(phone)) throw new Error('Enter a valid phone number in international format, such as +61412345678.');
-        const {error} = await client.auth.updateUser({phone});
-        if (error) throw error;
-        pendingAccountPhone = phone;
-        phoneAccountVerifyForm.hidden = false;
-        phoneAccountCode.focus();
-        phoneAccountStatus.textContent = 'A verification code was sent to ' + phone + '. Verify it to enable phone sign-in.';
-      }
-      phoneAccountForm.addEventListener('submit', async event => {
-        event.preventDefault();
-        if (!phoneAccountForm.reportValidity()) return;
-        const button = document.getElementById('phone-account-send');
-        button.disabled = true;
-        try { await requestPhoneAccountVerification(); }
-        catch (error) { phoneAccountStatus.textContent = error.message || 'Could not send phone verification.'; }
-        finally { button.disabled = false; }
-      });
-      phoneAccountVerifyForm.addEventListener('submit', async event => {
-        event.preventDefault();
-        if (!pendingAccountPhone || !phoneAccountVerifyForm.reportValidity()) return;
-        const button = document.getElementById('phone-account-verify');
-        button.disabled = true;
-        try {
-          const {error} = await client.auth.verifyOtp({phone:pendingAccountPhone,token:phoneAccountCode.value.trim(),type:'phone_change'});
-          if (error) throw error;
-          const {data:updatedUser,error:refreshError} = await client.auth.getUser();
-          if (refreshError) throw refreshError;
-          phoneAccountStatus.textContent = 'Verified phone number: ' + (updatedUser.user.phone || pendingAccountPhone) + '. You can now use SMS sign-in.';
-          phoneAccountCode.value = '';
-          phoneAccountVerifyForm.hidden = true;
-          pendingAccountPhone = '';
-        } catch (error) {
-          phoneAccountStatus.textContent = error.message || 'The phone verification code could not be verified.';
-          phoneAccountCode.select();
-        } finally { button.disabled = false; }
-      });
-      document.getElementById('phone-account-resend').addEventListener('click', async event => {
-        const button = event.currentTarget;
-        button.disabled = true;
-        try { await requestPhoneAccountVerification(); }
-        catch (error) { phoneAccountStatus.textContent = error.message || 'Could not resend phone verification.'; }
-        finally { button.disabled = false; }
-      });
-      let pendingPhoneFactorId = '';
-      let pendingPhoneChallengeId = '';
-      const phoneMfaEnrollForm = document.getElementById('phone-mfa-enroll-form');
-      const phoneMfaVerifyForm = document.getElementById('phone-mfa-verify-form');
-      const phoneMfaNumber = document.getElementById('phone-mfa-number');
-      const phoneMfaCode = document.getElementById('phone-mfa-code');
-      async function sendPhoneMfaChallenge() {
-        const phone = phoneMfaNumber.value.trim();
-        if (!/^\+[1-9]\d{7,14}$/.test(phone)) throw new Error('Enter a valid phone number in international format, such as +61412345678.');
-        const {data,error} = await client.auth.mfa.enroll({factorType:'phone',phone,friendlyName:'ConfigKit SMS backup'});
-        if (error) throw error;
-        pendingPhoneFactorId = data.id;
-        const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:data.id});
-        if (challengeError) throw challengeError;
-        pendingPhoneChallengeId = challenge.id;
-        phoneMfaVerifyForm.hidden = false;
-        phoneMfaCode.focus();
-        setStatus('A verification code was sent to your phone. Enter it to enable SMS backup authentication.');
-      }
-      phoneMfaEnrollForm.addEventListener('submit', async event => {
-        event.preventDefault();
-        if (!phoneMfaEnrollForm.reportValidity()) return;
-        const button = document.getElementById('phone-mfa-send');
-        button.disabled = true;
-        try { await sendPhoneMfaChallenge(); }
-        catch (error) { setStatus(error.message || 'Could not start phone verification.',true); }
-        finally { button.disabled = false; }
-      });
-      phoneMfaVerifyForm.addEventListener('submit', async event => {
-        event.preventDefault();
-        if (!pendingPhoneFactorId || !phoneMfaVerifyForm.reportValidity()) return;
-        const button = document.getElementById('phone-mfa-verify');
-        button.disabled = true;
-        try {
-          const {error} = await client.auth.mfa.verify({factorId:pendingPhoneFactorId,challengeId:pendingPhoneChallengeId,code:phoneMfaCode.value.trim()});
-          if (error) throw error;
-          pendingPhoneFactorId = '';
-          pendingPhoneChallengeId = '';
-          phoneMfaCode.value = '';
-          phoneMfaVerifyForm.hidden = true;
-          phoneMfaEnrollForm.hidden = true;
-          await client.auth.refreshSession();
-          setStatus('Phone backup authentication is enabled.');
           await refreshMfaFactors();
         } catch (error) {
           setStatus(error.message || 'The SMS code could not be verified.',true);
