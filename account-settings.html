@@ -713,7 +713,10 @@
           const {error:lockError} = await client.rpc('lock_my_account');
           if (lockError) throw lockError;
           const {error:signOutError} = await client.auth.signOut({scope:'global'});
-          if (signOutError) throw signOutError;
+          if (signOutError) {
+            console.warn('Global sign-out could not be confirmed; ending this browser session instead.', signOutError);
+            await client.auth.signOut({scope:'local'});
+          }
           window.location.replace('account-locked.html');
         } catch (error) {
           lockAccountStatus.textContent = error.message || 'Could not lock the account. Please try again.';
