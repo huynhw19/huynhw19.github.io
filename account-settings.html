@@ -80,6 +80,19 @@
         </div>
         <p class="muted">Supabase does not provide recovery codes for this factor type. Consider enrolling a second authenticator on a separate device and keep its access secure.</p>
       </section>
+      <section class="card" aria-labelledby="phone-mfa-title">
+        <h2 id="phone-mfa-title">Phone as a backup two-factor method</h2>
+        <p class="muted">Register a phone number and verify it by SMS. After setup, you can choose SMS instead of your authenticator code when signing in. Use international E.164 format, for example +61412345678.</p>
+        <div id="phone-mfa-list" aria-live="polite"><p class="muted">Loading phone security settings…</p></div>
+        <form id="phone-mfa-enroll-form">
+          <div class="field"><label for="phone-mfa-number">Phone number</label><input id="phone-mfa-number" type="tel" inputmode="tel" autocomplete="tel" placeholder="+61412345678" maxlength="16" required></div>
+          <div class="actions"><button id="phone-mfa-send" type="submit">Send verification SMS</button></div>
+        </form>
+        <form id="phone-mfa-verify-form" hidden>
+          <div class="field"><label for="phone-mfa-code">Six-digit SMS code</label><input id="phone-mfa-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required></div>
+          <div class="actions"><button id="phone-mfa-verify" type="submit">Verify and enable phone 2FA</button><button id="phone-mfa-resend" class="secondary" type="button">Resend SMS</button><button id="phone-mfa-cancel" class="secondary" type="button">Cancel</button></div>
+        </form>
+      </section>
       <section class="card" aria-labelledby="email-2fa-title">
         <h2 id="email-2fa-title">Email verification as an alternative 2FA method</h2>
         <p class="muted">When enabled, ConfigKit sends a one-time eight-digit code and a single-use verification link to your confirmed email after your primary sign-in. This can replace the authenticator challenge for that session. Verification expires after eight hours; the next sign-in will ask again.</p>
@@ -305,6 +318,31 @@
           });
           row.append(detail,remove); mfaFactorList.append(row);
         }
+        const verifiedPhoneFactors = (data.phone || []).filter(factor => factor.status === 'verified');
+        const phoneList = document.getElementById('phone-mfa-list');
+        phoneList.replaceChildren();
+        if (!verifiedPhoneFactors.length) {
+          const note = document.createElement('p'); note.className = 'muted';
+          note.textContent = 'No verified phone backup factor is registered.';
+          phoneList.append(note);
+        }
+        for (const factor of verifiedPhoneFactors) {
+          const row = document.createElement('div'); row.className = 'provider';
+          const detail = document.createElement('div');
+          const name = document.createElement('strong'); name.textContent = factor.phone || 'Phone number';
+          const state = document.createElement('div'); state.className = 'muted'; state.textContent = 'Enabled · SMS second factor';
+          detail.append(name,state);
+          const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Remove';
+          remove.addEventListener('click', async () => {
+            if (!window.confirm('Remove this phone number as a second factor? SMS will no longer be available as a backup sign-in step.')) return;
+            remove.disabled = true;
+            const {error:removeError} = await client.auth.mfa.unenroll({factorId:factor.id});
+            if (removeError) { remove.disabled = false; setStatus('Could not remove phone factor: ' + removeError.message,true); return; }
+            await client.auth.refreshSession();
+            setStatus('Phone backup factor removed.'); await refreshMfaFactors();
+          });
+          row.append(detail,remove); phoneList.append(row);
+        }
         const webauthnFactors = (data.all || []).filter(factor => factor.factor_type === 'webauthn');
         mfaWebauthnFactorList.replaceChildren();
         const verifiedWebauthnFactors = webauthnFactors.filter(factor => factor.status === 'verified');
@@ -366,7 +404,71 @@
           const {data,error} = await client.auth.mfa.webauthn.register({friendlyName:'ConfigKit passkey second factor'});
           if (error) throw error;
           setStatus('Passkey second factor registered and verified. You can now use it instead of a six-digit code after passkey sign-in.');
+          let pendingPhoneFactorId = '';
+      const phoneMfaEnrollForm = document.getElementById('phone-mfa-enroll-form');
+      const phoneMfaVerifyForm = document.getElementById('phone-mfa-verify-form');
+      const phoneMfaNumber = document.getElementById('phone-mfa-number');
+      const phoneMfaCode = document.getElementById('phone-mfa-code');
+      async function sendPhoneMfaChallenge() {
+        const phone = phoneMfaNumber.value.trim();
+        if (!/^\+[1-9]\d{7,14}$/.test(phone)) throw new Error('Enter a valid phone number in international format, such as +61412345678.');
+        const {data,error} = await client.auth.mfa.enroll({factorType:'phone',phone,friendlyName:'ConfigKit SMS backup'});
+        if (error) throw error;
+        pendingPhoneFactorId = data.id;
+        const {error:challengeError} = await client.auth.mfa.challenge({factorId:data.id});
+        if (challengeError) throw challengeError;
+        phoneMfaVerifyForm.hidden = false;
+        phoneMfaCode.focus();
+        setStatus('A verification code was sent to your phone. Enter it to enable SMS backup authentication.');
+      }
+      phoneMfaEnrollForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!phoneMfaEnrollForm.reportValidity()) return;
+        const button = document.getElementById('phone-mfa-send');
+        button.disabled = true;
+        try { await sendPhoneMfaChallenge(); }
+        catch (error) { setStatus(error.message || 'Could not start phone verification.',true); }
+        finally { button.disabled = false; }
+      });
+      phoneMfaVerifyForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!pendingPhoneFactorId || !phoneMfaVerifyForm.reportValidity()) return;
+        const button = document.getElementById('phone-mfa-verify');
+        button.disabled = true;
+        try {
+          const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:pendingPhoneFactorId});
+          if (challengeError) throw challengeError;
+          const {error} = await client.auth.mfa.verify({factorId:pendingPhoneFactorId,challengeId:challenge.id,code:phoneMfaCode.value.trim()});
+          if (error) throw error;
+          pendingPhoneFactorId = '';
+          phoneMfaCode.value = '';
+          phoneMfaVerifyForm.hidden = true;
+          phoneMfaEnrollForm.hidden = true;
+          await client.auth.refreshSession();
+          setStatus('Phone backup authentication is enabled.');
           await refreshMfaFactors();
+        } catch (error) {
+          setStatus(error.message || 'The SMS code could not be verified.',true);
+          phoneMfaCode.select();
+        } finally { button.disabled = false; }
+      });
+      document.getElementById('phone-mfa-resend').addEventListener('click', async event => {
+        event.currentTarget.disabled = true;
+        try {
+          const {error} = await client.auth.mfa.challenge({factorId:pendingPhoneFactorId});
+          if (error) throw error;
+          setStatus('A new verification code was sent to your phone.');
+        } catch (error) { setStatus(error.message || 'Could not resend the SMS code.',true); }
+        finally { event.currentTarget.disabled = false; }
+      });
+      document.getElementById('phone-mfa-cancel').addEventListener('click', async () => {
+        if (pendingPhoneFactorId) await client.auth.mfa.unenroll({factorId:pendingPhoneFactorId});
+        pendingPhoneFactorId = '';
+        phoneMfaVerifyForm.hidden = true;
+        setStatus('Phone verification cancelled.');
+        await refreshMfaFactors();
+      });
+      await refreshMfaFactors();
         } catch (error) {
           setStatus(`Could not register passkey second factor: ${error.message || 'Please try again.'}`,true);
         } finally {
