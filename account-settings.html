@@ -46,6 +46,16 @@
           <p id="visibility-help" class="muted" role="status" aria-live="polite">Loading your current visibility…</p>
         </form>
       </section>
+      <section class="card" aria-labelledby="lock-account-title">
+        <h2 id="lock-account-title">Lock account</h2>
+        <div class="notice">
+          <strong>Temporarily lock ConfigKit on all your signed-in devices.</strong>
+          <p>Locking signs out all active sessions and sends ConfigKit pages to a locked screen. To unlock, sign in again using your usual sign-in method and complete any required two-factor verification.</p>
+          <p>This protects access through ConfigKit's website. Already-issued access tokens may remain valid until they expire, so this is not a substitute for revoking a compromised password or provider account.</p>
+        </div>
+        <div class="actions"><button class="danger" id="lock-account-button" type="button">Lock my account</button></div>
+        <p id="lock-account-status" class="muted" role="status" aria-live="polite"></p>
+      </section>
       <section class="card" aria-labelledby="security-title">
         <h2 id="security-title">Email and password</h2>
         <p class="muted">Update the email address and password used to sign in to your ConfigKit account.</p>
@@ -690,6 +700,25 @@
           setStatus(`Could not save profile visibility: ${error.message || 'Please try again.'}`, true);
         } finally {
           visibilityButton.disabled = false;
+        }
+      });
+
+      const lockAccountButton = document.getElementById('lock-account-button');
+      const lockAccountStatus = document.getElementById('lock-account-status');
+      lockAccountButton.addEventListener('click', async () => {
+        if (!window.confirm('Lock your ConfigKit account and sign out all active devices? You will need to sign in again to unlock it.')) return;
+        lockAccountButton.disabled = true;
+        lockAccountStatus.textContent = 'Locking your account and ending active sessions…';
+        try {
+          const {error:lockError} = await client.rpc('lock_my_account');
+          if (lockError) throw lockError;
+          const {error:signOutError} = await client.auth.signOut({scope:'global'});
+          if (signOutError) throw signOutError;
+          window.location.replace('account-locked.html');
+        } catch (error) {
+          lockAccountStatus.textContent = error.message || 'Could not lock the account. Please try again.';
+          setStatus('Account lock was not completed. Please try again.', true);
+          lockAccountButton.disabled = false;
         }
       });
 
