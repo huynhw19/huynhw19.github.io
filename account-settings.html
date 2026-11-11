@@ -80,6 +80,19 @@
         </div>
         <p class="muted">Supabase does not provide recovery codes for this factor type. Consider enrolling a second authenticator on a separate device and keep its access secure.</p>
       </section>
+      <section class="card" aria-labelledby="phone-signin-title">
+        <h2 id="phone-signin-title">Phone number for SMS sign-in</h2>
+        <p class="muted">Link and verify a phone number on your account. Once verified, you can use it to sign in from the login page without a password. Use international E.164 format, for example +61412345678.</p>
+        <p id="phone-account-status" class="notice" aria-live="polite">Checking your verified phone number…</p>
+        <form id="phone-account-form">
+          <div class="field"><label for="phone-account-number">Phone number</label><input id="phone-account-number" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="+61412345678" required></div>
+          <div class="actions"><button id="phone-account-send" type="submit">Send phone verification code</button></div>
+        </form>
+        <form id="phone-account-verify-form" hidden>
+          <div class="field"><label for="phone-account-code">Six-digit SMS code</label><input id="phone-account-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required></div>
+          <div class="actions"><button id="phone-account-verify" type="submit">Verify phone number</button><button id="phone-account-resend" class="secondary" type="button">Resend code</button></div>
+        </form>
+      </section>
       <section class="card" aria-labelledby="phone-mfa-title">
         <h2 id="phone-mfa-title">Phone as a backup two-factor method</h2>
         <p class="muted">Register a phone number and verify it by SMS. After setup, you can choose SMS instead of your authenticator code when signing in. Use international E.164 format, for example +61412345678.</p>
@@ -404,7 +417,61 @@
           const {data,error} = await client.auth.mfa.webauthn.register({friendlyName:'ConfigKit passkey second factor'});
           if (error) throw error;
           setStatus('Passkey second factor registered and verified. You can now use it instead of a six-digit code after passkey sign-in.');
-          let pendingPhoneFactorId = '';
+          const phoneAccountStatus = document.getElementById('phone-account-status');
+      const phoneAccountForm = document.getElementById('phone-account-form');
+      const phoneAccountVerifyForm = document.getElementById('phone-account-verify-form');
+      const phoneAccountNumber = document.getElementById('phone-account-number');
+      const phoneAccountCode = document.getElementById('phone-account-code');
+      let pendingAccountPhone = '';
+      phoneAccountNumber.value = user.phone || '';
+      phoneAccountStatus.textContent = user.phone
+        ? 'Verified phone number on this account: ' + user.phone
+        : 'No verified phone number is linked to this account yet.';
+      async function requestPhoneAccountVerification() {
+        const phone = phoneAccountNumber.value.trim();
+        if (!/^\+[1-9]\d{7,14}$/.test(phone)) throw new Error('Enter a valid phone number in international format, such as +61412345678.');
+        const {error} = await client.auth.updateUser({phone});
+        if (error) throw error;
+        pendingAccountPhone = phone;
+        phoneAccountVerifyForm.hidden = false;
+        phoneAccountCode.focus();
+        phoneAccountStatus.textContent = 'A verification code was sent to ' + phone + '. Verify it to enable phone sign-in.';
+      }
+      phoneAccountForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!phoneAccountForm.reportValidity()) return;
+        const button = document.getElementById('phone-account-send');
+        button.disabled = true;
+        try { await requestPhoneAccountVerification(); }
+        catch (error) { phoneAccountStatus.textContent = error.message || 'Could not send phone verification.'; }
+        finally { button.disabled = false; }
+      });
+      phoneAccountVerifyForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!pendingAccountPhone || !phoneAccountVerifyForm.reportValidity()) return;
+        const button = document.getElementById('phone-account-verify');
+        button.disabled = true;
+        try {
+          const {error} = await client.auth.verifyOtp({phone:pendingAccountPhone,token:phoneAccountCode.value.trim(),type:'phone_change'});
+          if (error) throw error;
+          const {data:updatedUser,error:refreshError} = await client.auth.getUser();
+          if (refreshError) throw refreshError;
+          phoneAccountStatus.textContent = 'Verified phone number: ' + (updatedUser.user.phone || pendingAccountPhone) + '. You can now use SMS sign-in.';
+          phoneAccountCode.value = '';
+          phoneAccountVerifyForm.hidden = true;
+          pendingAccountPhone = '';
+        } catch (error) {
+          phoneAccountStatus.textContent = error.message || 'The phone verification code could not be verified.';
+          phoneAccountCode.select();
+        } finally { button.disabled = false; }
+      });
+      document.getElementById('phone-account-resend').addEventListener('click', async event => {
+        event.currentTarget.disabled = true;
+        try { await requestPhoneAccountVerification(); }
+        catch (error) { phoneAccountStatus.textContent = error.message || 'Could not resend phone verification.'; }
+        finally { event.currentTarget.disabled = false; }
+      });
+      let pendingPhoneFactorId = '';
       let pendingPhoneChallengeId = '';
       const phoneMfaEnrollForm = document.getElementById('phone-mfa-enroll-form');
       const phoneMfaVerifyForm = document.getElementById('phone-mfa-verify-form');
