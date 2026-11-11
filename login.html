@@ -247,7 +247,7 @@
           catch (error) { console.warn('Recovery-code status unavailable; authenticator sign-in remains available.', error); }
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
-          if (emailMfa.enabled && !emailMfa.verified && assurance.currentLevel !== 'aal2' && !emailMfaUseTotp && !recoveryCodes.verified) {
+          if (emailMfa.enabled && !emailMfa.verified && assurance.currentLevel !== 'aal2' && !emailMfaUseTotp && !recoveryCodes.verified && !passkeySession) {
             const {data: availableFactors} = await client.auth.mfa.listFactors();
             document.getElementById('email-mfa-use-totp').hidden = !(availableFactors?.totp || []).some(factor => factor.status === 'verified');
             document.getElementById('email-mfa-use-recovery').hidden = !recoveryCodes.enabled;
@@ -545,6 +545,10 @@
           const {data, error} = await client.auth.signInWithPasskey();
           if (error) throw error;
           if (!data.session) throw new Error('Passkey sign-in did not create a session. Please try again.');
+          // Persist the passkey routing hint immediately, before auth-state callbacks
+          // or the initial session check can race with this successful ceremony.
+          window.CONFIGKIT_PASSKEY_SESSION?.mark(data.session.user.id);
+          passkeyPrimaryPending = false;
           setStatus('Signed in with your passkey.'); await renderSession();
         } catch (error) {
           passkeyPrimaryPending = false;
