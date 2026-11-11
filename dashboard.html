@@ -102,13 +102,20 @@
           const passkeySession = sessionStorage.getItem('configkit_passkey_session_user') === data.session.user.id;
           const {data: email2FAStatus, error: email2FAError} = await client.functions.invoke('email-2fa', {body:{action:'status'}});
           if (email2FAError) throw email2FAError;
+          let recoveryCodeStatus = {enabled:false,verified:false};
+          const {data: recoveryStatus, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
+          if (!recoveryError && recoveryStatus) recoveryCodeStatus = recoveryStatus;
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) throw assuranceError;
-          if (email2FAStatus?.enabled && !email2FAStatus.verified && assurance.currentLevel !== 'aal2') {
+          if (email2FAStatus?.enabled && !email2FAStatus.verified && !recoveryCodeStatus.verified && assurance.currentLevel !== 'aal2') {
             window.location.replace('login.html');
             return;
           }
-          if (!email2FAStatus?.verified && !passkeySession && assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+          if (recoveryCodeStatus.enabled && !recoveryCodeStatus.verified && !email2FAStatus?.verified && assurance.currentLevel !== 'aal2') {
+            window.location.replace('login.html');
+            return;
+          }
+          if (!email2FAStatus?.verified && !recoveryCodeStatus.verified && (!passkeySession || recoveryCodeStatus.enabled) && assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
             window.location.replace('login.html');
             return;
           }

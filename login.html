@@ -58,7 +58,12 @@
         <form id="mfa-form">
           <label for="mfa-code">Authenticator code</label>
           <input id="mfa-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required>
-          <div class="form-actions"><button id="mfa-submit" type="submit">Verify and continue</button><button id="mfa-cancel" class="secondary" type="button">Sign out</button></div>
+          <div class="form-actions"><button id="mfa-submit" type="submit">Verify and continue</button><button id="mfa-use-recovery" class="secondary" type="button" hidden>Use a recovery code</button><button id="mfa-cancel" class="secondary" type="button">Sign out</button></div>
+        </form>
+        <form id="mfa-recovery-form" hidden>
+          <label for="mfa-recovery-code">One-time recovery code</label>
+          <input id="mfa-recovery-code" name="recoveryCode" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="39" pattern="([0-9A-Fa-f]{32}|([0-9A-Fa-f]{8}-){3}[0-9A-Fa-f]{8})" required>
+          <div class="form-actions"><button id="mfa-recovery-submit" type="submit">Use recovery code</button><button id="mfa-recovery-back" class="secondary" type="button">Use authenticator instead</button><button id="mfa-recovery-cancel" class="secondary" type="button">Sign out</button></div>
         </form>
       </section>
       <section id="email-mfa-challenge" class="education-note" hidden aria-labelledby="email-mfa-title">
@@ -67,7 +72,7 @@
         <form id="email-mfa-form">
           <label for="email-mfa-code">Email verification code</label>
           <input id="email-mfa-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{8}" minlength="8" maxlength="8" required>
-          <div class="form-actions"><button id="email-mfa-submit" type="submit">Verify and continue</button><button id="email-mfa-resend" class="secondary" type="button">Resend code and link</button><button id="email-mfa-use-totp" class="secondary" type="button" hidden>Use authenticator instead</button><button id="email-mfa-cancel" class="secondary" type="button">Sign out</button></div>
+          <div class="form-actions"><button id="email-mfa-submit" type="submit">Verify and continue</button><button id="email-mfa-resend" class="secondary" type="button">Resend code and link</button><button id="email-mfa-use-totp" class="secondary" type="button" hidden>Use authenticator instead</button><button id="email-mfa-use-recovery" class="secondary" type="button" hidden>Use a recovery code instead</button><button id="email-mfa-cancel" class="secondary" type="button">Sign out</button></div>
         </form>
       </section>
       <div class="account" id="account" hidden></div>
@@ -150,6 +155,18 @@
         if (data?.error) throw new Error(data.error);
         return data || {};
       }
+      async function invokeRecoveryCodes(body) {
+        const {data, error} = await client.functions.invoke('recovery-codes', {body});
+        if (error) {
+          let detail = data?.error || data?.message;
+          if (!detail && error.context && typeof error.context.json === 'function') {
+            try { const payload = await error.context.json(); detail = payload?.error || payload?.message; } catch (_) {}
+          }
+          throw new Error(detail || error.message || 'Recovery-code verification could not be completed.');
+        }
+        if (data?.error) throw new Error(data.error);
+        return data || {};
+      }
       function updateAccountFields() {
         const isEducation = accountType.value === 'education';
         const isWork = accountType.value === 'work';
@@ -224,11 +241,15 @@
             setStatus(error.message || 'Could not check email verification status.', true);
             return;
           }
+          let recoveryCodes = {enabled:false,verified:false,remaining:0};
+          try { recoveryCodes = await invokeRecoveryCodes({action:'status'}); }
+          catch (error) { console.warn('Recovery-code status unavailable; authenticator sign-in remains available.', error); }
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
-          if (emailMfa.enabled && !emailMfa.verified && assurance.currentLevel !== 'aal2' && !emailMfaUseTotp) {
+          if (emailMfa.enabled && !emailMfa.verified && assurance.currentLevel !== 'aal2' && !emailMfaUseTotp && !recoveryCodes.verified) {
             const {data: availableFactors} = await client.auth.mfa.listFactors();
             document.getElementById('email-mfa-use-totp').hidden = !(availableFactors?.totp || []).some(factor => factor.status === 'verified');
+            document.getElementById('email-mfa-use-recovery').hidden = !recoveryCodes.enabled;
             form.hidden = true;
             document.querySelector('.tabs').hidden = true;
             document.querySelector('.divider').hidden = true;
@@ -249,22 +270,33 @@
           }
           emailChallengeSent = false;
           document.getElementById('email-mfa-challenge').hidden = true;
-          if (!emailMfa.verified && !passkeySession && assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+          if (!emailMfa.verified && !recoveryCodes.verified && (!passkeySession || recoveryCodes.enabled) &&
+              assurance.currentLevel !== 'aal2' &&
+              (assurance.nextLevel === 'aal2' || recoveryCodes.enabled)) {
             const {data: factorData, error: factorError} = await client.auth.mfa.listFactors();
             if (factorError) { setStatus('Could not load your authenticator. Please try again.', true); return; }
             const factor = (factorData.totp || []).find(item => item.status === 'verified');
-            if (!factor) { setStatus('Your account requires a verified authenticator app to complete two-factor sign-in. Phone-based factors are not supported on this website. Contact support or use another enrolled factor.', true); return; }
-            pendingMfaFactorId = factor.id;
+            if (!factor && !recoveryCodes.enabled) {
+              setStatus('Your account requires a verified authenticator app to complete two-factor sign-in. Contact support or use another enrolled factor.', true);
+              return;
+            }
+            pendingMfaFactorId = factor?.id || '';
             form.hidden = true;
             document.querySelector('.tabs').hidden = true;
             document.querySelector('.divider').hidden = true;
             document.querySelectorAll('.providers').forEach(node => node.hidden = true);
             document.getElementById('mfa-challenge').hidden = false;
             document.getElementById('mfa-title').textContent = 'Two-factor authentication';
-            document.querySelector('#mfa-challenge .muted').textContent = 'Enter the current six-digit code from your authenticator app.';
+            document.getElementById('mfa-form').hidden = !factor;
+            document.getElementById('mfa-recovery-form').hidden = !!factor;
+            document.getElementById('mfa-use-recovery').hidden = !recoveryCodes.enabled || !factor;
+            document.getElementById('mfa-recovery-back').hidden = !factor;
+            document.querySelector('#mfa-challenge .muted').textContent = factor
+              ? 'Enter the current six-digit code from your authenticator app, or use a one-time recovery code.'
+              : 'Your authenticator is unavailable. Enter one of your unused recovery codes to finish signing in.';
             document.querySelector('#mfa-form label').textContent = 'Authenticator code';
             setStatus('Your password or provider sign-in was accepted. Complete the second step to continue.');
-            document.getElementById('mfa-code').focus();
+            document.getElementById(factor ? 'mfa-code' : 'mfa-recovery-code').focus();
             return;
           }
           document.getElementById('mfa-challenge').hidden = true;
@@ -317,6 +349,46 @@
         }
       }
 
+      document.getElementById('mfa-use-recovery').addEventListener('click', () => {
+        document.getElementById('mfa-form').hidden = true;
+        document.getElementById('mfa-recovery-form').hidden = false;
+        document.getElementById('mfa-recovery-code').focus();
+      });
+      document.getElementById('mfa-recovery-back').addEventListener('click', () => {
+        document.getElementById('mfa-recovery-form').hidden = true;
+        document.getElementById('mfa-form').hidden = false;
+        document.getElementById('mfa-recovery-code').value = '';
+        document.getElementById('mfa-code').focus();
+      });
+      document.getElementById('mfa-recovery-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const input = document.getElementById('mfa-recovery-code');
+        const button = document.getElementById('mfa-recovery-submit');
+        if (!input.reportValidity()) return;
+        button.disabled = true;
+        try {
+          await invokeRecoveryCodes({action:'verify', code:input.value.trim()});
+          input.value = '';
+          document.getElementById('mfa-recovery-form').hidden = true;
+          setStatus('Recovery code accepted. Finishing sign-in…');
+          await renderSession();
+        } catch (error) {
+          setStatus(error.message || 'That recovery code could not be verified.', true);
+          input.select();
+        } finally { button.disabled = false; }
+      });
+      document.getElementById('mfa-recovery-cancel').addEventListener('click', async () => {
+        sessionStorage.removeItem(passkeySessionKey);
+        const {error} = await client.auth.signOut({scope:'local'});
+        if (error) { setStatus('Could not cancel sign-in. Please try again.', true); return; }
+        document.getElementById('mfa-recovery-code').value = '';
+        document.getElementById('mfa-recovery-form').hidden = true;
+        document.getElementById('mfa-form').hidden = false;
+        pendingMfaFactorId = '';
+        emailChallengeSent = false;
+        emailMfaUseTotp = false;
+        await renderSession();
+      });
       document.getElementById('mfa-form').addEventListener('submit', async event => {
         event.preventDefault();
         const input = document.getElementById('mfa-code');
@@ -388,6 +460,15 @@
         document.getElementById('email-mfa-challenge').hidden = true;
         setStatus('Use your registered authenticator code to finish signing in.');
         await renderSession();
+      });
+      document.getElementById('email-mfa-use-recovery').addEventListener('click', async () => {
+        emailMfaUseTotp = true;
+        document.getElementById('email-mfa-challenge').hidden = true;
+        setStatus('Enter one of your unused recovery codes to finish signing in.');
+        await renderSession();
+        document.getElementById('mfa-form').hidden = true;
+        document.getElementById('mfa-recovery-form').hidden = false;
+        document.getElementById('mfa-recovery-code').focus();
       });
       document.getElementById('email-mfa-cancel').addEventListener('click', async () => {
         sessionStorage.removeItem(passkeySessionKey);
