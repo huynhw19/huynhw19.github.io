@@ -184,7 +184,7 @@
       // Match the dashboard's passkey handling: a successful passkey ceremony is
       // accepted as the primary factor for this tab. This marker is only a UI
       // routing hint; it is not a server-side AAL2 claim.
-      const passkeySession = sessionStorage.getItem('configkit_passkey_session_user') === userData.user.id;
+      const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(userData.user.id) === true;
       let recoveryCodeStatusData = {enabled:false,remaining:0,verified:false};
       try { recoveryCodeStatusData = await invokeRecoveryCodes({action:'status'}); }
       catch (error) { console.warn('Recovery-code status unavailable; native authenticator checks remain active.', error); }
@@ -202,7 +202,7 @@
         window.location.replace('login.html?next=account-settings.html');
         return;
       }
-      if ((recoveryCodeStatusData.enabled && !recoveryCodeStatusData.verified && !email2FAStatus.verified && assuranceData.currentLevel !== 'aal2') ||
+      if ((recoveryCodeStatusData.enabled && !recoveryCodeStatusData.verified && !email2FAStatus.verified && !passkeySession && assuranceData.currentLevel !== 'aal2') ||
           (!email2FAStatus.verified && !recoveryCodeStatusData.verified && !passkeySession && assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2')) {
         setStatus('Please complete two-factor authentication before managing account security. Redirecting to sign in…');
         window.location.replace('login.html?next=account-settings.html');
