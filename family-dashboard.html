@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Private family dashboard for managing child profiles in ConfigKit.">
+  <title>Family dashboard — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px rgba(23,35,31,.08)}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,900px);margin:0 auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line);flex-wrap:wrap}nav{display:flex;gap:1rem;flex-wrap:wrap}a{color:var(--green)}main{padding:2rem 0 3rem}.card{background:var(--white);border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow);padding:1.25rem;margin:1rem 0}.muted{color:var(--muted)}h1{font-size:clamp(2rem,5vw,2.7rem);line-height:1.15;margin:.3rem 0}.eyebrow{display:inline-block;background:var(--mint);color:var(--green-dark);border-radius:999px;padding:.25rem .7rem;font-size:.85rem;font-weight:700}form{display:grid;gap:.85rem;max-width:560px}label{display:grid;gap:.25rem;font-weight:600}input,textarea,button{font:inherit}input,textarea{width:100%;padding:.7rem;border:1px solid #b9c8c0;border-radius:.55rem;background:white;color:var(--ink)}button{border:0;border-radius:.6rem;padding:.65rem .9rem;background:var(--green);color:white;font-weight:650;cursor:pointer}button.secondary{background:var(--mint);color:var(--green-dark)}button.danger{background:#9b3030}.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}.child{border:1px solid var(--line);border-radius:.75rem;padding:1rem;margin:.75rem 0}.status{padding:.7rem 0;color:var(--green-dark)}.status.error{color:var(--red)}[hidden]{display:none!important}footer{padding:1rem 0 2rem;color:var(--muted)}@media(max-width:600px){header{align-items:flex-start;flex-direction:column;padding:.8rem 0}nav{gap:.7rem}}
+  </style>
+</head>
+<body>
+  <header><a href="dashboard.html">← ConfigKit dashboard</a><nav aria-label="Family navigation"><a href="index.html">Home</a><a href="account-settings.html">Account settings</a></nav></header>
+  <main>
+    <section class="card">
+      <span class="eyebrow">Personal account</span>
+      <h1>Family dashboard</h1>
+      <p id="account-label" class="muted">Checking your account…</p>
+      <p class="muted">Create private child profiles managed by your signed-in adult account. These are family records, not separate sign-in accounts.</p>
+    </section>
+    <section class="card" id="creator" hidden>
+      <h2 id="form-title">Add a child</h2>
+      <form id="child-form">
+        <label for="child-name">Child's name<input id="child-name" maxlength="120" autocomplete="off" required></label>
+        <label for="child-age">Age (optional)<input id="child-age" type="number" min="0" max="17" inputmode="numeric" placeholder="Age in years"></label>
+        <label for="child-grade">School year / grade (optional)<input id="child-grade" maxlength="80" placeholder="e.g. Year 5"></label>
+        <label for="child-notes">Notes (optional)<textarea id="child-notes" rows="3" maxlength="500" placeholder="A short note for your family"></textarea></label>
+        <div class="actions"><button id="save-child" type="submit">Create child profile</button><button id="cancel-edit" class="secondary" type="button" hidden>Cancel</button></div>
+      </form>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+    <section class="card" id="children-panel" hidden>
+      <h2>Your children</h2>
+      <p class="muted">Only your signed-in account can view and manage these records.</p>
+      <div id="children-list"></div>
+    </section>
+  </main>
+  <footer>ConfigKit · Family information is private to the parent account.</footer>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (() => {
+      const config = window.CONFIGKIT_AUTH || {};
+      const accountLabel = document.getElementById('account-label');
+      const creator = document.getElementById('creator');
+      const panel = document.getElementById('children-panel');
+      const list = document.getElementById('children-list');
+      const form = document.getElementById('child-form');
+      const status = document.getElementById('status');
+      const cancel = document.getElementById('cancel-edit');
+      const title = document.getElementById('form-title');
+      const save = document.getElementById('save-child');
+      let userId = null;
+      let editingId = null;
+      const say = (message, error = false) => { status.textContent = message; status.classList.toggle('error', error); };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+        accountLabel.textContent = 'Sign-in is not configured on this site.'; return;
+      }
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      const reset = () => { form.reset(); editingId = null; title.textContent = 'Add a child'; save.textContent = 'Create child profile'; cancel.hidden = true; };
+      const field = id => document.getElementById(id);
+      async function loadChildren() {
+        list.replaceChildren();
+        const {data,error} = await client.from('family_children').select('id,child_name,age_years,grade,notes,created_at').eq('parent_id',userId).order('created_at',{ascending:false});
+        if (error) { say(error.message || 'Could not load child profiles.',true); return; }
+        if (!data.length) { const p=document.createElement('p'); p.className='muted'; p.textContent='No child profiles yet. Add your first child above.'; list.append(p); return; }
+        data.forEach(child => {
+          const article=document.createElement('article'); article.className='child';
+          const heading=document.createElement('h3'); heading.textContent=child.child_name;
+          const details=document.createElement('p'); details.className='muted';
+          details.textContent=[child.age_years === null ? '' : 'Age '+child.age_years,child.grade].filter(Boolean).join(' · ') || 'No age or grade added';
+          article.append(heading,details);
+          if (child.notes) { const note=document.createElement('p'); note.textContent=child.notes; article.append(note); }
+          const actions=document.createElement('div'); actions.className='actions';
+          const edit=document.createElement('button'); edit.type='button'; edit.className='secondary'; edit.textContent='Edit';
+          edit.addEventListener('click',()=>{editingId=child.id;field('child-name').value=child.child_name;field('child-age').value=child.age_years ?? '';field('child-grade').value=child.grade || '';field('child-notes').value=child.notes || '';title.textContent='Edit child profile';save.textContent='Save changes';cancel.hidden=false;form.scrollIntoView({behavior:'smooth',block:'start'});});
+          const remove=document.createElement('button'); remove.type='button'; remove.className='danger'; remove.textContent='Delete';
+          remove.addEventListener('click',async()=>{if(!window.confirm('Delete the profile for '+child.child_name+'?'))return;const result=await client.from('family_children').delete().eq('id',child.id).eq('parent_id',userId);if(result.error){say(result.error.message,true);return;}say('Child profile deleted.');await loadChildren();});
+          actions.append(edit,remove);article.append(actions);list.append(article);
+        });
+      }
+      cancel.addEventListener('click',()=>{reset();say('Editing cancelled.');});
+      form.addEventListener('submit',async event=>{
+        event.preventDefault();
+        const name=field('child-name').value.trim();
+        const ageRaw=field('child-age').value.trim();
+        const age=ageRaw===''?null:Number(ageRaw);
+        if(!name){say('Enter the child’s name.',true);return;}
+        if(age!==null&&(!Number.isInteger(age)||age<0||age>17)){say('Age must be between 0 and 17.',true);return;}
+        const record={child_name:name,age_years:age,grade:field('child-grade').value.trim(),notes:field('child-notes').value.trim()};
+        say(editingId?'Saving changes…':'Creating child profile…');save.disabled=true;
+        const result=editingId
+          ? await client.from('family_children').update(record).eq('id',editingId).eq('parent_id',userId)
+          : await client.from('family_children').insert({...record,parent_id:userId});
+        save.disabled=false;
+        if(result.error){say(result.error.message || 'Could not save the child profile.',true);return;}
+        reset();say(editingId?'Child profile updated.':'Child profile created.');
+        await loadChildren();
+      });
+      async function init(){
+        const {data,error}=await client.auth.getSession();
+        if(error||!data.session){window.location.replace('login.html?next=family-dashboard.html');return;}
+        const user=data.session.user; const accountType=user.user_metadata?.account_type || 'personal';
+        if(accountType!=='personal'){accountLabel.textContent='This dashboard is available only to personal accounts.';return;}
+        userId=user.id; accountLabel.textContent='Signed in as '+(user.email || 'your personal account');
+        creator.hidden=false;panel.hidden=false;await loadChildren();
+      }
+      client.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace('login.html');});
+      void init();
+    })();
+  </script>
+</body>
+</html>
