@@ -368,31 +368,6 @@
           setStatus('Passkey second factor registered and verified. You can now use it instead of a six-digit code after passkey sign-in.');
           await refreshMfaFactors();
         } catch (error) {
-          setStatus(error.message || 'The SMS code could not be verified.',true);
-          phoneMfaCode.select();
-        } finally { button.disabled = false; }
-      });
-      document.getElementById('phone-mfa-resend').addEventListener('click', async event => {
-        const button = event.currentTarget;
-        button.disabled = true;
-        try {
-          const {data:challenge,error} = await client.auth.mfa.challenge({factorId:pendingPhoneFactorId});
-          if (error) throw error;
-          pendingPhoneChallengeId = challenge.id;
-          setStatus('A new verification code was sent to your phone.');
-        } catch (error) { setStatus(error.message || 'Could not resend the SMS code.',true); }
-        finally { button.disabled = false; }
-      });
-      document.getElementById('phone-mfa-cancel').addEventListener('click', async () => {
-        if (pendingPhoneFactorId) await client.auth.mfa.unenroll({factorId:pendingPhoneFactorId});
-        pendingPhoneFactorId = '';
-        pendingPhoneChallengeId = '';
-        phoneMfaVerifyForm.hidden = true;
-        setStatus('Phone verification cancelled.');
-        await refreshMfaFactors();
-      });
-      await refreshMfaFactors();
-        } catch (error) {
           setStatus(`Could not register passkey second factor: ${error.message || 'Please try again.'}`,true);
         } finally {
           mfaAddPasskeyFactorButton.disabled = false;
