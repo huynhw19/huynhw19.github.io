@@ -21,6 +21,7 @@
       <a href="groups.html">Your groups</a>
       <a href="account-settings.html">Account settings</a>
       <a href="account-docs.html">Account Help</a>
+      <a id="family-nav-link" href="family-dashboard.html" hidden>Family dashboard</a>
       <button id="signout" type="button" hidden>Sign out</button>
     </nav>
   </header>
@@ -63,6 +64,9 @@
         <article class="card" id="work-collaboration-card" hidden><h2>Work collaboration</h2><p>Manage your workplace profile and use ConfigKit collaboration tools. Your workplace name is only a local profile detail.</p><a href="account-settings.html">Manage work profile →</a></article>
         <article class="card" id="developer-dashboard-card" hidden><h2>Developer dashboard</h2><p>Write, check, format, and download raw profile XML in the built-in XML editor.</p><a href="developer-dashboard.html">Open developer dashboard →</a></article>
         <article class="card" id="enterprise-dashboard-card" hidden><h2>Enterprise dashboard</h2><p>Open your enterprise workspace for profile-building and review tools.</p><a href="enterprise-dashboard.html">Open enterprise dashboard →</a></article>
+      </section>
+      <section class="grid" aria-label="Family tools">
+        <article class="card" id="family-dashboard-card" hidden><h2>Family dashboard</h2><p>Create and manage private child profiles from your personal account.</p><a href="family-dashboard.html">Open family dashboard →</a></article>
       </section>
       <h2 class="section-title">Education tools</h2>
       <section class="grid" aria-label="Education tools">
@@ -134,6 +138,9 @@
           badge.textContent = type === 'developer' ? 'Developer account' : type === 'work' ? 'Work account' : type === 'education' ? 'Education account' : (type === 'organization' || type === 'enterprise') ? 'Enterprise account' : 'Personal account';
           badge.hidden = false;
           const isWork = type === 'work';
+          const isPersonal = type === 'personal';
+          document.getElementById('family-nav-link').hidden = !isPersonal;
+          document.getElementById('family-dashboard-card').hidden = !isPersonal;
           const isEnterprise = type === 'enterprise' || type === 'organization';
           document.getElementById('workspace-details').hidden = !isWork;
           document.getElementById('workplace-label').textContent = metadata.workplace ? `Company or workplace: ${metadata.workplace}` : 'No company or workplace name has been added.';
