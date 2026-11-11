@@ -1,31 +1,29 @@
-***Configkit***
+# ConfigKit
 
-Have you even try a site that is share profile but don’t have any other content? 
+ConfigKit is a public web app for creating mobileconfig profiles such as Wi-Fi, DNS, and web clips.
 
-Configkit is a public app that lets you generate mobileconfig such as wi-fi, web clip and more.
+## Getting started
 
-Important, Microsoft is not ready yet because the admin isn’t send a invitation yet. If you are the admin, here is your email: huynh.w@icloud.com
+1. Open the site and choose **Sign up**.
+2. Select the account type that best matches how you plan to use ConfigKit.
+3. Confirm your email using the link sent to your inbox. Check spam or junk if it does not arrive.
+4. Sign in and open your dashboard.
 
-***For new user***
+## Account help
 
-To get started, for the prompt.
-1. Scroll down all the way
-2. Sign up as personal, work etc
-3. A email needs to confirm, Go to your email. If you don’t see it, Look at spam.
-4. Once confirmed, login into your account
-5. WELCOME TO MOBILECPNFIG!!!!
+See the [ConfigKit Account Guide](account-docs.html) for instructions on:
 
-   
-***Person account***
+- Creating an account and choosing an account type
+- Signing in with passwords, connected providers, and passkeys
+- Updating your profile, email address, and password
+- Setting up authenticator, passkey, or email two-factor authentication
+- Generating and safely storing authenticator recovery codes
+- Troubleshooting sign-in and account-security issues
 
-For personal account can access their dashboard and more.
+Account types and workplace, school, or organization labels are self-declared profile details. They do not verify identity or membership and do not automatically grant special access.
 
-Only enter your personal account information. Do not share password and information to other people because THEY can stolen YOUR information.
+## Keep your account safe
 
-***Education**
+Only enter your own account information. Never share your password, one-time verification codes, passkeys, or recovery codes. Use a unique password and keep your email account secure.
 
-For all education, You can create a at code to this link and create a student.
-
-For students, told them to sign up and watch the information.
-
-
+ConfigKit generates mobileconfig profile content in your browser. Treat downloaded profiles as sensitive, especially when they contain Wi-Fi credentials or network settings. Review profiles before installing them and only install profiles from sources you trust.
