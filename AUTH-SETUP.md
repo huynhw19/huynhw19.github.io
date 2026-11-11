@@ -60,7 +60,7 @@ These are native Supabase Auth flows. They require a real SMS provider; frontend
 5. In Authentication → URL Configuration, allow https://huynhw19.github.io/login.html and set the site's homepage as the Site URL.
 6. Test with a real phone number in E.164 format (for example +61412345678). Test phone sign-in and phone MFA separately.
 
-The phone login form is for existing phone-verified accounts (shouldCreateUser:false). A user who wants phone sign-in must first have a verified phone number on their Supabase account. Phone MFA enrollment is performed after sign-in from Account settings → Phone as a backup two-factor method.
+The phone login form is for existing phone-verified accounts (shouldCreateUser:false). Users can link and verify a phone number from Account settings → Phone number for SMS sign-in; that verified number can then be used on the login page. Phone MFA enrollment is performed separately from Account settings → Phone as a backup two-factor method.
 
 Security note: SMS is susceptible to SIM-swap and number-porting attacks. Treat it as a convenient fallback, not as strong as a passkey or authenticator app. Keep TOTP/passkeys available and never display or store SMS OTP values in application logs.
 
