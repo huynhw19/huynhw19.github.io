@@ -161,6 +161,32 @@
       color: var(--white);
     }
 
+    .video-panel {
+      margin-top: 1.5rem;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      padding: 1.2rem;
+      box-shadow: var(--shadow);
+    }
+    .video-panel h2 { margin: .15rem 0 .5rem; font-size: 1.5rem; }
+    .video-panel p { margin: 0 0 1rem; color: var(--muted); }
+    .video-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: .8rem;
+      background: #101814;
+    }
+    .video-frame iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
     .section-title {
       margin: 0 0 1rem;
       font-size: 1.7rem;
@@ -362,6 +388,23 @@
         <a class="button primary" href="#wifi-builder" data-i18n="openWifi">Open Wi‑Fi builder</a>
         <a class="button" href="mobileconfig-guide.html" data-i18n="beginnerGuideButton">Beginner guide</a>
       </div>
+    </section>
+
+    <section class="video-panel" id="install-tutorial" aria-labelledby="install-tutorial-title">
+      <span class="eyebrow">Video tutorial</span>
+      <h2 id="install-tutorial-title">How to install a mobileconfig profile</h2>
+      <p>Watch this step-by-step video to learn how to install a mobileconfig profile on your device.</p>
+      <div class="video-frame">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/sZyY5NpxxRw"
+          title="How to install a mobileconfig profile"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
+      </div>
+      <p style="margin-top: .8rem; margin-bottom: 0;"><a href="https://www.youtube.com/watch?v=sZyY5NpxxRw" target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a></p>
     </section>
 
     <section class="panel" id="family-tools" aria-labelledby="family-tools-title">
