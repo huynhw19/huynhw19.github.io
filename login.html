@@ -270,25 +270,32 @@
           }
           emailChallengeSent = false;
           document.getElementById('email-mfa-challenge').hidden = true;
-          if (!emailMfa.verified && !recoveryCodes.verified && (!passkeySession || recoveryCodes.enabled) && assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+          if (!emailMfa.verified && !recoveryCodes.verified && (!passkeySession || recoveryCodes.enabled) &&
+              assurance.currentLevel !== 'aal2' &&
+              (assurance.nextLevel === 'aal2' || recoveryCodes.enabled)) {
             const {data: factorData, error: factorError} = await client.auth.mfa.listFactors();
             if (factorError) { setStatus('Could not load your authenticator. Please try again.', true); return; }
             const factor = (factorData.totp || []).find(item => item.status === 'verified');
-            if (!factor) { setStatus('Your account requires a verified authenticator app to complete two-factor sign-in. Phone-based factors are not supported on this website. Contact support or use another enrolled factor.', true); return; }
-            pendingMfaFactorId = factor.id;
+            if (!factor && !recoveryCodes.enabled) {
+              setStatus('Your account requires a verified authenticator app to complete two-factor sign-in. Contact support or use another enrolled factor.', true);
+              return;
+            }
+            pendingMfaFactorId = factor?.id || '';
             form.hidden = true;
             document.querySelector('.tabs').hidden = true;
             document.querySelector('.divider').hidden = true;
             document.querySelectorAll('.providers').forEach(node => node.hidden = true);
             document.getElementById('mfa-challenge').hidden = false;
             document.getElementById('mfa-title').textContent = 'Two-factor authentication';
-            document.getElementById('mfa-form').hidden = false;
-            document.getElementById('mfa-recovery-form').hidden = true;
-            document.getElementById('mfa-use-recovery').hidden = !recoveryCodes.enabled;
-            document.querySelector('#mfa-challenge .muted').textContent = 'Enter the current six-digit code from your authenticator app.';
+            document.getElementById('mfa-form').hidden = !factor;
+            document.getElementById('mfa-recovery-form').hidden = !!factor;
+            document.getElementById('mfa-use-recovery').hidden = !recoveryCodes.enabled || !factor;
+            document.querySelector('#mfa-challenge .muted').textContent = factor
+              ? 'Enter the current six-digit code from your authenticator app, or use a one-time recovery code.'
+              : 'Your authenticator is unavailable. Enter one of your unused recovery codes to finish signing in.';
             document.querySelector('#mfa-form label').textContent = 'Authenticator code';
             setStatus('Your password or provider sign-in was accepted. Complete the second step to continue.');
-            document.getElementById('mfa-code').focus();
+            document.getElementById(factor ? 'mfa-code' : 'mfa-recovery-code').focus();
             return;
           }
           document.getElementById('mfa-challenge').hidden = true;
@@ -455,7 +462,9 @@
         document.getElementById('email-mfa-challenge').hidden = true;
         setStatus('Enter one of your unused recovery codes to finish signing in.');
         await renderSession();
-        document.getElementById('mfa-use-recovery').click();
+        document.getElementById('mfa-form').hidden = true;
+        document.getElementById('mfa-recovery-form').hidden = false;
+        document.getElementById('mfa-recovery-code').focus();
       });
       document.getElementById('email-mfa-cancel').addEventListener('click', async () => {
         sessionStorage.removeItem(passkeySessionKey);
