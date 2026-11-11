@@ -31,6 +31,20 @@
           <button type="submit" id="save-profile">Save profile</button>
         </form>
       </section>
+      <section class="card" id="work-hours-section" aria-labelledby="work-hours-title" hidden>
+        <h2 id="work-hours-title">Working hours</h2>
+        <p class="muted">Set your usual weekly work schedule and local time zone. This is a personal schedule preference; it does not control employer systems or automatically block access outside these hours.</p>
+        <form id="work-hours-form">
+          <div class="field"><label for="work-hours-enabled">Schedule</label><select id="work-hours-enabled"><option value="true">Working hours enabled</option><option value="false">Not set / disabled</option></select></div>
+          <fieldset class="field" style="border:0;padding:0;margin:16px 0"><legend style="font-weight:650;margin-bottom:8px">Working days</legend><div class="actions" id="work-days">
+            <label><input type="checkbox" value="1"> Monday</label><label><input type="checkbox" value="2"> Tuesday</label><label><input type="checkbox" value="3"> Wednesday</label><label><input type="checkbox" value="4"> Thursday</label><label><input type="checkbox" value="5"> Friday</label><label><input type="checkbox" value="6"> Saturday</label><label><input type="checkbox" value="0"> Sunday</label>
+          </div></fieldset>
+          <div class="field"><label for="work-start-time">Start time</label><input id="work-start-time" type="time" required value="09:00"></div>
+          <div class="field"><label for="work-end-time">End time</label><input id="work-end-time" type="time" required value="17:00"></div>
+          <div class="field"><label for="work-time-zone">Time zone (IANA)</label><input id="work-time-zone" maxlength="100" required placeholder="e.g. Australia/Melbourne"></div>
+          <button id="save-work-hours" type="submit">Save working hours</button><p id="work-hours-status" class="muted" role="status" aria-live="polite">Loading your schedule…</p>
+        </form>
+      </section>
       <section class="card" aria-labelledby="visibility-title">
         <h2 id="visibility-title">Profile visibility</h2>
         <p class="muted">Choose whether your community profile appears in ConfigKit member discovery. Public profiles are visible to signed-in ConfigKit members only; private profiles are hidden from discovery and remain visible to you.</p>
@@ -641,8 +655,37 @@
         document.getElementById('work-account-summary').hidden = !isWork;
         document.getElementById('organization-account-summary').hidden = !isOrganization;
       };
-      accountTypeInput.addEventListener('change', updateProfileFields);
-      updateProfileFields();
+      const workHoursSection = document.getElementById('work-hours-section');
+      const workHoursForm = document.getElementById('work-hours-form');
+      const workHoursStatus = document.getElementById('work-hours-status');
+      const workHoursEnabled = document.getElementById('work-hours-enabled');
+      const workStartTime = document.getElementById('work-start-time');
+      const workEndTime = document.getElementById('work-end-time');
+      const workTimeZone = document.getElementById('work-time-zone');
+      const workDays = document.getElementById('work-days');
+      workTimeZone.value = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      const selectedWorkDays = () => [...workDays.querySelectorAll('input:checked')].map(input => Number(input.value));
+      const setWorkDays = days => workDays.querySelectorAll('input').forEach(input => { input.checked = days.includes(Number(input.value)); });
+      async function loadWorkHours() {
+        const {data,error} = await client.from('work_hours_settings').select('enabled,work_days,start_time,end_time,time_zone').eq('user_id',user.id).maybeSingle();
+        if (error) throw error;
+        if (data) { workHoursEnabled.value=String(data.enabled); setWorkDays(data.work_days||[1,2,3,4,5]); workStartTime.value=String(data.start_time||'09:00').slice(0,5); workEndTime.value=String(data.end_time||'17:00').slice(0,5); workTimeZone.value=data.time_zone||workTimeZone.value; workHoursStatus.textContent='Your saved weekly schedule is loaded.'; }
+        else { setWorkDays([1,2,3,4,5]); workHoursStatus.textContent='No schedule saved yet. Defaults are Monday–Friday, 9:00 AM–5:00 PM.'; }
+      }
+      workHoursForm.addEventListener('submit', async event => {
+        event.preventDefault(); if (!workHoursForm.reportValidity()) return;
+        const days=selectedWorkDays();
+        if (workHoursEnabled.value==='true' && !days.length) { workHoursStatus.textContent='Choose at least one working day, or disable the schedule.'; return; }
+        if (workHoursEnabled.value==='true' && workEndTime.value<=workStartTime.value) { workHoursStatus.textContent='End time must be later than start time on the same day.'; return; }
+        const saveButton=document.getElementById('save-work-hours'); saveButton.disabled=true; workHoursStatus.textContent='Saving your working hours…';
+        try { const {error}=await client.from('work_hours_settings').upsert({user_id:user.id,enabled:workHoursEnabled.value==='true',work_days:days,start_time:workStartTime.value,end_time:workEndTime.value,time_zone:workTimeZone.value.trim(),updated_at:new Date().toISOString()},{onConflict:'user_id'}); if(error) throw error; workHoursStatus.textContent='Working hours saved.'; setStatus('Working hours saved.'); }
+        catch(error) { workHoursStatus.textContent='Could not save working hours. Please try again.'; setStatus(error.message||'Could not save working hours.',true); }
+        finally { saveButton.disabled=false; }
+      });
+      accountTypeInput.addEventListener('change', updateProfileFields); updateProfileFields();
+      workHoursSection.hidden=accountTypeInput.value!=='work';
+      if (accountTypeInput.value==='work') { try { await loadWorkHours(); } catch(error) { workHoursStatus.textContent='Could not load your working hours. Refresh and try again.'; document.getElementById('save-work-hours').disabled=true; console.warn('Could not load working hours:',error); } }
+      accountTypeInput.addEventListener('change', async () => { workHoursSection.hidden=accountTypeInput.value!=='work'; if(accountTypeInput.value==='work') { document.getElementById('save-work-hours').disabled=false; try { await loadWorkHours(); } catch(error) { workHoursStatus.textContent='Could not load your working hours. Refresh and try again.'; } } });
 
       // Community visibility is stored in the community_profiles table and
       // enforced by its RLS policy; "public" means signed-in ConfigKit members.
