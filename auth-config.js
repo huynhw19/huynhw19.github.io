@@ -359,6 +359,14 @@ window.CONFIGKIT_AUTH = {
           if (!session) { if (event === 'SIGNED_OUT') window.CONFIGKIT_PASSKEY_SESSION?.clear(); return; }
           setTimeout(async () => {
             try {
+              const {data:lockState, error:lockStateError} = await client.rpc('is_my_account_locked');
+              if (!lockStateError && lockState === true) {
+                await client.auth.signOut({scope:'local'});
+                if (!window.location.pathname.endsWith('/account-locked.html')) {
+                  window.location.replace('account-locked.html');
+                }
+                return;
+              }
               const {data, error} = await client.functions.invoke('email-2fa', {body:{action:'status'}});
               const {data: recovery, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
               const recoveryVerified = !recoveryError && recovery?.verified;
