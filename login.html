@@ -290,6 +290,7 @@
             document.getElementById('mfa-form').hidden = !factor;
             document.getElementById('mfa-recovery-form').hidden = !!factor;
             document.getElementById('mfa-use-recovery').hidden = !recoveryCodes.enabled || !factor;
+            document.getElementById('mfa-recovery-back').hidden = !factor;
             document.querySelector('#mfa-challenge .muted').textContent = factor
               ? 'Enter the current six-digit code from your authenticator app, or use a one-time recovery code.'
               : 'Your authenticator is unavailable. Enter one of your unused recovery codes to finish signing in.';
@@ -383,6 +384,9 @@
         document.getElementById('mfa-recovery-code').value = '';
         document.getElementById('mfa-recovery-form').hidden = true;
         document.getElementById('mfa-form').hidden = false;
+        pendingMfaFactorId = '';
+        emailChallengeSent = false;
+        emailMfaUseTotp = false;
         await renderSession();
       });
       document.getElementById('mfa-form').addEventListener('submit', async event => {
