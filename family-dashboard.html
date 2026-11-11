@@ -7,7 +7,7 @@
   <title>Family dashboard — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px rgba(23,35,31,.08)}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,900px);margin:0 auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line);flex-wrap:wrap}nav{display:flex;gap:1rem;flex-wrap:wrap}a{color:var(--green)}main{padding:2rem 0 3rem}.card{background:var(--white);border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow);padding:1.25rem;margin:1rem 0}.muted{color:var(--muted)}h1{font-size:clamp(2rem,5vw,2.7rem);line-height:1.15;margin:.3rem 0}.eyebrow{display:inline-block;background:var(--mint);color:var(--green-dark);border-radius:999px;padding:.25rem .7rem;font-size:.85rem;font-weight:700}form{display:grid;gap:.85rem;max-width:560px}label{display:grid;gap:.25rem;font-weight:600}input,textarea,button{font:inherit}input,textarea{width:100%;padding:.7rem;border:1px solid #b9c8c0;border-radius:.55rem;background:white;color:var(--ink)}button{border:0;border-radius:.6rem;padding:.65rem .9rem;background:var(--green);color:white;font-weight:650;cursor:pointer}button.secondary{background:var(--mint);color:var(--green-dark)}button.danger{background:#9b3030}.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}.child{border:1px solid var(--line);border-radius:.75rem;padding:1rem;margin:.75rem 0}.status{padding:.7rem 0;color:var(--green-dark)}.status.error{color:var(--red)}[hidden]{display:none!important}footer{padding:1rem 0 2rem;color:var(--muted)}@media(max-width:600px){header{align-items:flex-start;flex-direction:column;padding:.8rem 0}nav{gap:.7rem}}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,900px);margin:0 auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line);flex-wrap:wrap}nav{display:flex;gap:1rem;flex-wrap:wrap}a{color:var(--green)}main{padding:2rem 0 3rem}.steps{padding-left:1.35rem}.steps li{padding:.25rem 0}.qr-panel{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap}.qr-panel img{width:176px;height:176px;max-width:100%;border:1px solid var(--line);border-radius:.75rem;padding:.4rem;background:#fff}.qr-copy{flex:1 1 220px}.card{background:var(--white);border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow);padding:1.25rem;margin:1rem 0}.muted{color:var(--muted)}h1{font-size:clamp(2rem,5vw,2.7rem);line-height:1.15;margin:.3rem 0}.eyebrow{display:inline-block;background:var(--mint);color:var(--green-dark);border-radius:999px;padding:.25rem .7rem;font-size:.85rem;font-weight:700}form{display:grid;gap:.85rem;max-width:560px}label{display:grid;gap:.25rem;font-weight:600}input,textarea,button{font:inherit}input,textarea{width:100%;padding:.7rem;border:1px solid #b9c8c0;border-radius:.55rem;background:white;color:var(--ink)}button{border:0;border-radius:.6rem;padding:.65rem .9rem;background:var(--green);color:white;font-weight:650;cursor:pointer}button.secondary{background:var(--mint);color:var(--green-dark)}button.danger{background:#9b3030}.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}.child{border:1px solid var(--line);border-radius:.75rem;padding:1rem;margin:.75rem 0}.status{padding:.7rem 0;color:var(--green-dark)}.status.error{color:var(--red)}[hidden]{display:none!important}footer{padding:1rem 0 2rem;color:var(--muted)}@media(max-width:600px){header{align-items:flex-start;flex-direction:column;padding:.8rem 0}nav{gap:.7rem}}
   </style>
 </head>
 <body>
@@ -18,6 +18,27 @@
       <h1>Family dashboard</h1>
       <p id="account-label" class="muted">Checking your account…</p>
       <p class="muted">Create private child profiles managed by your signed-in adult account. These are family records, not separate sign-in accounts.</p>
+    </section>
+    <section class="card" aria-labelledby="getting-started-title">
+      <span class="eyebrow">Getting started</span>
+      <h2 id="getting-started-title">Set up your family dashboard</h2>
+      <ol class="steps">
+        <li><a href="login.html?next=family-dashboard.html">Sign in or create a personal account</a>. Family tools are available to personal accounts.</li>
+        <li>Use <strong>Add a child</strong> below to create a profile with a name. Age, school year or grade, and notes are optional.</li>
+        <li>Choose <strong>Edit</strong> to update a profile or <strong>Delete</strong> to remove it.</li>
+        <li>Keep notes appropriate for a private family record. Do not enter passwords or highly sensitive information.</li>
+      </ol>
+      <p class="muted">Child profiles are managed by your adult account; children do not get separate sign-in accounts.</p>
+      <div class="qr-panel">
+        <a href="https://huynhw19.github.io/family-dashboard.html" aria-label="Open the ConfigKit family dashboard">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&amp;margin=12&amp;data=https%3A%2F%2Fhuynhw19.github.io%2Ffamily-dashboard.html" alt="QR code linking to the ConfigKit family dashboard">
+        </a>
+        <div class="qr-copy">
+          <h3>Open on a phone</h3>
+          <p class="muted">Scan this QR code with your phone camera to open the family dashboard. You may need to sign in first.</p>
+          <a href="https://huynhw19.github.io/family-dashboard.html">huynhw19.github.io/family-dashboard.html</a>
+        </div>
+      </div>
     </section>
     <section class="card" id="creator" hidden>
       <h2 id="form-title">Add a child</h2>
