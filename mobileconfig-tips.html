@@ -28,6 +28,54 @@
         <div class="prompts" aria-label="Example questions"><button type="button" data-prompt="How are Apple configuration profiles structured, and what does each payload do?">Profile structure</button><button type="button" data-prompt="Which restrictions can an iPhone or Mac configuration profile enforce, and what are the limitations?">Restrictions</button><button type="button" data-prompt="How do passkeys work on Apple devices, and how do they relate to iCloud Keychain, Face ID, Touch ID, FIDO2 and WebAuthn?">Passkeys</button><button type="button" data-prompt="Explain Apple certificates, certificate authorities, trust chains, SCEP and certificate renewal.">Certificates and PKI</button><button type="button" data-prompt="Explain Secure Enclave, Secure Boot, FileVault, Data Protection, Gatekeeper and System Integrity Protection.">Apple security</button><button type="button" data-prompt="What should I know about MDM enrollment, supervision, profile deployment and troubleshooting?">MDM management</button></div>
       </section>
       <section id="answer" class="answer" aria-live="polite" aria-labelledby="answer-title" hidden><h2 id="answer-title">Suggested guidance</h2><div id="answer-content"></div></section>
+      <section class="panel" aria-labelledby="example-title">
+        <h2 id="example-title">Example: a basic Wi-Fi configuration profile</h2>
+        <p>This illustrative <code>.mobileconfig</code> XML installs one WPA2/WPA3-personal Wi-Fi network on a compatible Apple device. It uses obvious placeholders—replace them with your own network details before testing.</p>
+        <pre style="white-space:pre;overflow-x:auto;padding:16px;border-radius:10px;background:#f3f6f4;border:1px solid var(--line);font-size:.85rem;line-height:1.5"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+  &lt;key&gt;PayloadContent&lt;/key&gt;
+  &lt;array&gt;
+    &lt;dict&gt;
+      &lt;key&gt;PayloadType&lt;/key&gt;
+      &lt;string&gt;com.apple.wifi.managed&lt;/string&gt;
+      &lt;key&gt;PayloadVersion&lt;/key&gt;
+      &lt;integer&gt;1&lt;/integer&gt;
+      &lt;key&gt;PayloadIdentifier&lt;/key&gt;
+      &lt;string&gt;com.example.profile.wifi&lt;/string&gt;
+      &lt;key&gt;PayloadUUID&lt;/key&gt;
+      &lt;string&gt;11111111-2222-4333-8444-555555555555&lt;/string&gt;
+      &lt;key&gt;SSID_STR&lt;/key&gt;
+      &lt;string&gt;YOUR_WIFI_NAME&lt;/string&gt;
+      &lt;key&gt;EncryptionType&lt;/key&gt;
+      &lt;string&gt;WPA&lt;/string&gt;
+      &lt;key&gt;Password&lt;/key&gt;
+      &lt;string&gt;REPLACE_WITH_WIFI_PASSWORD&lt;/string&gt;
+      &lt;key&gt;AutoJoin&lt;/key&gt;
+      &lt;true/&gt;
+    &lt;/dict&gt;
+  &lt;/array&gt;
+  &lt;key&gt;PayloadDisplayName&lt;/key&gt;
+  &lt;string&gt;Example Wi-Fi Settings&lt;/string&gt;
+  &lt;key&gt;PayloadIdentifier&lt;/key&gt;
+  &lt;string&gt;com.example.profile.wifi-root&lt;/string&gt;
+  &lt;key&gt;PayloadUUID&lt;/key&gt;
+  &lt;string&gt;aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee&lt;/string&gt;
+  &lt;key&gt;PayloadType&lt;/key&gt;
+  &lt;string&gt;Configuration&lt;/string&gt;
+  &lt;key&gt;PayloadVersion&lt;/key&gt;
+  &lt;integer&gt;1&lt;/integer&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;</code></pre>
+        <ul>
+          <li><strong>PayloadType:</strong> identifies the Wi-Fi payload.</li>
+          <li><strong>SSID_STR:</strong> the exact network name; <strong>EncryptionType</strong> and <strong>Password</strong> describe the network security.</li>
+          <li><strong>PayloadIdentifier</strong> and <strong>PayloadUUID:</strong> uniquely identify the profile and its payload. Generate your own identifiers for real deployments.</li>
+        </ul>
+        <p class="notice"><strong>Safety notes:</strong> This is a teaching example, not a production-ready profile. Never publish a real Wi-Fi password in a public repository or website. Use a unique UUID for each payload, validate the plist/XML, confirm compatibility with your target OS, and only install profiles from sources you trust. For enterprise networks, prefer an appropriately designed 802.1X/certificate-based configuration rather than embedding shared credentials.</p>
+      </section>
     </section>
   </main>
   <footer>ConfigKit · Independent mobileconfig builder demo · <a href="safety.html">Safety &amp; contact</a> · <a href="privacy.html">Privacy</a></footer>
