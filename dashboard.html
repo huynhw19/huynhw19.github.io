@@ -111,7 +111,7 @@
             window.location.replace('login.html');
             return;
           }
-          if (recoveryCodeStatus.enabled && !recoveryCodeStatus.verified && assurance.currentLevel !== 'aal2') {
+          if (recoveryCodeStatus.enabled && !recoveryCodeStatus.verified && !email2FAStatus?.verified && assurance.currentLevel !== 'aal2') {
             window.location.replace('login.html');
             return;
           }
