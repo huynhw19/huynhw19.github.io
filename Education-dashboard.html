@@ -104,6 +104,26 @@
       <ul id="student-list" class="student-list"></ul>
     </section>
 
+    <section class="card" id="slideshows-panel" aria-labelledby="slideshows-title">
+      <h2 id="slideshows-title">Create slideshow</h2>
+      <p class="muted">Build a lesson or presentation with up to 40 slides. Add optional image URLs, save drafts, then publish when students are ready to view it.</p>
+      <form id="slideshow-form">
+        <label>Slideshow title<input id="slideshow-title" maxlength="160" required></label>
+        <label>Description<textarea id="slideshow-description" rows="2" maxlength="2000" placeholder="What will students learn?"></textarea></label>
+        <div id="slide-editors"></div>
+        <div class="form-actions">
+          <button id="add-slide" type="button" class="secondary">Add slide</button>
+          <button id="slideshow-submit" type="submit">Save slideshow</button>
+          <button id="slideshow-cancel" type="button" class="secondary" hidden>Cancel editing</button>
+        </div>
+      </form>
+      <div id="slideshow-message" class="status" role="status" aria-live="polite"></div>
+    </section>
+    <section class="card" aria-labelledby="manage-slideshows-title">
+      <h2 id="manage-slideshows-title">Manage slideshows</h2>
+      <div id="slideshow-list"><p class="muted">Loading slideshows…</p></div>
+    </section>
+
     <section class="card" id="assignments-panel">
       <h2 id="assignment-form-title">Create assignment</h2>
       <p class="muted">Create work for one of your students. Drafts are private to you; publish an assignment when it is ready for the student to view.</p>
@@ -362,6 +382,145 @@
       });
 
 
+      const slideshowForm = document.getElementById('slideshow-form');
+      const slideshowTitle = document.getElementById('slideshow-title');
+      const slideshowDescription = document.getElementById('slideshow-description');
+      const slideEditors = document.getElementById('slide-editors');
+      const slideshowList = document.getElementById('slideshow-list');
+      const slideshowMessage = document.getElementById('slideshow-message');
+      const slideshowSubmit = document.getElementById('slideshow-submit');
+      const slideshowCancel = document.getElementById('slideshow-cancel');
+      let editingSlideshowId = null;
+
+      function setSlideshowMessage(message, isError = false) {
+        slideshowMessage.textContent = message;
+        slideshowMessage.className = 'status' + (isError ? ' error' : '');
+      }
+      function addSlideEditor(slide = {}) {
+        if (slideEditors.children.length >= 40) {
+          setSlideshowMessage('A slideshow can contain up to 40 slides.', true);
+          return;
+        }
+        const card = document.createElement('div');
+        card.className = 'assignment-item slide-editor';
+        const number = slideEditors.children.length + 1;
+        const heading = document.createElement('h3');
+        heading.textContent = 'Slide ' + number;
+        const titleLabel = document.createElement('label');
+        titleLabel.textContent = 'Slide heading';
+        const title = document.createElement('input');
+        title.className = 'slide-title'; title.maxLength = 160; title.required = true;
+        title.value = slide.title || ''; titleLabel.append(title);
+        const bodyLabel = document.createElement('label');
+        bodyLabel.textContent = 'Slide text';
+        const body = document.createElement('textarea');
+        body.className = 'slide-content'; body.rows = 4; body.maxLength = 5000;
+        body.value = slide.content || ''; bodyLabel.append(body);
+        const imageLabel = document.createElement('label');
+        imageLabel.textContent = 'Image URL (optional, https://)';
+        const image = document.createElement('input');
+        image.className = 'slide-image'; image.type = 'url'; image.maxLength = 2048;
+        image.placeholder = 'https://example.com/image.jpg'; image.value = slide.image_url || '';
+        imageLabel.append(image);
+        const remove = document.createElement('button');
+        remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Remove slide';
+        remove.addEventListener('click', () => {
+          if (slideEditors.children.length <= 1) {
+            setSlideshowMessage('Keep at least one slide in your slideshow.', true); return;
+          }
+          card.remove();
+          Array.from(slideEditors.children).forEach((node, index) => node.querySelector('h3').textContent = 'Slide ' + (index + 1));
+        });
+        card.append(heading, titleLabel, bodyLabel, imageLabel, remove);
+        slideEditors.append(card);
+      }
+      function resetSlideshowForm() {
+        slideshowForm.reset(); slideEditors.replaceChildren();
+        editingSlideshowId = null; addSlideEditor();
+        slideshowSubmit.textContent = 'Save slideshow';
+        slideshowCancel.hidden = true;
+      }
+      async function loadSlideshows() {
+        slideshowList.replaceChildren();
+        const { data, error } = await client.from('education_slideshows')
+          .select('id,title,description,slides,status,created_at,updated_at')
+          .eq('user_id', currentUserId).order('created_at', { ascending: false });
+        if (error) {
+          const p = document.createElement('p'); p.className = 'error';
+          p.textContent = error.message || 'Could not load slideshows.'; slideshowList.append(p); return;
+        }
+        if (!data || !data.length) {
+          const p = document.createElement('p'); p.className = 'muted';
+          p.textContent = 'No slideshows yet. Create your first one above.'; slideshowList.append(p); return;
+        }
+        data.forEach(show => {
+          const article = document.createElement('article'); article.className = 'assignment-item';
+          const heading = document.createElement('h3'); heading.textContent = show.title;
+          const meta = document.createElement('p'); meta.className = 'assignment-meta';
+          meta.textContent = (show.status === 'published' ? 'Published' : 'Draft') + ' · ' + (show.slides || []).length + ' slides';
+          article.append(heading, meta);
+          if (show.description) { const desc = document.createElement('p'); desc.textContent = show.description; article.append(desc); }
+          const actions = document.createElement('div'); actions.className = 'assignment-actions';
+          const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'secondary'; edit.textContent = 'Edit';
+          edit.addEventListener('click', () => {
+            editingSlideshowId = show.id;
+            slideshowTitle.value = show.title; slideshowDescription.value = show.description || '';
+            slideEditors.replaceChildren();
+            (show.slides || []).forEach(slide => addSlideEditor(slide));
+            if (!slideEditors.children.length) addSlideEditor();
+            slideshowSubmit.textContent = 'Save changes'; slideshowCancel.hidden = false;
+            slideshowForm.scrollIntoView({behavior:'smooth',block:'start'}); slideshowTitle.focus();
+          });
+          const toggle = document.createElement('button'); toggle.type = 'button'; toggle.className = 'secondary';
+          toggle.textContent = show.status === 'published' ? 'Unpublish' : 'Publish';
+          toggle.addEventListener('click', async () => {
+            const next = show.status === 'published' ? 'draft' : 'published';
+            const {error: updateError} = await client.from('education_slideshows')
+              .update({status:next,updated_at:new Date().toISOString()}).eq('id',show.id).eq('user_id',currentUserId);
+            if (updateError) { setSlideshowMessage(updateError.message || 'Could not update slideshow.',true); return; }
+            setSlideshowMessage(next === 'published' ? 'Slideshow published to linked students.' : 'Slideshow moved back to drafts.');
+            await loadSlideshows();
+          });
+          const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Delete';
+          remove.addEventListener('click', async () => {
+            if (!window.confirm('Delete "' + show.title + '"? This cannot be undone.')) return;
+            const {error: deleteError} = await client.from('education_slideshows').delete().eq('id',show.id).eq('user_id',currentUserId);
+            if (deleteError) { setSlideshowMessage(deleteError.message || 'Could not delete slideshow.',true); return; }
+            if (editingSlideshowId === show.id) resetSlideshowForm();
+            setSlideshowMessage('Slideshow deleted.'); await loadSlideshows();
+          });
+          actions.append(edit,toggle,remove); article.append(actions); slideshowList.append(article);
+        });
+      }
+      document.getElementById('add-slide').addEventListener('click', () => addSlideEditor());
+      slideshowCancel.addEventListener('click', () => { resetSlideshowForm(); setSlideshowMessage('Editing cancelled.'); });
+      slideshowForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const title = slideshowTitle.value.trim();
+        const slides = Array.from(slideEditors.querySelectorAll('.slide-editor')).map(card => ({
+          title: card.querySelector('.slide-title').value.trim(),
+          content: card.querySelector('.slide-content').value.trim(),
+          image_url: card.querySelector('.slide-image').value.trim()
+        }));
+        if (!title || !slides.length || slides.some(slide => !slide.title)) {
+          setSlideshowMessage('Enter a slideshow title and a heading for every slide.', true); return;
+        }
+        if (slides.some(slide => slide.image_url && !/^https:\/\//i.test(slide.image_url))) {
+          setSlideshowMessage('Slide image URLs must use https://.', true); return;
+        }
+        slideshowSubmit.disabled = true;
+        setSlideshowMessage(editingSlideshowId ? 'Saving slideshow…' : 'Creating slideshow…');
+        const record = {title,description:slideshowDescription.value.trim(),slides,updated_at:new Date().toISOString()};
+        const result = editingSlideshowId
+          ? await client.from('education_slideshows').update(record).eq('id',editingSlideshowId).eq('user_id',currentUserId)
+          : await client.from('education_slideshows').insert({...record,user_id:currentUserId,status:'draft'});
+        slideshowSubmit.disabled = false;
+        if (result.error) { setSlideshowMessage(result.error.message || 'Could not save slideshow.',true); return; }
+        resetSlideshowForm(); setSlideshowMessage('Slideshow saved as a draft. Publish it when it is ready for students.');
+        await loadSlideshows();
+      });
+      resetSlideshowForm();
+
       const assignmentForm = document.getElementById('assignment-form');
       const assignmentStudent = document.getElementById('assignment-student');
       const assignmentTitle = document.getElementById('assignment-title');
@@ -449,6 +608,7 @@
             if (updateError) { setAssignmentMessage(updateError.message || 'Could not update assignment.', true); return; }
             setAssignmentMessage(nextStatus === 'published' ? 'Assignment published for the student.' : 'Assignment moved back to draft.');
             await loadAssignments();
+        await loadSlideshows();
           });
           const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Delete';
           remove.addEventListener('click', async () => {
