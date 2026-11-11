@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Your ConfigKit account is locked. Sign in again to unlock it.">
+  <title>Account locked — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--dark:#174b39}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,sans-serif}
+    main{width:min(100%,520px);padding:clamp(24px,5vw,40px);border:1px solid var(--line);border-radius:18px;background:var(--white);text-align:center}
+    .lock{font-size:42px}h1{line-height:1.2}.muted{color:var(--muted)}a{display:inline-block;margin-top:14px;padding:11px 18px;border-radius:9px;background:var(--green);color:white;text-decoration:none;font-weight:700}a:hover{background:var(--dark)}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="lock" aria-hidden="true">🔒</div>
+    <h1>Your account is locked</h1>
+    <p class="muted">ConfigKit has signed out your active sessions. To unlock your account, sign in again with your usual email, GitHub, or passkey method and complete any required two-factor verification.</p>
+    <a href="login.html?next=dashboard.html">Sign in to unlock</a>
+  </main>
+</body>
+</html>
