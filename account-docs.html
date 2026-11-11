@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ConfigKit account help: sign-up, sign-in, account settings, passkeys, two-factor authentication, and recovery codes.">
+  <title>Account help — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.7 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,900px);margin-inline:auto}header{padding:22px 0;border-bottom:1px solid var(--line)}header a, a{color:var(--green-dark)}main{padding:34px 0 56px}h1{font-size:clamp(2.1rem,5vw,3.1rem);line-height:1.12;margin:.3rem 0}h2{margin:2.2rem 0 .5rem;font-size:1.5rem}h3{margin:1.4rem 0 .3rem;font-size:1.1rem}.muted{color:var(--muted)}.intro,.card,.note{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}.intro{background:var(--mint)}.note{background:var(--gold)}nav ul{columns:2;max-width:650px;padding-left:1.3rem}li{margin:.35rem 0}code{overflow-wrap:anywhere}footer{border-top:1px solid var(--line);padding:22px 0 34px;color:var(--muted)}@media(max-width:560px){nav ul{columns:1}}
+  </style>
+</head>
+<body>
+  <header><a href="index.html">← ConfigKit home</a> · <a href="login.html">Sign in</a> · <a href="dashboard.html">Dashboard</a></header>
+  <main>
+    <p class="muted">CONFIGKIT HELP</p>
+    <h1>Account guide</h1>
+    <p class="muted">How to create, secure, and manage your ConfigKit account.</p>
+    <section class="intro"><strong>Quick links</strong><nav aria-label="On this page"><ul>
+      <li><a href="#create">Create an account</a></li><li><a href="#types">Account types</a></li>
+      <li><a href="#signin">Sign in and passkeys</a></li><li><a href="#settings">Account settings</a></li>
+      <li><a href="#security">Two-factor authentication</a></li><li><a href="#recovery">Recovery codes</a></li>
+      <li><a href="#sessions">Sessions and sign-out</a></li><li><a href="#privacy">Privacy and safety</a></li>
+      <li><a href="#trouble">Troubleshooting</a></li>
+    </ul></nav></section>
+
+    <h2 id="create">Create an account</h2>
+    <ol><li>Open the <a href="login.html">sign-in and sign-up page</a>.</li><li>Choose the sign-up option and enter the requested details. Select the account type that best describes how you plan to use ConfigKit.</li><li>Check your inbox for the Supabase confirmation email. If it is missing, check spam or junk.</li><li>Follow the confirmation link, return to ConfigKit, and sign in.</li><li>After sign-in, open your <a href="dashboard.html">dashboard</a>.</li></ol>
+    <p class="muted">Use an email address you control. Never share your password, one-time codes, passkeys, or recovery codes.</p>
+
+    <h2 id="types">Account types</h2>
+    <p>ConfigKit offers profile types such as Personal, Developer, Education, Work, and Organization. These labels help tailor the dashboard and profile fields.</p>
+    <div class="note"><strong>Important:</strong> An account type and any school, workplace, or organization name are self-declared profile information. They do not verify identity, employment, student status, legal status, or membership, and do not automatically grant special permissions or managed access.</div>
+
+    <h2 id="signin">Sign in and passkeys</h2>
+    <p>Use the sign-in method configured for your account on the <a href="login.html">login page</a>. Depending on the options enabled on the site, this may include email/password, a connected identity provider, or a passkey.</p>
+    <h3>Passkeys</h3>
+    <p>A passkey lets a device or password manager verify you using its built-in screen lock, biometrics, or security key. Keep access to the device or password manager where your passkey is stored. If you lose access, use another sign-in method already linked to your account or the provider's account-recovery process.</p>
+    <p>A passkey used for primary sign-in is not automatically the same thing as a passkey enrolled as a second factor in Account settings. The available prompts depend on how that passkey was registered.</p>
+
+    <h2 id="settings">Manage account settings</h2>
+    <p>Open <a href="account-settings.html">Account settings</a> from your dashboard. The page provides the following controls:</p>
+    <ul>
+      <li><strong>Profile:</strong> change your display name, account type, and relevant profile label such as workplace or institution.</li>
+      <li><strong>Email:</strong> request an email address change. Supabase may require confirmation using links sent to your current and new email addresses; the change is not complete until the required confirmation is finished.</li>
+      <li><strong>Password:</strong> set a new password. Use a unique password that you do not reuse on other sites.</li>
+      <li><strong>Sign-in providers and sessions:</strong> review the provider and session controls shown on the settings page. Only disconnect a provider after ensuring you have another way to sign in.</li>
+    </ul>
+
+    <h2 id="security">Two-factor authentication (2FA)</h2>
+    <p>Two-factor authentication adds a verification step after your primary sign-in. ConfigKit account settings may offer these methods:</p>
+    <h3>Authenticator app (TOTP)</h3>
+    <ol><li>In <a href="account-settings.html">Account settings</a>, choose <strong>Set up authenticator</strong>.</li><li>Scan the displayed QR code with a compatible authenticator app, or enter the setup key manually.</li><li>Enter the current six-digit code from the app and choose <strong>Verify and enable 2FA</strong>.</li><li>Keep the authenticator available for future verification prompts.</li></ol>
+    <h3>Passkey as a second factor</h3>
+    <p>The separate <strong>Add passkey as second factor</strong> control enrolls a WebAuthn passkey as a verified second factor. This is distinct from using a passkey only as your primary sign-in method.</p>
+    <h3>Email verification</h3>
+    <p>If enabled, ConfigKit can send a one-time code and verification link to your confirmed email address after primary sign-in. Email access is therefore security-critical: protect that inbox with a strong, unique password and its own 2FA. Email verification is an alternative second-step method, not a replacement for securing your email account.</p>
+
+    <h2 id="recovery">Authenticator recovery codes</h2>
+    <p>Recovery codes are single-use backups for an enrolled authenticator factor. They do not replace your password or primary sign-in method.</p>
+    <ol><li>First enroll and verify an authenticator app (TOTP) in Account settings.</li><li>Complete the required recent sign-in or second-factor check if prompted.</li><li>Choose <strong>Generate recovery codes</strong>.</li><li>Save the displayed codes immediately in a password manager or another secure location. The full set is shown only when generated.</li><li>Use each code once if you cannot access your authenticator. Generate a new set if you run low or think the codes may have been exposed.</li></ol>
+    <div class="note"><strong>Keep them private.</strong> Anyone with an unused recovery code may be able to use it to complete a second-factor challenge for your account. Do not email them to yourself in plain text or store them beside your password.</div>
+    <p>If ConfigKit says you must complete an authenticator or email second-factor check before generating codes, complete the requested check first. A primary passkey sign-in may be accepted as a trusted recent sign-in, but recovery codes are specifically backups for a verified authenticator factor. If no authenticator factor is enrolled and verified, set one up before generating authenticator recovery codes.</p>
+
+    <h2 id="sessions">Sessions and signing out</h2>
+    <p>Use the account controls to review available session information. Sign out when using a shared device, and close the browser after signing out. If you believe someone else has accessed your account, change your password, secure your email account, review linked providers and sessions, and replace any exposed recovery codes.</p>
+
+    <h2 id="privacy">Privacy and safety</h2>
+    <ul><li>Never share passwords, verification codes, passkeys, or recovery codes with anyone, including someone claiming to be ConfigKit support.</li><li>Use a unique password and keep your email account secure.</li><li>Do not use a shared or public computer for account security changes where possible.</li><li>ConfigKit's mobileconfig builders generate profile content in your browser. Treat downloaded configuration profiles as sensitive, especially if they contain Wi-Fi credentials or network settings.</li><li>Review a configuration profile before installing it. Only install profiles from sources you trust.</li></ul>
+
+    <h2 id="trouble">Troubleshooting</h2>
+    <h3>I did not receive the confirmation email</h3><p>Check spam or junk, confirm that you entered the correct address, and request another confirmation from the sign-in page if that option is available.</p>
+    <h3>My passkey is not offered or does not work</h3><p>Check that the device or password manager containing the passkey is available, that your browser supports passkeys, and that you are visiting the genuine ConfigKit website. Try another linked sign-in method if one is available.</p>
+    <h3>I cannot generate recovery codes</h3><p>Complete the second-factor verification requested on screen. Confirm that an authenticator app has been enrolled and verified. Recovery codes cannot be generated as a substitute for enrolling the authenticator they back up.</p>
+    <h3>I lost my authenticator</h3><p>Use an unused recovery code or another second-factor method already enabled for your account. Once you regain access, update your authenticator setup and generate a fresh recovery-code set. If you have no remaining sign-in or recovery method, use the site's account-support route; do not send anyone your password or codes.</p>
+
+    <div class="card"><strong>Useful account links</strong><ul><li><a href="login.html">Sign in or create an account</a></li><li><a href="dashboard.html">Your dashboard</a></li><li><a href="account-settings.html">Account settings and security</a></li></ul></div>
+  </main>
+  <footer>ConfigKit account help · <a href="index.html">Home</a></footer>
+</body>
+</html>
