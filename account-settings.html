@@ -405,6 +405,7 @@
           if (error) throw error;
           setStatus('Passkey second factor registered and verified. You can now use it instead of a six-digit code after passkey sign-in.');
           let pendingPhoneFactorId = '';
+      let pendingPhoneChallengeId = '';
       const phoneMfaEnrollForm = document.getElementById('phone-mfa-enroll-form');
       const phoneMfaVerifyForm = document.getElementById('phone-mfa-verify-form');
       const phoneMfaNumber = document.getElementById('phone-mfa-number');
@@ -415,8 +416,9 @@
         const {data,error} = await client.auth.mfa.enroll({factorType:'phone',phone,friendlyName:'ConfigKit SMS backup'});
         if (error) throw error;
         pendingPhoneFactorId = data.id;
-        const {error:challengeError} = await client.auth.mfa.challenge({factorId:data.id});
+        const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:data.id});
         if (challengeError) throw challengeError;
+        pendingPhoneChallengeId = challenge.id;
         phoneMfaVerifyForm.hidden = false;
         phoneMfaCode.focus();
         setStatus('A verification code was sent to your phone. Enter it to enable SMS backup authentication.');
@@ -436,11 +438,10 @@
         const button = document.getElementById('phone-mfa-verify');
         button.disabled = true;
         try {
-          const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:pendingPhoneFactorId});
-          if (challengeError) throw challengeError;
-          const {error} = await client.auth.mfa.verify({factorId:pendingPhoneFactorId,challengeId:challenge.id,code:phoneMfaCode.value.trim()});
+          const {error} = await client.auth.mfa.verify({factorId:pendingPhoneFactorId,challengeId:pendingPhoneChallengeId,code:phoneMfaCode.value.trim()});
           if (error) throw error;
           pendingPhoneFactorId = '';
+          pendingPhoneChallengeId = '';
           phoneMfaCode.value = '';
           phoneMfaVerifyForm.hidden = true;
           phoneMfaEnrollForm.hidden = true;
@@ -455,8 +456,9 @@
       document.getElementById('phone-mfa-resend').addEventListener('click', async event => {
         event.currentTarget.disabled = true;
         try {
-          const {error} = await client.auth.mfa.challenge({factorId:pendingPhoneFactorId});
+          const {data:challenge,error} = await client.auth.mfa.challenge({factorId:pendingPhoneFactorId});
           if (error) throw error;
+          pendingPhoneChallengeId = challenge.id;
           setStatus('A new verification code was sent to your phone.');
         } catch (error) { setStatus(error.message || 'Could not resend the SMS code.',true); }
         finally { event.currentTarget.disabled = false; }
@@ -464,6 +466,7 @@
       document.getElementById('phone-mfa-cancel').addEventListener('click', async () => {
         if (pendingPhoneFactorId) await client.auth.mfa.unenroll({factorId:pendingPhoneFactorId});
         pendingPhoneFactorId = '';
+        pendingPhoneChallengeId = '';
         phoneMfaVerifyForm.hidden = true;
         setStatus('Phone verification cancelled.');
         await refreshMfaFactors();
