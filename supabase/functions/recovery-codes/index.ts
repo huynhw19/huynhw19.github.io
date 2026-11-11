@@ -30,7 +30,7 @@ function formatCode(value: string): string {
   return value.match(/.{1,8}/g)?.join("-") ?? value;
 }
 function normalizeCode(value: string): string {
-  return value.toUpperCase().replace(/[\\s-]/g, "");
+  return value.toUpperCase().replace(/[\s-]/g, "");
 }
 async function sha256(value: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
