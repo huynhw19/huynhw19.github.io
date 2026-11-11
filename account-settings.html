@@ -50,7 +50,7 @@
         <h2 id="lock-account-title">Lock account</h2>
         <div class="notice">
           <strong>Temporarily lock ConfigKit on all your signed-in devices.</strong>
-          <p>Locking signs out all active sessions and sends ConfigKit pages to a locked screen. To unlock, sign in again using your usual sign-in method and complete any required two-factor verification.</p>
+          <p>Locking revokes all refreshable sessions and sends ConfigKit pages to a locked screen as they are reopened or their sessions refresh. To unlock, sign in again using your usual sign-in method and complete any required two-factor verification.</p>
           <p>This protects access through ConfigKit's website. Already-issued access tokens may remain valid until they expire, so this is not a substitute for revoking a compromised password or provider account.</p>
         </div>
         <div class="actions"><button class="danger" id="lock-account-button" type="button">Lock my account</button></div>
