@@ -7,7 +7,7 @@
   <title>Dashboard — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px rgba(23,35,31,.08)}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(100% - 32px,1000px);margin:0 auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}.brand{font-weight:700;text-decoration:none;color:var(--ink)}nav{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}button{font:inherit;font-weight:600;border:1px solid var(--line);border-radius:.7rem;padding:.65rem .9rem;background:var(--white);color:var(--ink);cursor:pointer}main{padding:2rem 0 3rem}.status,.card,.welcome{background:var(--white);border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow)}.status{padding:1rem;margin:1rem 0}.status.error{color:var(--red)}.welcome{padding:1.5rem;margin:1rem 0 1.25rem}.eyebrow{display:inline-block;padding:.3rem .7rem;border-radius:999px;background:var(--mint);color:var(--green-dark);font-size:.85rem;font-weight:700}.badge{display:inline-block;margin:.4rem;padding:.25rem .65rem;background:var(--mint);border-radius:999px;color:var(--green-dark);font-size:.85rem;font-weight:700}.muted{color:var(--muted)}h1{margin:.65rem 0;font-size:clamp(2rem,5vw,3rem);line-height:1.15}h2{margin:.1rem 0 .6rem}.section-title{margin-top:1.75rem}.workspace,.getting-started{padding:1.2rem;margin:1rem 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1rem 0 2rem}.card{padding:1.2rem}.card p{margin:.35rem 0 .8rem;color:var(--muted)}.getting-started ol{padding-left:1.4rem}.getting-started li{padding:.25rem 0}footer{padding:1.5rem 0 2rem;color:var(--muted)}[hidden]{display:none!important}@media(max-width:600px){header{padding:.8rem 0;align-items:flex-start;flex-direction:column}nav{gap:.65rem}}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(100% - 32px,1000px);margin:0 auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}.brand{font-weight:700;text-decoration:none;color:var(--ink)}nav{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}button{font:inherit;font-weight:600;border:1px solid var(--line);border-radius:.7rem;padding:.65rem .9rem;background:var(--white);color:var(--ink);cursor:pointer}main{padding:2rem 0 3rem}.status,.card,.welcome{background:var(--white);border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow)}.status{padding:1rem;margin:1rem 0}.status.error{color:var(--red)}.welcome{padding:1.5rem;margin:1rem 0 1.25rem}.eyebrow{display:inline-block;padding:.3rem .7rem;border-radius:999px;background:var(--mint);color:var(--green-dark);font-size:.85rem;font-weight:700}.badge{display:inline-block;margin:.4rem;padding:.25rem .65rem;background:var(--mint);border-radius:999px;color:var(--green-dark);font-size:.85rem;font-weight:700}.muted{color:var(--muted)}h1{margin:.65rem 0;font-size:clamp(2rem,5vw,3rem);line-height:1.15}h2{margin:.1rem 0 .6rem}.section-title{margin-top:1.75rem}.workspace,.getting-started{padding:1.2rem;margin:1rem 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1rem 0 2rem}.card{padding:1.2rem}.card p{margin:.35rem 0 .8rem;color:var(--muted)}.getting-started ol{padding-left:1.4rem}.getting-started li{padding:.25rem 0}.achievements-summary{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}.achievement-count{font-size:1.7rem;font-weight:800;color:var(--green-dark)}.achievement-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.75rem;margin-top:1rem}.achievement-item{display:flex;gap:.8rem;align-items:flex-start;border:1px solid var(--line);border-radius:.8rem;padding:.85rem;background:#fff}.achievement-item.earned{background:var(--mint);border-color:#c8dfd1}.achievement-icon{font-size:1.5rem;line-height:1.4}.achievement-item strong{display:block}.achievement-item small{color:var(--muted)}.achievement-item.locked{opacity:.68}footer{padding:1.5rem 0 2rem;color:var(--muted)}[hidden]{display:none!important}@media(max-width:600px){header{padding:.8rem 0;align-items:flex-start;flex-direction:column}nav{gap:.65rem}}
   </style>
 </head>
 <body>
@@ -36,6 +36,15 @@
         <span id="account-type-badge" class="badge" hidden></span>
         <p id="account-label" class="muted"></p>
         <div id="workspace-details" class="workspace" hidden><strong>Work account workspace</strong><div id="workplace-label" class="muted"></div><small class="muted">This is a local profile label and does not provide employer-managed access.</small></div>
+      </section>
+      <section class="card" id="achievements" aria-labelledby="achievements-title" style="padding:1.2rem;margin:1rem 0 1.5rem">
+        <div class="achievements-summary">
+          <div><span class="eyebrow">Your progress</span><h2 id="achievements-title">Achievements</h2><p class="muted">Earn badges as you explore ConfigKit and protect your account.</p></div>
+          <div class="achievement-count" id="achievement-count" aria-live="polite">0 / 10</div>
+        </div>
+        <div class="achievement-grid" id="achievement-grid" aria-label="Your achievements">
+          <p class="muted">Loading achievements…</p>
+        </div>
       </section>
       <section class="card" id="about-configkit" aria-labelledby="about-configkit-title" style="padding:1.2rem;margin:1rem 0 1.5rem">
         <span class="eyebrow">About this project</span>
@@ -164,6 +173,49 @@
           }
           const user = data.session.user;
           const metadata = user.user_metadata || {};
+          const achievementDefinitions = [
+            ['welcome','🎉','Welcome aboard','Create your ConfigKit account.'],
+            ['profile_complete','🪪','Make it yours','Add a name or profile detail.'],
+            ['authenticator','🔐','Authenticator secured','Verify an authenticator app as a second factor.'],
+            ['passkey','🗝️','Passkey pioneer','Register and verify a passkey.'],
+            ['email_2fa','📧','Inbox guardian','Enable email two-factor authentication.'],
+            ['first_saved_profile','📥','First download','Save your first profile download to your history.'],
+            ['first_shared_profile','📤','Sharing is caring','Share your first mobileconfig profile.'],
+            ['community_member','🤝','Community explorer','Follow another ConfigKit member.'],
+            ['conversation_starter','💬','Conversation starter','Start your first builder discussion.'],
+            ['team_player','👥','Team player','Join your first ConfigKit group.']
+          ];
+          try {
+            const {data: earnedRows, error: achievementsError} = await client
+              .from('user_achievements').select('achievement_key,earned_at').eq('user_id', user.id);
+            if (achievementsError) throw achievementsError;
+            const earned = new Map((earnedRows || []).map(row => [row.achievement_key, row.earned_at]));
+            const grid = document.getElementById('achievement-grid');
+            grid.replaceChildren();
+            document.getElementById('achievement-count').textContent = `${earned.size} / ${achievementDefinitions.length}`;
+            for (const [key, icon, title, description] of achievementDefinitions) {
+              const earnedAt = earned.get(key);
+              const item = document.createElement('article');
+              item.className = `achievement-item ${earnedAt ? 'earned' : 'locked'}`;
+              const symbol = document.createElement('span');
+              symbol.className = 'achievement-icon';
+              symbol.setAttribute('aria-hidden', 'true');
+              symbol.textContent = earnedAt ? icon : '🔒';
+              const details = document.createElement('div');
+              const heading = document.createElement('strong');
+              heading.textContent = title;
+              const copy = document.createElement('span');
+              copy.textContent = description;
+              const state = document.createElement('small');
+              state.textContent = earnedAt ? `Earned ${new Date(earnedAt).toLocaleDateString()}` : 'Not yet earned';
+              details.append(heading, copy, document.createElement('br'), state);
+              item.append(symbol, details);
+              grid.append(item);
+            }
+          } catch (achievementError) {
+            document.getElementById('achievement-grid').textContent = 'Achievements could not be loaded. Please refresh to try again.';
+            console.error('Could not load achievements:', achievementError);
+          }
           const name = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username;
           const type = metadata.account_type || 'personal';
           document.getElementById('welcome-title').textContent = name ? `Welcome, ${name}` : 'Welcome to ConfigKit';
