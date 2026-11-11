@@ -146,7 +146,7 @@
         if (error) { setStatus('Could not sign out. Please try again.', true); return; }
         window.location.replace('login.html');
       });
-      client.auth.onAuthStateChange((_event, session) => { if (!session) window.location.replace('login.html'); });
+      client.auth.onAuthStateChange((event, session) => { if (event === 'SIGNED_OUT' && !session) window.location.replace('login.html'); });
       void renderSession();
     })();
   </script>
