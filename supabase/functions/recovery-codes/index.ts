@@ -127,7 +127,9 @@ Deno.serve(async (req: Request) => {
       return json({ enabled: false, remaining: 0, revoked: true });
     }
     if (action === "verify") {
-      if (!(await hasVerifiedTotp())) return json({ error: "No verified authenticator factor is enrolled for this recovery-code set." }, 409);
+      // Recovery codes remain usable if the user has lost or removed the authenticator.
+      // Issuance still requires a verified TOTP factor; redemption only requires the
+      // authenticated primary session plus an unused one-time code.
       const supplied = typeof body.code === "string" ? normalizeCode(body.code) : "";
       if (!/^[0-9A-F]{32}$/.test(supplied)) return json({ error: "Enter one of your 32-character recovery codes." }, 400);
       const result = await admin.rpc("consume_recovery_code", {
