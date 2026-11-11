@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Discover ConfigKit members and follow their public profiles.">
+<title>ConfigKit Community</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--red:#9b3030}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,sans-serif}header,main,footer{width:min(100% - 32px,960px);margin:auto}header{padding:18px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}a{color:var(--green)}header a{text-decoration:none;font-weight:650}main{padding:30px 0 55px}h1{font-size:clamp(2rem,5vw,2.8rem);line-height:1.15;margin:.3rem 0}h2{margin:.2rem 0 .6rem}.muted{color:var(--muted)}.panel,.member{background:white;border:1px solid var(--line);border-radius:14px;padding:18px}.panel{margin:18px 0}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.toolbar input{flex:1;min-width:200px}input,textarea{font:inherit;padding:10px;border:1px solid #cfd9d4;border-radius:8px;width:100%}button{font:inherit;font-weight:650;padding:9px 14px;border:0;border-radius:8px;background:var(--green);color:white;cursor:pointer}button.secondary{background:var(--mint);color:var(--dark)}button.danger{background:#a83232}button:disabled{opacity:.55;cursor:wait}.members{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.member{display:flex;flex-direction:column;gap:8px}.person{display:flex;align-items:center;gap:12px}.avatar{width:48px;height:48px;border-radius:50%;background:var(--mint);object-fit:cover;display:grid;place-items:center;font-weight:700;color:var(--dark);flex:none}.person h2{font-size:1.05rem}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:8px}.status{padding:12px;border-radius:9px;background:var(--mint);margin:12px 0}.error{background:#fff0f0;color:var(--red)}.profile-top{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.profile-top .avatar{width:76px;height:76px;font-size:1.4rem}.stats{display:flex;gap:22px;flex-wrap:wrap;color:var(--muted)}.stats strong{color:var(--ink)}label{display:block;font-weight:650;margin:12px 0 5px}.checkline{display:flex;align-items:center;gap:9px}.checkline input{width:auto}footer{padding:18px 0 30px;color:var(--muted)}[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><a href="dashboard.html">← Dashboard</a><nav><a href="community.html">Discover members</a> · <a href="account-settings.html">Account settings</a></nav></header>
+<main>
+<p class="muted">CONFIGKIT COMMUNITY</p><h1>Meet other members</h1>
+<p class="muted">Browse member profiles and follow people whose work you’d like to keep up with.</p>
+<div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
+<section id="directory" hidden>
+<div class="toolbar"><input id="search" type="search" placeholder="Search member names…" aria-label="Search member names"><button id="show-my-profile" class="secondary" type="button">My profile</button></div>
+<div id="member-list" class="members"></div>
+</section>
+<section id="profile-view" class="panel" hidden>
+<a href="community.html">← Back to all members</a>
+<div class="profile-top" style="margin-top:18px"><div id="profile-avatar" class="avatar"></div><div><h2 id="profile-name"></h2><p id="profile-bio" class="muted"></p></div></div>
+<div class="stats"><span><strong id="followers-count">0</strong> followers</span><span><strong id="following-count">0</strong> following</span></div>
+<div id="profile-actions" class="actions"></div>
+</section>
+<section id="edit-panel" class="panel" hidden>
+<h2>Your community profile</h2><p class="muted">Choose the name and short bio other discoverable members can see. Your email address is never shown.</p>
+<form id="profile-form">
+<label for="display-name">Display name</label><input id="display-name" maxlength="80" required>
+<label for="bio">About you (optional)</label><textarea id="bio" rows="3" maxlength="500" placeholder="A short introduction…"></textarea>
+<label class="checkline"><input id="discoverable" type="checkbox"> Show my profile in member discovery</label>
+<div class="actions"><button type="submit">Save profile</button></div>
+</form>
+</section>
+</main>
+<footer>ConfigKit Community · Be respectful and only share information you’re comfortable making visible to other signed-in members.</footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+ const status=document.getElementById('status'),directory=document.getElementById('directory'),list=document.getElementById('member-list'),profileView=document.getElementById('profile-view'),editPanel=document.getElementById('edit-panel');
+ const config=window.CONFIGKIT_AUTH||{};
+ if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){status.textContent='Authentication is not configured.';status.classList.add('error');return;}
+ const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ let currentUser=null,profiles=[],follows=[];
+ const message=(s,error=false)=>{status.hidden=false;status.textContent=s;status.classList.toggle('error',error);};
+ const displayName=(p)=>p.display_name||'ConfigKit member';
+ function avatar(node,p){node.replaceChildren();if(p.avatar_url&&/^https:\/\//i.test(p.avatar_url)){const img=document.createElement('img');img.src=p.avatar_url;img.alt='';img.className='avatar';img.referrerPolicy='no-referrer';node.append(img);}else{node.textContent=displayName(p).trim().charAt(0).toUpperCase()||'C';}}
+ function goProfile(id){history.pushState({},'',id?'?user='+encodeURIComponent(id):'community.html');renderRoute();}
+ async function load(){
+  const session=await client.auth.getSession();if(!session.data.session){window.location.replace('login.html');return;}
+  currentUser=session.data.session.user;
+  const meta=currentUser.user_metadata||{};
+  const fallback=meta.display_name||meta.full_name||meta.name||meta.preferred_username||'ConfigKit member';
+  let own=await client.from('community_profiles').select('*').eq('user_id',currentUser.id).maybeSingle();
+  if(own.error)throw own.error;
+  if(!own.data){const made=await client.from('community_profiles').insert({user_id:currentUser.id,display_name:fallback.slice(0,80),avatar_url:meta.avatar_url||meta.picture||null}).select().single();if(made.error)throw made.error;own={data:made.data};}
+  document.getElementById('display-name').value=own.data.display_name;
+  document.getElementById('bio').value=own.data.bio||'';
+  document.getElementById('discoverable').checked=own.data.is_discoverable;
+  const [people,relations]=await Promise.all([
+   client.from('community_profiles').select('user_id,display_name,avatar_url,bio,is_discoverable').eq('is_discoverable',true).order('display_name').limit(200),
+   client.from('user_follows').select('follower_id,following_id')
+  ]);
+  if(people.error)throw people.error;if(relations.error)throw relations.error;
+  profiles=people.data||[];follows=relations.data||[];
+  directory.hidden=false;status.hidden=true;await renderRoute();
+ }
+ function renderCard(p){
+  const article=document.createElement('article');article.className='member';
+  const row=document.createElement('div');row.className='person';
+  const av=document.createElement('div');av.className='avatar';avatar(av,p);
+  const title=document.createElement('h2');title.textContent=displayName(p);row.append(av,title);article.append(row);
+  if(p.bio){const bio=document.createElement('p');bio.className='muted';bio.textContent=p.bio;article.append(bio);}
+  const count=follows.filter(x=>x.following_id===p.user_id).length;
+  const stats=document.createElement('p');stats.className='muted';stats.textContent=count+' follower'+(count===1?'':'s');article.append(stats);
+  const actions=document.createElement('div');actions.className='actions';
+  const visit=document.createElement('button');visit.type='button';visit.className='secondary';visit.textContent='Visit profile';visit.addEventListener('click',()=>goProfile(p.user_id));actions.append(visit);
+  if(p.user_id!==currentUser.id){const follow=document.createElement('button');follow.type='button';follow.textContent=follows.some(x=>x.follower_id===currentUser.id&&x.following_id===p.user_id)?'Following · Unfollow':'Follow';follow.addEventListener('click',()=>toggleFollow(p.user_id,follow));actions.append(follow);}
+  article.append(actions);return article;
+ }
+ async function toggleFollow(id,button){
+  button.disabled=true;const existing=follows.some(x=>x.follower_id===currentUser.id&&x.following_id===id);
+  const result=existing
+   ? await client.from('user_follows').delete().eq('follower_id',currentUser.id).eq('following_id',id)
+   : await client.from('user_follows').insert({follower_id:currentUser.id,following_id:id});
+  button.disabled=false;if(result.error){message(result.error.message,true);return;}
+  const [relations]=await Promise.all([client.from('user_follows').select('follower_id,following_id')]);if(relations.error){message(relations.error.message,true);return;}
+  follows=relations.data||[];message(existing?'You unfollowed this member.':'You are now following this member.');await renderRoute();
+ }
+ async function renderRoute(){
+  const id=new URLSearchParams(location.search).get('user');
+  if(!id){profileView.hidden=true;editPanel.hidden=false;list.replaceChildren();const query=document.getElementById('search').value.trim().toLowerCase();const shown=profiles.filter(p=>p.user_id!==currentUser.id&&displayName(p).toLowerCase().includes(query));if(!shown.length){const p=document.createElement('p');p.className='muted';p.textContent='No discoverable members found. Try another search, or invite someone to join ConfigKit.';list.append(p);}else shown.forEach(p=>list.append(renderCard(p)));return;}
+  directory.hidden=true;editPanel.hidden=id!==currentUser.id;profileView.hidden=false;
+  let p=profiles.find(x=>x.user_id===id);
+  if(id===currentUser.id){const own=await client.from('community_profiles').select('*').eq('user_id',id).single();if(own.error){message(own.error.message,true);return;}p=own.data;}
+  if(!p){const result=await client.from('community_profiles').select('user_id,display_name,avatar_url,bio,is_discoverable').eq('user_id',id).maybeSingle();if(result.error||!result.data){message('This profile is unavailable or is not discoverable.',true);return;}p=result.data;}
+  if(!p.is_discoverable&&id!==currentUser.id){message('This profile is not available for discovery.',true);return;}
+  avatar(document.getElementById('profile-avatar'),p);document.getElementById('profile-name').textContent=displayName(p);document.getElementById('profile-bio').textContent=p.bio||'No introduction added yet.';
+  document.getElementById('followers-count').textContent=follows.filter(x=>x.following_id===id).length;
+  document.getElementById('following-count').textContent=follows.filter(x=>x.follower_id===id).length;
+  const actions=document.getElementById('profile-actions');actions.replaceChildren();
+  if(id!==currentUser.id){const b=document.createElement('button');b.textContent=follows.some(x=>x.follower_id===currentUser.id&&x.following_id===id)?'Following · Unfollow':'Follow';b.addEventListener('click',()=>toggleFollow(id,b));actions.append(b);}
+  else{const note=document.createElement('span');note.className='muted';note.textContent='This is how other discoverable members see your profile.';actions.append(note);}
+ }
+ document.getElementById('search').addEventListener('input',()=>{if(!new URLSearchParams(location.search).has('user'))renderRoute();});
+ document.getElementById('show-my-profile').addEventListener('click',()=>goProfile(currentUser.id));
+ document.getElementById('profile-form').addEventListener('submit',async e=>{e.preventDefault();const record={display_name:document.getElementById('display-name').value.trim(),bio:document.getElementById('bio').value.trim(),is_discoverable:document.getElementById('discoverable').checked,updated_at:new Date().toISOString()};if(!record.display_name){message('Enter a display name.',true);return;}const result=await client.from('community_profiles').update(record).eq('user_id',currentUser.id);if(result.error){message(result.error.message,true);return;}const refreshed=await client.from('community_profiles').select('user_id,display_name,avatar_url,bio,is_discoverable').eq('user_id',currentUser.id).single();if(refreshed.error){message(refreshed.error.message,true);return;}profiles=profiles.filter(x=>x.user_id!==currentUser.id);if(refreshed.data.is_discoverable)profiles.push(refreshed.data);message('Your community profile has been saved.');await renderRoute();});
+ window.addEventListener('popstate',()=>renderRoute());
+ client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session)window.location.replace('login.html');});
+ load().catch(e=>message(e.message||'Could not load the community.',true));
+})();
+</script>
+</body></html>
