@@ -99,7 +99,7 @@
           }
           // A passkey sign-in is accepted as the primary factor for this tab.
           // The marker is only a UI routing hint; it is not a server-side AAL2 claim.
-          const passkeySession = sessionStorage.getItem('configkit_passkey_session_user') === data.session.user.id;
+          const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(data.session.user.id) === true;
           const {data: email2FAStatus, error: email2FAError} = await client.functions.invoke('email-2fa', {body:{action:'status'}});
           if (email2FAError) throw email2FAError;
           let recoveryCodeStatus = {enabled:false,verified:false};
@@ -111,11 +111,11 @@
             window.location.replace('login.html');
             return;
           }
-          if (recoveryCodeStatus.enabled && !recoveryCodeStatus.verified && !email2FAStatus?.verified && assurance.currentLevel !== 'aal2') {
+          if (recoveryCodeStatus.enabled && !recoveryCodeStatus.verified && !email2FAStatus?.verified && !passkeySession && assurance.currentLevel !== 'aal2') {
             window.location.replace('login.html');
             return;
           }
-          if (!email2FAStatus?.verified && !recoveryCodeStatus.verified && (!passkeySession || recoveryCodeStatus.enabled) && assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+          if (!email2FAStatus?.verified && !recoveryCodeStatus.verified && !passkeySession && assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
             window.location.replace('login.html');
             return;
           }
@@ -140,7 +140,7 @@
         } catch (error) { setStatus(error.message || 'Could not check your sign-in. Please refresh and try again.', true); }
       }
       signout.addEventListener('click', async () => {
-        sessionStorage.removeItem('configkit_passkey_session_user');
+        window.CONFIGKIT_PASSKEY_SESSION?.clear();
         signout.disabled = true;
         const {error} = await client.auth.signOut({scope:'local'}); signout.disabled = false;
         if (error) { setStatus('Could not sign out. Please try again.', true); return; }
