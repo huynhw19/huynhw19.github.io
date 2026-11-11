@@ -78,7 +78,22 @@
             <div class="actions"><button id="mfa-enable" type="submit">Verify and enable 2FA</button><button id="mfa-cancel-enroll" class="secondary" type="button">Cancel setup</button></div>
           </form>
         </div>
-        <p class="muted">Supabase does not provide recovery codes for this factor type. Consider enrolling a second authenticator on a separate device and keep its access secure.</p>
+        <p class="muted">ConfigKit can issue one-time backup codes for this authenticator. Each code works once after your primary sign-in. Keep them somewhere separate from your authenticator device.</p>
+      </section>
+      <section class="card" aria-labelledby="recovery-codes-title">
+        <h2 id="recovery-codes-title">Authenticator recovery codes</h2>
+        <p class="muted">Generate 10 high-entropy, single-use backup codes. They can complete the second step after your email/password or provider sign-in if you cannot access your authenticator. They do not replace your password or primary sign-in. Each code expires after use; a successful recovery-code sign-in verifies that browser session for up to 8 hours.</p>
+        <p id="recovery-codes-status" class="notice" aria-live="polite">Checking recovery-code settings…</p>
+        <div class="actions">
+          <button id="recovery-codes-generate" type="button">Generate recovery codes</button>
+          <button id="recovery-codes-revoke" class="danger" type="button" hidden>Revoke all recovery codes</button>
+        </div>
+        <div id="recovery-codes-display" class="notice" hidden>
+          <strong>Save these codes now — they will not be shown again.</strong>
+          <p>Store them in a password manager or another secure place. Generating a replacement set invalidates every code in the previous set.</p>
+          <pre id="recovery-codes-list" style="white-space:pre-wrap;overflow-wrap:anywhere;font:600 1rem/1.9 ui-monospace,monospace"></pre>
+          <button id="recovery-codes-copy" class="secondary" type="button">Copy codes</button>
+        </div>
       </section>
       <section class="card" aria-labelledby="email-2fa-title">
         <h2 id="email-2fa-title">Email verification as an alternative 2FA method</h2>
@@ -170,6 +185,9 @@
       // accepted as the primary factor for this tab. This marker is only a UI
       // routing hint; it is not a server-side AAL2 claim.
       const passkeySession = sessionStorage.getItem('configkit_passkey_session_user') === userData.user.id;
+      let recoveryCodeStatusData = {enabled:false,remaining:0,verified:false};
+      try { recoveryCodeStatusData = await invokeRecoveryCodes({action:'status'}); }
+      catch (error) { console.warn('Recovery-code status unavailable; native authenticator checks remain active.', error); }
       let email2FAStatus;
       try {
         email2FAStatus = await invokeEmail2FA({action:'status'});
@@ -179,12 +197,13 @@
       }
       const {data:assuranceData,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
       if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
-      if (email2FAStatus.enabled && !email2FAStatus.verified && assuranceData.currentLevel !== 'aal2') {
+      if (email2FAStatus.enabled && !email2FAStatus.verified && !recoveryCodeStatusData.verified && assuranceData.currentLevel !== 'aal2') {
         setStatus('Please verify your email or authenticator second factor before managing account security. Redirecting to sign in…');
         window.location.replace('login.html?next=account-settings.html');
         return;
       }
-      if (!email2FAStatus.verified && !passkeySession && assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2') {
+      if ((recoveryCodeStatusData.enabled && !recoveryCodeStatusData.verified && assuranceData.currentLevel !== 'aal2') ||
+          (!email2FAStatus.verified && !recoveryCodeStatusData.verified && !passkeySession && assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2')) {
         setStatus('Please complete two-factor authentication before managing account security. Redirecting to sign in…');
         window.location.replace('login.html?next=account-settings.html');
         return;
@@ -196,19 +215,31 @@
       const email2FADisableButton = document.getElementById('email-2fa-disable');
       const email2FAEnrollForm = document.getElementById('email-2fa-enroll-form');
       const email2FAEnrollCode = document.getElementById('email-2fa-enroll-code');
+      const recoveryCodesStatusElement = document.getElementById('recovery-codes-status');
+      const recoveryCodesGenerateButton = document.getElementById('recovery-codes-generate');
+      const recoveryCodesRevokeButton = document.getElementById('recovery-codes-revoke');
+      const recoveryCodesDisplay = document.getElementById('recovery-codes-display');
+      const recoveryCodesList = document.getElementById('recovery-codes-list');
       async function invokeEmail2FA(body) {
         const {data, error} = await client.functions.invoke('email-2fa', {body});
         if (error) {
           let detail = data?.error || data?.message;
-          // FunctionsHttpError keeps the non-2xx response body on error.context.
-          // Read it so server-side messages (including the resend cooldown) reach the UI.
           if (!detail && error.context && typeof error.context.json === 'function') {
-            try {
-              const payload = await error.context.json();
-              detail = payload?.error || payload?.message;
-            } catch (_) { /* Fall back to the SDK error message. */ }
+            try { const payload = await error.context.json(); detail = payload?.error || payload?.message; } catch (_) {}
           }
           throw new Error(detail || error.message || 'Email verification could not be completed.');
+        }
+        if (data?.error) throw new Error(data.error);
+        return data || {};
+      }
+      async function invokeRecoveryCodes(body) {
+        const {data, error} = await client.functions.invoke('recovery-codes', {body});
+        if (error) {
+          let detail = data?.error || data?.message;
+          if (!detail && error.context && typeof error.context.json === 'function') {
+            try { const payload = await error.context.json(); detail = payload?.error || payload?.message; } catch (_) {}
+          }
+          throw new Error(detail || error.message || 'Recovery-code request could not be completed.');
         }
         if (data?.error) throw new Error(data.error);
         return data || {};
@@ -222,6 +253,50 @@
         email2FADisableButton.hidden = !data.enabled;
         return data;
       }
+      async function refreshRecoveryCodesStatus() {
+        recoveryCodeStatusData = await invokeRecoveryCodes({action:'status'});
+        recoveryCodesStatusElement.textContent = recoveryCodeStatusData.enabled
+          ? `Enabled · ${recoveryCodeStatusData.remaining} unused recovery code(s) remain. Codes are only displayed when generated.`
+          : 'Not set up · Generate codes after enabling an authenticator app.';
+        recoveryCodesGenerateButton.textContent = recoveryCodeStatusData.enabled ? 'Replace recovery codes' : 'Generate recovery codes';
+        recoveryCodesRevokeButton.hidden = !recoveryCodeStatusData.enabled;
+        return recoveryCodeStatusData;
+      }
+      recoveryCodesGenerateButton.addEventListener('click', async () => {
+        if (recoveryCodeStatusData.enabled && !window.confirm('Generate a new set of recovery codes? This immediately invalidates every unused code in your current set.')) return;
+        recoveryCodesGenerateButton.disabled = true;
+        try {
+          const result = await invokeRecoveryCodes({action:'generate'});
+          recoveryCodesList.textContent = result.codes.join('\\n');
+          recoveryCodesDisplay.hidden = false;
+          await refreshRecoveryCodesStatus();
+          setStatus('Ten new recovery codes were generated. Save them now; they cannot be displayed again.');
+        } catch (error) {
+          setStatus(error.message || 'Could not generate recovery codes.', true);
+        } finally { recoveryCodesGenerateButton.disabled = false; }
+      });
+      recoveryCodesCopyButton = document.getElementById('recovery-codes-copy');
+      recoveryCodesCopyButton.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(recoveryCodesList.textContent);
+          setStatus('Recovery codes copied. Store them securely.');
+        } catch (_) {
+          setStatus('Copy is unavailable in this browser. Select the codes and copy them manually.', true);
+        }
+      });
+      recoveryCodesRevokeButton.addEventListener('click', async () => {
+        if (!window.confirm('Revoke all unused recovery codes? They will no longer work.')) return;
+        recoveryCodesRevokeButton.disabled = true;
+        try {
+          await invokeRecoveryCodes({action:'revoke'});
+          recoveryCodesDisplay.hidden = true;
+          recoveryCodesList.textContent = '';
+          await refreshRecoveryCodesStatus();
+          setStatus('All recovery codes have been revoked.');
+        } catch (error) {
+          setStatus(error.message || 'Could not revoke recovery codes.', true);
+        } finally { recoveryCodesRevokeButton.disabled = false; }
+      });
       const passkeyList = document.getElementById('passkey-list');
       const addPasskeyButton = document.getElementById('add-passkey');
       const mfaFactorList = document.getElementById('mfa-factor-list');
@@ -270,6 +345,7 @@
       });
       try {
         await refreshEmail2FAStatus();
+        await refreshRecoveryCodesStatus();
       } catch (error) {
         email2FAStatusElement.textContent = error.message || 'Email 2FA settings could not be loaded.';
         email2FAEnableButton.disabled = true;
@@ -283,6 +359,7 @@
           mfaFactorList.append(note); return;
         }
         const verified = (data.totp || []).filter(factor => factor.status === 'verified');
+        recoveryCodesGenerateButton.disabled = verified.length === 0;
         if (!verified.length) {
           const note = document.createElement('p'); note.className = 'muted';
           note.textContent = 'Two-factor authentication is currently off.';
