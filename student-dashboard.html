@@ -11,6 +11,8 @@
     .status { color: #174b39; }
     .error { color: #9b3030; }
     .record { padding: 12px 0; border-top: 1px solid #e5ece8; }
+    .assignment { padding:14px 0; border-top:1px solid #e5ece8; }
+    .assignment-meta { color:#56645e; font-size:.95rem; }
     button, .button { display: inline-block; padding: 10px 14px; border: 0; border-radius: 8px; background: #226b51; color: white; text-decoration: none; cursor: pointer; }
   </style>
 </head>
@@ -21,6 +23,10 @@
       <h1>Student dashboard</h1>
       <p id="status" class="status" role="status" aria-live="polite">Checking your sign in…</p>
       <div id="records"></div>
+      <section id="assignments" aria-labelledby="assignments-title" hidden>
+        <h2 id="assignments-title">My assignments</h2>
+        <div id="assignment-records"></div>
+      </section>
       <button id="signout" type="button" hidden>Sign out</button>
     </section>
   </main>
@@ -30,6 +36,8 @@
     (() => {
       const status = document.getElementById('status');
       const records = document.getElementById('records');
+      const assignmentsPanel = document.getElementById('assignments');
+      const assignmentRecords = document.getElementById('assignment-records');
       const signout = document.getElementById('signout');
       const config = window.CONFIGKIT_AUTH || {};
       const showStatus = (message, isError = false) => {
@@ -64,6 +72,44 @@
           return;
         }
         showStatus(`Signed in as ${data.session.user.email || 'student'}.`);
+
+        const studentIds = studentRecords.map(student => student.id);
+        const { data: assignments, error: assignmentsError } = await client
+          .from('education_assignments')
+          .select('id, student_id, title, instructions, due_date, created_at')
+          .in('student_id', studentIds)
+          .eq('status', 'published')
+          .order('due_date', { ascending: true, nullsFirst: false });
+        assignmentsPanel.hidden = false;
+        assignmentRecords.replaceChildren();
+        if (assignmentsError) {
+          const warning = document.createElement('p');
+          warning.className = 'error';
+          warning.textContent = 'Could not load assignments. Ask your teacher to check the assignment setup.';
+          assignmentRecords.append(warning);
+        } else if (!assignments || assignments.length === 0) {
+          const empty = document.createElement('p');
+          empty.textContent = 'You do not have any published assignments yet.';
+          assignmentRecords.append(empty);
+        } else {
+          assignments.forEach(assignment => {
+            const item = document.createElement('article');
+            item.className = 'assignment';
+            const title = document.createElement('h3');
+            title.textContent = assignment.title;
+            const student = studentRecords.find(record => record.id === assignment.student_id);
+            const meta = document.createElement('p');
+            meta.className = 'assignment-meta';
+            meta.textContent = (student?.student_name || 'Your assignment') + ' · Due: ' + (assignment.due_date || 'No due date');
+            item.append(title, meta);
+            if (assignment.instructions) {
+              const instructions = document.createElement('p');
+              instructions.textContent = assignment.instructions;
+              item.append(instructions);
+            }
+            assignmentRecords.append(item);
+          });
+        }
         studentRecords.forEach(student => {
           const item = document.createElement('article');
           item.className = 'record';
