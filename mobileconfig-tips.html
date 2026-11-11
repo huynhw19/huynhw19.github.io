@@ -15,7 +15,7 @@
   <main>
     <p class="muted">Signed-in workspace · AI-powered Apple configuration guidance</p>
     <h1>Mobileconfig Tips Assistant</h1>
-    <p>Ask in your own words about Apple configuration profiles, Wi-Fi, DNS, VPNs, certificates, web clips, installation, payloads, restrictions, and profile safety. Get tailored explanations and practical next steps.</p>
+    <p>Ask in your own words about Apple configuration profiles and .mobileconfig structure; payloads and restrictions; passkeys and authentication; certificates, PKI and trust; MDM; and Apple platform security. Get tailored explanations, safe configuration tips, and practical next steps for iPhone, iPad, and Mac.</p>
     <p id="auth-status" class="notice" role="status" aria-live="polite">Checking your sign-in…</p>
     <section id="assistant" hidden>
       <p class="notice"><strong>Privacy:</strong> Your question and selected device context are sent securely to OpenAI through ConfigKit’s Supabase Edge Function to generate an answer. Questions and answers are not saved in ConfigKit chat history; the request uses the API with response storage disabled. OpenAI processes the request under its API data policies. Do not include passwords, private keys, recovery codes, or personal/sensitive information. This assistant cannot inspect your device or certify a profile as safe or compatible.</p>
@@ -25,7 +25,7 @@
         <div class="field"><label for="question">Your question</label><textarea id="question" maxlength="1500" placeholder="For example: What should I check before sharing a Wi-Fi profile?" required></textarea></div>
         <button id="ask" type="button">Get AI guidance</button>
         <p class="muted">Or try one of these:</p>
-        <div class="prompts" aria-label="Example questions"><button type="button" data-prompt="What should I check before installing a profile?">Before installing</button><button type="button" data-prompt="How do I keep Wi-Fi credentials safe?">Wi-Fi privacy</button><button type="button" data-prompt="What should I know about encrypted DNS?">DNS settings</button><button type="button" data-prompt="How do I review a web clip?">Web clip</button><button type="button" data-prompt="What should I know about VPN or certificates?">VPNs and certificates</button></div>
+        <div class="prompts" aria-label="Example questions"><button type="button" data-prompt="How are Apple configuration profiles structured, and what does each payload do?">Profile structure</button><button type="button" data-prompt="Which restrictions can an iPhone or Mac configuration profile enforce, and what are the limitations?">Restrictions</button><button type="button" data-prompt="How do passkeys work on Apple devices, and how do they relate to iCloud Keychain, Face ID, Touch ID, FIDO2 and WebAuthn?">Passkeys</button><button type="button" data-prompt="Explain Apple certificates, certificate authorities, trust chains, SCEP and certificate renewal.">Certificates and PKI</button><button type="button" data-prompt="Explain Secure Enclave, Secure Boot, FileVault, Data Protection, Gatekeeper and System Integrity Protection.">Apple security</button><button type="button" data-prompt="What should I know about MDM enrollment, supervision, profile deployment and troubleshooting?">MDM management</button></div>
       </section>
       <section id="answer" class="answer" aria-live="polite" aria-labelledby="answer-title" hidden><h2 id="answer-title">Suggested guidance</h2><div id="answer-content"></div></section>
     </section>
