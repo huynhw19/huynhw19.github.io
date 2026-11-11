@@ -107,7 +107,7 @@
           if (!recoveryError && recoveryStatus) recoveryCodeStatus = recoveryStatus;
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) throw assuranceError;
-          if (email2FAStatus?.enabled && !email2FAStatus.verified && !recoveryCodeStatus.verified && assurance.currentLevel !== 'aal2') {
+          if (email2FAStatus?.enabled && !email2FAStatus.verified && !recoveryCodeStatus.verified && !passkeySession && assurance.currentLevel !== 'aal2') {
             window.location.replace('login.html');
             return;
           }
