@@ -132,7 +132,8 @@
       if (pendingEmail2FALink) callbackUrlObject.searchParams.set('email_2fa_token', pendingEmail2FALink);
       const callbackUrl = callbackUrlObject.href;
       const accountIntentKey = 'configkit_account_oauth_intent';
-      const isPasskeySession = userId => window.CONFIGKIT_PASSKEY_SESSION?.has(userId) === true;\n      const clearPasskeySession = () => window.CONFIGKIT_PASSKEY_SESSION?.clear();
+      const isPasskeySession = userId => window.CONFIGKIT_PASSKEY_SESSION?.has(userId) === true;
+      const clearPasskeySession = () => window.CONFIGKIT_PASSKEY_SESSION?.clear();
       function selectedMetadata() {
         const type = accountType.value;
         const metadata = {account_type:type};
