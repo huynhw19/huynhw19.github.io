@@ -91,7 +91,7 @@
  }
  async function renderRoute(){
   const id=new URLSearchParams(location.search).get('user');
-  if(!id){profileView.hidden=true;editPanel.hidden=false;list.replaceChildren();const query=document.getElementById('search').value.trim().toLowerCase();const shown=profiles.filter(p=>p.user_id!==currentUser.id&&displayName(p).toLowerCase().includes(query));if(!shown.length){const p=document.createElement('p');p.className='muted';p.textContent='No discoverable members found. Try another search, or invite someone to join ConfigKit.';list.append(p);}else shown.forEach(p=>list.append(renderCard(p)));return;}
+  if(!id){profileView.hidden=true;editPanel.hidden=true;list.replaceChildren();const query=document.getElementById('search').value.trim().toLowerCase();const shown=profiles.filter(p=>p.user_id!==currentUser.id&&displayName(p).toLowerCase().includes(query));if(!shown.length){const p=document.createElement('p');p.className='muted';p.textContent='No discoverable members found. Try another search, or invite someone to join ConfigKit.';list.append(p);}else shown.forEach(p=>list.append(renderCard(p)));return;}
   directory.hidden=true;editPanel.hidden=id!==currentUser.id;profileView.hidden=false;
   let p=profiles.find(x=>x.user_id===id);
   if(id===currentUser.id){const own=await client.from('community_profiles').select('*').eq('user_id',id).single();if(own.error){message(own.error.message,true);return;}p=own.data;}
