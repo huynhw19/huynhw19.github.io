@@ -7,6 +7,23 @@ window.CONFIGKIT_AUTH = {
   turnstileSiteKey: '0x4AAAAAAF0lgF9cPbDl120-'
 };
 
+// Share a short-lived passkey UI hint across same-origin pages and tabs.
+// This is not an AAL2 assertion; Supabase/RLS remains the authorization boundary.
+(() => {
+  const key = 'configkit_passkey_session_user';
+  const ttlMs = 8 * 60 * 60 * 1000;
+  const clear = () => { try { localStorage.removeItem(key); } catch (_) {} try { sessionStorage.removeItem(key); } catch (_) {} };
+  window.CONFIGKIT_PASSKEY_SESSION = {
+    mark(userId) { if (!userId) return; try { localStorage.setItem(key, JSON.stringify({userId, expiresAt:Date.now() + ttlMs})); } catch (_) { try { sessionStorage.setItem(key, userId); } catch (_) {} } },
+    has(userId) {
+      if (!userId) return false;
+      try { const raw = localStorage.getItem(key); if (raw) { const entry = JSON.parse(raw); if (entry?.userId === userId && Number(entry.expiresAt) > Date.now()) return true; localStorage.removeItem(key); } } catch (_) {}
+      try { return sessionStorage.getItem(key) === userId; } catch (_) { return false; }
+    },
+    clear
+  };
+})();
+
 // Brand the OAuth page and expose account links only after sign-in.
 (() => {
   const isLoginPage = () => window.location.pathname.endsWith('/login.html') || window.location.pathname === '/login';
@@ -347,7 +364,7 @@ window.CONFIGKIT_AUTH = {
               const recoveryVerified = !recoveryError && recovery?.verified;
               const emailVerified = !error && data?.enabled && data.verified;
               const emailNeedsVerification = !error && data?.enabled && !data.verified && !recoveryVerified;
-              const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recoveryVerified && !emailVerified;
+              const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(session.user.id) === true;\n              const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recoveryVerified && !emailVerified && !passkeySession;
               if (!emailNeedsVerification && !recoveryNeedsVerification) return;
               const {data: assurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
               if (assurance?.currentLevel === 'aal2') return;
