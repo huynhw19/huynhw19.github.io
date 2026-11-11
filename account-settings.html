@@ -275,7 +275,7 @@
           setStatus(error.message || 'Could not generate recovery codes.', true);
         } finally { recoveryCodesGenerateButton.disabled = false; }
       });
-      recoveryCodesCopyButton = document.getElementById('recovery-codes-copy');
+      const recoveryCodesCopyButton = document.getElementById('recovery-codes-copy');
       recoveryCodesCopyButton.addEventListener('click', async () => {
         try {
           await navigator.clipboard.writeText(recoveryCodesList.textContent);
