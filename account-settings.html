@@ -202,7 +202,7 @@
         window.location.replace('login.html?next=account-settings.html');
         return;
       }
-      if ((recoveryCodeStatusData.enabled && !recoveryCodeStatusData.verified && assuranceData.currentLevel !== 'aal2') ||
+      if ((recoveryCodeStatusData.enabled && !recoveryCodeStatusData.verified && !email2FAStatus.verified && assuranceData.currentLevel !== 'aal2') ||
           (!email2FAStatus.verified && !recoveryCodeStatusData.verified && !passkeySession && assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2')) {
         setStatus('Please complete two-factor authentication before managing account security. Redirecting to sign in…');
         window.location.replace('login.html?next=account-settings.html');
