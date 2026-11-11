@@ -314,6 +314,13 @@
               return;
             }
           }
+          // A fresh, fully verified sign-in is the only way to clear an account lock.
+          const {error:unlockError} = await client.rpc('unlock_my_account');
+          if (unlockError) {
+            setStatus('You signed in, but the account is still locked. Please sign in again to unlock it.', true);
+            await client.auth.signOut({scope:'local'});
+            return;
+          }
           if (!redirecting) { redirecting = true; window.location.replace(postLoginDestination); }
         } else {
           passkeyPrimaryPending = false;
