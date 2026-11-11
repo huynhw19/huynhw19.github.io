@@ -44,6 +44,16 @@
         <button class="text-button" id="resetPassword" type="button">Forgot password?</button>
         <div class="form-actions"><button class="provider" id="emailSubmit" type="submit">Log in with email</button></div>
       </form>
+            <section class="education-note" aria-labelledby="phone-login-title" style="margin-top:18px">
+        <h2 id="phone-login-title">Sign in with your phone</h2>
+        <p class="muted">Use a verified phone number and a one-time SMS code. Enter the number in international E.164 format, for example +61412345678.</p>
+        <div class="field"><label for="phone-login-number">Phone number</label><input id="phone-login-number" type="tel" autocomplete="tel" inputmode="tel" placeholder="+61412345678" maxlength="16"></div>
+        <div class="form-actions"><button id="phone-login-send" class="provider" type="button">Send SMS sign-in code</button></div>
+        <form id="phone-login-verify" hidden>
+          <div class="field"><label for="phone-login-code">Six-digit SMS code</label><input id="phone-login-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required></div>
+          <div class="form-actions"><button id="phone-login-verify-button" type="submit">Verify and sign in</button><button id="phone-login-resend" class="secondary" type="button">Resend code</button></div>
+        </form>
+      </section>
       <div class="divider">or continue with</div>
       <div class="providers">
         <button class="provider secondary" id="github" type="button" disabled>Continue with GitHub</button>
@@ -60,6 +70,7 @@
           <input id="mfa-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required>
           <div class="form-actions"><button id="mfa-submit" type="submit">Verify and continue</button><button id="mfa-cancel" class="secondary" type="button">Sign out</button></div>
         </form>
+          <button id="mfa-use-phone" class="secondary" type="button" hidden>Use SMS to this phone instead</button>
       </section>
       <section id="email-mfa-challenge" class="education-note" hidden aria-labelledby="email-mfa-title">
         <h2 id="email-mfa-title">Verify your email</h2>
@@ -104,6 +115,8 @@
       let mode = 'login';
       let redirecting = false;
       let pendingMfaFactorId = '';
+      let pendingMfaChallengeId = '';
+      let pendingPhoneLogin = '';
       let passkeyPrimaryPending = false;
       let emailChallengeSent = false;
       let emailMfaUseTotp = false;
@@ -116,6 +129,64 @@
       }
 
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,experimental:{passkey:true}}});
+      const phoneLoginNumber = document.getElementById('phone-login-number');
+      const phoneLoginVerify = document.getElementById('phone-login-verify');
+      const phoneLoginCode = document.getElementById('phone-login-code');
+      const phoneLoginSend = document.getElementById('phone-login-send');
+      async function sendPhoneLoginCode() {
+        const phone = phoneLoginNumber.value.trim();
+        if (!/^\+[1-9]\d{7,14}$/.test(phone)) throw new Error('Enter a valid phone number in international format, such as +61412345678.');
+        const {error} = await client.auth.signInWithOtp({phone, options:{shouldCreateUser:false}});
+        if (error) throw error;
+        pendingPhoneLogin = phone;
+        phoneLoginVerify.hidden = false;
+        phoneLoginCode.focus();
+        setStatus('If this phone number is registered and verified, an SMS sign-in code has been sent.');
+      }
+      phoneLoginSend.addEventListener('click', async () => {
+        phoneLoginSend.disabled = true;
+        try { await sendPhoneLoginCode(); }
+        catch (error) { setStatus(error.message || 'Could not send the SMS code.', true); }
+        finally { phoneLoginSend.disabled = false; }
+      });
+      document.getElementById('phone-login-resend').addEventListener('click', async event => {
+        event.currentTarget.disabled = true;
+        try { await sendPhoneLoginCode(); }
+        catch (error) { setStatus(error.message || 'Could not resend the SMS code.', true); }
+        finally { event.currentTarget.disabled = false; }
+      });
+      phoneLoginVerify.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!pendingPhoneLogin || !phoneLoginVerify.reportValidity()) return;
+        const button = document.getElementById('phone-login-verify-button');
+        button.disabled = true;
+        try {
+          const {error} = await client.auth.verifyOtp({phone:pendingPhoneLogin,token:phoneLoginCode.value.trim(),type:'sms'});
+          if (error) throw error;
+          phoneLoginCode.value = '';
+          setStatus('Phone verified. Checking your account security…');
+          await renderSession();
+        } catch (error) { setStatus(error.message || 'The SMS code could not be verified.', true); phoneLoginCode.select(); }
+        finally { button.disabled = false; }
+      });
+      async function startPhoneMfaChallenge() {
+        const {data,error} = await client.auth.mfa.listFactors();
+        if (error) throw error;
+        const factor = (data.phone || []).find(item => item.status === 'verified');
+        if (!factor) throw new Error('No verified phone factor is registered on this account.');
+        pendingMfaFactorId = factor.id;
+        const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:factor.id});
+        if (challengeError) throw challengeError;
+        pendingMfaChallengeId = challenge.id;
+        document.getElementById('mfa-title').textContent = 'Verify your phone';
+        document.querySelector('#mfa-challenge .muted').textContent = 'Enter the six-digit code sent by SMS to your registered phone number.';
+        document.querySelector('#mfa-form label').textContent = 'SMS verification code';
+        document.getElementById('mfa-use-phone').hidden = true;
+        document.getElementById('mfa-code').value = '';
+        setStatus('A security code was sent to your registered phone.');
+        document.getElementById('mfa-code').focus();
+      }
+
       const requestedNext = new URLSearchParams(window.location.search).get('next');
       // Only allow known same-site destinations; never redirect to an arbitrary URL.
       const allowedDestinations = new Set(['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html']);
@@ -252,15 +323,28 @@
             const {data: factorData, error: factorError} = await client.auth.mfa.listFactors();
             if (factorError) { setStatus('Could not load your authenticator. Please try again.', true); return; }
             const factor = (factorData.totp || []).find(item => item.status === 'verified');
-            if (!factor) { setStatus('Your account requires a verified second factor, but no verified authenticator is available. Contact support.', true); return; }
-            pendingMfaFactorId = factor.id;
+            const phoneFactor = (factorData.phone || []).find(item => item.status === 'verified');
+            if (!factor && !phoneFactor) { setStatus('Your account requires a verified second factor, but no verified authenticator or phone is available. Contact support.', true); return; }
+            pendingMfaFactorId = factor?.id || phoneFactor.id;
             form.hidden = true;
             document.querySelector('.tabs').hidden = true;
             document.querySelector('.divider').hidden = true;
             document.querySelectorAll('.providers').forEach(node => node.hidden = true);
             document.getElementById('mfa-challenge').hidden = false;
+            const usePhoneButton = document.getElementById('mfa-use-phone');
+            usePhoneButton.hidden = !factor || !phoneFactor;
+            document.getElementById('mfa-title').textContent = factor ? 'Two-factor authentication' : 'Verify your phone';
+            document.querySelector('#mfa-challenge .muted').textContent = factor ? 'Enter the current six-digit code from your authenticator app.' : 'Enter the six-digit code sent by SMS to your registered phone.';
+            document.querySelector('#mfa-form label').textContent = factor ? 'Authenticator code' : 'SMS verification code';
+            if (!factor && phoneFactor) {
+              const {data:phoneChallenge,error:phoneChallengeError} = await client.auth.mfa.challenge({factorId:phoneFactor.id});
+              if (phoneChallengeError) { setStatus(phoneChallengeError.message || 'Could not send your phone verification code.', true); return; }
+              pendingMfaChallengeId = phoneChallenge.id;
+              setStatus('Your password or provider sign-in was accepted. A security code was sent to your phone.');
+            } else {
+              setStatus('Your password or provider sign-in was accepted. Complete the second step to continue.');
+            }
             document.getElementById('mfa-code').focus();
-            setStatus('Your password or provider sign-in was accepted. Complete the second step to continue.');
             return;
           }
           document.getElementById('mfa-challenge').hidden = true;
@@ -320,11 +404,16 @@
         if (!pendingMfaFactorId || !input.reportValidity()) return;
         button.disabled = true;
         try {
-          const {data:challenge, error:challengeError} = await client.auth.mfa.challenge({factorId:pendingMfaFactorId});
-          if (challengeError) throw challengeError;
-          const {error:verifyError} = await client.auth.mfa.verify({factorId:pendingMfaFactorId,challengeId:challenge.id,code:input.value.trim()});
+          let challengeId = pendingMfaChallengeId;
+          if (!challengeId) {
+            const {data:challenge, error:challengeError} = await client.auth.mfa.challenge({factorId:pendingMfaFactorId});
+            if (challengeError) throw challengeError;
+            challengeId = challenge.id;
+          }
+          const {error:verifyError} = await client.auth.mfa.verify({factorId:pendingMfaFactorId,challengeId,code:input.value.trim()});
           if (verifyError) throw verifyError;
           pendingMfaFactorId = '';
+          pendingMfaChallengeId = '';
           input.value = '';
           // MFA verification updates the session asynchronously in some client flows.
           // Confirm the active JWT is AAL2 before routing away from the challenge page.
@@ -342,7 +431,7 @@
           setStatus('Two-factor authentication successful. Signing you in…');
           await renderSession();
         } catch (error) {
-          setStatus(error.message || 'That code could not be verified. Check your authenticator and try again.', true);
+          setStatus(error.message || 'That code could not be verified. Check your authenticator or phone and try again.', true);
           input.select();
         } finally { button.disabled = false; }
       });
@@ -389,6 +478,12 @@
         document.getElementById('email-mfa-challenge').hidden = true;
         setMode('login');
         await renderSession();
+      });
+      document.getElementById('mfa-use-phone').addEventListener('click', async event => {
+        event.currentTarget.disabled = true;
+        try { await startPhoneMfaChallenge(); }
+        catch (error) { setStatus(error.message || 'Could not send an SMS verification code.', true); }
+        finally { event.currentTarget.disabled = false; }
       });
       document.getElementById('mfa-cancel').addEventListener('click', async () => {
         sessionStorage.removeItem(passkeySessionKey);
