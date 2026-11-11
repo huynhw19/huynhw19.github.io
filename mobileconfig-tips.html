@@ -54,7 +54,10 @@
           if(!data?.answer)throw new Error(data?.error||'The assistant returned no answer.');
           showMessage(data.answer);
         }catch(error){
-          const message=error?.context?.json?.error||error?.message||'Something went wrong. Please try again.';
+          let message=error?.message||'Something went wrong. Please try again.';
+          if(error?.context&&typeof error.context.json==='function'){
+            try{const detail=await error.context.json();if(detail?.error)message=detail.error;}catch{}
+          }
           showMessage(message+' If this continues, contact the site owner.',true);
         }finally{
           askButton.disabled=false;askButton.textContent='Get AI guidance';
