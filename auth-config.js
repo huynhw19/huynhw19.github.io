@@ -343,7 +343,10 @@ window.CONFIGKIT_AUTH = {
           setTimeout(async () => {
             try {
               const {data, error} = await client.functions.invoke('email-2fa', {body:{action:'status'}});
-              if (error || !data?.enabled || data.verified) return;
+              const emailNeedsVerification = !error && data?.enabled && !data.verified;
+              const {data: recovery, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
+              const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recovery.verified;
+              if (!emailNeedsVerification && !recoveryNeedsVerification) return;
               const {data: assurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
               if (assurance?.currentLevel === 'aal2') return;
               const currentPage = window.location.pathname.split('/').pop();
