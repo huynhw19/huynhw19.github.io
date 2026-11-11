@@ -31,6 +31,21 @@
           <button type="submit" id="save-profile">Save profile</button>
         </form>
       </section>
+      <section class="card" aria-labelledby="visibility-title">
+        <h2 id="visibility-title">Profile visibility</h2>
+        <p class="muted">Choose whether your community profile appears in ConfigKit member discovery. Public profiles are visible to signed-in ConfigKit members only; private profiles are hidden from discovery and remain visible to you.</p>
+        <form id="visibility-form">
+          <div class="field">
+            <label for="profile-visibility">Who can discover your profile?</label>
+            <select id="profile-visibility" name="visibility">
+              <option value="public">Public — visible to signed-in members</option>
+              <option value="private">Private — hidden from member discovery</option>
+            </select>
+          </div>
+          <button id="save-visibility" type="submit">Save visibility</button>
+          <p id="visibility-help" class="muted" role="status" aria-live="polite">Loading your current visibility…</p>
+        </form>
+      </section>
       <section class="card" aria-labelledby="security-title">
         <h2 id="security-title">Email and password</h2>
         <p class="muted">Update the email address and password used to sign in to your ConfigKit account.</p>
@@ -618,6 +633,65 @@
       };
       accountTypeInput.addEventListener('change', updateProfileFields);
       updateProfileFields();
+
+      // Community visibility is stored in the community_profiles table and
+      // enforced by its RLS policy; "public" means signed-in ConfigKit members.
+      const visibilityForm = document.getElementById('visibility-form');
+      const visibilitySelect = document.getElementById('profile-visibility');
+      const visibilityHelp = document.getElementById('visibility-help');
+      const visibilityButton = document.getElementById('save-visibility');
+      let communityProfileAvailable = false;
+      try {
+        const {data:communityProfile, error:communityProfileError} = await client
+          .from('community_profiles')
+          .select('user_id,is_discoverable')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (communityProfileError) throw communityProfileError;
+        communityProfileAvailable = !!communityProfile;
+        visibilitySelect.value = communityProfile?.is_discoverable === false ? 'private' : 'public';
+        visibilityHelp.textContent = communityProfile
+          ? 'Your current visibility is loaded.'
+          : 'Your community profile has not been created yet. Save to create it.';
+      } catch (error) {
+        visibilitySelect.disabled = true;
+        visibilityButton.disabled = true;
+        visibilityHelp.textContent = 'Could not load profile visibility. Please refresh and try again.';
+        console.warn('Could not load community profile visibility:', error);
+      }
+      visibilityForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const isDiscoverable = visibilitySelect.value === 'public';
+        visibilityButton.disabled = true;
+        visibilityHelp.textContent = 'Saving visibility…';
+        try {
+          let result;
+          if (communityProfileAvailable) {
+            result = await client.from('community_profiles')
+              .update({is_discoverable:isDiscoverable, updated_at:new Date().toISOString()})
+              .eq('user_id', user.id);
+          } else {
+            const fallbackName = displayNameInput.value.trim() || metadata.display_name || metadata.full_name || metadata.name || 'ConfigKit member';
+            result = await client.from('community_profiles').insert({
+              user_id:user.id,
+              display_name:fallbackName.slice(0,80),
+              avatar_url:metadata.avatar_url || metadata.picture || null,
+              is_discoverable:isDiscoverable
+            });
+            if (!result.error) communityProfileAvailable = true;
+          }
+          if (result.error) throw result.error;
+          visibilityHelp.textContent = isDiscoverable
+            ? 'Saved. Your profile is discoverable by signed-in ConfigKit members.'
+            : 'Saved. Your profile is private and hidden from member discovery.';
+          setStatus('Profile visibility saved.');
+        } catch (error) {
+          visibilityHelp.textContent = 'Could not save visibility. Please try again.';
+          setStatus(`Could not save profile visibility: ${error.message || 'Please try again.'}`, true);
+        } finally {
+          visibilityButton.disabled = false;
+        }
+      });
 
       const identityList = user.identities || [];
       if (!identityList.length) {
