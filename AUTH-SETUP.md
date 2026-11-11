@@ -50,8 +50,25 @@ Phone-number sign-in and phone-based multi-factor authentication (SMS MFA) have 
 
 This is a website-interface change only. It does not delete or modify phone numbers or phone MFA factors already stored in Supabase Auth. Those existing records remain in Supabase and may still be subject to the project's Auth configuration and database policies. The website does not provide controls to inspect, enroll, remove, or use those phone factors. Do not assume an existing phone factor can be used to complete sign-in through this website.
 
-## 6. Test
+## 6. Configure one-time authenticator recovery codes
 
-Deploy the site, open `login.html`, and test each provider in a private browser window. Test email 2FA by enabling it in account settings, signing out, signing in again, and verifying both the emailed code and one-time link. Confirm that direct Supabase Data API requests remain blocked until verification. The Supabase project must allow the exact callback URL. First successful provider sign-in creates an account; subsequent sign-ins use the same identity. Review provider/Supabase account-linking and email-confirmation settings before launch.
+ConfigKit provides a separate recovery-code backup for users who have enabled authenticator-app TOTP. It generates 10 random 128-bit codes. Each code can be redeemed once after the user completes their primary email/password or provider sign-in; it is not a password and cannot create a primary session by itself.
 
-This adds authentication only. The site currently has no backend storage or account-specific profile features. Supabase and the identity providers process authentication data under their own privacy terms. Update the site's privacy policy accordingly before inviting users.
+1. Confirm the Supabase database migrations `add_secure_totp_recovery_codes` and `secure_recovery_code_status_and_revoke` are applied.
+2. Confirm the `recovery-codes` Edge Function is active with JWT verification enabled. It uses the existing Supabase project URL, publishable key, and server-side service-role/secret key environment. Never put the service-role/secret key in this repository or browser code.
+3. A signed-in user completes a second-factor check, then opens **Account settings → Authenticator recovery codes** and generates a set. Generation requires a verified TOTP factor and a trusted session.
+4. Save the displayed codes in a password manager or other secure offline location. The codes are shown only once. Replacing the set invalidates every unused code in the previous set; users can also revoke the set.
+5. During sign-in, after the primary credential is accepted, users can enter one recovery code instead of a TOTP challenge. A successful redemption is single-use and authorizes only that Supabase session for up to eight hours.
+
+Security properties:
+- Each code contains 128 bits of cryptographically secure randomness. Only SHA-256 hashes are stored; raw codes are returned once at generation and are never logged.
+- Redemption is performed server-side and atomically marks a code as used. Replays fail. Attempts are limited to 10 per session per 15-minute window.
+- Recovery-code records and verification sessions live in the private database schema, with service-role-only RPC access. The browser cannot insert hashes or mark itself verified.
+- Restrictive RLS policies accept a native AAL2 session, a verified email-2FA session, or a server-issued recovery-code session while recovery codes are enabled.
+- Recovery codes are a backup second factor only. They do not bypass the primary sign-in step. Users should keep a fresh TOTP factor enrolled and replace codes if they may have been exposed.
+
+## 7. Test
+
+Deploy the site, open `login.html`, and test each provider in a private browser window. Test email 2FA by enabling it in account settings, signing out, signing in again, and verifying both the emailed code and one-time link. Test recovery codes by enabling TOTP, generating a set in Account settings, saving the codes, signing out, and using one code after the primary sign-in step. Confirm that the remaining count decreases, that a used code is rejected on replay, and that protected Data API requests remain blocked for an unverified session. Also test normal TOTP sign-in after recovery codes have been enabled. The Supabase project must allow the exact callback URL. First successful provider sign-in creates an account; subsequent sign-ins use the same identity. Review provider/Supabase account-linking and email-confirmation settings before launch.
+
+Supabase and the identity providers process authentication data under their own privacy terms. Other ConfigKit features may also store account-related data in Supabase. Update the site's privacy policy accordingly before inviting users.
