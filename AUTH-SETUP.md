@@ -43,7 +43,28 @@ Users enable the email factor from **Account settings → Email verification as 
 
 A one-time email link requires the user to be signed in to the same ConfigKit account in the browser where the link is opened. The link can verify another active session for that account, but it cannot create a signed-in session by itself.
 
-## 5. Test
+
+## 5. Configure phone sign-in and SMS backup authentication
+
+The site supports two separate phone flows:
+
+- Phone sign-in: a registered user enters their phone number, receives a one-time SMS, and verifies it to sign in without a password.
+- Phone MFA backup: a signed-in user enrolls and verifies a phone factor in Account settings. At the next sign-in, they can choose SMS instead of their TOTP authenticator as the second factor.
+
+These are native Supabase Auth flows. They require a real SMS provider; frontend code cannot send SMS by itself.
+
+1. In Supabase Dashboard, open Authentication → Sign In / Providers → Phone (the exact menu label may vary) and enable phone sign-in.
+2. Configure a supported SMS provider such as Twilio, Twilio Verify, MessageBird, or Vonage. Enter its credentials only in the Supabase Dashboard; never add them to GitHub or auth-config.js.
+3. In Authentication → Multi-Factor Authentication, enable Phone enrollment and verification. Phone MFA uses the same SMS provider as phone sign-in.
+4. Set a suitable SMS OTP expiry and rate limits. Monitor usage because SMS has per-message costs.
+5. In Authentication → URL Configuration, allow https://huynhw19.github.io/login.html and set the site's homepage as the Site URL.
+6. Test with a real phone number in E.164 format (for example +61412345678). Test phone sign-in and phone MFA separately.
+
+The phone login form is for existing phone-verified accounts (shouldCreateUser:false). A user who wants phone sign-in must first have a verified phone number on their Supabase account. Phone MFA enrollment is performed after sign-in from Account settings → Phone as a backup two-factor method.
+
+Security note: SMS is susceptible to SIM-swap and number-porting attacks. Treat it as a convenient fallback, not as strong as a passkey or authenticator app. Keep TOTP/passkeys available and never display or store SMS OTP values in application logs.
+
+## 6. Test
 
 Deploy the site, open `login.html`, and test each provider in a private browser window. Test email 2FA by enabling it in account settings, signing out, signing in again, and verifying both the emailed code and one-time link. Confirm that direct Supabase Data API requests remain blocked until verification. The Supabase project must allow the exact callback URL. First successful provider sign-in creates an account; subsequent sign-ins use the same identity. Review provider/Supabase account-linking and email-confirmation settings before launch.
 
