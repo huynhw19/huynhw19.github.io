@@ -44,7 +44,7 @@
         <button class="text-button" id="resetPassword" type="button">Forgot password?</button>
         <div class="form-actions"><button class="provider" id="emailSubmit" type="submit">Log in with email</button></div>
       </form>
-            <section class="education-note" aria-labelledby="phone-login-title" style="margin-top:18px">
+            <section id="phone-login-section" class="education-note" aria-labelledby="phone-login-title" style="margin-top:18px">
         <h2 id="phone-login-title">Sign in with your phone</h2>
         <p class="muted">Use a verified phone number and a one-time SMS code. Enter the number in international E.164 format, for example +61412345678.</p>
         <div class="field"><label for="phone-login-number">Phone number</label><input id="phone-login-number" type="tel" autocomplete="tel" inputmode="tel" placeholder="+61412345678" maxlength="16"></div>
@@ -300,6 +300,7 @@
             const {data: availableFactors} = await client.auth.mfa.listFactors();
             document.getElementById('email-mfa-use-totp').hidden = !(availableFactors?.totp || []).some(factor => factor.status === 'verified');
             form.hidden = true;
+            document.getElementById('phone-login-section').hidden = true;
             document.querySelector('.tabs').hidden = true;
             document.querySelector('.divider').hidden = true;
             document.querySelectorAll('.providers').forEach(node => node.hidden = true);
@@ -371,6 +372,7 @@
           emailMfaUseTotp = false;
           document.getElementById('mfa-code').value = '';
           account.hidden = true; signout.hidden = true; form.hidden = false;
+          document.getElementById('phone-login-section').hidden = false;
           document.querySelector('.tabs').hidden = false;
           document.querySelector('.divider').hidden = false;
           document.querySelectorAll('.providers').forEach(node => node.hidden = false);
