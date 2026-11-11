@@ -20,7 +20,7 @@
       <a href="examples.html">Examples</a>
       <a href="groups.html">Your groups</a>
       <a href="community.html">Community</a>
-      <a href="#about-configkit">About ConfigKit</a>
+      <a id="about-nav-link" href="#about-configkit" hidden>About ConfigKit</a>
       <a href="account-settings.html">Account settings</a>
       <a href="account-docs.html">Account Help</a>
       <a id="family-nav-link" href="family-dashboard.html" hidden>Family dashboard</a>
@@ -124,7 +124,7 @@
           const {data, error} = await client.auth.getSession();
           if (error) throw error;
           if (!data.session) {
-            dashboard.hidden = true; signout.hidden = true; setStatus('You are signed out. ');
+            dashboard.hidden = true; signout.hidden = true; document.getElementById('about-nav-link').hidden = true; setStatus('You are signed out. ');
             const link = document.createElement('a'); link.href = 'login.html'; link.textContent = 'Go to sign in'; status.append(link); return;
           }
           // A passkey sign-in is accepted as the primary factor for this tab.
@@ -169,7 +169,7 @@
           document.getElementById('work-getting-started').hidden = !isWork;
           document.getElementById('enterprise-dashboard-card').hidden = !isEnterprise;
           document.getElementById('developer-dashboard-card').hidden = type !== 'developer';
-          status.hidden = true; dashboard.hidden = false; signout.hidden = false;
+          status.hidden = true; dashboard.hidden = false; signout.hidden = false; document.getElementById('about-nav-link').hidden = false;
         } catch (error) { setStatus(error.message || 'Could not check your sign-in. Please refresh and try again.', true); }
       }
       signout.addEventListener('click', async () => {
