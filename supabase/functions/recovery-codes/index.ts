@@ -49,7 +49,7 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "Method not allowed." }, 405);
   try {
     const authorization = req.headers.get("authorization") ?? "";
-    const match = authorization.match(/^Bearer\\s+(.+)$/i);
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
     if (!match) return json({ error: "Sign in before using recovery codes." }, 401);
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const publishableKey = resolveNamedKey("SUPABASE_ANON_KEY", "SUPABASE_PUBLISHABLE_KEYS");
