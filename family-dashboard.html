@@ -89,13 +89,14 @@
         if(!name){say('Enter the child’s name.',true);return;}
         if(age!==null&&(!Number.isInteger(age)||age<0||age>17)){say('Age must be between 0 and 17.',true);return;}
         const record={child_name:name,age_years:age,grade:field('child-grade').value.trim(),notes:field('child-notes').value.trim()};
-        say(editingId?'Saving changes…':'Creating child profile…');save.disabled=true;
+        const wasEditing = editingId !== null;
+        say(wasEditing?'Saving changes…':'Creating child profile…');save.disabled=true;
         const result=editingId
           ? await client.from('family_children').update(record).eq('id',editingId).eq('parent_id',userId)
           : await client.from('family_children').insert({...record,parent_id:userId});
         save.disabled=false;
         if(result.error){say(result.error.message || 'Could not save the child profile.',true);return;}
-        reset();say(editingId?'Child profile updated.':'Child profile created.');
+        reset();say(wasEditing?'Child profile updated.':'Child profile created.');
         await loadChildren();
       });
       async function init(){
