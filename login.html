@@ -132,7 +132,7 @@
       if (pendingEmail2FALink) callbackUrlObject.searchParams.set('email_2fa_token', pendingEmail2FALink);
       const callbackUrl = callbackUrlObject.href;
       const accountIntentKey = 'configkit_account_oauth_intent';
-      const passkeySessionKey = 'configkit_passkey_session_user';
+      const isPasskeySession = userId => window.CONFIGKIT_PASSKEY_SESSION?.has(userId) === true;\n      const clearPasskeySession = () => window.CONFIGKIT_PASSKEY_SESSION?.clear();
       function selectedMetadata() {
         const type = accountType.value;
         const metadata = {account_type:type};
@@ -216,10 +216,10 @@
           // A successful passkey ceremony is the primary sign-in for this tab.
           // Record only the user id, never a credential or token.
           if (passkeyPrimaryPending) {
-            sessionStorage.setItem(passkeySessionKey, data.session.user.id);
+            window.CONFIGKIT_PASSKEY_SESSION?.mark(data.session.user.id);
             passkeyPrimaryPending = false;
           }
-          const passkeySession = sessionStorage.getItem(passkeySessionKey) === data.session.user.id;
+          const passkeySession = isPasskeySession(data.session.user.id);
           const tokenParams = new URLSearchParams(window.location.search);
           const emailLinkToken = tokenParams.get('email_2fa_token');
           if (emailLinkToken) {
@@ -270,7 +270,7 @@
           }
           emailChallengeSent = false;
           document.getElementById('email-mfa-challenge').hidden = true;
-          if (!emailMfa.verified && !recoveryCodes.verified && (!passkeySession || recoveryCodes.enabled) &&
+          if (!emailMfa.verified && !recoveryCodes.verified && !passkeySession &&
               assurance.currentLevel !== 'aal2' &&
               (assurance.nextLevel === 'aal2' || recoveryCodes.enabled)) {
             const {data: factorData, error: factorError} = await client.auth.mfa.listFactors();
@@ -329,7 +329,7 @@
         }
       }
       async function startOAuth(provider) {
-        sessionStorage.removeItem(passkeySessionKey);
+        clearPasskeySession();
         setStatus(`Connecting to ${provider === 'azure' ? 'Microsoft' : 'GitHub'}…`);
         setBusy(true);
         try {
@@ -378,7 +378,7 @@
         } finally { button.disabled = false; }
       });
       document.getElementById('mfa-recovery-cancel').addEventListener('click', async () => {
-        sessionStorage.removeItem(passkeySessionKey);
+        clearPasskeySession();
         const {error} = await client.auth.signOut({scope:'local'});
         if (error) { setStatus('Could not cancel sign-in. Please try again.', true); return; }
         document.getElementById('mfa-recovery-code').value = '';
@@ -471,7 +471,7 @@
         document.getElementById('mfa-recovery-code').focus();
       });
       document.getElementById('email-mfa-cancel').addEventListener('click', async () => {
-        sessionStorage.removeItem(passkeySessionKey);
+        clearPasskeySession();
         const {error} = await client.auth.signOut({scope:'local'});
         if (error) { setStatus('Could not cancel sign-in. Please try again.', true); return; }
         emailChallengeSent = false;
@@ -481,7 +481,7 @@
         await renderSession();
       });
       document.getElementById('mfa-cancel').addEventListener('click', async () => {
-        sessionStorage.removeItem(passkeySessionKey);
+        clearPasskeySession();
         const {error} = await client.auth.signOut({scope:'local'});
         if (error) { setStatus('Could not cancel sign-in. Please try again.', true); return; }
         pendingMfaFactorId = '';
@@ -496,7 +496,7 @@
       form.addEventListener('submit', async event => {
         event.preventDefault();
         if (!form.reportValidity()) return;
-        sessionStorage.removeItem(passkeySessionKey);
+        clearPasskeySession();
         setBusy(true);
         setStatus(mode === 'signup' ? 'Creating your account…' : 'Logging in…');
         try {
@@ -553,7 +553,7 @@
       github.addEventListener('click', () => startOAuth('github'));
       microsoft.addEventListener('click', () => startOAuth('azure'));
       signout.addEventListener('click', async () => {
-        sessionStorage.removeItem(passkeySessionKey);
+        clearPasskeySession();
         signout.disabled = true;
         const {error} = await client.auth.signOut({scope:'local'});
         signout.disabled = false;
