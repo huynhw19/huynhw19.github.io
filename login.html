@@ -61,7 +61,7 @@
         <button class="provider secondary" id="microsoft" type="button" disabled aria-describedby="microsoftHelp">Microsoft sign-in unavailable</button>
       </div>
       <p class="muted fine-print" id="microsoftHelp">Microsoft sign-in and sign-up need an Azure app registration (client ID and secret) configured by a Microsoft Entra administrator. This site cannot create or bypass those credentials. Use email/password or GitHub for now.</p>
-      <div class="providers"><button class="provider" id="passkeyLogin" type="button">Sign in with a passkey</button></div>
+      <div class="providers"><button class="provider" id="passkeyLogin" type="button">Sign in / unlock with a passkey</button></div>
       <p class="status" id="status" role="status" aria-live="polite">Checking sign-in configuration…</p>
       <section id="mfa-challenge" class="education-note" hidden aria-labelledby="mfa-title">
         <h2 id="mfa-title">Two-factor authentication</h2>
@@ -330,12 +330,23 @@
               return;
             }
           }
-          // A fresh, fully verified sign-in is the only way to clear an account lock.
-          const {error:unlockError} = await client.rpc('unlock_my_account');
-          if (unlockError) {
-            setStatus('You signed in, but the account is still locked. Please sign in again to unlock it.', true);
-            await client.auth.signOut({scope:'local'});
+          // Only attempt the privileged unlock when the account is actually locked.
+          // A normal, older persisted session must not be treated as a failed unlock:
+          // unlock_my_account intentionally requires a recent authentication event.
+          const {data: accountIsLocked, error: lockStatusError} = await client.rpc('is_my_account_locked');
+          if (lockStatusError) {
+            setStatus('We could not verify your account status. Please refresh and try again. If this continues, contact support. (' + (lockStatusError.message || 'Account status check failed') + ')', true);
             return;
+          }
+          if (accountIsLocked === true) {
+            const {error:unlockError} = await client.rpc('unlock_my_account');
+            if (unlockError) {
+              setStatus('Your account is locked and needs a fresh sign-in. Sign out, then use your password, provider, or passkey to verify it. (' + (unlockError.message || 'Unlock verification failed') + ')', true);
+              await client.auth.signOut({scope:'local'});
+              clearPasskeySession();
+              return;
+            }
+            setStatus('Your account has been unlocked successfully.');
           }
           if (!redirecting) { redirecting = true; window.location.replace(postLoginDestination); }
         } else {
