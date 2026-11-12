@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A colourful, family-friendly cooking game with 5,000 creative food challenges for kids.">
+<title>Cooking Creator — Kids Zone</title>
+<style>
+:root{color-scheme:light;--ink:#26324a;--muted:#68738a;--purple:#6654c8;--line:#e5e8f2;--paper:#fffaf1}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#fff4e8,#fff0f6 52%,#edf7ff);color:var(--ink);font:16px/1.55 ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif}
+header,main,footer{width:min(100% - 30px,1000px);margin:auto}header{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:1rem 0;border-bottom:1px solid #e9dfe3}a{color:#5543b1;font-weight:800}
+main{padding:1.5rem 0 3rem}.hero,.panel,.challenge{background:#fff;border:1px solid var(--line);border-radius:1.25rem;box-shadow:0 12px 30px #28345a12;padding:clamp(1rem,3vw,1.6rem);margin:1rem 0}
+.hero{background:linear-gradient(120deg,#fff,#fff0df 55%,#f5edff)}.eyebrow{display:inline-block;padding:.25rem .7rem;border-radius:99px;background:#ffe3c7;color:#8b4c1e;font-weight:850;font-size:.9rem}
+h1{font-size:clamp(2rem,6vw,3.5rem);line-height:1.1;margin:.5rem 0}h2{margin:.1rem 0 .5rem}.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:.7rem}.food{border:2px solid #eee8f5;border-radius:1rem;padding:.85rem;background:#fffdfb}.food label{display:flex;gap:.55rem;align-items:center;font-weight:750;cursor:pointer}.food input{width:1.2rem;height:1.2rem;accent-color:var(--purple)}
+button{font:inherit;font-weight:800;border:0;border-radius:.8rem;padding:.75rem 1rem;background:var(--purple);color:white;cursor:pointer}button.secondary{background:#eeeaff;color:#49399d}button:disabled{opacity:.55;cursor:not-allowed}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #a99df5;outline-offset:3px}
+.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}.challenge{background:linear-gradient(135deg,#fff,#f5f2ff)}.big{font-size:1.2rem;font-weight:850}.badge{display:inline-block;padding:.25rem .65rem;border-radius:99px;background:#e4f7e9;color:#27613a;font-weight:800}.result{min-height:1.7rem;font-weight:800;color:#5140ae}.steps{padding-left:1.3rem}.steps li{margin:.45rem 0}.steps li.done{text-decoration:line-through;color:#66816b}.progress{height:12px;background:#eceaf4;border-radius:99px;overflow:hidden}.progress>div{height:100%;width:0;background:#56a878;transition:width .2s}
+footer{padding:1rem 0 2rem;color:var(--muted)}@media(max-width:520px){header{flex-direction:column}}
+</style>
+</head>
+<body>
+<header><a href="kids-zone.html">← Back to Kids Zone</a><span>🍓 ConfigKit Kids · Cooking Creator</span></header>
+<main>
+<section class="hero"><span class="eyebrow">🥕 Mix • Make • Imagine</span><h1>Little Chef Cooking Creator! 👩‍🍳</h1>
+<p>Welcome to your pretend kitchen! Explore <strong>5,000 cooking challenges</strong>, choose ingredients and build a colourful recipe idea.</p>
+<p class="muted">This is a pretend-play game. It does not use real ovens, knives or hot equipment. Ask a grown-up before preparing or tasting real food, and let them handle cooking and sharp tools.</p>
+<div class="actions"><button id="newChallenge">🎲 Give me a new challenge</button><button class="secondary" id="reset">Start over</button></div>
+</section>
+<section class="challenge" aria-live="polite"><span class="badge" id="challengeNumber">Challenge 1 of 5,000</span><h2 id="challengeTitle">Rainbow Picnic Plate 🌈</h2><p class="big" id="challengePrompt">Can you invent a colourful snack plate?</p><p id="challengeHint" class="muted">Choose at least three ingredients that fit your challenge.</p></section>
+<section class="panel"><h2>🧺 Choose your ingredients</h2><p class="muted">Pick at least three. There are no wrong creative ideas!</p><div class="grid" id="ingredients">
+<div class="food"><label><input type="checkbox" value="🍓 Strawberries">🍓 Strawberries</label></div><div class="food"><label><input type="checkbox" value="🍌 Banana">🍌 Banana</label></div><div class="food"><label><input type="checkbox" value="🫐 Blueberries">🫐 Blueberries</label></div><div class="food"><label><input type="checkbox" value="🍎 Apple">🍎 Apple</label></div><div class="food"><label><input type="checkbox" value="🥕 Carrot">🥕 Carrot</label></div><div class="food"><label><input type="checkbox" value="🥒 Cucumber">🥒 Cucumber</label></div><div class="food"><label><input type="checkbox" value="🧀 Cheese">🧀 Cheese</label></div><div class="food"><label><input type="checkbox" value="🥑 Avocado">🥑 Avocado</label></div><div class="food"><label><input type="checkbox" value="🍞 Toast">🍞 Toast</label></div><div class="food"><label><input type="checkbox" value="🥣 Yogurt">🥣 Yogurt</label></div><div class="food"><label><input type="checkbox" value="🌽 Corn">🌽 Corn</label></div><div class="food"><label><input type="checkbox" value="🍅 Tomato">🍅 Tomato</label></div><div class="food"><label><input type="checkbox" value="🥬 Lettuce">🥬 Lettuce</label></div><div class="food"><label><input type="checkbox" value="🍚 Rice">🍚 Rice</label></div><div class="food"><label><input type="checkbox" value="🫘 Beans">🫘 Beans</label></div><div class="food"><label><input type="checkbox" value="🍍 Pineapple">🍍 Pineapple</label></div>
+</div><div class="actions"><button id="makeRecipe">✨ Create my recipe</button></div><p class="result" id="ingredientResult" role="status" aria-live="polite">Your kitchen is ready!</p></section>
+<section class="panel"><h2>📖 My recipe card</h2><p><strong>Recipe name:</strong> <span id="recipeName">Waiting for your idea…</span></p><p><strong>Ingredients:</strong> <span id="recipeIngredients">Choose ingredients above.</span></p><h3>Safe pretend-play steps</h3><ol class="steps" id="recipeSteps"><li>Choose your ingredients.</li><li>Imagine how they could look on a plate.</li><li>Give your creation a fun name.</li></ol><div class="progress" aria-label="Recipe steps progress"><div id="progressFill"></div></div><p class="muted" id="stepCount">0 of 3 steps complete</p><div class="actions"><button class="secondary" id="nextStep">Next step ✓</button><button class="secondary" id="saveIdea">Save my idea on this device</button></div><p class="result" id="saveResult" role="status" aria-live="polite"></p></section>
+<section class="panel"><h2>⭐ Chef's mini quiz</h2><p id="quizQuestion" class="big">What should you do before helping prepare real food?</p><div class="actions" id="quizOptions"><button class="secondary" data-answer="adult">Ask a grown-up</button><button class="secondary" data-answer="alone">Do everything alone</button><button class="secondary" data-answer="rush">Rush without washing hands</button></div><p class="result" id="quizResult" role="status" aria-live="polite"></p></section>
+</main>
+<footer>Made for curious little chefs. Be creative, be kind, and cook real food only with a grown-up's help.</footer>
+<script>
+(()=>{
+const prompts=[
+["Rainbow Picnic Plate 🌈","Invent a colourful snack plate using at least three colours."],
+["Cosy Breakfast Bowl ☀️","Imagine a breakfast bowl that gives someone a happy start."],
+["Under-the-Sea Snack 🐠","Create a snack inspired by the colours of the ocean."],
+["Crunchy Garden Wrap 🌱","Design a pretend wrap packed with garden colours."],
+["Fruit Party Surprise 🎉","Invent a fruity treat for a pretend celebration."],
+["Superhero Lunch 🦸","Make up a lunch that gives your superhero energy."],
+["Funny Face Toast 😄","Design a silly face using food shapes and colours."],
+["Picnic for a Penguin 🐧","Create a pretend picnic that a friendly penguin would love."],
+["Tiny Chef's Special 🍽️","Invent a special dish for your own little café."],
+["Kindness Cup 🧡","Imagine a snack you would share with someone you care about."]
+];
+const styles=["rainbow","crunchy","sunny","cosy","colourful","garden-fresh","silly","superhero","party","ocean"];
+const foods=["strawberry","banana","blueberry","apple","carrot","cucumber","cheese","avocado","toast","yogurt"];
+const extras=["for a picnic","for a celebration","for a friendly dragon","for a teddy-bear café","for a sunny day"];
+const total=5000;
+let challenge=1,step=0,recipe=null,quizDone=false;
+const $=id=>document.getElementById(id);
+function challengeAt(n){const a=prompts[(n-1)%prompts.length];const s=styles[Math.floor((n-1)/10)%styles.length];const f=foods[Math.floor((n-1)/100)%foods.length];const e=extras[Math.floor((n-1)/1000)%extras.length];return {title:a[0],prompt:a[1],hint:"Bonus idea: include something "+s+" and imagine using "+f+" "+e+"."};}
+function showChallenge(){const c=challengeAt(challenge);$("challengeNumber").textContent="Challenge "+challenge.toLocaleString()+" of 5,000";$("challengeTitle").textContent=c.title;$("challengePrompt").textContent=c.prompt;$("challengeHint").textContent=c.hint;}
+function clearRecipe(){recipe=null;step=0;$("recipeName").textContent="Waiting for your idea…";$("recipeIngredients").textContent="Choose ingredients above.";$("recipeSteps").replaceChildren(...["Choose your ingredients.","Imagine how they could look on a plate.","Give your creation a fun name."].map(t=>{const li=document.createElement("li");li.textContent=t;return li;}));$("progressFill").style.width="0%";$("stepCount").textContent="0 of 3 steps complete";$("ingredientResult").textContent="Your kitchen is ready!";$("saveResult").textContent="";}
+function newChallenge(){challenge=challenge%total+1;showChallenge();document.querySelectorAll('#ingredients input').forEach(x=>x.checked=false);clearRecipe();}
+$("newChallenge").addEventListener("click",newChallenge);
+$("reset").addEventListener("click",()=>{challenge=1;showChallenge();document.querySelectorAll('#ingredients input').forEach(x=>x.checked=false);clearRecipe();});
+$("makeRecipe").addEventListener("click",()=>{const chosen=[...document.querySelectorAll('#ingredients input:checked')].map(x=>x.value);if(chosen.length<3){$("ingredientResult").textContent="Pick at least three ingredients first, little chef!";return;}recipe={ingredients:chosen,name:challengeAt(challenge).title.replace(/[🌈☀️🐠🌱🎉🦸😄🐧🍽️🧡]/gu,"").trim()+" Surprise"};$("recipeName").textContent=recipe.name;$("recipeIngredients").textContent=chosen.join(", ");$("ingredientResult").textContent="Fantastic choices! Your pretend recipe is ready.";step=0;updateSteps();});
+function updateSteps(){const lis=$("recipeSteps").querySelectorAll("li");lis.forEach((li,i)=>li.classList.toggle("done",i<step));$("progressFill").style.width=(step/3*100)+"%";$("stepCount").textContent=step+" of 3 steps complete";}
+$("nextStep").addEventListener("click",()=>{if(!recipe){$("ingredientResult").textContent="Create your recipe first!";return;}if(step<3)step++;updateSteps();if(step===3)$("ingredientResult").textContent="You did it! You're a creative kitchen star! ⭐";});
+$("saveIdea").addEventListener("click",()=>{if(!recipe){$("saveResult").textContent="Create a recipe before saving it.";return;}try{const key="configkit-kids-cooking-ideas";const old=JSON.parse(localStorage.getItem(key)||"[]");old.push({name:recipe.name,ingredients:recipe.ingredients,challenge,createdAt:new Date().toISOString()});localStorage.setItem(key,JSON.stringify(old.slice(-50)));$("saveResult").textContent="Your idea is saved on this device!";}catch(e){$("saveResult").textContent="This browser could not save your idea. You can still play!";}});
+$("quizOptions").addEventListener("click",e=>{const b=e.target.closest("button[data-answer]");if(!b)return;$("quizResult").textContent=b.dataset.answer==="adult"?"That's right! Ask a grown-up, wash your hands, and let an adult handle hot or sharp tools. 🌟":"Good try! Always ask a grown-up before preparing real food.";});
+showChallenge();
+})();
+</script>
+</body></html>
