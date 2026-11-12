@@ -49,8 +49,26 @@
  function avatar(node,p){node.replaceChildren();if(p.avatar_url&&/^https:\/\//i.test(p.avatar_url)){const img=document.createElement('img');img.src=p.avatar_url;img.alt='';img.className='avatar';img.referrerPolicy='no-referrer';node.append(img);}else{node.textContent=displayName(p).trim().charAt(0).toUpperCase()||'C';}}
  function goProfile(id){history.pushState({},'',id?'?user='+encodeURIComponent(id):'community.html');renderRoute();}
  async function load(){
-  const session=await client.auth.getSession();if(!session.data.session){window.location.replace('login.html');return;}
+  const session=await client.auth.getSession();if(!session.data.session){window.location.replace('login.html?next=community.html');return;}
   currentUser=session.data.session.user;
+  // Match the database email_2fa_session_gate before issuing any community
+  // queries. The auth-state redirect runs asynchronously and can otherwise
+  // race this page's initial user_follows read/insert.
+  const [emailFactor,recoveryFactor,assuranceResult]=await Promise.all([
+   client.functions.invoke('email-2fa',{body:{action:'status'}}),
+   client.functions.invoke('recovery-codes',{body:{action:'status'}}),
+   client.auth.mfa.getAuthenticatorAssuranceLevel()
+  ]);
+  if(emailFactor.error)throw emailFactor.error;
+  if(recoveryFactor.error)throw recoveryFactor.error;
+  if(assuranceResult.error)throw assuranceResult.error;
+  const emailStatus=emailFactor.data||{},recoveryStatus=recoveryFactor.data||{};
+  const factorEnabled=emailStatus.enabled===true||recoveryStatus.enabled===true;
+  const factorVerified=emailStatus.verified===true||recoveryStatus.verified===true||assuranceResult.data?.currentLevel==='aal2';
+  if(factorEnabled&&!factorVerified){
+   window.location.replace('login.html?next=community.html');
+   return;
+  }
   const meta=currentUser.user_metadata||{};
   const fallback=meta.display_name||meta.full_name||meta.name||meta.preferred_username||'ConfigKit member';
   let own=await client.from('community_profiles').select('*').eq('user_id',currentUser.id).maybeSingle();
