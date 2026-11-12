@@ -39,8 +39,8 @@
 </section>
 <div class="game-search" role="search">
   <label for="game-search">🔎 Find a game</label>
-  <input id="game-search" type="search" placeholder="Search 100,000 games by name or topic…" autocomplete="off">
-  <p id="game-count" class="muted" aria-live="polite">Showing 100,000 games</p>
+  <input id="game-search" type="search" placeholder="Search 10,000 games by name or topic…" autocomplete="off">
+  <p id="game-count" class="muted" aria-live="polite">Showing 10,000 games</p>
 </div>
 <section class="games" aria-label="Games">
 <article class="game"><h2>🧠 Memory Match</h2><p>Find all six matching pairs. Can you remember where they are?</p><div id="memory" class="board memory-board" aria-label="Memory cards"></div><div class="controls"><button id="memory-reset" class="secondary">New game</button></div><p id="memory-result" class="result" aria-live="polite">Find a matching pair!</p></article>
@@ -135,19 +135,18 @@ let targetPair=[];function newTarget(){const a=1+Math.floor(Math.random()*9),b=1
 let treasure=0;function newChests(){treasure=Math.floor(Math.random()*3);const box=document.getElementById('chest-choices');box.replaceChildren();for(let i=0;i<3;i++){const b=document.createElement('button');b.type='button';b.textContent='🎁 Chest '+(i+1);b.addEventListener('click',()=>{document.getElementById('chest-result').textContent=i===treasure?'💎 You found the treasure!':'🙈 Empty chest! Try another shuffle.';});box.append(b);}document.getElementById('chest-result').textContent='Pick a chest!';}document.getElementById('chest-next').addEventListener('click',newChests);newChests();
 
 
-// Build a searchable 100,000-game catalog, but render cards in small batches
-// so mobile browsers do not need to create 100,000 DOM nodes at once.
+// Build a searchable 10,000-game catalog, but render cards in small batches
+// so mobile browsers do not need to create 10,000 DOM nodes at once.
 const gameTypes=[
-  {name:'Number Quest',desc:'Solve a number puzzle',make:n=>{const a=(n*7)%19+2,b=(n*11)%13+1,op=n%3;return op===0?['What is '+a+' + '+b+'?',a+b]:op===1?['What is '+(a+b)+' − '+b+'?',a]:['What is '+a+' × '+(n%8+2)+'?',a*(n%8+2)];}},
-  {name:'Pattern Patrol',desc:'Spot what comes next',make:n=>{const a=n%9+1,step=n%4+2;return ['What comes next: '+a+', '+(a+step)+', '+(a+2*step)+', '+(a+3*step)+', ?',a+4*step];}},
-  {name:'Word Wizard',desc:'Unscramble a word',make:n=>{const words=['planet','garden','silver','rocket','puzzle','orange','turtle','castle','pencil','monkey','flower','window','jungle','button','kitten','dragon'];const w=words[n%words.length];return ['Unscramble: '+w.split('').sort((a,b)=>((a.charCodeAt(0)*(n+3))%17)-((b.charCodeAt(0)*(n+3))%17)).join(' · '),w];}},
-  {name:'Alphabet Ace',desc:'Find the next letter',make:n=>{const i=n%22;return ['What letter comes after '+String.fromCharCode(65+i)+'?',String.fromCharCode(66+i)];}},
-  {name:'Quick Science',desc:'Answer a science question',make:n=>{const qs=[['Which planet is known as the Red Planet?','Mars',['Venus','Mars','Jupiter','Saturn']],['What do plants absorb from sunlight?','Energy',['Sound','Energy','Rain','Soil']],['What is water made of?','Hydrogen and oxygen',['Salt and sugar','Hydrogen and oxygen','Iron and carbon','Helium and neon']],['Which animal is a mammal?','Dolphin',['Shark','Dolphin','Trout','Octopus']]];return qs[n%qs.length];}},
-  {name:'World Wonders',desc:'Explore the world',make:n=>{const qs=[['Which is the largest ocean?','Pacific',['Atlantic','Indian','Pacific','Arctic']],['What is the capital of Japan?','Tokyo',['Seoul','Tokyo','Beijing','Bangkok']],['Which continent is Egypt in?','Africa',['Europe','Asia','Africa','South America']],['Which country has the city of Rome?','Italy',['Spain','Greece','Italy','France']]];return qs[n%qs.length];}},
-  {name:'Logic Lab',desc:'Use your logic skills',make:n=>{const qs=[['How many sides has a hexagon?','6',['5','6','7','8']],['Which number is even?','24',['13','17','21','24']],['What is half of 18?','9',['6','8','9','12']],['Which is the smallest?','0.2',['0.5','0.2','0.8','1.2']]];return qs[n%qs.length];}},
-  {name:'Animal Academy',desc:'Guess the animal',make:n=>{const qs=[['I have eight arms. What am I?','Octopus',['Crab','Octopus','Dolphin','Seal']],['I make honey. What am I?','Bee',['Ant','Bee','Fly','Moth']],['I sleep upside down. What am I?','Bat',['Owl','Bat','Squirrel','Fox']],['I am the fastest land animal.','Cheetah',['Lion','Horse','Cheetah','Leopard']]];return qs[n%qs.length];}},
-  {name:'Shape Shifter',desc:'Think about shapes',make:n=>{const qs=[['How many corners has a triangle?','3',['2','3','4','5']],['Which shape has no corners?','Circle',['Square','Triangle','Circle','Rectangle']],['How many sides has an octagon?','8',['6','7','8','9']],['Which shape has four equal sides?','Square',['Oval','Square','Triangle','Pentagon']]];return qs[n%qs.length];}},
-  {name:'Memory Master',desc:'Remember and reason',make:n=>{const a=n%8+2,b=n%5+1;return ['If you have '+a+' pairs of socks, how many socks is that?',String(a*2),[String(a*2),String(a+b),String(a*3),String(a*2+2)]];}}
+  {name:'Number Quest',desc:'Practise addition, subtraction, multiplication and division',make:n=>{const mode=n%4,a=(n*7)%90+10,b=(n*11)%20+2;if(mode===0)return ['What is '+a+' + '+b+'?',a+b];if(mode===1)return ['What is '+(a+b)+' − '+b+'?',a];if(mode===2)return ['What is '+(n%12+2)+' × '+(n%9+2)+'?',(n%12+2)*(n%9+2)];const divisor=n%9+2,quotient=n%12+2;return ['What is '+(divisor*quotient)+' ÷ '+divisor+'?',quotient];}}},
+  {name:'Pattern Patrol',desc:'Find number and shape patterns',make:n=>{const step=n%12+2,a=n%30+1;return ['What comes next: '+a+', '+(a+step)+', '+(a+2*step)+', '+(a+3*step)+', ?',a+4*step];}},
+  {name:'Word Wizard',desc:'Build vocabulary and spelling skills',make:n=>{const words=['planet','garden','silver','rocket','puzzle','orange','turtle','castle','pencil','monkey','flower','window','jungle','button','kitten','dragon','harvest','journey','curious','whisper','mountain','sunshine','triangle','discover','friendly','adventure','beautiful','remember','important','wonderful'];const w=words[n%words.length],shift=(Math.floor(n/words.length)% (w.length-1))+1;const scrambled=w.slice(shift)+w.slice(0,shift);return ['Rearrange these letters to make a word: '+scrambled.split('').join(' · '),w];}},
+  {name:'Alphabet Ace',desc:'Explore letters, sounds and word order',make:n=>{const i=n%20;const letters=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T'];return ['Which letter comes '+(n%2?'before ':'after ')+letters[i]+'?',letters[(i+(n%2?-1:1)+26)%26];}},
+  {name:'Quick Science',desc:'Discover living things, materials and space',make:n=>{const qs=[['Which planet is known as the Red Planet?','Mars',['Venus','Mars','Jupiter','Saturn']],['Which part of a plant takes in water?','Roots',['Flower','Roots','Fruit','Petals']],['What do bees collect from flowers?','Nectar',['Sand','Nectar','Leaves','Bark']],['Which state of water is ice?','Solid',['Gas','Liquid','Solid','Steam']],['What force pulls objects towards Earth?','Gravity',['Magnetism','Gravity','Friction','Light']],['Which organ helps us breathe?','Lungs',['Heart','Lungs','Stomach','Brain']],['What do plants need for photosynthesis?','Sunlight',['Plastic','Sunlight','Sand only','Metal']],['Which animal is an amphibian?','Frog',['Eagle','Frog','Whale','Lizard']]];return qs[n%qs.length];}},
+  {name:'World Wonders',desc:'Learn about continents, oceans and places',make:n=>{const qs=[['Which is the largest ocean?','Pacific',['Atlantic','Indian','Pacific','Arctic']],['What is the capital of Japan?','Tokyo',['Seoul','Tokyo','Beijing','Bangkok']],['Which continent is Egypt in?','Africa',['Europe','Asia','Africa','South America']],['What is the capital of France?','Paris',['Rome','Madrid','Paris','Lisbon']],['Which imaginary line divides Earth into north and south?','Equator',['Equator','Prime Meridian','Tropic of Cancer','Date Line']],['Which country is famous for the Great Barrier Reef?','Australia',['Australia','Canada','India','Kenya']],['How many continents are commonly taught?','7',['5','6','7','8']]];return qs[n%qs.length];}},
+  {name:'Logic Lab',desc:'Use reasoning, comparisons and problem-solving',make:n=>{const a=n%40+10,b=n%9+2;const qs=[['Which number is even?',[12,15,19,21][n%4].toString(),['12','15','19','21']],['How many sides has a hexagon?','6',['5','6','7','8']],['What is half of '+(b*2)+'?',String(b),[String(b),String(b+1),String(b+3),String(b+5)]],['Which is the smallest number?',String(n%5),[String(n%5+3),String(n%5),String(n%5+6),String(n%5+9)]]];return qs[n%qs.length];}},
+  {name:'Animal Academy',desc:'Explore animal habitats and adaptations',make:n=>{const qs=[['I have eight arms. What am I?','Octopus',['Crab','Octopus','Dolphin','Seal']],['I make honey. What am I?','Bee',['Ant','Bee','Fly','Moth']],['I sleep upside down. What am I?','Bat',['Owl','Bat','Squirrel','Fox']],['I am the fastest land animal.','Cheetah',['Lion','Horse','Cheetah','Leopard']],['Which animal is a mammal that lays eggs?','Platypus',['Koala','Platypus','Dingo','Kangaroo']],['Which habitat is home to a camel?','Desert',['Rainforest','Desert','Coral reef','Arctic']]];return qs[n%qs.length];}},
+  {name:'Shape Shifter',desc:'Recognise shapes, angles and measurement',make:n=>{const qs=[['How many corners has a triangle?','3',['2','3','4','5']],['Which shape has no corners?','Circle',['Square','Triangle','Circle','Rectangle']],['How many sides has an octagon?','8',['6','7','8','9']],['Which shape has four equal sides?','Square',['Oval','Square','Triangle','Pentagon']],['How many degrees are in a right angle?','90',['45','60','90','180']],['How many faces has a cube?','6',['4','6','8','12']]];return qs[n%qs.length];}}
 ];
 const gameGrid=document.querySelector('.games');
 const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count');
@@ -158,7 +157,7 @@ function makeCard(item){
   const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
   const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;
   const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
-  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 100,000';
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 10,000';
   const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
   const challenge=document.createElement('div');challenge.hidden=true;
   const question=document.createElement('p');question.className='mini-question';
@@ -188,7 +187,7 @@ function renderBatch(items,reset=false){
   const next=items.slice(shown,shown+100);next.forEach(item=>gameGrid.append(makeCard(item)));shown+=next.length;
   loadMore.hidden=shown>=items.length;loadMore.textContent='Load '+Math.min(100,items.length-shown)+' more games';
   const staticCount=[...gameGrid.querySelectorAll(':scope > .game:not(.generated-game)')].filter(card=>!card.hidden).length;
-  gameCount.textContent='Showing '+(staticCount+shown).toLocaleString()+' of 100,000 games'+(activeMatches?' matching your search':'');
+  gameCount.textContent='Showing '+(staticCount+shown).toLocaleString()+' of 10,000 games'+(activeMatches?' matching your search':'');
 }
 function filterGames(){
   const query=searchInput.value.trim().toLowerCase();
