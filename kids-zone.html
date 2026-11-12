@@ -63,6 +63,7 @@
 <footer>ConfigKit Kids Zone · Have fun and be kind to yourself and others.</footer>
 <script src="auth-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="family-screen-time.js"></script>
 <script>
 (()=> {
 const status=document.getElementById('status'),zone=document.getElementById('zone'),signout=document.getElementById('signout'),config=window.CONFIGKIT_AUTH||{};const childId=new URLSearchParams(location.search).get('child');if(childId&&/^[0-9a-f-]{36}$/i.test(childId)){document.getElementById('kids-messages-link').href='kids-messages.html?child='+encodeURIComponent(childId);document.getElementById('kids-messages-entry').hidden=false;}
