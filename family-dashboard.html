@@ -93,7 +93,7 @@
       const field = id => document.getElementById(id);
       async function loadChildren() {
         list.replaceChildren();
-        const {data,error} = await client.from('family_children').select('id,child_name,age_years,grade,notes,created_at,child_user_id,messaging_enabled,friend_code').eq('parent_id',userId).order('created_at',{ascending:false});
+        const {data,error} = await client.from('family_children').select('id,child_name,age_years,grade,notes,created_at,child_user_id,messaging_enabled,call_enabled,friend_code').eq('parent_id',userId).order('created_at',{ascending:false});
         if (error) { say(error.message || 'Could not load child profiles.',true); return; }
         if (!data.length) { const p=document.createElement('p'); p.className='muted'; p.textContent='No child profiles yet. Add your first child above.'; list.append(p); await loadKidsApprovals(); return; }
         data.forEach(child => {
