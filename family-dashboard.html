@@ -17,7 +17,7 @@
       <span class="eyebrow">Personal account</span>
       <h1>Family dashboard</h1>
       <p id="account-label" class="muted">Checking your account…</p>
-      <p class="muted">Create private child profiles managed by your signed-in adult account. Each child profile gets its own six-digit PIN for a separate Kids Zone session. Adults control messaging and friend approvals.</p>
+      <p class="muted">Create private child profiles managed by your signed-in adult account. Each child profile has its own six-digit PIN for a separate Kids Messages session. Adults control messaging and friend approvals.</p>
     </section>
     <section class="card" aria-labelledby="getting-started-title">
       <span class="eyebrow">Getting started</span>
@@ -104,7 +104,7 @@
           const edit=document.createElement('button'); edit.type='button'; edit.className='secondary'; edit.textContent='Edit';
           edit.addEventListener('click',()=>{editingId=child.id;field('child-name').value=child.child_name;field('child-age').value=child.age_years ?? '';field('child-grade').value=child.grade || '';field('child-notes').value=child.notes || '';title.textContent='Edit child profile';save.textContent='Save changes';cancel.hidden=false;form.scrollIntoView({behavior:'smooth',block:'start'});});
           const remove=document.createElement('button'); remove.type='button'; remove.className='danger'; remove.textContent='Delete';
-          remove.addEventListener('click',async()=>{if(!window.confirm('Delete the profile for '+child.child_name+'?'))return;const result=await client.from('family_children').delete().eq('id',child.id).eq('parent_id',userId);if(result.error){say(result.error.message,true);return;}say('Child profile deleted.');await loadChildren();});
+          remove.addEventListener('click',async()=>{if(!window.confirm('Delete the profile for '+child.child_name+' and close its child sign-in? This also removes its friend connections and messages.'))return;remove.disabled=true;const result=await client.functions.invoke('kids-messaging',{body:{action:'delete_child_profile',child_id:child.id}});remove.disabled=false;if(result.error||result.data?.error){say(result.data?.error||result.error?.message||'Could not delete child profile.',true);return;}say('Child profile and child sign-in deleted.');await loadChildren();});
           const play=document.createElement('a'); play.href='kids-zone.html?child='+encodeURIComponent(child.id); play.className='button'; play.textContent='Open Kids Zone 🎮'; play.style.marginTop='.6rem';
           const messages=document.createElement('a'); messages.href='kids-messages.html?child='+encodeURIComponent(child.id); messages.className='button'; messages.textContent='Open Kids Messages ✉️'; messages.style.cssText='display:inline-block;margin:.6rem 0 0 .5rem';
           const settings=document.createElement('div'); settings.className='child'; settings.style.marginTop='.8rem';
