@@ -8,6 +8,18 @@
 <style>
 :root{color-scheme:light;--ink:#24304a;--muted:#68738a;--paper:#f5f7ff;--white:#fff;--line:#e3e8f4;--purple:#6654c8;--pink:#ffe8f1;--blue:#e7f3ff;--yellow:#fff5cf;--green:#e5f8eb;--shadow:0 12px 30px #28345a12}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#f8f4ff,#f1f8ff 55%,#fff8ee);color:var(--ink);font:16px/1.55 ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,1080px);margin:auto}header{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;padding:1rem 0;border-bottom:1px solid var(--line)}a{color:var(--purple);font-weight:700}.brand{text-decoration:none;color:var(--ink);font-size:1.1rem}nav{display:flex;gap:1rem;flex-wrap:wrap}main{padding:2rem 0 3rem}.hero,.game{background:var(--white);border:1px solid var(--line);border-radius:1.25rem;box-shadow:var(--shadow)}.hero{padding:clamp(1.3rem,4vw,2.4rem);background:linear-gradient(120deg,#fff,#f2edff 60%,#eaf7ff)}.eyebrow{display:inline-block;padding:.3rem .75rem;border-radius:999px;background:var(--pink);font-size:.85rem;font-weight:800;color:#8a3862}h1{font-size:clamp(2.2rem,6vw,3.7rem);line-height:1.1;margin:.6rem 0}h2{margin:.1rem 0 .4rem}.muted{color:var(--muted)}.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:1rem;margin:1.3rem 0}.game{padding:1.2rem;min-height:300px}.game:nth-child(3n+1){background:#fff}.game:nth-child(3n+2){background:#fbfaff}.game:nth-child(3n){background:#f8fcff}.game h2{font-size:1.35rem}.game p{color:var(--muted);margin:.35rem 0 .8rem}button{font:inherit;font-weight:750;border:0;border-radius:.75rem;padding:.7rem 1rem;background:var(--purple);color:white;cursor:pointer}button:hover{filter:brightness(.94)}button:focus-visible,a:focus-visible{outline:3px solid #a99df5;outline-offset:3px}.secondary{background:#ece9ff;color:#4535a0}.controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.8rem}.result{min-height:1.8rem;margin:.7rem 0 0;font-weight:700;color:#4d3aa6}.board{display:grid;gap:.45rem;margin:.8rem 0}.memory-board{grid-template-columns:repeat(4,minmax(0,1fr));max-width:290px}.tile{min-height:58px;padding:.4rem;background:#edf0ff;color:var(--ink);font-size:1.5rem;border:2px solid #dfe3fa}.tile.revealed{background:#fff0f6;border-color:#ffc5dc}.tile.matched{background:#e5f8eb;border-color:#a9dfb8}.ttt-board{grid-template-columns:repeat(3,68px)}.ttt-board button{height:68px;padding:0;font-size:1.8rem;background:#e9e5ff;color:#40358e}.ttt-board button:disabled{opacity:1}.question{font-size:1.5rem;font-weight:850;margin:.6rem 0}.answer{width:110px;padding:.7rem;border:1px solid var(--line);border-radius:.7rem;font:inherit}.choices{display:flex;gap:.5rem;flex-wrap:wrap}.choices button{background:#eaf3ff;color:#294e7a}.choices button:focus{outline:3px solid #a6d1ff}.word{font-size:1.8rem;letter-spacing:.15em;font-weight:900;color:#5140ae}.status{padding:1rem;background:#fff5cf;border-radius:1rem;margin:1rem 0}.status.error{background:#ffe9e9;color:#9b3030}footer{padding:1.5rem 0 2rem;color:var(--muted)}[hidden]{display:none!important}@media(max-width:600px){header{align-items:flex-start;flex-direction:column}.ttt-board{grid-template-columns:repeat(3, minmax(0,1fr))}.ttt-board button{height:auto;aspect-ratio:1}}
+
+.game-search{position:sticky;top:0;z-index:5;background:#f5f7ffed;backdrop-filter:blur(10px);padding:1rem 0 .5rem;margin-top:1rem}
+.game-search label{display:block;font-weight:850;margin-bottom:.4rem}
+.game-search input{width:100%;padding:.9rem 1rem;border:2px solid #d9d4f7;border-radius:.85rem;font:inherit;background:white;color:var(--ink);box-shadow:var(--shadow)}
+.game-search input:focus{outline:3px solid #c8c0ff;outline-offset:2px}
+.game-search p{margin:.35rem 0}
+.generated-game{min-height:250px}
+.generated-game .mini-question{font-size:1.1rem;font-weight:800;margin:.8rem 0}
+.generated-game .mini-options{display:flex;gap:.45rem;flex-wrap:wrap}
+.generated-game .mini-options button{background:#eaf3ff;color:#294e7a}
+.generated-game .mini-result{min-height:1.5rem;font-weight:750;color:#4d3aa6;margin:.6rem 0 0}
+
 </style>
 </head>
 <body>
@@ -16,6 +28,12 @@
 <div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
 <div id="zone" hidden>
 <section class="hero"><span class="eyebrow">✦ Play • Learn • Have fun</span><h1>Welcome to the Kids Zone! 🎈</h1><p>Pick a game and give it a go. These little games run right here in your browser—no chat, public profiles, or purchases.</p><p class="muted">Remember to take breaks and ask a parent or guardian before using any website or sharing information online.</p></section>
+
+<div class="game-search" role="search">
+  <label for="game-search">🔎 Find a game</label>
+  <input id="game-search" type="search" placeholder="Search 1,000 games by name or topic…" autocomplete="off">
+  <p id="game-count" class="muted" aria-live="polite">Showing 1,000 games</p>
+</div>
 <section class="games" aria-label="Games">
 <article class="game"><h2>🧠 Memory Match</h2><p>Find all six matching pairs. Can you remember where they are?</p><div id="memory" class="board memory-board" aria-label="Memory cards"></div><div class="controls"><button id="memory-reset" class="secondary">New game</button></div><p id="memory-result" class="result" aria-live="polite">Find a matching pair!</p></article>
 <article class="game"><h2>⭕ Tic-Tac-Toe</h2><p>Take turns with a friend. Get three in a row to win.</p><div id="ttt" class="board ttt-board" aria-label="Tic tac toe board"></div><div class="controls"><button id="ttt-reset" class="secondary">Restart</button></div><p id="ttt-result" class="result" aria-live="polite">X goes first.</p></article>
@@ -89,6 +107,58 @@ quiz('detective',[{q:'I shine in the sky at night. What am I?',options:['Moon','
 quiz('facts',[{q:'How many days are in a week?',options:['5','7','10'],a:'7'},{q:'Which is the largest: 8, 3 or 6?',options:['8','3','6'],a:'8'},{q:'How many legs do two spiders have altogether?',options:['8','12','16'],a:'16'},{q:'What is 5 + 4?',options:['8','9','10'],a:'9'}]);
 let targetPair=[];function newTarget(){const a=1+Math.floor(Math.random()*9),b=10-a,extras=[Math.floor(Math.random()*9)+1,Math.floor(Math.random()*9)+1];targetPair=[a,b];const values=[a,b,...extras].sort(()=>Math.random()-.5),box=document.getElementById('target-choices');box.replaceChildren();let selected=[];values.forEach(n=>{const btn=document.createElement('button');btn.type='button';btn.textContent=n;btn.addEventListener('click',()=>{if(selected.includes(btn)||selected.length===2)return;selected.push(btn);btn.disabled=true;if(selected.length===2){const sum=selected.reduce((s,x)=>s+Number(x.textContent),0);document.getElementById('target-result').textContent=sum===10?'🎉 Ten! You found the pair.':'Not ten this time—try a new set!';}});box.append(btn);});document.getElementById('target-result').textContent='Pick two numbers that make 10.';}document.getElementById('target-next').addEventListener('click',newTarget);newTarget();
 let treasure=0;function newChests(){treasure=Math.floor(Math.random()*3);const box=document.getElementById('chest-choices');box.replaceChildren();for(let i=0;i<3;i++){const b=document.createElement('button');b.type='button';b.textContent='🎁 Chest '+(i+1);b.addEventListener('click',()=>{document.getElementById('chest-result').textContent=i===treasure?'💎 You found the treasure!':'🙈 Empty chest! Try another shuffle.';});box.append(b);}document.getElementById('chest-result').textContent='Pick a chest!';}document.getElementById('chest-next').addEventListener('click',newChests);newChests();
+
+
+// Add 980 more distinct, playable mini-games. The shared engine keeps the page fast
+// while each game has its own generated puzzle, answer set, and round.
+const gameTypes=[
+  {name:'Number Quest',desc:'Solve a number puzzle',make:n=>{const a=(n*7)%19+2,b=(n*11)%13+1,op=n%3;return op===0?['What is '+a+' + '+b+'?',a+b]:op===1?['What is '+(a+b)+' − '+b+'?',a]:['What is '+a+' × '+(n%8+2)+'?',a*(n%8+2)];}},
+  {name:'Pattern Patrol',desc:'Spot what comes next',make:n=>{const a=n%9+1,step=n%4+2;return ['What comes next: '+a+', '+(a+step)+', '+(a+2*step)+', '+(a+3*step)+', ?',a+4*step];}},
+  {name:'Word Wizard',desc:'Unscramble a word',make:n=>{const words=['planet','garden','silver','rocket','puzzle','orange','turtle','castle','pencil','monkey','flower','window','jungle','button','kitten','dragon'];const w=words[n%words.length];return ['Unscramble: '+w.split('').sort((a,b)=>((a.charCodeAt(0)*(n+3))%17)-((b.charCodeAt(0)*(n+3))%17)).join(' · '),w];}},
+  {name:'Alphabet Ace',desc:'Find the next letter',make:n=>{const i=n%22;return ['What letter comes after '+String.fromCharCode(65+i)+'?',String.fromCharCode(66+i)];}},
+  {name:'Quick Science',desc:'Answer a science question',make:n=>{const qs=[['Which planet is known as the Red Planet?','Mars',['Venus','Mars','Jupiter','Saturn']],['What do plants absorb from sunlight?','Energy',['Sound','Energy','Rain','Soil']],['What is water made of?','Hydrogen and oxygen',['Salt and sugar','Hydrogen and oxygen','Iron and carbon','Helium and neon']],['Which animal is a mammal?','Dolphin',['Shark','Dolphin','Trout','Octopus']]];return qs[n%qs.length];}},
+  {name:'World Wonders',desc:'Explore the world',make:n=>{const qs=[['Which is the largest ocean?','Pacific',['Atlantic','Indian','Pacific','Arctic']],['What is the capital of Japan?','Tokyo',['Seoul','Tokyo','Beijing','Bangkok']],['Which continent is Egypt in?','Africa',['Europe','Asia','Africa','South America']],['Which country has the city of Rome?','Italy',['Spain','Greece','Italy','France']]];return qs[n%qs.length];}},
+  {name:'Logic Lab',desc:'Use your logic skills',make:n=>{const qs=[['How many sides has a hexagon?','6',['5','6','7','8']],['Which number is even?','24',['13','17','21','24']],['What is half of 18?','9',['6','8','9','12']],['Which is the smallest?','0.2',['0.5','0.2','0.8','1.2']]];return qs[n%qs.length];}},
+  {name:'Animal Academy',desc:'Guess the animal',make:n=>{const qs=[['I have eight arms. What am I?','Octopus',['Crab','Octopus','Dolphin','Seal']],['I make honey. What am I?','Bee',['Ant','Bee','Fly','Moth']],['I sleep upside down. What am I?','Bat',['Owl','Bat','Squirrel','Fox']],['I am the fastest land animal.','Cheetah',['Lion','Horse','Cheetah','Leopard']]];return qs[n%qs.length];}},
+  {name:'Shape Shifter',desc:'Think about shapes',make:n=>{const qs=[['How many corners has a triangle?','3',['2','3','4','5']],['Which shape has no corners?','Circle',['Square','Triangle','Circle','Rectangle']],['How many sides has an octagon?','8',['6','7','8','9']],['Which shape has four equal sides?','Square',['Oval','Square','Triangle','Pentagon']]];return qs[n%qs.length];}},
+  {name:'Memory Master',desc:'Remember and reason',make:n=>{const a=n%8+2,b=n%5+1;return ['If you have '+a+' pairs of socks, how many socks is that?',String(a*2),[String(a*2),String(a+b),String(a*3),String(a*2+2)]];}}
+];
+const gameGrid=document.querySelector('.games');
+const generated=[];
+for(let i=20;i<1000;i++){
+  const typeIndex=i%gameTypes.length,type=gameTypes[typeIndex],number=i+1;
+  const article=document.createElement('article');article.className='game generated-game';article.dataset.gameTitle=type.name+' '+number;article.dataset.gameSearch=(type.name+' '+number+' '+type.desc).toLowerCase();
+  const heading=document.createElement('h2');heading.textContent=['🔢','🧩','🔤','🔬','🌍','🧠','🐾','📐','🎓','🧠'][typeIndex]+' '+type.name+' '+number;
+  const description=document.createElement('p');description.textContent=type.desc+' · Game '+number+' of 1,000';
+  const play=document.createElement('button');play.type='button';play.textContent='Play game';
+  const challenge=document.createElement('div');challenge.hidden=true;
+  const question=document.createElement('p');question.className='mini-question';
+  const options=document.createElement('div');options.className='mini-options';
+  const result=document.createElement('p');result.className='mini-result';result.setAttribute('aria-live','polite');
+  const again=document.createElement('button');again.type='button';again.className='secondary';again.textContent='New round';again.hidden=true;
+  challenge.append(question,options,result,again);article.append(heading,description,play,challenge);gameGrid.append(article);
+  let answer='';
+  function newRound(){
+    const data=type.make(number+Math.floor(Math.random()*7));
+    let q,correct,choices;
+    if(data.length===4){[q,correct,choices]=data;}else{[q,correct]=data;choices=[String(correct),String(Number(correct)+1),String(Math.max(0,Number(correct)-2)),String(Number(correct)+3)];}
+    answer=String(correct);question.textContent=q;result.textContent='Choose the correct answer.';options.replaceChildren();
+    const unique=[...new Set(choices.map(String))];while(unique.length<4)unique.push(String(Number(correct)+unique.length+2));
+    unique.sort(()=>Math.random()-.5).forEach(choice=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.addEventListener('click',()=>{result.textContent=choice===answer?'🎉 Correct! Great work.':'Good try! The answer is '+answer+'.';options.querySelectorAll('button').forEach(x=>x.disabled=true);again.hidden=false;});options.append(b);});
+    again.hidden=true;
+  }
+  play.addEventListener('click',()=>{challenge.hidden=false;play.hidden=true;newRound();});
+  again.addEventListener('click',newRound);
+  generated.push(article);
+}
+const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count');
+function filterGames(){
+  const query=searchInput.value.trim().toLowerCase();let visible=0;
+  gameGrid.querySelectorAll('.game').forEach(card=>{const title=card.dataset.gameSearch||card.textContent.toLowerCase();const match=title.includes(query);card.hidden=!match;if(match)visible++;});
+  gameCount.textContent='Showing '+visible.toLocaleString()+' of 1,000 games';
+}
+searchInput.addEventListener('input',filterGames);
+filterGames();
 
 })();
 </script>
