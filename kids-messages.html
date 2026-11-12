@@ -29,6 +29,7 @@
 (()=> {
  const config=window.CONFIGKIT_AUTH||{},status=document.getElementById('status'),pinPanel=document.getElementById('pin-panel'),app=document.getElementById('app');
  const childId=new URLSearchParams(location.search).get('child');
+ document.getElementById("pin")?.addEventListener("input",e=>{e.target.value=e.target.value.replace(/[^0-9]/g,"").slice(0,6);});
  const say=(msg,error=false)=>{status.hidden=false;status.classList.toggle('error',error);status.textContent=msg;};
  if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){say('Sign-in is not configured. Please contact the site owner.',true);return;}
  if(!childId||!/^[0-9a-f-]{36}$/i.test(childId)){say('Open this page from your Family Dashboard so the correct child profile is selected.',true);return;}
