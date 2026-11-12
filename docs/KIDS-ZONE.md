@@ -33,7 +33,7 @@ Story writing is session-only: the Studio does not save children's free-text wri
 
 ## Social Interaction Studio
 
-The Social Interaction Studio provides short, age-banded pretend-play scenarios for ages 3–5, 6–8 and 9–10. Children can practise:
+The Social Interaction Studio provides 168 short, age-banded pretend-play scenarios for ages 3–5, 6–8 and 9–10 (8 original scenarios plus 160 additional scenarios). Children can practise:
 - Making friends and including others.
 - Listening, sharing and taking turns.
 - Recognising feelings and responding with empathy.
