@@ -128,7 +128,7 @@
         const usageResult=await client.from('family_screen_time_usage').select('child_id,seconds_used,last_seen_at,current_activity').eq('usage_date',todayUtc).in('child_id',data.map(child=>child.id));
         if(usageResult.error) say('Screen-time activity could not be loaded: '+usageResult.error.message,true);
         const usageByChild=new Map((usageResult.data||[]).map(row=>[row.child_id,row]));
-        data.forEach(child => {
+        for (const child of data) {
           const article=document.createElement('article'); article.className='child';
           const heading=document.createElement('h3'); heading.textContent=child.child_name;
           const details=document.createElement('p'); details.className='muted';
@@ -181,7 +181,7 @@
           screenLimitButton.addEventListener('click',async()=>{const raw=screenLimitInput.value.trim();const limit=raw===''?null:Number(raw);if(limit!==null&&(!Number.isInteger(limit)||limit<1||limit>1440)){say('Enter a daily limit between 1 and 1,440 minutes, or leave it blank for no limit.',true);return;}screenLimitButton.disabled=true;const result=await client.from('family_children').update({daily_screen_time_limit_minutes:limit}).eq('id',child.id).eq('parent_id',userId);screenLimitButton.disabled=false;if(result.error){say('Could not save screen-time limit: '+result.error.message,true);return;}say(limit===null?'Daily screen-time limit removed for '+child.child_name+'.':'Daily screen-time limit set to '+limit+' minutes for '+child.child_name+'.');child.daily_screen_time_limit_minutes=limit;limitSummary.textContent=limit?'Daily limit: '+limit+' minutes':'No daily limit set';});
           settings.append(pinLabel,pinButton,messagingLabel,mediaLabel,callingLabel,screenLimitLabel,screenLimitButton,code,note);
           article.append(actions,play,messages,settings);list.append(article);
-        });
+        }
         await loadKidsApprovals();
       }
       document.getElementById('refresh-children')?.addEventListener('click',()=>loadChildren());
