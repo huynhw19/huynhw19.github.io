@@ -98,7 +98,7 @@
           edit.addEventListener('click',()=>{editingId=child.id;field('child-name').value=child.child_name;field('child-age').value=child.age_years ?? '';field('child-grade').value=child.grade || '';field('child-notes').value=child.notes || '';title.textContent='Edit child profile';save.textContent='Save changes';cancel.hidden=false;form.scrollIntoView({behavior:'smooth',block:'start'});});
           const remove=document.createElement('button'); remove.type='button'; remove.className='danger'; remove.textContent='Delete';
           remove.addEventListener('click',async()=>{if(!window.confirm('Delete the profile for '+child.child_name+'?'))return;const result=await client.from('family_children').delete().eq('id',child.id).eq('parent_id',userId);if(result.error){say(result.error.message,true);return;}say('Child profile deleted.');await loadChildren();});
-          actions.append(edit,remove);article.append(actions);list.append(article);
+          const play=document.createElement('a'); play.href='kids-zone.html?child='+encodeURIComponent(child.id); play.className='button'; play.textContent='Open Kids Zone 🎮'; play.style.marginTop='.6rem'; article.append(actions,play);list.append(article);
         });
       }
       cancel.addEventListener('click',()=>{reset();say('Editing cancelled.');});
