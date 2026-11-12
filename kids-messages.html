@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Private messages with parent-approved friends in ConfigKit Kids.">
+<title>Kids Messages — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#24304a;--muted:#68738a;--line:#e3e8f4;--purple:#6654c8;--paper:#f5f7ff;--white:#fff;--red:#9b3030}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#f8f4ff,#f1f8ff 55%,#fff8ee);color:var(--ink);font:16px/1.55 system-ui,sans-serif}header,main,footer{width:min(100% - 32px,920px);margin:auto}header{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:1rem 0;border-bottom:1px solid var(--line)}a{color:var(--purple);font-weight:700}main{padding:1.5rem 0 3rem}.card{background:var(--white);border:1px solid var(--line);border-radius:1rem;padding:1.2rem;margin:1rem 0;box-shadow:0 10px 28px #28345a10}.muted{color:var(--muted)}h1{margin:.2rem 0 .6rem;font-size:clamp(2rem,5vw,2.8rem)}h2{margin:.2rem 0 .6rem}label{display:block;font-weight:700;margin:.6rem 0}input,textarea,select,button{font:inherit}input,textarea,select{width:100%;padding:.75rem;border:1px solid #cbd3e6;border-radius:.65rem;background:white;color:var(--ink)}button{border:0;border-radius:.65rem;padding:.7rem 1rem;background:var(--purple);color:white;font-weight:750;cursor:pointer;margin:.25rem .25rem .25rem 0}button.secondary{background:#ece9ff;color:#4535a0}button.danger{background:#9b3030}.layout{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(0,1.5fr);gap:1rem}.friend{display:block;width:100%;text-align:left;background:#f3f1ff;color:var(--ink);border:1px solid var(--line);margin:.4rem 0}.friend.active{border:2px solid var(--purple)}.friend small{display:block;color:var(--muted);font-weight:500}.messages{min-height:250px;max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:.7rem;padding:.7rem;background:#fbfcff}.bubble{max-width:85%;padding:.65rem .8rem;margin:.45rem 0;border-radius:.8rem;background:#edf0ff;overflow-wrap:anywhere}.bubble.mine{margin-left:auto;background:#eee8ff}.bubble small{display:block;color:var(--muted);font-size:.75rem}.row{display:flex;gap:.5rem;align-items:center}.row input{flex:1}.status{padding:.8rem;background:#fff5cf;border-radius:.7rem;margin:.8rem 0}.status.error{background:#ffe9e9;color:var(--red)}[hidden]{display:none!important}footer{padding:1rem 0 2rem;color:var(--muted)}@media(max-width:650px){.layout{grid-template-columns:1fr}.messages{max-height:360px}}
+</style>
+</head>
+<body>
+<header><a href="kids-zone.html">← Kids Zone</a><nav><a href="family-dashboard.html">Family dashboard</a> · <a href="dashboard.html">Dashboard</a></nav></header>
+<main>
+<section class="card"><span class="muted">✉️ ConfigKit Kids</span><h1>Kids Messages</h1><p class="muted">You can message only friends approved by both families. Be kind, and never share your address, passwords, school details, or private information.</p><div id="status" class="status" role="status" aria-live="polite">Checking this child profile…</div></section>
+<section id="pin-panel" class="card" hidden><h2>Welcome! 🔐</h2><p>Ask your parent or guardian to sign in, then enter the six-digit PIN they set for this profile.</p><form id="pin-form"><label for="pin">Your six-digit PIN</label><input id="pin" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required><button id="pin-submit" type="submit">Unlock Kids Messages</button></form></section>
+<section id="app" hidden>
+<section class="card"><h2>Hello, <span id="child-name">friend</span>! 👋</h2><p class="muted">Your parent or guardian has enabled messaging. Friend requests need approval from both families before you can chat.</p>
+<form id="friend-form"><label for="friend-code">Add a friend using their family’s friend code</label><div class="row"><input id="friend-code" maxlength="10" placeholder="10-character code" autocomplete="off" required><button type="submit">Send request</button></div></form><p id="friend-result" class="muted" aria-live="polite"></p></section>
+<div class="layout">
+<section class="card"><h2>Your friends</h2><div id="friends"><p class="muted">Loading…</p></div></section>
+<section class="card"><h2 id="chat-title">Choose a friend</h2><p id="chat-hint" class="muted">You can chat after both families approve.</p><div id="messages" class="messages" aria-live="polite"></div><form id="message-form" hidden><label for="message">Your message (up to 1,000 characters)</label><textarea id="message" rows="3" maxlength="1000" required></textarea><button type="submit">Send message</button><button id="report-button" type="button" class="secondary">Report a concern</button><button id="remove-button" type="button" class="danger">Remove friend</button></form></section>
+</div>
+</section>
+</main>
+<footer>ConfigKit Kids · If a message makes you uncomfortable, stop chatting and tell a trusted adult.</footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=> {
+ const config=window.CONFIGKIT_AUTH||{},status=document.getElementById('status'),pinPanel=document.getElementById('pin-panel'),app=document.getElementById('app');
+ const childId=new URLSearchParams(location.search).get('child');
+ const say=(msg,error=false)=>{status.hidden=false;status.classList.toggle('error',error);status.textContent=msg;};
+ if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){say('Sign-in is not configured. Please contact the site owner.',true);return;}
+ if(!childId||!/^[0-9a-f-]{36}$/i.test(childId)){say('Open this page from your Family Dashboard so the correct child profile is selected.',true);return;}
+ const parent=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ const child=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{storageKey:'configkit-kid-'+childId,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+ let profile=null,selected=null,friends=[];
+ async function childStatus(){
+   const {data,error}=await child.functions.invoke('kids-messaging',{body:{action:'child_status'}});
+   if(error||data?.error)throw new Error(data?.error||error?.message||'Could not verify child profile.');
+   if(data.child_id!==childId)throw new Error('This PIN belongs to a different child profile.');
+   profile=data;document.getElementById('child-name').textContent=data.child_name;
+   pinPanel.hidden=true;app.hidden=false;status.hidden=true;await loadFriends();
+ }
+ async function init(){
+   const {data:sessionData}=await child.auth.getSession();
+   if(sessionData.session){try{await childStatus();return;}catch(e){await child.auth.signOut({scope:'local'});}}
+   const {data:parentData,error}=await parent.auth.getSession();
+   if(error||!parentData.session){location.replace('login.html?next='+encodeURIComponent('kids-messages.html?child='+childId));return;}
+   pinPanel.hidden=false;say('Enter the PIN set by your parent or guardian.');
+ }
+ document.getElementById('pin-form').addEventListener('submit',async e=>{
+   e.preventDefault();const pin=document.getElementById('pin').value.trim(),button=document.getElementById('pin-submit');
+   if(!/^\d{6}$/.test(pin)){say('Enter all six digits.',true);return;}
+   button.disabled=true;say('Checking PIN…');
+   const {data,error}=await parent.functions.invoke('kids-messaging',{body:{action:'verify_pin',child_id:childId,pin}});
+   if(error||data?.error){say(data?.error||error?.message||'Could not verify PIN.',true);button.disabled=false;return;}
+   const {error:verifyError}=await child.auth.verifyOtp({token_hash:data.token_hash,type:'magiclink'});
+   button.disabled=false;document.getElementById('pin').value='';
+   if(verifyError){say('Could not start child session. Ask your parent to reset the PIN and try again.',true);return;}
+   try{await childStatus();}catch(err){say(err.message||'Could not open this profile.',true);}
+ });
+ async function loadFriends(){
+   const {data,error}=await child.rpc('kids_my_friends');
+   const holder=document.getElementById('friends');holder.replaceChildren();
+   if(error){holder.textContent='Could not load friends. Please refresh.';return;}
+   friends=data||[];
+   if(!friends.length){const p=document.createElement('p');p.className='muted';p.textContent='No friends yet. Ask a parent to share a friend code with another family.';holder.append(p);return;}
+   friends.forEach(f=>{
+     const b=document.createElement('button');b.type='button';b.className='friend'+(selected?.friendship_id===f.friendship_id?' active':'');
+     b.append(document.createTextNode(f.friend_name));
+     const small=document.createElement('small');
+     small.textContent=f.status==='approved'&&f.my_parent_approved&&f.friend_parent_approved?'Approved friend':f.status==='pending'?'Waiting for both families to approve':'Not available to chat';
+     b.append(small);
+     if(f.status==='approved'&&f.my_parent_approved&&f.friend_parent_approved)b.addEventListener('click',()=>openChat(f));
+     else b.disabled=true;
+     holder.append(b);
+   });
+ }
+ async function openChat(friend){
+   selected=friend;document.getElementById('chat-title').textContent=friend.friend_name;document.getElementById('chat-hint').textContent='Only you and this approved friend can see this conversation.';
+   document.getElementById('message-form').hidden=false;await loadFriends();await loadMessages();
+ }
+ async function loadMessages(){
+   if(!selected)return;const box=document.getElementById('messages');box.replaceChildren();
+   const {data,error}=await child.from('kids_messages').select('id,body,sender_child_id,created_at').eq('friendship_id',selected.friendship_id).order('created_at',{ascending:true}).limit(100);
+   if(error){box.textContent='Messages are unavailable until both families approve.';return;}
+   (data||[]).forEach(m=>{const b=document.createElement('div');b.className='bubble'+(m.sender_child_id===profile.child_id?' mine':'');b.textContent=m.body;const small=document.createElement('small');small.textContent=new Date(m.created_at).toLocaleString();b.append(small);box.append(b);});
+   box.scrollTop=box.scrollHeight;
+ }
+ document.getElementById('friend-form').addEventListener('submit',async e=>{
+   e.preventDefault();const code=document.getElementById('friend-code').value.trim().toUpperCase();const result=document.getElementById('friend-result');
+   const {data,error}=await child.functions.invoke('kids-messaging',{body:{action:'send_friend_request',friend_code:code}});
+   result.textContent=error?(error.message||'Could not send request.'):data?.error||'Friend request sent. Both families need to approve it.';
+   if(!error&&!data?.error){document.getElementById('friend-code').value='';await loadFriends();}
+ });
+ document.getElementById('message-form').addEventListener('submit',async e=>{
+   e.preventDefault();if(!selected)return;const input=document.getElementById('message'),body=input.value.trim();if(!body)return;
+   const {error}=await child.from('kids_messages').insert({friendship_id:selected.friendship_id,sender_child_id:profile.child_id,body});
+   if(error){say('Could not send this message. Check that both families still allow messaging.',true);return;}
+   input.value='';await loadMessages();
+ });
+ document.getElementById('report-button').addEventListener('click',async()=>{
+   if(!selected)return;const reason=prompt('What is the concern? Type one: unkind, personal_information, bullying, something_else','something_else');
+   if(!reason)return;const allowed=['unkind','personal_information','bullying','something_else'];if(!allowed.includes(reason)){say('Please use one of the listed report reasons.',true);return;}
+   const details=prompt('Add a short note for your parent or guardian (optional).','')||'';
+   const {error}=await child.from('kids_safety_reports').insert({friendship_id:selected.friendship_id,reporter_child_id:profile.child_id,reason,details:details.slice(0,1000)});
+   say(error?'Could not send report. Tell your parent or guardian directly.':'Report sent to the families. Tell a trusted adult too.',!!error);
+ });
+ document.getElementById('remove-button').addEventListener('click',async()=>{
+   if(!selected||!confirm('Remove this friend? You will no longer be able to chat.'))return;
+   const {data,error}=await child.functions.invoke('kids-messaging',{body:{action:'remove_friendship',friendship_id:selected.friendship_id}});
+   if(error||data?.error){say(data?.error||error?.message||'Could not remove friend.',true);return;}
+   selected=null;document.getElementById('message-form').hidden=true;document.getElementById('messages').replaceChildren();document.getElementById('chat-title').textContent='Choose a friend';await loadFriends();
+ });
+ init().catch(e=>say(e.message||'Could not open Kids Messages.',true));
+})();
+</script>
+</body></html>
