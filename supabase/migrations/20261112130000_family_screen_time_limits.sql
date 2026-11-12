@@ -77,7 +77,7 @@ begin
           end,
         last_seen_at = pg_catalog.now(),
         current_activity = excluded.current_activity
-  returning public.family_screen_time_usage.seconds_used
+  returning usage.seconds_used
        into v_used;
 
   return query select
