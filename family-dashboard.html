@@ -17,7 +17,7 @@
       <span class="eyebrow">Personal account</span>
       <h1>Family dashboard</h1>
       <p id="account-label" class="muted">Checking your account…</p>
-      <p class="muted">Create private child profiles managed by your signed-in adult account. Each child profile has its own six-digit PIN for a separate Kids Messages session. Adults control messaging and friend approvals.</p>
+      <p class="muted">Create private child profiles managed by your signed-in adult account. Each child profile has its own six-digit PIN for a separate Kids Messages session. Adults control messaging and friend approvals. Screen Time shows usage inside ConfigKit Kids Zone and Kids Messages only; it cannot monitor other apps on a phone.</p>
     </section>
     <section class="card" aria-labelledby="getting-started-title">
       <span class="eyebrow">Getting started</span>
@@ -54,6 +54,7 @@
     <section class="card" id="children-panel" hidden>
       <h2>Your children</h2>
       <p class="muted">Only your signed-in account can view and manage these records.</p>
+      <button id="refresh-children" type="button" class="secondary">Refresh activity</button>
       <div id="children-list"></div>
     </section>
     <section class="card" id="kids-requests" hidden>
@@ -144,6 +145,7 @@
         });
         await loadKidsApprovals();
       }
+      document.getElementById('refresh-children')?.addEventListener('click',()=>loadChildren());
       async function loadKidsApprovals(){
         requestsPanel.hidden=false;requestsList.replaceChildren();reportsList.replaceChildren();
         let approvalCount=0;
