@@ -6,7 +6,7 @@
 <meta name="description" content="A private, browser-based photo booth for the Kids Zone.">
 <title>Kids Photo Booth — ConfigKit</title>
 <style>
-:root{font-family:ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif;color:#24304a;background:#f5f7ff}*{box-sizing:border-box}body{margin:0;line-height:1.5}header,main,footer{width:min(100% - 2rem,900px);margin:auto}header{padding:1rem 0;border-bottom:1px solid #e3e8f4}a{color:#5946b8;font-weight:750}main{padding:1.5rem 0 3rem}.panel{background:white;border:1px solid #e3e8f4;border-radius:1.2rem;padding:clamp(1rem,4vw,2rem);box-shadow:0 12px 30px #28345a12;margin:1rem 0}h1{font-size:clamp(2rem,6vw,3rem);line-height:1.1;margin:.5rem 0}.muted{color:#68738a}.stage{background:#182334;border-radius:1rem;overflow:hidden;aspect-ratio:4/3;display:grid;place-items:center;color:white}.stage video,.stage img{width:100%;height:100%;object-fit:contain}.stage img{background:#182334}.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin:1rem 0}button{border:0;border-radius:.75rem;padding:.8rem 1rem;background:#6654c8;color:white;font:inherit;font-weight:800;cursor:pointer}button.secondary{background:#ece9ff;color:#4535a0}button:disabled{opacity:.5;cursor:not-allowed}.notice{padding:1rem;border-radius:.8rem;background:#fff5cf}.status{min-height:1.5rem;font-weight:700;color:#4535a0}footer{padding:1rem 0 2rem;color:#68738a}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+:root{font-family:ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif;color:#24304a;background:#f5f7ff}*{box-sizing:border-box}body{margin:0;line-height:1.5}header,main,footer{width:min(100% - 2rem,900px);margin:auto}header{padding:1rem 0;border-bottom:1px solid #e3e8f4}a{color:#5946b8;font-weight:750}main{padding:1.5rem 0 3rem}.panel{background:white;border:1px solid #e3e8f4;border-radius:1.2rem;padding:clamp(1rem,4vw,2rem);box-shadow:0 12px 30px #28345a12;margin:1rem 0}h1{font-size:clamp(2rem,6vw,3rem);line-height:1.1;margin:.5rem 0}.muted{color:#68738a}.stage{background:#182334;border-radius:1rem;overflow:hidden;aspect-ratio:4/3;display:grid;place-items:center;color:white}.stage video,.stage img{width:100%;height:100%;object-fit:contain}.stage img{background:#182334}.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin:1rem 0}button{border:0;border-radius:.75rem;padding:.8rem 1rem;background:#6654c8;color:white;font:inherit;font-weight:800;cursor:pointer}button.secondary{background:#ece9ff;color:#4535a0}button:disabled{opacity:.5;cursor:not-allowed}.notice{padding:1rem;border-radius:.8rem;background:#fff5cf}.status{min-height:1.5rem;font-weight:700;color:#4535a0}footer{padding:1rem 0 2rem;color:#68738a}.stage{position:relative}.stage.frame-rainbow{box-shadow:inset 0 0 0 12px #ff8ab5,inset 0 0 0 20px #ffd66b,inset 0 0 0 28px #8bd8ff}.stage.frame-stars{box-shadow:inset 0 0 0 16px #f5d76e,inset 0 0 0 23px #fff2bd}.stage.frame-hearts{box-shadow:inset 0 0 0 16px #ff9ebc,inset 0 0 0 23px #ffe2ed}.stage.frame-mint{box-shadow:inset 0 0 0 16px #79c9a4,inset 0 0 0 23px #d8f7e8}.photo-sticker{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:flex-end;padding:1rem;font-size:clamp(2rem,9vw,5rem);pointer-events:none;text-shadow:0 2px 8px #0008}.decoration-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin:1rem 0}.decoration-tools label{display:block;font-weight:800;margin-bottom:.4rem}.decoration-tools select{width:100%;padding:.75rem;border:2px solid #d9d4f7;border-radius:.75rem;font:inherit;background:white;color:#24304a}.sticker-choices{display:flex;gap:.45rem;flex-wrap:wrap}.sticker-choices button{font-size:1.35rem;padding:.55rem .8rem;background:#eaf3ff;color:#294e7a}.sticker-choices button[aria-pressed=true]{outline:3px solid #6654c8;background:#ece9ff}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
@@ -20,7 +20,7 @@
 <div class="stage" style="margin-top:1rem">
 <video id="camera" autoplay playsinline muted aria-label="Live camera preview" hidden></video>
 <img id="preview" alt="Your captured photo will appear here" hidden>
-<p id="placeholder">Camera preview will appear here 📷</p>
+<p id="placeholder">Camera preview will appear here 📷</p><div id="sticker-overlay" class="photo-sticker" hidden aria-hidden="true"></div>
 </div>
 <p id="status" class="status" role="status" aria-live="polite">Camera is off.</p>
 <div class="actions">
@@ -30,6 +30,11 @@
 <button id="save" type="button" class="secondary" disabled>Save photo</button>
 <button id="stop" type="button" class="secondary" disabled>Turn camera off</button>
 </div>
+<div class="decoration-tools" aria-label="Photo decorations">
+<div><label for="frame">Choose a photo frame</label><select id="frame"><option value="none">No frame</option><option value="rainbow">🌈 Rainbow frame</option><option value="stars">⭐ Starry gold frame</option><option value="hearts">💗 Heart pink frame</option><option value="mint">🌿 Mint frame</option></select></div>
+<div><label>Choose a silly sticker</label><div class="sticker-choices" role="group" aria-label="Choose a sticker">
+<button type="button" data-sticker="" aria-pressed="true" aria-label="No sticker">✖️</button><button type="button" data-sticker="😎" aria-pressed="false" aria-label="Cool sunglasses">😎</button><button type="button" data-sticker="🤠" aria-pressed="false" aria-label="Cowboy hat">🤠</button><button type="button" data-sticker="👑" aria-pressed="false" aria-label="Crown">👑</button><button type="button" data-sticker="🐱" aria-pressed="false" aria-label="Cat">🐱</button><button type="button" data-sticker="🦄" aria-pressed="false" aria-label="Unicorn">🦄</button><button type="button" data-sticker="🎉" aria-pressed="false" aria-label="Party">🎉</button>
+</div></div></div>
 <p class="muted">Tip: Good lighting makes a clearer picture. The camera needs your browser's permission and works on a secure connection (HTTPS). Saving downloads the photo to this device only.</p>
 </section>
 </main>
@@ -38,6 +43,12 @@
 (()=>{
  const video=document.getElementById('camera'),preview=document.getElementById('preview'),placeholder=document.getElementById('placeholder'),status=document.getElementById('status');
  const start=document.getElementById('start'),snap=document.getElementById('snap'),retake=document.getElementById('retake'),save=document.getElementById('save'),stop=document.getElementById('stop');
+ const stage=document.querySelector('.stage'),framePicker=document.getElementById('frame'),stickerOverlay=document.getElementById('sticker-overlay');
+ let selectedSticker='';
+ function updateDecorations(){stage.classList.remove('frame-rainbow','frame-stars','frame-hearts','frame-mint');if(framePicker.value!=='none')stage.classList.add('frame-'+framePicker.value);stickerOverlay.textContent=selectedSticker;stickerOverlay.hidden=!selectedSticker||preview.hidden;document.querySelectorAll('[data-sticker]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sticker===selectedSticker)));}
+ framePicker.addEventListener('change',updateDecorations);
+ document.querySelectorAll('[data-sticker]').forEach(b=>b.addEventListener('click',()=>{selectedSticker=b.dataset.sticker;updateDecorations()}));
+
  let stream=null,photoUrl=null;
  function say(message){status.textContent=message}
  function clearPhoto(){if(photoUrl){URL.revokeObjectURL(photoUrl);photoUrl=null}preview.removeAttribute('src');preview.hidden=true;save.disabled=true;retake.disabled=true}
@@ -55,10 +66,10 @@
   if(!stream||!video.videoWidth){say('Wait for the camera picture to appear, then try again.');return}
   const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;
   canvas.getContext('2d').drawImage(video,0,0);
-  canvas.toBlob(blob=>{if(!blob){say('Sorry, that photo could not be created. Try again.');return}clearPhoto();photoUrl=URL.createObjectURL(blob);preview.src=photoUrl;preview.hidden=false;video.hidden=true;save.disabled=false;retake.disabled=false;say('Photo taken! It stays on this page until you save or leave.');},'image/jpeg',.92);
+  canvas.toBlob(blob=>{if(!blob){say('Sorry, that photo could not be created. Try again.');return}clearPhoto();photoUrl=URL.createObjectURL(blob);preview.src=photoUrl;preview.hidden=false;video.hidden=true;save.disabled=false;retake.disabled=false;updateDecorations();say('Photo taken! Pick a frame or sticker, then save your decorated photo.');},'image/jpeg',.92);
  });
- retake.addEventListener('click',()=>{clearPhoto();video.hidden=false;say('Ready for another photo!')});
- save.addEventListener('click',()=>{if(!photoUrl)return;const a=document.createElement('a');a.href=photoUrl;a.download='my-kids-zone-photo.jpg';document.body.append(a);a.click();a.remove();say('Your photo download has started on this device.')});
+ retake.addEventListener('click',()=>{clearPhoto();video.hidden=false;updateDecorations();say('Ready for another photo!')});
+ save.addEventListener('click',()=>{if(!photoUrl)return;const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);const w=canvas.width,h=canvas.height;const palettes={rainbow:['#ff8ab5','#ffd66b','#8bd8ff'],stars:['#f5d76e','#fff2bd'],hearts:['#ff9ebc','#ffe2ed'],mint:['#79c9a4','#d8f7e8']};const bands=palettes[framePicker.value]||[];bands.forEach((color,i)=>{ctx.strokeStyle=color;ctx.lineWidth=Math.max(10,Math.round(Math.min(w,h)*(.025-i*.006)));ctx.strokeRect(ctx.lineWidth*(i+.5),ctx.lineWidth*(i+.5),w-ctx.lineWidth*(i+1),h-ctx.lineWidth*(i+1));});if(selectedSticker){ctx.save();ctx.textAlign='right';ctx.textBaseline='top';ctx.font=Math.round(Math.min(w,h)*.16)+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';ctx.shadowColor='#0008';ctx.shadowBlur=Math.min(w,h)*.015;ctx.fillText(selectedSticker,w*.94,h*.05);ctx.restore();}canvas.toBlob(blob=>{if(!blob){say('Could not prepare the decorated photo. Please try again.');return}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='my-kids-zone-decorated-photo.jpg';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);say('Your decorated photo download has started on this device.');},'image/jpeg',.94);};img.onerror=()=>say('Could not load the photo for saving. Please take it again.');img.src=photoUrl;});
  stop.addEventListener('click',turnOff);
  window.addEventListener('pagehide',()=>{turnOff();clearPhoto()});
 })();
