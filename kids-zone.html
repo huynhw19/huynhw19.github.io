@@ -20,6 +20,7 @@
 .generated-game .mini-options button{background:#eaf3ff;color:#294e7a}
 .generated-game .mini-result{min-height:1.5rem;font-weight:750;color:#4d3aa6;margin:.6rem 0 0}
 
+.kids-video-section{margin:1.3rem 0;padding:1.25rem;background:#fff;border:1px solid var(--line);border-radius:1.25rem;box-shadow:var(--shadow)}.kids-video-tag{display:inline-block;padding:.25rem .65rem;border-radius:999px;background:var(--green);font-size:.85rem;font-weight:800}.kids-video-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(220px,1fr);gap:1rem}.kids-video-player{aspect-ratio:16/9;background:#17231f;border-radius:.8rem;overflow:hidden;display:grid;place-items:center;color:white}.kids-video-player iframe{width:100%;height:100%;border:0}.kids-video-list{list-style:none;padding:0;margin:0;display:grid;gap:.5rem}.kids-video-list li{padding:.55rem;border:1px solid var(--line);border-radius:.65rem}.kids-video-list button{width:100%;text-align:left;background:#ece9ff;color:#4535a0}@media(max-width:650px){.kids-video-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -29,6 +30,13 @@
 <div id="zone" hidden>
 <section class="hero"><span class="eyebrow">✦ Play • Learn • Have fun</span><h1>Welcome to the Kids Zone! 🎈</h1><p>Pick a game and give it a go. These games run in your browser. For parent-approved chats with friends, open Kids Messages.</p><p class="muted">Remember to take breaks and ask a parent or guardian before using any website or sharing information online.</p><p id="kids-messages-entry" hidden><a id="kids-messages-link" href="#">Open Kids Messages ✉️</a></p></section>
 
+
+<section class="kids-video-section" id="kids-video-library" aria-labelledby="kids-video-heading">
+  <span class="kids-video-tag">Parent-approved videos</span><h2 id="kids-video-heading">📺 My Videos</h2>
+  <p class="muted" id="kids-video-message">Loading videos chosen by your parent…</p>
+  <div class="kids-video-grid"><div><h3 id="kids-video-title">Choose a video</h3><div id="kids-video-player" class="kids-video-player"><p class="muted">Your videos will play here.</p></div></div>
+  <div><h3>My playlist</h3><ul id="kids-video-list" class="kids-video-list"><li class="muted">Loading…</li></ul></div></div>
+</section>
 <div class="game-search" role="search">
   <label for="game-search">🔎 Find a game</label>
   <input id="game-search" type="search" placeholder="Search 100,000 games by name or topic…" autocomplete="off">
@@ -70,7 +78,23 @@ const status=document.getElementById('status'),zone=document.getElementById('zon
 const say=(message,error=false)=>{status.hidden=false;status.classList.toggle('error',error);status.textContent=message;};
 if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){say('Sign-in is not configured. Please contact the site owner.',true);return;}
 const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-async function init(){const {data,error}=await client.auth.getSession();if(error)throw error;if(!data.session){location.replace('login.html?next=kids-zone.html');return;}const {data:assurance,error:assuranceError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();if(assuranceError)throw assuranceError;const passkey=window.CONFIGKIT_PASSKEY_SESSION?.has(data.session.user.id)===true;if(assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'&&!passkey){location.replace('login.html?next=kids-zone.html');return;}status.hidden=true;zone.hidden=false;signout.hidden=false;}
+
+async function loadKidsVideos(userId){
+  const message=document.getElementById('kids-video-message'),list=document.getElementById('kids-video-list'),player=document.getElementById('kids-video-player'),title=document.getElementById('kids-video-title');
+  const profileQuery=client.from('family_children').select('id,child_name').eq('child_user_id',userId);
+  const {data:profiles,error:profileError}=childId&&/^[0-9a-f-]{36}$/i.test(childId)?await profileQuery.eq('id',childId).limit(1):await profileQuery.limit(1);
+  const profile=profiles?.[0];
+  if(profileError||!profile){message.textContent='Parent-approved videos appear here when you are signed in with your own child profile.';list.replaceChildren();const li=document.createElement('li');li.className='muted';li.textContent='No child profile is linked to this sign-in.';list.append(li);return;}
+  const {data:videos,error}=await client.from('kids_approved_videos').select('id,title,youtube_video_id').eq('child_id',profile.id).order('created_at',{ascending:true});
+  if(error){message.textContent='Your playlist could not be loaded. Please ask a parent to check the family dashboard.';return;}
+  message.textContent='These videos were selected by your parent for '+profile.child_name+'.';
+  list.replaceChildren();
+  if(!videos?.length){const li=document.createElement('li');li.className='muted';li.textContent='Your parent has not added any videos yet.';list.append(li);return;}
+  function play(video){title.textContent=video.title;const frame=document.createElement('iframe');frame.src='https://www.youtube-nocookie.com/embed/'+video.youtube_video_id+'?rel=0';frame.title=video.title;frame.loading='lazy';frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';frame.allowFullscreen=true;frame.sandbox='allow-scripts allow-same-origin allow-presentation';player.replaceChildren(frame);}
+  videos.forEach(video=>{const li=document.createElement('li'),button=document.createElement('button');button.type='button';button.textContent=video.title;button.addEventListener('click',()=>play(video));li.append(button);list.append(li);});
+  play(videos[0]);
+}
+async function init(){const {data,error}=await client.auth.getSession();if(error)throw error;if(!data.session){location.replace('login.html?next=kids-zone.html');return;}const {data:assurance,error:assuranceError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();if(assuranceError)throw assuranceError;const passkey=window.CONFIGKIT_PASSKEY_SESSION?.has(data.session.user.id)===true;if(assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'&&!passkey){location.replace('login.html?next=kids-zone.html');return;}status.hidden=true;zone.hidden=false;signout.hidden=false;await loadKidsVideos(data.session.user.id);}
 signout.addEventListener('click',async()=>{signout.disabled=true;window.CONFIGKIT_PASSKEY_SESSION?.clear();const {error}=await client.auth.signOut({scope:'local'});signout.disabled=false;if(error){say('Could not sign out. Please try again.',true);return;}location.replace('login.html');});
 client.auth.onAuthStateChange((_event,session)=>{if(!session)location.replace('login.html');});
 init().catch(error=>say(error.message||'Could not verify your sign-in. Refresh and try again.',true));
