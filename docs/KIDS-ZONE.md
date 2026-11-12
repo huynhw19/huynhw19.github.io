@@ -40,3 +40,8 @@ Kids Zone uses the site's existing Supabase sign-in flow. Existing family video 
 The game catalogue is generated client-side in `kids-zone.html`. It contains 20 hand-built games plus 9,980 generated games, for 10,000 total. The first 5,000 generated entries support two-player pass-and-play. Game cards are rendered in batches of 100.
 
 The storytelling catalogue is generated client-side from reusable, age-banded templates: 5,000 story records and 5,000 activity records. Story choices and endings are handled in the browser. Story and activity cards are rendered in small batches of 12. No external AI service or user-generated content endpoint is used.
+
+
+## Family Dashboard storytelling progress
+
+Parents can see a private per-child storytelling summary in the Family Dashboard: completed stories, completed creative activities, recently opened or completed items, age bands and favourites. Children can save a story as a favourite and mark a creative activity finished. The progress record stores catalogue item IDs, titles, age bands, completion state, favourite state and the selected ending—not children's free-text story writing. The `family_storytelling_progress` table is protected by row-level security: parents can read only their own children's records, and a child session can save progress only for its linked child profile. Apply `supabase/migrations/20261112143000_family_storytelling_progress.sql` before using cloud-saved storytelling progress.
