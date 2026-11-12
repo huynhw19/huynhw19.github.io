@@ -144,7 +144,7 @@
           const limitSummary=document.createElement('p'); limitSummary.className='muted'; limitSummary.textContent=child.daily_screen_time_limit_minutes?'Daily limit: '+child.daily_screen_time_limit_minutes+' minutes':'No daily limit set';
           screenTime.append(screenHeading,screenSummary,limitSummary); article.append(screenTime);
           const progressBox=document.createElement('div');progressBox.className='child';progressBox.style.background='#f7faf8';
-          const progressHeading=document.createElement('h4');progressHeading.textContent='Educational game progress';
+          const progressHeading=document.createElement('h4');progressHeading.textContent='Educational game progress · searchable catalogue';
           const progressSummary=document.createElement('p');progressSummary.className='muted';progressSummary.textContent='Loading learning activity…';
           const recentList=document.createElement('ul');recentList.className='muted';
           progressBox.append(progressHeading,progressSummary,recentList);article.append(progressBox);
