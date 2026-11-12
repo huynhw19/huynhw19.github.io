@@ -124,6 +124,25 @@
       <div id="slideshow-list"><p class="muted">Loading slideshows…</p></div>
     </section>
 
+
+    <section class="card" id="books-panel" aria-labelledby="books-title">
+      <h2 id="books-title">📚 Create a book</h2>
+      <p class="muted">Write a class reader, workbook, storybook or course guide. Add up to 50 chapters, save a private draft, then publish it to your class or one linked student.</p>
+      <form id="book-form">
+        <label>Book title<input id="book-title" maxlength="160" required placeholder="e.g. The Little Science Explorer"></label>
+        <label>Short description<textarea id="book-description" rows="2" maxlength="2000" placeholder="What will readers learn or discover?"></textarea></label>
+        <label>Share with<select id="book-student"><option value="">All linked students</option></select></label>
+        <label>Visibility<select id="book-status"><option value="draft">Draft — only you can see it</option><option value="published">Published — visible to selected students</option><option value="archived">Archived — hidden from students</option></select></label>
+        <div id="book-chapters"></div>
+        <div class="form-actions"><button id="book-add-chapter" type="button" class="secondary">Add chapter</button><button id="book-submit" type="submit">Save book</button><button id="book-cancel" type="button" class="secondary" hidden>Cancel editing</button></div>
+      </form>
+      <div id="book-message" class="status" role="status" aria-live="polite"></div>
+    </section>
+    <section class="card" aria-labelledby="manage-books-title">
+      <h2 id="manage-books-title">Manage books</h2>
+      <div id="book-list"><p class="muted">Loading books…</p></div>
+    </section>
+
     <section class="card" id="documents-panel" aria-labelledby="documents-title">
       <h2 id="documents-title">Create document</h2>
       <p class="muted">Write lesson notes, reading material, study guides or other class documents. Keep a document as a draft, publish it to linked students, or archive it.</p>
@@ -642,6 +661,20 @@
         await loadDocuments();
       });
 
+
+      // Teacher book authoring and management.
+      const bookForm=document.getElementById('book-form'),bookTitle=document.getElementById('book-title'),bookDescription=document.getElementById('book-description'),bookStudent=document.getElementById('book-student'),bookStatus=document.getElementById('book-status'),bookChapters=document.getElementById('book-chapters'),bookList=document.getElementById('book-list'),bookMessage=document.getElementById('book-message'),bookSubmit=document.getElementById('book-submit'),bookCancel=document.getElementById('book-cancel');
+      let editingBookId=null;
+      function setBookMessage(message,isError=false){bookMessage.textContent=message;bookMessage.className='status'+(isError?' error':'');}
+      function addBookChapter(chapter={}){if(bookChapters.children.length>=50){setBookMessage('A book can contain up to 50 chapters.',true);return;}const card=document.createElement('div');card.className='assignment-item book-chapter';const heading=document.createElement('h3');heading.textContent='Chapter '+(bookChapters.children.length+1);const titleLabel=document.createElement('label');titleLabel.textContent='Chapter title';const title=document.createElement('input');title.className='book-chapter-title';title.maxLength=160;title.required=true;title.value=chapter.title||'';titleLabel.append(title);const contentLabel=document.createElement('label');contentLabel.textContent='Chapter text';const content=document.createElement('textarea');content.className='book-chapter-content';content.rows=8;content.maxLength=20000;content.required=true;content.value=chapter.content||'';contentLabel.append(content);const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Remove chapter';remove.addEventListener('click',()=>{if(bookChapters.children.length<=1){setBookMessage('Keep at least one chapter in your book.',true);return;}card.remove();Array.from(bookChapters.children).forEach((node,index)=>node.querySelector('h3').textContent='Chapter '+(index+1));});card.append(heading,titleLabel,contentLabel,remove);bookChapters.append(card);}
+      function resetBookForm(){bookForm.reset();bookChapters.replaceChildren();editingBookId=null;bookStatus.value='draft';addBookChapter();bookSubmit.textContent='Save book';bookCancel.hidden=true;}
+      async function loadBookStudents(selectedId=''){const {data,error}=await client.from('education_students').select('id,student_name').eq('user_id',currentUserId).order('student_name');if(error){setBookMessage('Could not load your student list.',true);return;}bookStudent.replaceChildren();const all=document.createElement('option');all.value='';all.textContent='All linked students';bookStudent.append(all);(data||[]).forEach(st=>{const option=document.createElement('option');option.value=st.id;option.textContent=st.student_name;bookStudent.append(option);});bookStudent.value=selectedId||'';}
+      async function loadBooks(){bookList.replaceChildren();const {data,error}=await client.from('education_books').select('id,title,description,chapters,student_id,status,created_at,updated_at,education_students(student_name)').eq('user_id',currentUserId).order('updated_at',{ascending:false});if(error){const p=document.createElement('p');p.className='error';p.textContent='Could not load books. '+(error.message||'Check that the book database migration is applied.');bookList.append(p);return;}if(!data?.length){const p=document.createElement('p');p.className='muted';p.textContent='No books yet. Create your first book above.';bookList.append(p);return;}data.forEach(book=>{const article=document.createElement('article');article.className='assignment-item';const heading=document.createElement('h3');heading.textContent=book.title;const meta=document.createElement('p');meta.className='assignment-meta';meta.textContent=(book.status==='published'?'Published':book.status==='archived'?'Archived':'Draft')+' · '+(book.chapters||[]).length+' chapters · '+(book.student_id?(book.education_students?.student_name||'One student'):'All linked students');article.append(heading,meta);if(book.description){const desc=document.createElement('p');desc.textContent=book.description;article.append(desc);}const actions=document.createElement('div');actions.className='assignment-actions';const edit=document.createElement('button');edit.type='button';edit.className='secondary';edit.textContent='Edit';edit.addEventListener('click',async()=>{editingBookId=book.id;bookTitle.value=book.title;bookDescription.value=book.description||'';bookStatus.value=book.status;await loadBookStudents(book.student_id);bookChapters.replaceChildren();(book.chapters||[]).forEach(ch=>addBookChapter(ch));if(!bookChapters.children.length)addBookChapter();bookSubmit.textContent='Save changes';bookCancel.hidden=false;bookForm.scrollIntoView({behavior:'smooth',block:'start'});bookTitle.focus();});const toggle=document.createElement('button');toggle.type='button';toggle.className='secondary';toggle.textContent=book.status==='published'?'Move to draft':book.status==='archived'?'Restore to draft':'Publish';toggle.addEventListener('click',async()=>{const next=book.status==='published'?'draft':'published';const {error:updateError}=await client.from('education_books').update({status:next,updated_at:new Date().toISOString()}).eq('id',book.id).eq('user_id',currentUserId);if(updateError){setBookMessage(updateError.message||'Could not update book.',true);return;}setBookMessage(next==='published'?'Book published to selected students.':'Book moved to drafts.');await loadBooks();});const archive=document.createElement('button');archive.type='button';archive.className='secondary';archive.textContent=book.status==='archived'?'Already archived':'Archive';archive.disabled=book.status==='archived';archive.addEventListener('click',async()=>{const {error:updateError}=await client.from('education_books').update({status:'archived',updated_at:new Date().toISOString()}).eq('id',book.id).eq('user_id',currentUserId);if(updateError){setBookMessage(updateError.message||'Could not archive book.',true);return;}setBookMessage('Book archived.');await loadBooks();});const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Delete';remove.addEventListener('click',async()=>{if(!window.confirm('Delete the book "'+book.title+'"? This cannot be undone.'))return;const {error:deleteError}=await client.from('education_books').delete().eq('id',book.id).eq('user_id',currentUserId);if(deleteError){setBookMessage(deleteError.message||'Could not delete book.',true);return;}if(editingBookId===book.id)resetBookForm();setBookMessage('Book deleted.');await loadBooks();});actions.append(edit,toggle,archive,remove);article.append(actions);bookList.append(article);});}
+      document.getElementById('book-add-chapter').addEventListener('click',()=>addBookChapter());
+      bookCancel.addEventListener('click',()=>{resetBookForm();setBookMessage('Book editing cancelled.');});
+      bookForm.addEventListener('submit',async event=>{event.preventDefault();const title=bookTitle.value.trim(),chapters=Array.from(bookChapters.querySelectorAll('.book-chapter')).map(card=>({title:card.querySelector('.book-chapter-title').value.trim(),content:card.querySelector('.book-chapter-content').value.trim()}));if(!title||!chapters.length||chapters.some(ch=>!ch.title||!ch.content)){setBookMessage('Enter a book title and complete every chapter title and chapter text.',true);return;}const record={title,description:bookDescription.value.trim(),student_id:bookStudent.value||null,chapters,status:bookStatus.value,updated_at:new Date().toISOString()};bookSubmit.disabled=true;setBookMessage(editingBookId?'Saving book…':'Creating book…');const result=editingBookId?await client.from('education_books').update(record).eq('id',editingBookId).eq('user_id',currentUserId):await client.from('education_books').insert({...record,user_id:currentUserId});bookSubmit.disabled=false;if(result.error){setBookMessage(result.error.message||'Could not save book.',true);return;}const savedStatus=record.status;resetBookForm();setBookMessage(savedStatus==='published'?'Book published for the selected linked students.':'Book saved successfully.');await loadBooks();});
+      resetBookForm();
+
       const assignmentForm = document.getElementById('assignment-form');
       const assignmentStudent = document.getElementById('assignment-student');
       const assignmentTitle = document.getElementById('assignment-title');
@@ -732,6 +765,8 @@
         await loadDocumentStudents();
         await loadDocuments();
         await loadSlideshows();
+        await loadBookStudents();
+        await loadBooks();
           });
           const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Delete';
           remove.addEventListener('click', async () => {
