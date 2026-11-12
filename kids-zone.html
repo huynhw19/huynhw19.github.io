@@ -31,8 +31,8 @@
 
 <div class="game-search" role="search">
   <label for="game-search">🔎 Find a game</label>
-  <input id="game-search" type="search" placeholder="Search 10,000 games by name or topic…" autocomplete="off">
-  <p id="game-count" class="muted" aria-live="polite">Showing 10,000 games</p>
+  <input id="game-search" type="search" placeholder="Search 100,000 games by name or topic…" autocomplete="off">
+  <p id="game-count" class="muted" aria-live="polite">Showing 100,000 games</p>
 </div>
 <section class="games" aria-label="Games">
 <article class="game"><h2>🧠 Memory Match</h2><p>Find all six matching pairs. Can you remember where they are?</p><div id="memory" class="board memory-board" aria-label="Memory cards"></div><div class="controls"><button id="memory-reset" class="secondary">New game</button></div><p id="memory-result" class="result" aria-live="polite">Find a matching pair!</p></article>
@@ -109,8 +109,8 @@ let targetPair=[];function newTarget(){const a=1+Math.floor(Math.random()*9),b=1
 let treasure=0;function newChests(){treasure=Math.floor(Math.random()*3);const box=document.getElementById('chest-choices');box.replaceChildren();for(let i=0;i<3;i++){const b=document.createElement('button');b.type='button';b.textContent='🎁 Chest '+(i+1);b.addEventListener('click',()=>{document.getElementById('chest-result').textContent=i===treasure?'💎 You found the treasure!':'🙈 Empty chest! Try another shuffle.';});box.append(b);}document.getElementById('chest-result').textContent='Pick a chest!';}document.getElementById('chest-next').addEventListener('click',newChests);newChests();
 
 
-// Add 9,980 more distinct, playable mini-games. The shared engine keeps the page fast
-// while each game has its own generated puzzle, answer set, and round.
+// Build a searchable 100,000-game catalog, but render cards in small batches
+// so mobile browsers do not need to create 100,000 DOM nodes at once.
 const gameTypes=[
   {name:'Number Quest',desc:'Solve a number puzzle',make:n=>{const a=(n*7)%19+2,b=(n*11)%13+1,op=n%3;return op===0?['What is '+a+' + '+b+'?',a+b]:op===1?['What is '+(a+b)+' − '+b+'?',a]:['What is '+a+' × '+(n%8+2)+'?',a*(n%8+2)];}},
   {name:'Pattern Patrol',desc:'Spot what comes next',make:n=>{const a=n%9+1,step=n%4+2;return ['What comes next: '+a+', '+(a+step)+', '+(a+2*step)+', '+(a+3*step)+', ?',a+4*step];}},
@@ -124,42 +124,55 @@ const gameTypes=[
   {name:'Memory Master',desc:'Remember and reason',make:n=>{const a=n%8+2,b=n%5+1;return ['If you have '+a+' pairs of socks, how many socks is that?',String(a*2),[String(a*2),String(a+b),String(a*3),String(a*2+2)]];}}
 ];
 const gameGrid=document.querySelector('.games');
-const generated=[];
-for(let i=20;i<10000;i++){
-  const typeIndex=i%gameTypes.length,type=gameTypes[typeIndex],number=i+1;
-  const article=document.createElement('article');article.className='game generated-game';article.dataset.gameTitle=type.name+' '+number;article.dataset.gameSearch=(type.name+' '+number+' '+type.desc).toLowerCase();
-  const heading=document.createElement('h2');heading.textContent=['🔢','🧩','🔤','🔬','🌍','🧠','🐾','📐','🎓','🧠'][typeIndex]+' '+type.name+' '+number;
-  const description=document.createElement('p');description.textContent=type.desc+' · Game '+number+' of 10,000';
-  const play=document.createElement('button');play.type='button';play.textContent='Play game';
+const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count');
+const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
+const catalog=Array.from({length:99980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t, multiplayer:n<5020, search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+let shown=0,activeMatches=null;
+function makeCard(item){
+  const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
+  const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;
+  const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 100,000';
+  const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
   const challenge=document.createElement('div');challenge.hidden=true;
   const question=document.createElement('p');question.className='mini-question';
   const options=document.createElement('div');options.className='mini-options';
   const result=document.createElement('p');result.className='mini-result';result.setAttribute('aria-live','polite');
-  const again=document.createElement('button');again.type='button';again.className='secondary';again.textContent='New round';again.hidden=true;
-  challenge.append(question,options,result,again);article.append(heading,description,play,challenge);gameGrid.append(article);
-  let answer='';
+  const again=document.createElement('button');again.type='button';again.className='secondary';again.textContent='Next round';again.hidden=true;
+  challenge.append(question,options,result,again);article.append(heading,description,play,challenge);
+  let answer='',turnNumber=0,scores=[0,0];
   function newRound(){
-    const data=type.make(number+Math.floor(Math.random()*7));
-    let q,correct,choices;
-    if(data.length===4){[q,correct,choices]=data;}else{[q,correct]=data;choices=[String(correct),String(Number(correct)+1),String(Math.max(0,Number(correct)-2)),String(Number(correct)+3)];}
-    answer=String(correct);question.textContent=q;result.textContent='Choose the correct answer.';options.replaceChildren();
-    const unique=[...new Set(choices.map(String))];while(unique.length<4)unique.push(String(Number(correct)+unique.length+2));
-    unique.sort(()=>Math.random()-.5).forEach(choice=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.addEventListener('click',()=>{result.textContent=choice===answer?'🎉 Correct! Great work.':'Good try! The answer is '+answer+'.';options.querySelectorAll('button').forEach(x=>x.disabled=true);again.hidden=false;});options.append(b);});
-    again.hidden=true;
+    const data=type.make(n+turnNumber++);
+    let q,correct,choices;if(data.length===4){[q,correct,choices]=data;}else{[q,correct]=data;choices=[String(correct),String(Number(correct)+1),String(Math.max(0,Number(correct)-2)),String(Number(correct)+3)];}
+    answer=String(correct);question.textContent=(multiplayer?'Player '+(turnNumber%2===1?1:2)+' — ':'')+q;
+    result.textContent=multiplayer?'Players take turns on this device. Player 1: '+scores[0]+' · Player 2: '+scores[1]:'Choose the correct answer.';
+    options.replaceChildren();const unique=[...new Set(choices.map(String))];while(unique.length<4)unique.push(String(Number(correct)+unique.length+2));
+    unique.sort(()=>Math.random()-.5).forEach(choice=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.addEventListener('click',()=>{
+      if(multiplayer){const player=(turnNumber-1)%2;scores[player]+=choice===answer?1:0;result.textContent=(choice===answer?'Correct! ':'Not quite. Answer: '+answer+'. ')+(player===0?'Player 1':'Player 2')+' score — Player 1: '+scores[0]+' · Player 2: '+scores[1];}
+      else result.textContent=choice===answer?'🎉 Correct! Great work.':'Good try! The answer is '+answer+'.';
+      options.querySelectorAll('button').forEach(x=>x.disabled=true);again.hidden=false;
+    });options.append(b);});again.hidden=true;
   }
   play.addEventListener('click',()=>{challenge.hidden=false;play.hidden=true;newRound();});
   again.addEventListener('click',newRound);
-  generated.push(article);
+  return article;
 }
-const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count');
+function renderBatch(items,reset=false){
+  if(reset){gameGrid.querySelectorAll('.generated-game').forEach(card=>card.remove());shown=0;}
+  const next=items.slice(shown,shown+100);next.forEach(item=>gameGrid.append(makeCard(item)));shown+=next.length;
+  loadMore.hidden=shown>=items.length;loadMore.textContent='Load '+Math.min(100,items.length-shown)+' more games';
+  const staticCount=[...gameGrid.querySelectorAll(':scope > .game:not(.generated-game)')].filter(card=>!card.hidden).length;
+  gameCount.textContent='Showing '+(staticCount+shown).toLocaleString()+' of 100,000 games'+(activeMatches?' matching your search':'');
+}
 function filterGames(){
-  const query=searchInput.value.trim().toLowerCase();let visible=0;
-  gameGrid.querySelectorAll('.game').forEach(card=>{const title=card.dataset.gameSearch||card.textContent.toLowerCase();const match=title.includes(query);card.hidden=!match;if(match)visible++;});
-  gameCount.textContent='Showing '+visible.toLocaleString()+' of 10,000 games';
+  const query=searchInput.value.trim().toLowerCase();
+  gameGrid.querySelectorAll(':scope > .game:not(.generated-game)').forEach(card=>{card.hidden=!card.textContent.toLowerCase().includes(query);});
+  activeMatches=query?catalog.filter(item=>item.search.includes(query)):catalog;
+  renderBatch(activeMatches,true);
 }
+loadMore.addEventListener('click',()=>renderBatch(activeMatches||catalog));
 searchInput.addEventListener('input',filterGames);
 filterGames();
-
 })();
 </script>
 </body>
