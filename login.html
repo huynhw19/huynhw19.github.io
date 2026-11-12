@@ -110,7 +110,8 @@
       const resetPassword = document.getElementById('resetPassword');
       const recoveryPanel = document.getElementById('password-recovery');
       const recoveryForm = document.getElementById('password-recovery-form');
-      let passwordRecoveryActive = false;
+      const initialAuthParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+      let passwordRecoveryActive = initialAuthParams.get('type') === 'recovery' || new URLSearchParams(window.location.search).get('type') === 'recovery';
       const loginTab = document.getElementById('loginTab');
       const signupTab = document.getElementById('signupTab');
       const accountType = document.getElementById('accountType');
