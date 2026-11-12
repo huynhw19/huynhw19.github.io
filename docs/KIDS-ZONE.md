@@ -1,6 +1,6 @@
 # Kids Zone — Game Guide
 
-Kids Zone is a browser-based collection of 10,000 family-friendly mini-games.
+Kids Zone is a browser-based collection of 100,000 family-friendly mini-games.
 
 ## Playing
 
@@ -9,9 +9,9 @@ Kids Zone is a browser-based collection of 10,000 family-friendly mini-games.
 3. Choose **Play game** on a generated mini-game card.
 4. Select an answer to see feedback, then choose **New round** to play again.
 
-The first 20 games are hand-built interactive games. The remaining 9,980 are generated from reusable puzzle templates so the page can offer a large searchable collection without storing thousands of duplicate HTML blocks.
+The first 20 games are hand-built interactive games. The remaining 99,980 are generated from reusable puzzle templates. Only 100 generated cards are rendered at a time; use **Load more games** to browse in batches. This keeps the page responsive despite the large catalog.
 
-## Game families
+## Multiplayer games\n\nThere are 5,000 two-player pass-and-play games in the generated catalog. Players take turns answering on the same device, and each game tracks Player 1 and Player 2 scores locally. These are not online matches: no player accounts, matchmaking, chat, or cross-device synchronization are provided.\n\n## Game families
 
 Generated games rotate through these families:
 
@@ -35,6 +35,6 @@ Generated games rotate through these families:
 
 ## Development notes
 
-The game catalog is generated client-side in `kids-zone.html`. The page creates 9,980 additional cards after the original 20 games, for a total of 10,000. To change the total, update the generation loop and the matching count labels together.
+The game catalog is generated client-side in `kids-zone.html`. The catalog contains 99,980 generated entries plus the original 20 games, for 100,000 total. The first 5,000 generated entries are two-player pass-and-play games. Generated cards are rendered in batches of 100; search filters the catalog index before rendering matching cards.
 
 The Kids Zone uses the site's existing Supabase sign-in flow and does not introduce accounts, chat, public profiles, or purchases.
