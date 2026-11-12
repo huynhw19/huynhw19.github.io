@@ -310,7 +310,7 @@
       
       const resourceForm=document.getElementById('kids-resource-form'),resourceTitle=document.getElementById('resource-title'),resourceType=document.getElementById('resource-type'),resourceSubject=document.getElementById('resource-subject'),resourceAge=document.getElementById('resource-age'),resourceDescription=document.getElementById('resource-description'),resourceUrl=document.getElementById('resource-url'),resourceVisibility=document.getElementById('resource-status'),resourceMessage=document.getElementById('resource-status-message'),resourceList=document.getElementById('kids-resources-list'),resourceSave=document.getElementById('save-resource'),resourceCancel=document.getElementById('cancel-resource-edit');
       let editingResourceId=null;
-      function resetResourceForm(){resourceForm.reset();editingResourceId=null;resourceSave.textContent='Create resource';resourceCancel.hidden=true;}
+      function resetResourceForm(){const selectedChild=resourceChild.value;resourceForm.reset();resourceChild.value=selectedChild;editingResourceId=null;resourceSave.textContent='Create resource';resourceCancel.hidden=true;}
       function resourceMessageText(message,error=false){resourceMessage.textContent=message;resourceMessage.classList.toggle('error',error);}
       async function loadKidsResources(){
         resourceList.replaceChildren();const childId=resourceChild.value;
