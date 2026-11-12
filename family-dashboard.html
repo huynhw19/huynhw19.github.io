@@ -78,6 +78,22 @@
       <div class="kids-video-layout"><div><h3 id="kids-video-now-title">Choose a video</h3><div class="kids-video-player" id="kids-video-player"><p class="muted">Your approved videos will play here.</p></div></div>
       <div><h3>Approved playlist</h3><ul id="kids-video-list" class="kids-video-list"><li class="muted">No videos added yet.</li></ul></div></div>
     </section>
+    <section class="card" id="kids-resources-manager" hidden aria-labelledby="kids-resources-title">
+      <span class="eyebrow">Parent-curated learning</span><h2 id="kids-resources-title">📚 Kids Resources Manager</h2>
+      <p class="muted">Create and organise learning links for each child. Publish a resource to show it in that child's Kids Zone. Drafts and archived items stay parent-only.</p>
+      <form id="kids-resource-form">
+        <label for="resource-child">For child<select id="resource-child" required><option value="">Choose a child</option></select></label>
+        <label for="resource-title">Resource title<input id="resource-title" maxlength="160" required></label>
+        <label for="resource-type">Resource type<select id="resource-type"><option value="website">Website</option><option value="video">Video</option><option value="book">Book</option><option value="worksheet">Worksheet</option><option value="activity">Activity</option></select></label>
+        <label for="resource-subject">Subject / topic<input id="resource-subject" maxlength="80" placeholder="Science, Reading, Maths…"></label>
+        <label for="resource-age">Age group<select id="resource-age"><option value="">Any age</option><option value="3-5">Ages 3–5</option><option value="6-8">Ages 6–8</option><option value="9-10">Ages 9–10</option><option value="11-13">Ages 11–13</option><option value="14-17">Ages 14–17</option></select></label>
+        <label for="resource-description">Description<textarea id="resource-description" rows="3" maxlength="2000"></textarea></label>
+        <label for="resource-url">Resource link (optional, HTTPS only)<input id="resource-url" type="url" placeholder="https://…"></label>
+        <label for="resource-status">Visibility<select id="resource-status"><option value="draft">Draft — parent only</option><option value="published">Published — visible in Kids Zone</option><option value="archived">Archived — parent only</option></select></label>
+        <div class="actions"><button id="save-resource" type="submit">Create resource</button><button id="cancel-resource-edit" class="secondary" type="button" hidden>Cancel edit</button></div>
+      </form>
+      <p id="resource-status-message" class="status" role="status" aria-live="polite"></p><h3>Saved resources</h3><div id="kids-resources-list"></div>
+    </section>
     <section class="card" id="kids-requests" hidden>
       <div class="inbox-head"><div><span class="eyebrow">Parent tools</span><h2>Parent Inbox</h2></div><button id="refresh-inbox" type="button" class="secondary">Refresh inbox</button></div>
       <p class="muted">Review friend requests that need your approval and safety reports from your children or their approved friends. A friendship only becomes active after both families approve.</p>
@@ -97,6 +113,8 @@
       const panel = document.getElementById('children-panel');
       const list = document.getElementById('children-list');
       const kidsVideos=document.getElementById('kids-videos');
+      const resourcesPanel=document.getElementById('kids-resources-manager');
+      const resourceChild=document.getElementById('resource-child');
       const requestsPanel=document.getElementById('kids-requests');
       const requestsList=document.getElementById('kids-requests-list');
       const reportsList=document.getElementById('kids-reports-list');
@@ -123,6 +141,8 @@
         const {data,error} = await client.from('family_children').select('id,child_name,age_years,grade,notes,created_at,child_user_id,messaging_enabled,call_enabled,media_sharing_enabled,friend_code,daily_screen_time_limit_minutes').eq('parent_id',userId).order('created_at',{ascending:false});
         if (error) { say(error.message || 'Could not load child profiles.',true); return; }
         videoChild.replaceChildren();const childPlaceholder=document.createElement('option');childPlaceholder.value='';childPlaceholder.textContent='Choose a child';videoChild.append(childPlaceholder);(data||[]).forEach(child=>{const option=document.createElement('option');option.value=child.id;option.textContent=child.child_name;videoChild.append(option);});
+        resourceChild.replaceChildren();const rp=document.createElement('option');rp.value='';rp.textContent='Choose a child';resourceChild.append(rp);(data||[]).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.child_name;resourceChild.append(o);});
+        if(data.length){resourceChild.value=data[0].id;await loadKidsResources();}
         if (!data.length) { const p=document.createElement('p'); p.className='muted'; p.textContent='No child profiles yet. Add your first child above.'; list.append(p); await loadKidsApprovals(); return; }
         const todayUtc=new Date().toISOString().slice(0,10);
         const usageResult=await client.from('family_screen_time_usage').select('child_id,seconds_used,last_seen_at,current_activity').eq('usage_date',todayUtc).in('child_id',data.map(child=>child.id));
@@ -287,13 +307,46 @@
       async function loadApprovedVideos(){approvedVideos=[];const childId=videoChild.value;if(!childId){renderVideoList();return;}const {data,error}=await client.from('kids_approved_videos').select('id,title,youtube_video_id,created_at').eq('child_id',childId).eq('parent_id',userId).order('created_at',{ascending:true});if(error){videoStatus.textContent='Could not load saved videos: '+error.message;videoStatus.classList.add('error');renderVideoList();return;}approvedVideos=data||[];renderVideoList();}
       videoChild.addEventListener('change',loadApprovedVideos);
       videoForm.addEventListener('submit',async e=>{e.preventDefault();const childId=videoChild.value,title=videoTitle.value.trim(),id=youtubeId(videoUrl.value.trim());if(!childId){videoStatus.textContent='Choose a child first.';videoStatus.classList.add('error');return;}if(!id){videoStatus.textContent='Enter a valid link to one YouTube video (not a channel or playlist).';videoStatus.classList.add('error');return;}if(approvedVideos.some(v=>v.youtube_video_id===id)){videoStatus.textContent='That video is already in this child’s playlist.';videoStatus.classList.remove('error');return;}const submit=videoForm.querySelector('button[type="submit"]');submit.disabled=true;const {error}=await client.from('kids_approved_videos').insert({child_id:childId,parent_id:userId,title,youtube_video_id:id});submit.disabled=false;if(error){videoStatus.textContent=error.code==='23505'?'That video is already in this child’s playlist.':'Could not save video: '+error.message;videoStatus.classList.add('error');return;}videoForm.reset();videoChild.value=childId;await loadApprovedVideos();videoStatus.textContent='Video saved to this child’s playlist.';videoStatus.classList.remove('error');});
+      
+      const resourceForm=document.getElementById('kids-resource-form'),resourceTitle=document.getElementById('resource-title'),resourceType=document.getElementById('resource-type'),resourceSubject=document.getElementById('resource-subject'),resourceAge=document.getElementById('resource-age'),resourceDescription=document.getElementById('resource-description'),resourceUrl=document.getElementById('resource-url'),resourceVisibility=document.getElementById('resource-status'),resourceMessage=document.getElementById('resource-status-message'),resourceList=document.getElementById('kids-resources-list'),resourceSave=document.getElementById('save-resource'),resourceCancel=document.getElementById('cancel-resource-edit');
+      let editingResourceId=null;
+      function resetResourceForm(){resourceForm.reset();editingResourceId=null;resourceSave.textContent='Create resource';resourceCancel.hidden=true;}
+      function resourceMessageText(message,error=false){resourceMessage.textContent=message;resourceMessage.classList.toggle('error',error);}
+      async function loadKidsResources(){
+        resourceList.replaceChildren();const childId=resourceChild.value;
+        if(!childId){const p=document.createElement('p');p.className='muted';p.textContent='Add a child profile to start creating resources.';resourceList.append(p);return;}
+        const {data,error}=await client.from('family_kids_resources').select('id,child_id,title,description,resource_type,subject,age_group,resource_url,status').eq('parent_id',userId).eq('child_id',childId).order('created_at',{ascending:false});
+        if(error){resourceMessageText('Could not load resources: '+error.message,true);return;}
+        if(!data?.length){const p=document.createElement('p');p.className='muted';p.textContent='No resources for this child yet.';resourceList.append(p);return;}
+        data.forEach(r=>{
+          const a=document.createElement('article');a.className='child';const h=document.createElement('h4');h.textContent=r.title;a.append(h);
+          const m=document.createElement('p');m.className='muted';m.textContent=[r.resource_type,r.subject,r.age_group?'Ages '+r.age_group:'',r.status].filter(Boolean).join(' · ');a.append(m);
+          if(r.description){const d=document.createElement('p');d.textContent=r.description;a.append(d);}
+          if(r.resource_url){const l=document.createElement('a');l.href=r.resource_url;l.target='_blank';l.rel='noopener noreferrer';l.textContent='Open resource';a.append(l);}
+          const actions=document.createElement('div');actions.className='actions';const edit=document.createElement('button');edit.type='button';edit.className='secondary';edit.textContent='Edit';
+          edit.addEventListener('click',()=>{editingResourceId=r.id;resourceChild.value=r.child_id;resourceTitle.value=r.title;resourceType.value=r.resource_type;resourceSubject.value=r.subject||'';resourceAge.value=r.age_group||'';resourceDescription.value=r.description||'';resourceUrl.value=r.resource_url||'';resourceVisibility.value=r.status;resourceSave.textContent='Save changes';resourceCancel.hidden=false;resourceTitle.focus();});
+          const del=document.createElement('button');del.type='button';del.className='danger';del.textContent='Delete';del.addEventListener('click',async()=>{if(!confirm('Delete this resource?'))return;del.disabled=true;const {error}=await client.from('family_kids_resources').delete().eq('id',r.id).eq('parent_id',userId);if(error){resourceMessageText('Could not delete resource: '+error.message,true);del.disabled=false;return;}if(editingResourceId===r.id)resetResourceForm();resourceMessageText('Resource deleted.');await loadKidsResources();});
+          actions.append(edit,del);a.append(actions);resourceList.append(a);
+        });
+      }
+      resourceChild.addEventListener('change',()=>{resetResourceForm();void loadKidsResources();});resourceCancel.addEventListener('click',resetResourceForm);
+      resourceForm.addEventListener('submit',async e=>{
+        e.preventDefault();const childId=resourceChild.value,title=resourceTitle.value.trim(),raw=resourceUrl.value.trim(),wasEditing=editingResourceId!==null;
+        if(!childId||!title){resourceMessageText('Choose a child and enter a title.',true);return;}
+        let url=null;if(raw){try{const parsed=new URL(raw);if(parsed.protocol!=='https:')throw 0;url=parsed.href;}catch(_){resourceMessageText('Use a valid HTTPS link, or leave the link blank.',true);return;}}
+        const payload={parent_id:userId,child_id:childId,title,resource_type:resourceType.value,subject:resourceSubject.value.trim(),age_group:resourceAge.value,description:resourceDescription.value.trim(),resource_url:url,status:resourceVisibility.value,updated_at:new Date().toISOString()};
+        resourceSave.disabled=true;const result=wasEditing?await client.from('family_kids_resources').update(payload).eq('id',editingResourceId).eq('parent_id',userId):await client.from('family_kids_resources').insert(payload);resourceSave.disabled=false;
+        if(result.error){resourceMessageText('Could not save resource: '+result.error.message,true);return;}
+        resetResourceForm();resourceMessageText(wasEditing?'Resource updated.':'Resource created.');await loadKidsResources();
+      });
+
       async function init(){
         const {data,error}=await client.auth.getSession();
         if(error||!data.session){window.location.replace('login.html?next=family-dashboard.html');return;}
         const user=data.session.user; const accountType=user.user_metadata?.account_type || 'personal';
         if(accountType!=='personal'){accountLabel.textContent='This dashboard is available only to personal accounts.';return;}
         userId=user.id; accountLabel.textContent='Signed in as '+(user.email || 'your personal account');
-        creator.hidden=false;panel.hidden=false;kidsVideos.hidden=false;await loadChildren();
+        creator.hidden=false;panel.hidden=false;kidsVideos.hidden=false;resourcesPanel.hidden=false;await loadChildren();
       }
       client.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace('login.html');});
       void init();
