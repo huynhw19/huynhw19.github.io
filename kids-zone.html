@@ -23,7 +23,7 @@
 </style>
 </head>
 <body>
-<header><a class="brand" href="dashboard.html">✦ ConfigKit</a><nav><a href="dashboard.html">Dashboard</a><a href="family-dashboard.html">Family dashboard</a><a href="account-settings.html">Account settings</a><button id="signout" type="button" hidden>Sign out</button></nav></header>
+<header><a class="brand" href="dashboard.html">✦ ConfigKit</a><nav><a href="dashboard.html">Dashboard</a><a href="family-dashboard.html">Family dashboard</a><a href="account-settings.html">Account settings</a><a href="https://github.com/huynhw19/huynhw19.github.io/blob/main/docs/KIDS-ZONE.md">Game docs</a><button id="signout" type="button" hidden>Sign out</button></nav></header>
 <main>
 <div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
 <div id="zone" hidden>
@@ -31,8 +31,8 @@
 
 <div class="game-search" role="search">
   <label for="game-search">🔎 Find a game</label>
-  <input id="game-search" type="search" placeholder="Search 1,000 games by name or topic…" autocomplete="off">
-  <p id="game-count" class="muted" aria-live="polite">Showing 1,000 games</p>
+  <input id="game-search" type="search" placeholder="Search 10,000 games by name or topic…" autocomplete="off">
+  <p id="game-count" class="muted" aria-live="polite">Showing 10,000 games</p>
 </div>
 <section class="games" aria-label="Games">
 <article class="game"><h2>🧠 Memory Match</h2><p>Find all six matching pairs. Can you remember where they are?</p><div id="memory" class="board memory-board" aria-label="Memory cards"></div><div class="controls"><button id="memory-reset" class="secondary">New game</button></div><p id="memory-result" class="result" aria-live="polite">Find a matching pair!</p></article>
@@ -109,7 +109,7 @@ let targetPair=[];function newTarget(){const a=1+Math.floor(Math.random()*9),b=1
 let treasure=0;function newChests(){treasure=Math.floor(Math.random()*3);const box=document.getElementById('chest-choices');box.replaceChildren();for(let i=0;i<3;i++){const b=document.createElement('button');b.type='button';b.textContent='🎁 Chest '+(i+1);b.addEventListener('click',()=>{document.getElementById('chest-result').textContent=i===treasure?'💎 You found the treasure!':'🙈 Empty chest! Try another shuffle.';});box.append(b);}document.getElementById('chest-result').textContent='Pick a chest!';}document.getElementById('chest-next').addEventListener('click',newChests);newChests();
 
 
-// Add 980 more distinct, playable mini-games. The shared engine keeps the page fast
+// Add 9,980 more distinct, playable mini-games. The shared engine keeps the page fast
 // while each game has its own generated puzzle, answer set, and round.
 const gameTypes=[
   {name:'Number Quest',desc:'Solve a number puzzle',make:n=>{const a=(n*7)%19+2,b=(n*11)%13+1,op=n%3;return op===0?['What is '+a+' + '+b+'?',a+b]:op===1?['What is '+(a+b)+' − '+b+'?',a]:['What is '+a+' × '+(n%8+2)+'?',a*(n%8+2)];}},
@@ -125,11 +125,11 @@ const gameTypes=[
 ];
 const gameGrid=document.querySelector('.games');
 const generated=[];
-for(let i=20;i<1000;i++){
+for(let i=20;i<10000;i++){
   const typeIndex=i%gameTypes.length,type=gameTypes[typeIndex],number=i+1;
   const article=document.createElement('article');article.className='game generated-game';article.dataset.gameTitle=type.name+' '+number;article.dataset.gameSearch=(type.name+' '+number+' '+type.desc).toLowerCase();
   const heading=document.createElement('h2');heading.textContent=['🔢','🧩','🔤','🔬','🌍','🧠','🐾','📐','🎓','🧠'][typeIndex]+' '+type.name+' '+number;
-  const description=document.createElement('p');description.textContent=type.desc+' · Game '+number+' of 1,000';
+  const description=document.createElement('p');description.textContent=type.desc+' · Game '+number+' of 10,000';
   const play=document.createElement('button');play.type='button';play.textContent='Play game';
   const challenge=document.createElement('div');challenge.hidden=true;
   const question=document.createElement('p');question.className='mini-question';
@@ -155,7 +155,7 @@ const searchInput=document.getElementById('game-search'),gameCount=document.getE
 function filterGames(){
   const query=searchInput.value.trim().toLowerCase();let visible=0;
   gameGrid.querySelectorAll('.game').forEach(card=>{const title=card.dataset.gameSearch||card.textContent.toLowerCase();const match=title.includes(query);card.hidden=!match;if(match)visible++;});
-  gameCount.textContent='Showing '+visible.toLocaleString()+' of 1,000 games';
+  gameCount.textContent='Showing '+visible.toLocaleString()+' of 10,000 games';
 }
 searchInput.addEventListener('input',filterGames);
 filterGames();
