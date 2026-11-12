@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="50 positive learning, creativity, kindness and discovery achievements for kids."><title>50 Kids Achievements — Kids Zone</title><style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#26324b;background:#f5f7ff}*{box-sizing:border-box}body{margin:0;line-height:1.6}header,main,footer{width:min(100% - 2rem,1000px);margin:auto}header{padding:1rem 0;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;border-bottom:1px solid #e2e7f2}a{color:#5846b5;font-weight:800}main{padding:1.5rem 0 3rem}.hero,.panel{background:white;border:1px solid #e2e7f2;border-radius:1.2rem;padding:clamp(1rem,4vw,2rem);margin:1rem 0;box-shadow:0 10px 28px #26324b0d}.hero{background:linear-gradient(120deg,#fff,#fff5d8,#f0edff)}h1{font-size:clamp(2rem,6vw,3rem);line-height:1.1;margin:.3rem 0}.muted{color:#68738a}.bar{height:14px;background:#eceef5;border-radius:99px;overflow:hidden}.bar span{display:block;height:100%;width:0;background:#6654c8;transition:width .2s}.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0}.filters button,.achievement button{border:0;border-radius:.7rem;padding:.65rem .9rem;background:#eceaff;color:#44349c;font:inherit;font-weight:800;cursor:pointer}.filters button[aria-pressed=true]{background:#6654c8;color:white}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:.8rem}.achievement{border:1px solid #e2e7f2;border-radius:1rem;padding:1rem;background:white;display:flex;flex-direction:column;gap:.4rem}.achievement.done{background:#f1fbf3;border-color:#b8e3c2}.emoji{font-size:2rem}.achievement h3{margin:0}.achievement p{margin:0;color:#68738a;flex:1}.achievement button{margin-top:.4rem;background:#6654c8;color:white}.achievement.done button{background:#dcefe0;color:#245b31}.tag{display:inline-block;border-radius:99px;background:#e9e6ff;color:#4939a5;padding:.15rem .6rem;font-size:.8rem;font-weight:800}.note{background:#fff5d8;border-radius:.8rem;padding:1rem}button:focus-visible,a:focus-visible{outline:3px solid #ffbd45;outline-offset:3px}footer{padding:1rem 0 2rem;color:#68738a}
+</style></head><body><header><a href="kids-zone.html">← Back to Kids Zone</a><a href="kids-wiki.html">📚 Explore the Kids Wiki</a></header><main>
+<section class="hero"><p>🏅 <strong>Small steps • Big discoveries</strong></p><h1>50 Kids Achievements 🌟</h1><p>Collect 50 badges by trying fun learning, creativity, kindness, wellbeing and discovery challenges. Every effort counts!</p><p id="summary" aria-live="polite"><strong>0 / 50</strong> achievements completed</p><div class="bar" role="progressbar" aria-label="Achievement progress" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0" id="progress"><span id="fill"></span></div><p class="muted">Your badges are saved in this browser on this device.</p></section>
+<section class="panel"><div class="filters" id="filters"></div><div class="grid" id="grid"></div></section>
+<section class="note"><strong>💜 Remember</strong><p>Achievements are about effort, curiosity and kindness — not competing. You can mark a challenge complete when you have tried it. Ask a trusted adult to help with activities that need supervision.</p></section>
+</main><footer>Kids Zone · You are capable of wonderful things ✨</footer>
+<script>
+(()=>{'use strict';
+const data=[
+['First Steps','🌱','Learning','Read your first Kids Wiki article.'],
+['Curious Mind','🔎','Learning','Find an answer to a question you have wondered about.'],
+['Quiz Starter','🧠','Learning','Try a knowledge quiz in the Kids Wiki.'],
+['Bookworm','📚','Learning','Read five different articles, books or stories.'],
+['Fact Collector','💡','Learning','Write down three new facts you discovered.'],
+['Space Explorer','🪐','Learning','Learn about a planet, star or moon.'],
+['Nature Detective','🦋','Learning','Identify three plants or animals with a grown-up.'],
+['Science Thinker','🔬','Learning','Make a prediction and test it safely with an adult.'],
+['Maths Mate','➗','Learning','Solve five maths puzzles or problems.'],
+['Word Wizard','✍️','Learning','Learn five new words and use them in sentences.'],
+['Story Creator','📖','Creativity','Write or tell an original short story.'],
+['Master Doodler','🎨','Creativity','Create an original drawing or picture.'],
+['Colour Explorer','🌈','Creativity','Make an artwork using at least five colours.'],
+['Photo Artist','📸','Creativity','Take a creative photo with permission from a grown-up.'],
+['Imagination Inventor','💭','Creativity','Invent a new character, creature or imaginary place.'],
+['Craft Champion','✂️','Creativity','Make something using safe recycled materials.'],
+['Music Maker','🎵','Creativity','Create a rhythm or a short original tune.'],
+['Design Dreamer','📐','Creativity','Sketch an invention that could solve a problem.'],
+['Puzzle Solver','🧩','Creativity','Complete a puzzle or brain teaser.'],
+['Rainbow Creator','🖍️','Creativity','Make a colourful poster about something you love.'],
+['Kindness Star','💛','Kindness','Do a thoughtful thing for someone.'],
+['Helpful Hero','🦸','Kindness','Help with a suitable task at home or school.'],
+['Good Listener','👂','Kindness','Listen carefully while someone shares an idea.'],
+['Team Player','🤝','Kindness','Take turns and work together on an activity.'],
+['Encourager','🌟','Kindness','Give someone a sincere and kind compliment.'],
+['Sharing Champion','🎁','Kindness','Share a game, idea or resource fairly.'],
+['Respect Ranger','🌻','Kindness','Show respect for someone with a different opinion.'],
+['Thankful Thinker','🙏','Kindness','Tell someone one thing you appreciate.'],
+['Community Helper','🏡','Kindness','Help make a shared space tidier with permission.'],
+['Friendship Builder','🫶','Kindness','Invite someone to join a friendly activity.'],
+['Water Break','💧','Wellbeing','Remember to drink water during your day.'],
+['Move Your Body','⚽','Wellbeing','Enjoy a safe movement or stretching break.'],
+['Sleep Superstar','🌙','Wellbeing','Follow a calming bedtime routine with your family.'],
+['Fresh Air Fan','🌳','Wellbeing','Spend a little time outdoors with a trusted adult.'],
+['Calm Captain','🧘','Wellbeing','Try a few slow breaths when you need a pause.'],
+['Healthy Helper','🍎','Wellbeing','Help prepare a balanced snack with an adult.'],
+['Screen Break Boss','⏳','Wellbeing','Take a screen break and do an offline activity.'],
+['Safety Smart','🛡️','Wellbeing','Name one piece of personal information you should keep private.'],
+['Brave Beginner','🧗','Wellbeing','Try a new activity that feels manageable.'],
+['Growth Mindset','🌼','Wellbeing','Practise something again after it felt tricky.'],
+['Animal Ally','🐾','Discovery','Learn one way to care for animals safely.'],
+['Ocean Guardian','🐬','Discovery','Discover one way to reduce rubbish near waterways.'],
+['Weather Watcher','🌦️','Discovery','Observe the weather and describe what you notice.'],
+['Map Explorer','🗺️','Discovery','Find a place on a map or globe.'],
+['History Hunter','🏺','Discovery','Learn about a person, place or event from the past.'],
+['Eco Helper','♻️','Discovery','Sort recycling correctly with a grown-up.'],
+['Sky Watcher','🌙','Discovery','Observe the Moon or clouds with a trusted adult.'],
+['Garden Grower','🌱','Discovery','Help care for a plant.'],
+['Question Champion','❓','Discovery','Ask a thoughtful question and explore its answer.'],
+['Discovery Collector','🏆','Discovery','Complete five challenges from this achievement page.']
+];
+const key='kids-zone-50-achievements-v1';let done=[];try{const x=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(x))done=x.filter(n=>Number.isInteger(n)&&n>=0&&n<data.length)}catch(e){}
+const cats=['All','Learning','Creativity','Kindness','Wellbeing','Discovery'];let active='All';
+const filters=document.getElementById('filters'),grid=document.getElementById('grid');
+cats.forEach(cat=>{const b=document.createElement('button');b.type='button';b.textContent=cat;b.setAttribute('aria-pressed',String(cat===active));b.addEventListener('click',()=>{active=cat;filters.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.textContent===active)));render()});filters.append(b)});
+function save(){try{localStorage.setItem(key,JSON.stringify(done))}catch(e){}}
+function update(){const n=done.length;document.getElementById('summary').innerHTML='<strong>'+n+' / 50</strong> achievements completed';document.getElementById('fill').style.width=(n/50*100)+'%';document.getElementById('progress').setAttribute('aria-valuenow',String(n))}
+function render(){grid.replaceChildren();data.forEach((a,i)=>{if(active!=='All'&&a[2]!==active)return;const card=document.createElement('article');card.className='achievement '+(done.includes(i)?'done':'');const em=document.createElement('div');em.className='emoji';em.textContent=a[1];const tag=document.createElement('span');tag.className='tag';tag.textContent=a[2];const h=document.createElement('h3');h.textContent=(done.includes(i)?'✓ ':'')+a[0];const p=document.createElement('p');p.textContent=a[3];const b=document.createElement('button');b.type='button';b.textContent=done.includes(i)?'Completed ✓':'Mark complete';b.setAttribute('aria-pressed',String(done.includes(i)));b.addEventListener('click',()=>{if(done.includes(i))done=done.filter(x=>x!==i);else done.push(i);save();update();render()});card.append(em,tag,h,p,b);grid.append(card)})}
+update();render();
+})();
+</script></body></html>
