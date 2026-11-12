@@ -143,6 +143,22 @@
           screenSummary.textContent='Used: '+(hours?hours+'h ':'')+minutes+'m · '+(active?'Active now: '+(usage.current_activity==='kids_messages'?'Kids Messages':'Kids Zone'):'Not active right now');
           const limitSummary=document.createElement('p'); limitSummary.className='muted'; limitSummary.textContent=child.daily_screen_time_limit_minutes?'Daily limit: '+child.daily_screen_time_limit_minutes+' minutes':'No daily limit set';
           screenTime.append(screenHeading,screenSummary,limitSummary); article.append(screenTime);
+          const progressBox=document.createElement('div');progressBox.className='child';progressBox.style.background='#f7faf8';
+          const progressHeading=document.createElement('h4');progressHeading.textContent='Educational game progress';
+          const progressSummary=document.createElement('p');progressSummary.className='muted';progressSummary.textContent='Loading learning activity…';
+          const recentList=document.createElement('ul');recentList.className='muted';
+          progressBox.append(progressHeading,progressSummary,recentList);article.append(progressBox);
+          const progressResult=await client.from('family_educational_game_progress')
+            .select('game_title,category,age_band,is_correct,played_at',{count:'exact'})
+            .eq('child_id',child.id).order('played_at',{ascending:false}).limit(50);
+          if(progressResult.error){progressSummary.textContent='Learning activity is unavailable right now.';}
+          else{
+            const recent=progressResult.data||[],total=progressResult.count||0,correct=recent.filter(row=>row.is_correct).length;
+            progressSummary.textContent='Challenges completed: '+total+' · Recent accuracy: '+(recent.length?Math.round(correct/recent.length*100)+'%':'Not enough activity yet')+(recent.length?' (last '+recent.length+' attempts)':'');
+            if(recent.length){
+              recent.slice(0,5).forEach(row=>{const item=document.createElement('li');item.textContent=row.game_title+' · Ages '+row.age_band+' · '+(row.is_correct?'Correct':'Try again')+' · '+new Date(row.played_at).toLocaleDateString();recentList.append(item);});
+            }else{const item=document.createElement('li');item.textContent='No completed learning challenges yet.';recentList.append(item);}
+          }
           const actions=document.createElement('div'); actions.className='actions';
           const edit=document.createElement('button'); edit.type='button'; edit.className='secondary'; edit.textContent='Edit';
           edit.addEventListener('click',()=>{editingId=child.id;field('child-name').value=child.child_name;field('child-age').value=child.age_years ?? '';field('child-grade').value=child.grade || '';field('child-notes').value=child.notes || '';title.textContent='Edit child profile';save.textContent='Save changes';cancel.hidden=false;form.scrollIntoView({behavior:'smooth',block:'start'});});
