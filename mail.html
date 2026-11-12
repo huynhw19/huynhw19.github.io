@@ -43,7 +43,23 @@
   mailbox=data;hide('claim');startApp();
  });
  if(mailbox)startApp();
- function startApp(){$('current-address').textContent=mailbox.address;show('app');showView('inbox')}
+ let mailChannel=null;
+ async function refreshUnreadCount(){
+  const {count,error}=await client.from('mail_messages').select('id',{count:'exact',head:true}).eq('recipient_user_id',user.id).is('read_at',null);
+  if(error)return;
+  const inboxButton=document.querySelector('[data-view="inbox"]');
+  if(inboxButton)inboxButton.textContent='Inbox'+(count?' ('+count+')':'');
+ }
+ function startApp(){
+  $('current-address').textContent=mailbox.address;show('app');showView('inbox');refreshUnreadCount();
+  if(mailChannel)return;
+  mailChannel=client.channel('configkit-mail-'+user.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'mail_messages',filter:'recipient_user_id=eq.'+user.id},payload=>{
+   refreshUnreadCount();
+   if(view==='inbox')renderList();
+   const title=payload.new?.subject||'New message';
+   document.title='New mail: '+title+' — ConfigKit Mail';
+  }).subscribe();
+ }
  document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
  $('refresh').onclick=()=>renderList();$('cancel-compose').onclick=()=>showView('inbox');$('back').onclick=()=>showView(view);
  $('signout').onclick=async()=>{await client.auth.signOut();location.href='login.html'};
