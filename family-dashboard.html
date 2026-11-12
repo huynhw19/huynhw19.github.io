@@ -97,9 +97,13 @@
       const field = id => document.getElementById(id);
       async function loadChildren() {
         list.replaceChildren();
-        const {data,error} = await client.from('family_children').select('id,child_name,age_years,grade,notes,created_at,child_user_id,messaging_enabled,call_enabled,media_sharing_enabled,friend_code').eq('parent_id',userId).order('created_at',{ascending:false});
+        const {data,error} = await client.from('family_children').select('id,child_name,age_years,grade,notes,created_at,child_user_id,messaging_enabled,call_enabled,media_sharing_enabled,friend_code,daily_screen_time_limit_minutes').eq('parent_id',userId).order('created_at',{ascending:false});
         if (error) { say(error.message || 'Could not load child profiles.',true); return; }
         if (!data.length) { const p=document.createElement('p'); p.className='muted'; p.textContent='No child profiles yet. Add your first child above.'; list.append(p); await loadKidsApprovals(); return; }
+        const todayUtc=new Date().toISOString().slice(0,10);
+        const usageResult=await client.from('family_screen_time_usage').select('child_id,seconds_used,last_seen_at,current_activity').eq('usage_date',todayUtc).in('child_id',data.map(child=>child.id));
+        if(usageResult.error) say('Screen-time activity could not be loaded: '+usageResult.error.message,true);
+        const usageByChild=new Map((usageResult.data||[]).map(row=>[row.child_id,row]));
         data.forEach(child => {
           const article=document.createElement('article'); article.className='child';
           const heading=document.createElement('h3'); heading.textContent=child.child_name;
@@ -107,6 +111,14 @@
           details.textContent=[child.age_years === null ? '' : 'Age '+child.age_years,child.grade].filter(Boolean).join(' · ') || 'No age or grade added';
           article.append(heading,details);
           if (child.notes) { const note=document.createElement('p'); note.textContent=child.notes; article.append(note); }
+          const usage=usageByChild.get(child.id); const active=!!usage && Date.now()-new Date(usage.last_seen_at).getTime()<120000;
+          const screenTime=document.createElement('div'); screenTime.className='child'; screenTime.style.background='#f7faf8';
+          const screenHeading=document.createElement('h4'); screenHeading.textContent='Screen time today (UTC)';
+          const screenSummary=document.createElement('p'); screenSummary.className='muted';
+          const seconds=usage?.seconds_used||0; const hours=Math.floor(seconds/3600); const minutes=Math.floor((seconds%3600)/60);
+          screenSummary.textContent='Used: '+(hours?hours+'h ':'')+minutes+'m · '+(active?'Active now: '+(usage.current_activity==='kids_messages'?'Kids Messages':'Kids Zone'):'Not active right now');
+          const limitSummary=document.createElement('p'); limitSummary.className='muted'; limitSummary.textContent=child.daily_screen_time_limit_minutes?'Daily limit: '+child.daily_screen_time_limit_minutes+' minutes':'No daily limit set';
+          screenTime.append(screenHeading,screenSummary,limitSummary); article.append(screenTime);
           const actions=document.createElement('div'); actions.className='actions';
           const edit=document.createElement('button'); edit.type='button'; edit.className='secondary'; edit.textContent='Edit';
           edit.addEventListener('click',()=>{editingId=child.id;field('child-name').value=child.child_name;field('child-age').value=child.age_years ?? '';field('child-grade').value=child.grade || '';field('child-notes').value=child.notes || '';title.textContent='Edit child profile';save.textContent='Save changes';cancel.hidden=false;form.scrollIntoView({behavior:'smooth',block:'start'});});
@@ -123,7 +135,11 @@
           const callingLabel=document.createElement('label');callingLabel.style.marginTop='.5rem';const calling=document.createElement('input');calling.type='checkbox';calling.checked=!!child.call_enabled;calling.style.width='auto';calling.addEventListener('change',async()=>{calling.disabled=true;const result=await client.from('family_children').update({call_enabled:calling.checked}).eq('id',child.id).eq('parent_id',userId);calling.disabled=false;if(result.error){calling.checked=!calling.checked;say(result.error.message,true);}else say('Calls '+(calling.checked?'enabled':'disabled')+' for '+child.child_name+'. Both families must enable calls.');});callingLabel.append(calling,document.createTextNode(' Allow voice and video calls (both families must enable)'));
                     const code=document.createElement('p');code.className='muted';code.textContent='Private friend code to share with another parent: '+child.friend_code;
           const note=document.createElement('p');note.className='muted';note.textContent=child.child_user_id?'PIN is set. The child can sign in to Messages using this profile and PIN.':'Set a PIN before the child can open Messages.';
-          settings.append(pinLabel,pinButton,messagingLabel,mediaLabel,callingLabel,code,note);
+          const screenLimitLabel=document.createElement('label'); screenLimitLabel.style.marginTop='.7rem'; screenLimitLabel.textContent='Daily screen-time limit (minutes; blank = unlimited)';
+          const screenLimitInput=document.createElement('input'); screenLimitInput.type='number'; screenLimitInput.min='1'; screenLimitInput.max='1440'; screenLimitInput.step='1'; screenLimitInput.inputMode='numeric'; screenLimitInput.placeholder='e.g. 120'; screenLimitInput.value=child.daily_screen_time_limit_minutes??''; screenLimitLabel.append(screenLimitInput);
+          const screenLimitButton=document.createElement('button'); screenLimitButton.type='button'; screenLimitButton.className='secondary'; screenLimitButton.textContent='Save screen-time limit';
+          screenLimitButton.addEventListener('click',async()=>{const raw=screenLimitInput.value.trim();const limit=raw===''?null:Number(raw);if(limit!==null&&(!Number.isInteger(limit)||limit<1||limit>1440)){say('Enter a daily limit between 1 and 1,440 minutes, or leave it blank for no limit.',true);return;}screenLimitButton.disabled=true;const result=await client.from('family_children').update({daily_screen_time_limit_minutes:limit}).eq('id',child.id).eq('parent_id',userId);screenLimitButton.disabled=false;if(result.error){say('Could not save screen-time limit: '+result.error.message,true);return;}say(limit===null?'Daily screen-time limit removed for '+child.child_name+'.':'Daily screen-time limit set to '+limit+' minutes for '+child.child_name+'.');child.daily_screen_time_limit_minutes=limit;limitSummary.textContent=limit?'Daily limit: '+limit+' minutes':'No daily limit set';});
+          settings.append(pinLabel,pinButton,messagingLabel,mediaLabel,callingLabel,screenLimitLabel,screenLimitButton,code,note);
           article.append(actions,play,messages,settings);list.append(article);
         });
         await loadKidsApprovals();
