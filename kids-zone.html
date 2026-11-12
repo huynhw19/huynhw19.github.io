@@ -81,6 +81,29 @@
   <div class="kids-video-grid"><div><h3 id="kids-video-title">Choose a video</h3><div id="kids-video-player" class="kids-video-player"><p class="muted">Your videos will play here.</p></div></div>
   <div><h3>My playlist</h3><ul id="kids-video-list" class="kids-video-list"><li class="muted">Loading…</li></ul></div></div>
 </section>
+<section class="storytelling-section" id="social-interaction" aria-labelledby="social-heading">
+  <span class="eyebrow">🤝 Connect • Listen • Include</span>
+  <div class="story-intro"><h2 id="social-heading">Social Interaction Studio 💬</h2>
+  <p>Practise the little things that help friendships grow: saying hello, taking turns, listening, including others, solving disagreements and asking a trusted adult for help.</p>
+  <p class="story-small">Choose a situation and think about what you could say or do. These pretend-play activities stay in this browser and do not contact other people. Grown-ups can explore the scenarios together with children.</p></div>
+  <div class="story-tools">
+    <div><label for="social-age">Age group</label><select id="social-age"><option value="3-5">Ages 3–5</option><option value="6-8">Ages 6–8</option><option value="9-10">Ages 9–10</option></select></div>
+    <div><label for="social-topic">Practise a skill</label><select id="social-topic"><option value="all">Surprise me</option><option value="friendship">Making friends</option><option value="listening">Listening and sharing</option><option value="feelings">Understanding feelings</option><option value="conflict">Kind problem-solving</option><option value="safety">Online safety</option><option value="help">Getting help</option></select></div>
+  </div>
+  <div class="story-panel" aria-live="polite">
+    <p id="social-situation" class="story-scene">A new child is sitting by themselves. What could you do?</p>
+    <div id="social-choices" class="story-choices">
+      <button type="button" data-social-choice="0">Invite them to join your game.</button>
+      <button type="button" data-social-choice="1">Laugh at them.</button>
+      <button type="button" data-social-choice="2">Ask a trusted adult how to help.</button>
+    </div>
+    <p id="social-feedback" class="story-activity-result" role="status" aria-live="polite">There can be more than one kind way to respond. Choose an answer to explore it.</p>
+    <div class="story-tools"><button type="button" id="social-next">🌟 Another situation</button><button type="button" id="social-reset" class="secondary">Try this one again</button></div>
+  </div>
+  <p class="story-small">Online reminder: be kind, keep personal details private, pause if something feels uncomfortable, and tell a trusted adult. Only use Kids Messages with friends approved by both families.</p>
+  <p id="social-messages-entry" hidden><a id="social-messages-link" href="#">Open parent-approved Kids Messages ✉️</a></p>
+</section>
+
 <div class="game-search" role="search">
   <label for="game-search">🔎 Find a game</label>
   <input id="game-search" type="search" placeholder="Search 10,000 games by name or topic…" autocomplete="off">
@@ -126,7 +149,7 @@
 <script src="family-screen-time.js"></script>
 <script>
 (()=> {
-const status=document.getElementById('status'),zone=document.getElementById('zone'),signout=document.getElementById('signout'),config=window.CONFIGKIT_AUTH||{};const childId=new URLSearchParams(location.search).get('child');let activeChildProfile=null;if(childId&&/^[0-9a-f-]{36}$/i.test(childId)){document.getElementById('kids-messages-link').href='kids-messages.html?child='+encodeURIComponent(childId);document.getElementById('kids-messages-entry').hidden=false;}
+const status=document.getElementById('status'),zone=document.getElementById('zone'),signout=document.getElementById('signout'),config=window.CONFIGKIT_AUTH||{};const childId=new URLSearchParams(location.search).get('child');let activeChildProfile=null;if(childId&&/^[0-9a-f-]{36}$/i.test(childId)){document.getElementById('kids-messages-link').href='kids-messages.html?child='+encodeURIComponent(childId);document.getElementById('kids-messages-entry').hidden=false;document.getElementById('social-messages-link').href='kids-messages.html?child='+encodeURIComponent(childId);document.getElementById('social-messages-entry').hidden=false;}
 const say=(message,error=false)=>{status.hidden=false;status.classList.toggle('error',error);status.textContent=message;};
 if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){say('Sign-in is not configured. Please contact the site owner.',true);return;}
 const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -317,6 +340,34 @@ ageFilter.addEventListener('change',filterGames);
 loadMore.addEventListener('click',()=>renderBatch(activeMatches||catalog));
 searchInput.addEventListener('input',filterGames);
 filterGames();
+
+// Social Interaction Studio: guided, offline practice scenarios (no child-generated content is uploaded).
+const socialScenarios=[
+ {topic:'friendship',age:'3-5',situation:'A new child is sitting by themselves. What could you do?',choices:[['Invite them to join your game.','A warm invitation helps someone feel welcome. They can say yes or no, and that is okay.',true],['Laugh at them.','Laughing can hurt feelings and make someone feel left out.',false],['Ask a trusted adult how to help.','A trusted grown-up can help you find a kind way to include someone.',true]]},
+ {topic:'listening',age:'3-5',situation:'Your friend is telling you about their favourite toy. What shows you are listening?',choices:[['Look towards them and let them finish.','Taking turns talking helps your friend feel heard.',true],['Talk over them.','Talking over someone makes it hard for them to share.',false],['Walk away without saying anything.','If you need a break, use kind words to let them know.',false]]},
+ {topic:'feelings',age:'6-8',situation:'A friend looks upset because their drawing did not turn out as they hoped. What might help?',choices:[['Ask if they would like to talk.','You noticed their feelings and offered support without pressuring them.',true],['Tell them they are being silly.','Everyone has feelings. Dismissing them can make things harder.',false],['Offer to make another drawing together.','A friendly offer can help, while letting them choose is important.',true]]},
+ {topic:'conflict',age:'6-8',situation:'You and a friend both want the same game first. What is a fair next step?',choices:[['Take turns or agree on a timer.','A fair plan helps both people have a turn.',true],['Grab it and refuse to share.','Taking things can make the disagreement bigger.',false],['Use calm words to explain what you want.','Calm words help others understand your point of view.',true]]},
+ {topic:'safety',age:'6-8',situation:'Someone you do not know online asks which school you go to. What should you do?',choices:[['Do not share it; tell a trusted adult.','School details are private. Stop the conversation and get help from a trusted adult.',true],['Tell them so they can be your friend.','People online may not be who they say they are. Keep school details private.',false],['Ask them for their school first.','It is safest not to exchange identifying details with strangers.',false]]},
+ {topic:'help',age:'9-10',situation:'A group chat message makes you feel worried or uncomfortable. What is a safe response?',choices:[['Pause, do not reply or forward it, and tell a trusted adult.','Pausing and getting help is a strong choice. You do not have to handle it alone.',true],['Keep it secret because it is probably nothing.','If something feels wrong, you can always talk to a trusted adult.',false],['Send an angry message back.','A heated reply can make things worse. Step away and ask for help.',false]]},
+ {topic:'friendship',age:'9-10',situation:'A classmate is often left out when teams are chosen. What could you do?',choices:[['Suggest making teams in a fair way that includes everyone.','You are helping create a welcoming group.',true],['Tell others not to let them play.','Excluding someone can hurt and does not solve the problem.',false],['Check in kindly and ask what they would like.','A kind check-in respects their feelings and choices.',true]]},
+ {topic:'safety',age:'3-5',situation:'A game or video shows something that makes you feel worried. What can you do?',choices:[['Stop and tell your grown-up.','You can always stop and ask a trusted grown-up for help.',true],['Keep watching even though you feel worried.','You do not need to keep watching something uncomfortable.',false],['Ask a grown-up to watch with you.','Watching together helps your grown-up guide you.',true]]}
+];
+const socialAge=document.getElementById('social-age'),socialTopic=document.getElementById('social-topic'),socialSituation=document.getElementById('social-situation'),socialChoices=document.getElementById('social-choices'),socialFeedback=document.getElementById('social-feedback');
+let currentSocial=null;
+function chooseSocialScenario(){
+ const age=socialAge.value,topic=socialTopic.value;
+ let options=socialScenarios.filter(s=>(s.age===age||age==='9-10'&&s.age==='6-8')&&(topic==='all'||s.topic===topic));
+ if(!options.length)options=socialScenarios.filter(s=>s.age===age);
+ currentSocial=options[Math.floor(Math.random()*options.length)];
+ socialSituation.textContent=currentSocial.situation;socialFeedback.textContent='Think about how each choice might make someone feel, then choose an answer.';
+ socialChoices.replaceChildren();
+ currentSocial.choices.forEach((choice,index)=>{const b=document.createElement('button');b.type='button';b.textContent=choice[0];b.addEventListener('click',()=>{socialFeedback.textContent=(choice[2]?'🌟 Kind idea! ':'💡 Let’s think about that. ')+choice[1];socialChoices.querySelectorAll('button').forEach(x=>x.disabled=true);});socialChoices.append(b);});
+}
+document.getElementById('social-next').addEventListener('click',chooseSocialScenario);
+document.getElementById('social-reset').addEventListener('click',chooseSocialScenario);
+socialAge.addEventListener('change',chooseSocialScenario);socialTopic.addEventListener('change',chooseSocialScenario);
+chooseSocialScenario();
+
 })();
 </script>
 </body>
