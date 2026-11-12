@@ -110,6 +110,47 @@
           settings.append(pinLabel,pinButton,messagingLabel,code,note);
           article.append(actions,play,messages,settings);list.append(article);
         });
+        await loadKidsApprovals();
+      }
+      async function loadKidsApprovals(){
+        requestsPanel.hidden=false;requestsList.replaceChildren();reportsList.replaceChildren();
+        const {data:requests,error}=await client.from('kids_friendships')
+          .select('id,status,child_a_id,child_b_id,parent_a_approved,parent_b_approved,child_a:family_children!kids_friendships_child_a_id_fkey(child_name,parent_id),child_b:family_children!kids_friendships_child_b_id_fkey(child_name,parent_id)')
+          .eq('status','pending').order('created_at',{ascending:false});
+        if(error){const p=document.createElement('p');p.className='muted';p.textContent='Friend requests could not be loaded.';requestsList.append(p);}
+        else {
+          (requests||[]).forEach(f=>{
+            const a=Array.isArray(f.child_a)?f.child_a[0]:f.child_a;
+            const b=Array.isArray(f.child_b)?f.child_b[0]:f.child_b;
+            const ownsA=a?.parent_id===userId,ownsB=b?.parent_id===userId;
+            const needs=(ownsA&&!f.parent_a_approved)||(ownsB&&!f.parent_b_approved);
+            if(!needs)return;
+            const row=document.createElement('div');row.className='child';
+            const p=document.createElement('p');
+            p.textContent=(a?.child_name||'Child')+' and '+(b?.child_name||'Child')+' want to be friends. '+((ownsA&&!f.parent_a_approved)?'Approve for '+a.child_name+'.':'Approve for '+b.child_name+'.');
+            const yes=document.createElement('button');yes.textContent='Approve';
+            const no=document.createElement('button');no.className='danger';no.textContent='Reject';
+            const act=async(approve)=>{
+              yes.disabled=no.disabled=true;
+              const result=await client.functions.invoke('kids-messaging',{body:{action:'approve_friendship',friendship_id:f.id,approve}});
+              if(result.error||result.data?.error){say(result.data?.error||result.error?.message||'Could not update request.',true);yes.disabled=no.disabled=false;return;}
+              say(approve?'Approval saved. The other family may still need to approve.':'Friend request rejected.');
+              await loadKidsApprovals();
+            };
+            yes.addEventListener('click',()=>act(true));no.addEventListener('click',()=>act(false));
+            row.append(p,yes,no);requestsList.append(row);
+          });
+          if(!requestsList.children.length){const p=document.createElement('p');p.className='muted';p.textContent='No friend requests need your approval.';requestsList.append(p);}
+        }
+        const {data:reports,error:reportError}=await client.from('kids_safety_reports')
+          .select('id,reason,details,status,created_at').eq('status','open').order('created_at',{ascending:false});
+        if(reportError||!reports?.length){const p=document.createElement('p');p.className='muted';p.textContent='No open safety reports.';reportsList.append(p);}
+        else reports.forEach(report=>{
+          const row=document.createElement('div');row.className='child';
+          const p=document.createElement('p');p.textContent='Reason: '+report.reason+'. '+(report.details||'No extra details provided.');
+          const small=document.createElement('p');small.className='muted';small.textContent=new Date(report.created_at).toLocaleString();
+          row.append(p,small);reportsList.append(row);
+        });
       }
       cancel.addEventListener('click',()=>{reset();say('Editing cancelled.');});
       form.addEventListener('submit',async event=>{
