@@ -99,11 +99,13 @@ window.CONFIGKIT_AUTH = {
       const discussionLink = account.querySelector('.builder-discussion-link');
       const settingsLink = account.querySelector('.account-settings-link');
       const organizationLink = account.querySelector('.organization-dashboard-link');
+      const mailLink = account.querySelector('.configkit-mail-link');
       if (account.hidden) {
         dashboardLink?.remove();
         discussionLink?.remove();
         settingsLink?.remove();
         organizationLink?.remove();
+        mailLink?.remove();
         return;
       }
       if (!dashboardLink) {
@@ -127,6 +129,14 @@ window.CONFIGKIT_AUTH = {
         link.className = 'account-settings-link';
         link.href = 'account-settings.html';
         link.textContent = 'Account settings →';
+        link.style.cssText = 'display:block;margin-top:6px;font-weight:600';
+        account.append(document.createElement('br'), link);
+      }
+      if (!mailLink) {
+        const link = document.createElement('a');
+        link.className = 'configkit-mail-link';
+        link.href = 'mail.html';
+        link.textContent = 'Open ConfigKit Mail →';
         link.style.cssText = 'display:block;margin-top:6px;font-weight:600';
         account.append(document.createElement('br'), link);
       }
