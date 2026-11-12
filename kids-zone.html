@@ -81,10 +81,11 @@ const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnon
 
 async function loadKidsVideos(userId){
   const message=document.getElementById('kids-video-message'),list=document.getElementById('kids-video-list'),player=document.getElementById('kids-video-player'),title=document.getElementById('kids-video-title');
-  const profileQuery=client.from('family_children').select('id,child_name').eq('child_user_id',userId);
-  const {data:profiles,error:profileError}=childId&&/^[0-9a-f-]{36}$/i.test(childId)?await profileQuery.eq('id',childId).limit(1):await profileQuery.limit(1);
-  const profile=profiles?.[0];
-  if(profileError||!profile){message.textContent='Parent-approved videos appear here when you are signed in with your own child profile.';list.replaceChildren();const li=document.createElement('li');li.className='muted';li.textContent='No child profile is linked to this sign-in.';list.append(li);return;}
+  const profileQuery=client.from('family_children').select('id,child_name,parent_id,child_user_id');
+  const {data:profile,error:profileError}=childId&&/^[0-9a-f-]{36}$/i.test(childId)
+    ?await profileQuery.eq('id',childId).maybeSingle()
+    :await profileQuery.eq('child_user_id',userId).maybeSingle();
+  if(profileError||!profile||(profile.parent_id!==userId&&profile.child_user_id!==userId)){message.textContent='Parent-approved videos appear here when you open your own child profile from the family dashboard or sign in with your child account.';list.replaceChildren();const li=document.createElement('li');li.className='muted';li.textContent='No matching child profile is available for this sign-in.';list.append(li);return;}
   const {data:videos,error}=await client.from('kids_approved_videos').select('id,title,youtube_video_id').eq('child_id',profile.id).order('created_at',{ascending:true});
   if(error){message.textContent='Your playlist could not be loaded. Please ask a parent to check the family dashboard.';return;}
   message.textContent='These videos were selected by your parent for '+profile.child_name+'.';
