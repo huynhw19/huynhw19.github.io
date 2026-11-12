@@ -159,6 +159,19 @@
               recent.slice(0,5).forEach(row=>{const item=document.createElement('li');item.textContent=row.game_title+' · Ages '+row.age_band+' · '+(row.is_correct?'Correct':'Try again')+' · '+new Date(row.played_at).toLocaleDateString();recentList.append(item);});
             }else{const item=document.createElement('li');item.textContent='No completed learning challenges yet.';recentList.append(item);}
           }
+          const storyBox=document.createElement('div');storyBox.className='child';storyBox.style.background='#fbfaff';
+          const storyHeading=document.createElement('h4');storyHeading.textContent='Interactive storytelling · Stories and activities';
+          const storySummary=document.createElement('p');storySummary.className='muted';storySummary.textContent='Loading storytelling activity…';
+          const storyList=document.createElement('ul');storyList.className='muted';
+          const storyLink=document.createElement('a');storyLink.href='kids-zone.html?child='+encodeURIComponent(child.id)+'#interactive-storytelling';storyLink.textContent='Open Storytelling Studio';storyLink.style.display='inline-block';storyLink.style.marginTop='.5rem';
+          storyBox.append(storyHeading,storySummary,storyList,storyLink);article.append(storyBox);
+          const storyResult=await client.from('family_storytelling_progress').select('content_type,content_id,content_title,age_band,completed,favourite,ending,updated_at',{count:'exact'}).eq('child_id',child.id).order('updated_at',{ascending:false}).limit(100);
+          if(storyResult.error){storySummary.textContent='Storytelling activity is unavailable. Apply the latest Supabase migration to enable family progress.';}
+          else{const records=storyResult.data||[],stories=records.filter(row=>row.content_type==='story'),activities=records.filter(row=>row.content_type==='activity'),completedStories=stories.filter(row=>row.completed).length,completedActivities=activities.filter(row=>row.completed).length,favourites=records.filter(row=>row.favourite);
+            storySummary.textContent='Stories completed: '+completedStories+' · Activities completed: '+completedActivities+' · Favourites: '+favourites.length;
+            const recentRows=[...records].slice(0,6);if(recentRows.length){recentRows.forEach(row=>{const item=document.createElement('li');item.textContent=(row.content_type==='story'?'📖 ':'🎨 ')+row.content_title+' · Ages '+row.age_band+(row.completed?' · Completed':' · Saved')+(row.favourite?' · ★ Favourite':'')+' · '+new Date(row.updated_at).toLocaleDateString();storyList.append(item);});}else{const item=document.createElement('li');item.textContent='No stories or activities completed yet.';storyList.append(item);}
+            if(favourites.length){const fav=document.createElement('p');fav.className='muted';fav.textContent='Favourite stories and activities: '+favourites.slice(0,4).map(row=>row.content_title).join(' · ');storyBox.append(fav);}
+          }
           const actions=document.createElement('div'); actions.className='actions';
           const edit=document.createElement('button'); edit.type='button'; edit.className='secondary'; edit.textContent='Edit';
           edit.addEventListener('click',()=>{editingId=child.id;field('child-name').value=child.child_name;field('child-age').value=child.age_years ?? '';field('child-grade').value=child.grade || '';field('child-notes').value=child.notes || '';title.textContent='Edit child profile';save.textContent='Save changes';cancel.hidden=false;form.scrollIntoView({behavior:'smooth',block:'start'});});
