@@ -159,7 +159,8 @@
  document.getElementById('voice-call-button').addEventListener('click',()=>beginCall(false));
  document.getElementById('video-call-button').addEventListener('click',()=>beginCall(true));
  document.getElementById('hangup-button').addEventListener('click',()=>endCall(true));
-\n document.getElementById('friend-form').addEventListener('submit',async e=>{
+ 
+ document.getElementById('friend-form').addEventListener('submit',async e=>{
    e.preventDefault();const code=document.getElementById('friend-code').value.trim().toUpperCase();const result=document.getElementById('friend-result');
    const {data,error}=await child.functions.invoke('kids-messaging',{body:{action:'send_friend_request',friend_code:code}});
    result.textContent=error?(error.message||'Could not send request.'):data?.error||'Friend request sent. Both families need to approve it.';
