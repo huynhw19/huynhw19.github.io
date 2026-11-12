@@ -151,7 +151,7 @@ const gameTypes=[
 const gameGrid=document.querySelector('.games');
 const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count');
 const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
-const catalog=Array.from({length:99980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t, multiplayer:n<5020, search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+const catalog=Array.from({length:9980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t, multiplayer:n<5020, search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
 let shown=0,activeMatches=null;
 function makeCard(item){
   const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
