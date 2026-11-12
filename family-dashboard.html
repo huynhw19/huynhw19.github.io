@@ -60,7 +60,7 @@
       <h2>Friend requests and safety reports</h2>
       <p class="muted">Friendships become active only after both families approve. Reports are visible to the families involved.</p>
       <div id="kids-requests-list"></div>
-      <h3>Safety reports</h3><div id="kids-reports-list"></div>
+      <h3>Approved friendships</h3><div id="kids-approved-list"></div><h3>Safety reports</h3><div id="kids-reports-list"></div>
     </section>
   </main>
   <footer>ConfigKit · Family information is private to the parent account.</footer>
@@ -72,7 +72,7 @@
       const accountLabel = document.getElementById('account-label');
       const creator = document.getElementById('creator');
       const panel = document.getElementById('children-panel');
-      const list = document.getElementById('children-list');\n      const requestsPanel=document.getElementById('kids-requests');\n      const requestsList=document.getElementById('kids-requests-list');\n      const reportsList=document.getElementById('kids-reports-list');
+      const list = document.getElementById('children-list');\n      const requestsPanel=document.getElementById('kids-requests');\n      const requestsList=document.getElementById('kids-requests-list');\n      const reportsList=document.getElementById('kids-reports-list');\n      const approvedList=document.getElementById('kids-approved-list');
       const form = document.getElementById('child-form');
       const status = document.getElementById('status');
       const cancel = document.getElementById('cancel-edit');
@@ -148,6 +148,20 @@
           });
           if(!requestsList.children.length){const p=document.createElement('p');p.className='muted';p.textContent='No friend requests need your approval.';requestsList.append(p);}
         }
+        approvedList.replaceChildren();
+        const {data:approved,error:approvedError}=await client.from('kids_friendships')
+          .select('id,child_a_id,child_b_id,child_a:family_children!kids_friendships_child_a_id_fkey(child_name,parent_id),child_b:family_children!kids_friendships_child_b_id_fkey(child_name,parent_id)')
+          .eq('status','approved').order('created_at',{ascending:false});
+        if(approvedError||!approved?.length){const p=document.createElement('p');p.className='muted';p.textContent='No approved friendships yet.';approvedList.append(p);}
+        else approved.forEach(f=>{
+          const a=Array.isArray(f.child_a)?f.child_a[0]:f.child_a;const b=Array.isArray(f.child_b)?f.child_b[0]:f.child_b;
+          if(a?.parent_id!==userId&&b?.parent_id!==userId)return;
+          const row=document.createElement('div');row.className='child';const p=document.createElement('p');
+          p.textContent=(a?.child_name||'Child')+' ↔ '+(b?.child_name||'Child');
+          const remove=document.createElement('button');remove.className='danger';remove.textContent='Remove friendship';
+          remove.addEventListener('click',async()=>{if(!window.confirm('Remove this friendship?'))return;remove.disabled=true;const result=await client.functions.invoke('kids-messaging',{body:{action:'parent_remove_friendship',friendship_id:f.id}});if(result.error||result.data?.error){say(result.data?.error||result.error?.message||'Could not remove friendship.',true);remove.disabled=false;return;}say('Friendship removed.');await loadKidsApprovals();});
+          row.append(p,remove);approvedList.append(row);
+        });
         const {data:reports,error:reportError}=await client.from('kids_safety_reports')
           .select('id,reason,details,status,created_at').eq('status','open').order('created_at',{ascending:false});
         if(reportError||!reports?.length){const p=document.createElement('p');p.className='muted';p.textContent='No open safety reports.';reportsList.append(p);}
