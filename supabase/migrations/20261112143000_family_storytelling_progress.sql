@@ -15,15 +15,15 @@ create table if not exists public.family_storytelling_progress (
 
 alter table public.family_storytelling_progress enable row level security;
 
-drop policy if exists "Parents can view children's storytelling progress" on public.family_storytelling_progress;
-create policy "Parents can view children's storytelling progress"
+drop policy if exists "Family members can view storytelling progress" on public.family_storytelling_progress;
+create policy "Family members can view storytelling progress"
 on public.family_storytelling_progress
 for select to authenticated
 using (
   exists (
     select 1 from public.family_children c
     where c.id = family_storytelling_progress.child_id
-      and c.parent_id = (select auth.uid())
+      and (c.parent_id = (select auth.uid()) or c.child_user_id = (select auth.uid()))
   )
 );
 
