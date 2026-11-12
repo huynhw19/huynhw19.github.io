@@ -44,6 +44,17 @@
         <button class="text-button" id="resetPassword" type="button">Forgot password?</button>
         <div class="form-actions"><button class="provider" id="emailSubmit" type="submit">Log in with email</button></div>
       </form>
+      <section id="password-recovery" class="education-note" hidden aria-labelledby="recovery-title">
+        <h2 id="recovery-title">Choose a new password</h2>
+        <p class="muted">Your recovery link has been verified. Choose a new password for your ConfigKit account.</p>
+        <form id="password-recovery-form">
+          <label for="new-password">New password</label>
+          <input id="new-password" name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" required>
+          <label for="confirm-new-password">Confirm new password</label>
+          <input id="confirm-new-password" name="confirmNewPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" required>
+          <div class="form-actions"><button id="save-new-password" type="submit">Save new password</button><button class="secondary" id="cancel-password-recovery" type="button">Cancel</button></div>
+        </form>
+      </section>
       <div class="divider">or continue with</div>
       <div class="providers">
         <button class="provider secondary" id="github" type="button" disabled>Continue with GitHub</button>
@@ -97,6 +108,9 @@
       const password = document.getElementById('password');
       const emailSubmit = document.getElementById('emailSubmit');
       const resetPassword = document.getElementById('resetPassword');
+      const recoveryPanel = document.getElementById('password-recovery');
+      const recoveryForm = document.getElementById('password-recovery-form');
+      let passwordRecoveryActive = false;
       const loginTab = document.getElementById('loginTab');
       const signupTab = document.getElementById('signupTab');
       const accountType = document.getElementById('accountType');
@@ -211,6 +225,7 @@
       }
 
       async function renderSessionOnce() {
+        if (passwordRecoveryActive) return;
         const {data, error} = await client.auth.getSession();
         if (error) { setStatus('Could not read the sign-in session. Please try again.', true); return; }
         if (data.session) {
@@ -529,6 +544,54 @@
         } catch (error) { setStatus(error.message || 'Authentication failed. Please try again.', true); }
         finally { setBusy(false); }
       });
+      recoveryForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const nextPassword = document.getElementById('new-password');
+        const confirmation = document.getElementById('confirm-new-password');
+        const button = document.getElementById('save-new-password');
+        if (!recoveryForm.reportValidity()) return;
+        if (nextPassword.value !== confirmation.value) {
+          setStatus('The passwords do not match. Please enter them again.', true);
+          confirmation.focus();
+          return;
+        }
+        button.disabled = true;
+        setStatus('Updating your password…');
+        try {
+          const {error} = await client.auth.updateUser({password:nextPassword.value});
+          if (error) throw error;
+          passwordRecoveryActive = false;
+          nextPassword.value = '';
+          confirmation.value = '';
+          recoveryPanel.hidden = true;
+          setStatus('Your password has been updated. Signing you in…');
+          await renderSession();
+        } catch (error) {
+          setStatus(error.message || 'Could not update your password. Request a new recovery email and try again.', true);
+        } finally { button.disabled = false; }
+      });
+      document.getElementById('cancel-password-recovery').addEventListener('click', async () => {
+        passwordRecoveryActive = false;
+        await client.auth.signOut({scope:'local'});
+        recoveryPanel.hidden = true;
+        form.hidden = false;
+        setMode('login');
+        setStatus('Password recovery cancelled. You can sign in again.');
+      });
+      function showPasswordRecovery() {
+        passwordRecoveryActive = true;
+        recoveryPanel.hidden = false;
+        form.hidden = true;
+        document.querySelector('.tabs').hidden = true;
+        document.querySelector('.divider').hidden = true;
+        document.querySelectorAll('.providers').forEach(node => node.hidden = true);
+        document.getElementById('mfa-challenge').hidden = true;
+        document.getElementById('email-mfa-challenge').hidden = true;
+        account.hidden = true;
+        signout.hidden = true;
+        document.getElementById('new-password').focus();
+        setStatus('Password recovery verified. Enter and confirm your new password.');
+      }
       resetPassword.addEventListener('click', async () => {
         if (!email.value.trim() || !email.checkValidity()) {
           email.focus(); setStatus('Enter a valid email address first, and then choose “Forgot password?”.', true); return;
@@ -573,7 +636,13 @@
         setMode('login'); await renderSession();
       });
       github.disabled = false; microsoft.disabled = true;
-      client.auth.onAuthStateChange((_event, session) => { if (session) queueMicrotask(() => { void renderSession(); }); });
+      client.auth.onAuthStateChange((event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          queueMicrotask(showPasswordRecovery);
+          return;
+        }
+        if (session && !passwordRecoveryActive) queueMicrotask(() => { void renderSession(); });
+      });
       const params = new URLSearchParams(window.location.search);
       if (params.has('error_description') || params.has('error')) {
         sessionStorage.removeItem(accountIntentKey);
