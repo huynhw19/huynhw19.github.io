@@ -23,6 +23,9 @@
 .generated-game .mini-result{min-height:1.5rem;font-weight:750;color:#4d3aa6;margin:.6rem 0 0}
 
 .kids-video-section{margin:1.3rem 0;padding:1.25rem;background:#fff;border:1px solid var(--line);border-radius:1.25rem;box-shadow:var(--shadow)}.kids-video-tag{display:inline-block;padding:.25rem .65rem;border-radius:999px;background:var(--green);font-size:.85rem;font-weight:800}.kids-video-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(220px,1fr);gap:1rem}.kids-video-player{aspect-ratio:16/9;background:#17231f;border-radius:.8rem;overflow:hidden;display:grid;place-items:center;color:white}.kids-video-player iframe{width:100%;height:100%;border:0}.kids-video-list{list-style:none;padding:0;margin:0;display:grid;gap:.5rem}.kids-video-list li{padding:.55rem;border:1px solid var(--line);border-radius:.65rem}.kids-video-list button{width:100%;text-align:left;background:#ece9ff;color:#4535a0}@media(max-width:650px){.kids-video-grid{grid-template-columns:1fr}}
+
+.storytelling-section{margin:1.3rem 0;padding:clamp(1rem,3vw,1.5rem);background:linear-gradient(135deg,#fff8fc,#f2f0ff 55%,#eff9ff);border:1px solid var(--line);border-radius:1.25rem;box-shadow:var(--shadow)}
+.storytelling-section .story-intro{max-width:760px}.story-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0}.story-tabs button[aria-pressed=true]{background:#4535a0;color:#fff}.story-panel{padding:1rem;background:#fff;border:1px solid var(--line);border-radius:1rem;margin-top:.75rem}.story-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.65rem;margin:.8rem 0}.story-tools label{display:block;font-weight:800}.story-tools input,.story-tools select{width:100%;padding:.75rem;border:2px solid #d9d4f7;border-radius:.75rem;font:inherit;background:#fff;color:var(--ink)}.story-scene{font-size:1.08rem;line-height:1.75;white-space:pre-line;margin:.8rem 0}.story-choices{display:grid;gap:.55rem}.story-choices button{text-align:left;background:#eaf3ff;color:#294e7a}.story-meta{font-size:.9rem;color:var(--muted)}.story-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:.7rem;margin:.8rem 0}.story-card{padding:.9rem;border:1px solid var(--line);border-radius:.8rem;background:#fff}.story-card h3{margin:.1rem 0 .3rem;font-size:1.05rem}.story-card p{margin:.25rem 0 .7rem;color:var(--muted)}.story-card button{width:100%}.story-activity-result{min-height:1.5rem;font-weight:750;color:#4d3aa6;margin:.7rem 0}.story-small{font-size:.92rem;color:var(--muted)}@media(prefers-reduced-motion:reduce){.storytelling-section *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -32,6 +35,45 @@
 <div id="zone" hidden>
 <section class="hero"><span class="eyebrow">✦ Play • Learn • Have fun</span><h1>Welcome to the Kids Zone! 🎈</h1><p>Pick a game and give it a go. These games run in your browser. For parent-approved chats with friends, open Kids Messages.</p><p class="muted">Remember to take breaks and ask a parent or guardian before using any website or sharing information online.</p><p id="kids-messages-entry" hidden><a id="kids-messages-link" href="#">Open Kids Messages ✉️</a></p></section>
 
+<section class="storytelling-section" id="interactive-storytelling" aria-labelledby="storytelling-heading">
+  <span class="eyebrow">📚 Imagine • Choose • Create</span>
+  <div class="story-intro"><h2 id="storytelling-heading">Interactive Storytelling Studio ✨</h2>
+  <p>Explore 5,000 choose-your-own-adventure stories and 5,000 creative storytelling activities. Make kind, thoughtful choices, invent characters and discover different endings.</p>
+  <p class="story-small">Made for ages 3–10. Stories stay in this browser session; never add your full name, address, school, passwords or other private information.</p></div>
+  <div class="story-tabs" role="group" aria-label="Storytelling tools">
+    <button type="button" id="story-tab-read" aria-pressed="true">📖 Story adventures</button>
+    <button type="button" id="story-tab-create" aria-pressed="false">🎨 Story activities</button>
+  </div>
+  <div id="story-reader-panel" class="story-panel">
+    <div class="story-tools">
+      <div><label for="story-search">Find a story</label><input id="story-search" type="search" placeholder="Try dragons, ocean, kindness…"></div>
+      <div><label for="story-age">Age group</label><select id="story-age"><option value="">All ages</option><option value="3-5">Ages 3–5</option><option value="6-8">Ages 6–8</option><option value="9-10">Ages 9–10</option></select></div>
+    </div>
+    <p id="story-count" class="story-meta" aria-live="polite">5,000 stories ready to explore.</p>
+    <div id="story-feature" class="story-panel" aria-live="polite">
+      <h3 id="story-title">The Little Lantern Adventure</h3><p id="story-scene" class="story-scene">Choose a story to begin your adventure.</p>
+      <div id="story-choices" class="story-choices"><button type="button" id="story-start-feature">Start a surprise story</button></div>
+      <div class="story-tools"><button type="button" id="story-next" class="secondary">Try another story</button><button type="button" id="story-restart" class="secondary">Restart this story</button></div>
+      <p id="story-ending" class="story-meta" role="status"></p>
+    </div>
+    <div id="story-list" class="story-card-grid" aria-label="Story collection"></div>
+    <button type="button" id="story-load-more" class="secondary">Show more stories</button>
+  </div>
+  <div id="story-activity-panel" class="story-panel" hidden>
+    <div class="story-tools">
+      <div><label for="activity-search">Find an activity</label><input id="activity-search" type="search" placeholder="Try drawing, characters, poems…"></div>
+      <div><label for="activity-age">Age group</label><select id="activity-age"><option value="">All ages</option><option value="3-5">Ages 3–5</option><option value="6-8">Ages 6–8</option><option value="9-10">Ages 9–10</option></select></div>
+    </div>
+    <p id="activity-count" class="story-meta" aria-live="polite">5,000 creative activities ready.</p>
+    <div class="story-panel"><p id="activity-prompt" class="story-scene">Pick an activity to get your imagination started!</p>
+      <div class="story-tools"><button type="button" id="activity-new">🎲 Surprise me</button><button type="button" id="activity-hint" class="secondary">Give me a hint</button></div>
+      <p id="activity-hint-text" class="story-small" aria-live="polite"></p>
+    </div>
+    <div id="activity-list" class="story-card-grid" aria-label="Creative activity collection"></div>
+    <button type="button" id="activity-load-more" class="secondary">Show more activities</button>
+  </div>
+  <p class="story-small">Grown-ups: explore together, let children lead the story, and talk about feelings, safe choices and asking a trusted adult for help.</p>
+</section>
 
 <section class="kids-video-section" id="kids-video-library" aria-labelledby="kids-video-heading">
   <span class="kids-video-tag">Parent-approved videos</span><h2 id="kids-video-heading">📺 My Videos</h2>
@@ -148,6 +190,50 @@ quiz('facts',[{q:'How many days are in a week?',options:['5','7','10'],a:'7'},{q
 let targetPair=[];function newTarget(){const a=1+Math.floor(Math.random()*9),b=10-a,extras=[Math.floor(Math.random()*9)+1,Math.floor(Math.random()*9)+1];targetPair=[a,b];const values=[a,b,...extras].sort(()=>Math.random()-.5),box=document.getElementById('target-choices');box.replaceChildren();let selected=[];values.forEach(n=>{const btn=document.createElement('button');btn.type='button';btn.textContent=n;btn.addEventListener('click',()=>{if(selected.includes(btn)||selected.length===2)return;selected.push(btn);btn.disabled=true;if(selected.length===2){const sum=selected.reduce((s,x)=>s+Number(x.textContent),0);document.getElementById('target-result').textContent=sum===10?'🎉 Ten! You found the pair.':'Not ten this time—try a new set!';}});box.append(btn);});document.getElementById('target-result').textContent='Pick two numbers that make 10.';}document.getElementById('target-next').addEventListener('click',newTarget);newTarget();
 let treasure=0;function newChests(){treasure=Math.floor(Math.random()*3);const box=document.getElementById('chest-choices');box.replaceChildren();for(let i=0;i<3;i++){const b=document.createElement('button');b.type='button';b.textContent='🎁 Chest '+(i+1);b.addEventListener('click',()=>{document.getElementById('chest-result').textContent=i===treasure?'💎 You found the treasure!':'🙈 Empty chest! Try another shuffle.';});box.append(b);}document.getElementById('chest-result').textContent='Pick a chest!';}document.getElementById('chest-next').addEventListener('click',newChests);newChests();
 
+
+
+/* Interactive storytelling: deterministic, child-friendly catalogues with local-only play. */
+const storyCharacters=['Milo the mouse','Asha the astronaut','Pip the penguin','Luna the little dragon','Kai the koala','Nia the nature explorer','Toby the turtle','Zara the zookeeper','Finn the fox','Maya the moon gardener'];
+const storyPlaces=['a moonlit garden','a friendly underwater city','a floating cloud village','a magical library','a quiet forest','a colourful space station','a seaside lighthouse','a secret dinosaur valley','a snowy mountain village','an enchanted music meadow'];
+const storyObjects=['a glowing compass','a tiny silver key','a map with dancing stars','a singing shell','a seed that sparkles','a mysterious storybook','a warm golden lantern','a puzzle-shaped crystal','a friendly robot','a rainbow ribbon'];
+const storyChallenges=['help a lost friend find their way home','restore the colours to the village garden','discover why the stars have gone quiet','prepare a welcoming party for a new neighbour','find a gentle way to wake a sleepy giant','return a borrowed treasure to its owner','help the animals make a safe crossing','solve a kind mystery before sunset','build a bridge so everyone can join in','find a way to share a very special discovery'];
+const storyAge=i=>i%3===0?'3-5':i%3===1?'6-8':'9-10';
+const storyCatalog=Array.from({length:5000},(_,i)=>({id:i+1,age:storyAge(i),character:storyCharacters[i%storyCharacters.length],place:storyPlaces[Math.floor(i/10)%storyPlaces.length],object:storyObjects[Math.floor(i/100)%storyObjects.length],challenge:storyChallenges[Math.floor(i/1000)%storyChallenges.length],title:['The '+['Brave','Curious','Kind','Wonderful','Little','Bright'][i%6]+' '+['Lantern','Adventure','Discovery','Secret','Journey','Promise'][Math.floor(i/6)%6],'The Mystery of '+['Moonlight','The Hidden Garden','The Singing River','The Starry Map','The Friendly Dragon'][Math.floor(i/36)%5]][i%2]}));
+const activityPrompts=[
+{title:'Invent a new friend',prompt:'Create a character who has one surprising talent. What are they good at, what makes them laugh, and how do they help someone?',hint:'Start with a name, a favourite colour and one special skill.',age:'3-5'},
+{title:'Draw a story map',prompt:'Draw a map of an imaginary place. Add three places to visit and a safe path between them.',hint:'Try a bridge, a garden and a cosy place to rest.',age:'3-5'},
+{title:'A kindness quest',prompt:'Make up a story about someone who notices a friend needs help. What kind thing could they do?',hint:'Think about listening, sharing or asking a trusted grown-up.',age:'3-5'},
+{title:'Choose a magical object',prompt:'Imagine an object with a gentle magical power. Who finds it, and how do they use it to help?',hint:'It could make plants grow, mend toys or help people understand animals.',age:'6-8'},
+{title:'Three doors, three choices',prompt:'Write a scene with three doors. Each door leads to a different adventure. Describe what happens after each choice.',hint:'Give each door a clue: a sound, a colour or a friendly sign.',age:'6-8'},
+{title:'A story in six sentences',prompt:'Tell a complete story in six sentences: introduce a character, show a problem, try two ideas and finish with a hopeful ending.',hint:'Use “First”, “Then”, “But”, “So” and “Finally”.',age:'6-8'},
+{title:'Invent a new planet',prompt:'Design a planet with its own landscape, creatures and weather. What rules help visitors care for it?',hint:'Think about clean water, safe habitats and welcoming visitors.',age:'9-10'},
+{title:'Two points of view',prompt:'Retell a small mystery from two characters’ perspectives. What does each character notice or misunderstand?',hint:'Give both characters a fair reason for what they think.',age:'9-10'},
+{title:'Build a better ending',prompt:'Choose a familiar kind of adventure and write an ending where teamwork solves the problem without anyone being left out.',hint:'Let every character contribute one useful idea.',age:'9-10'},
+{title:'Turn a sound into a story',prompt:'Choose three sounds you can safely make or imagine. Build a story where each sound is an important clue.',hint:'Try a tap, a rustle and a gentle hum.',age:'6-8'}
+];
+const activityCatalog=Array.from({length:5000},(_,i)=>{const base=activityPrompts[i%activityPrompts.length];return {id:i+1,title:base.title+' '+(i+1),prompt:base.prompt,hint:base.hint,age:base.age,search:(base.title+' '+base.prompt+' '+base.hint+' '+(i+1)).toLowerCase()};});
+const storyTabRead=document.getElementById('story-tab-read'),storyTabCreate=document.getElementById('story-tab-create'),readerPanel=document.getElementById('story-reader-panel'),activityPanel=document.getElementById('story-activity-panel');
+function setStoryTab(which){const read=which==='read';readerPanel.hidden=!read;activityPanel.hidden=read;storyTabRead.setAttribute('aria-pressed',String(read));storyTabCreate.setAttribute('aria-pressed',String(!read));}
+storyTabRead.addEventListener('click',()=>setStoryTab('read'));storyTabCreate.addEventListener('click',()=>setStoryTab('create'));
+let activeStory=null,storyStage=0,storyVisible=0,storyMatches=storyCatalog;
+const storyTitle=document.getElementById('story-title'),storyScene=document.getElementById('story-scene'),storyChoices=document.getElementById('story-choices'),storyEnding=document.getElementById('story-ending');
+function showStoryChoices(options){storyChoices.replaceChildren();options.forEach(option=>{const button=document.createElement('button');button.type='button';button.textContent=option.label;button.addEventListener('click',()=>advanceStory(option.path));storyChoices.append(button);});}
+function startStory(story){activeStory=story;storyStage=0;storyTitle.textContent=story.title+' · Story '+story.id;storyEnding.textContent='Ages '+story.age+' · Make choices to shape the adventure.';storyScene.textContent=story.character+' visits '+story.place+'. They discover '+story.object+' and learn that they must '+story.challenge+'. What should happen first?';showStoryChoices([{label:'🌱 Ask a new friend for help',path:'team'},{label:'🔎 Look carefully for a clue',path:'clue'},{label:'💡 Think of a kind and creative idea',path:'idea'}]);}
+function advanceStory(path){if(!activeStory)return;storyStage++;if(storyStage===1){const first={team:'A new friend arrives with a thoughtful suggestion. Together, they listen carefully and make a plan.',clue:'A small clue appears nearby. It points towards a safe place where someone may know more.',idea:'A creative idea begins to work. The character tests it gently and learns something surprising.'};storyScene.textContent=first[path]+' Now '+activeStory.character+' has another choice to make.';showStoryChoices([{label:'🤝 Include everyone in the plan',path:'include'},{label:'🧭 Take the careful route together',path:'careful'},{label:'🎨 Try a different creative solution',path:'creative'}]);return;}
+const endings={include:'Everyone gets a part to play. The group '+activeStory.challenge+'. They celebrate by thanking one another and making sure nobody is left out.',careful:'The friends take their time, check that the path is safe and ask a trusted guide when they need help. Their teamwork helps them '+activeStory.challenge+'.',creative:'The new idea brings a happy surprise. The friends work together to '+activeStory.challenge+'. They learn that mistakes can be useful clues.'};
+storyScene.textContent=endings[path]+'\n\nThe adventure ends with a warm celebration at '+activeStory.place+'.';storyEnding.textContent='🌟 A hopeful ending! Every choice can teach us something. Try another path or restart to explore a different ending.';showStoryChoices([{label:'📖 Read another adventure',path:'again'},{label:'🔁 Restart this story',path:'restart'}]);}
+storyChoices.addEventListener('click',e=>{const button=e.target.closest('button');if(button&&button.textContent.includes('another'))startStory(storyCatalog[(activeStory.id+136)%5000]);if(button&&button.textContent.includes('Restart'))startStory(activeStory);});
+document.getElementById('story-start-feature').addEventListener('click',()=>startStory(storyCatalog[Math.floor(Math.random()*storyCatalog.length)]));
+document.getElementById('story-next').addEventListener('click',()=>startStory(storyCatalog[Math.floor(Math.random()*storyCatalog.length)]));
+document.getElementById('story-restart').addEventListener('click',()=>{if(activeStory)startStory(activeStory);});
+function renderStories(reset=false){if(reset){storyVisible=0;document.getElementById('story-list').replaceChildren();}const list=document.getElementById('story-list'),batch=storyMatches.slice(storyVisible,storyVisible+12);batch.forEach(story=>{const card=document.createElement('article');card.className='story-card';const h=document.createElement('h3');h.textContent='📘 '+story.title;const p=document.createElement('p');p.textContent=story.character+' · Ages '+story.age;const b=document.createElement('button');b.type='button';b.textContent='Read this story';b.addEventListener('click',()=>{startStory(story);document.getElementById('story-feature').scrollIntoView({behavior:'smooth',block:'nearest'});});card.append(h,p,b);list.append(card);});storyVisible+=batch.length;document.getElementById('story-load-more').hidden=storyVisible>=storyMatches.length;document.getElementById('story-count').textContent='Showing '+storyVisible.toLocaleString()+' of '+storyMatches.length.toLocaleString()+' matching stories · 5,000 in the collection.';}
+function filterStories(){const q=document.getElementById('story-search').value.trim().toLowerCase(),age=document.getElementById('story-age').value;storyMatches=storyCatalog.filter(s=>(!age||s.age===age)&&(!q||(s.title+' '+s.character+' '+s.place+' '+s.challenge).toLowerCase().includes(q)));renderStories(true);}
+document.getElementById('story-search').addEventListener('input',filterStories);document.getElementById('story-age').addEventListener('change',filterStories);document.getElementById('story-load-more').addEventListener('click',()=>renderStories());filterStories();startStory(storyCatalog[0]);
+let activityVisible=0,activityMatches=activityCatalog,activeActivity=null;
+function chooseActivity(activity){activeActivity=activity;document.getElementById('activity-prompt').textContent='Activity '+activity.id+': '+activity.title+'\n\n'+activity.prompt;document.getElementById('activity-hint-text').textContent='';}
+function renderActivities(reset=false){if(reset){activityVisible=0;document.getElementById('activity-list').replaceChildren();}const list=document.getElementById('activity-list');activityMatches.slice(activityVisible,activityVisible+12).forEach(activity=>{const card=document.createElement('article');card.className='story-card';const h=document.createElement('h3');h.textContent='✏️ '+activity.title;const p=document.createElement('p');p.textContent='Ages '+activity.age+' · Activity '+activity.id;const b=document.createElement('button');b.type='button';b.textContent='Try this activity';b.addEventListener('click',()=>chooseActivity(activity));card.append(h,p,b);list.append(card);});activityVisible+=Math.min(12,activityMatches.length-activityVisible);document.getElementById('activity-load-more').hidden=activityVisible>=activityMatches.length;document.getElementById('activity-count').textContent='Showing '+activityVisible.toLocaleString()+' of '+activityMatches.length.toLocaleString()+' matching activities · 5,000 in the collection.';}
+function filterActivities(){const q=document.getElementById('activity-search').value.trim().toLowerCase(),age=document.getElementById('activity-age').value;activityMatches=activityCatalog.filter(a=>(!age||a.age===age)&&(!q||a.search.includes(q)));renderActivities(true);}
+document.getElementById('activity-search').addEventListener('input',filterActivities);document.getElementById('activity-age').addEventListener('change',filterActivities);document.getElementById('activity-load-more').addEventListener('click',()=>renderActivities());document.getElementById('activity-new').addEventListener('click',()=>chooseActivity(activityCatalog[Math.floor(Math.random()*activityCatalog.length)]));document.getElementById('activity-hint').addEventListener('click',()=>{document.getElementById('activity-hint-text').textContent=activeActivity?activeActivity.hint:'Choose an activity first, then ask for a hint.';});filterActivities();chooseActivity(activityCatalog[0]);
 
 // Build a searchable 10,000-game catalog, but render cards in small batches
 // so mobile browsers do not need to create 10,000 DOM nodes at once.
