@@ -16,7 +16,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   try {
-    const token = (req.headers.get("Authorization") || "").replace(/^Bearer\\s+/i, "");
+    const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
     if (!token) return json({ error: "Sign-in required" }, 401);
     const caller = createClient(url, anonKey, { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false, autoRefreshToken: false } });
     const { data: userData, error: userError } = await caller.auth.getUser(token);
@@ -33,7 +33,7 @@ Deno.serve(async (req: Request) => {
       if (childError || !child) return json({ error: "Child profile not found" }, 404);
       if (action === "set_pin") {
         const pin = String(body.pin || "");
-        if (!/^\\d{6}$/.test(pin)) return json({ error: "Choose a six-digit PIN" }, 400);
+        if (!/^\d{6}$/.test(pin)) return json({ error: "Choose a six-digit PIN" }, 400);
         let childUserId = child.child_user_id as string | null;
         if (!childUserId) {
           const password = `${crypto.randomUUID()}-${crypto.randomUUID()}-K9!`;
@@ -55,7 +55,7 @@ Deno.serve(async (req: Request) => {
         return json({ ok: true });
       }
       const pin = String(body.pin || "");
-      if (!/^\\d{6}$/.test(pin)) return json({ error: "Enter the six-digit PIN" }, 400);
+      if (!/^\d{6}$/.test(pin)) return json({ error: "Enter the six-digit PIN" }, 400);
       const { data: childUserId, error: verifyError } = await admin.rpc("kids_check_pin", {
         p_child_id: child.id, p_parent_id: user.id, p_pin: pin,
       });
