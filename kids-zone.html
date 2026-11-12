@@ -86,6 +86,14 @@
   <div class="story-intro"><h2 id="social-heading">Social Interaction Studio 💬</h2>
   <p>Practise the little things that help friendships grow: saying hello, taking turns, listening, including others, solving disagreements and asking a trusted adult for help.</p>
   <p class="story-small">Choose a situation and think about what you could say or do. These pretend-play activities stay in this browser and do not contact other people. Grown-ups can explore the scenarios together with children.</p></div>
+  <div class="story-panel" id="social-progress" aria-labelledby="social-progress-heading">
+    <h3 id="social-progress-heading">🌱 My social skills progress</h3>
+    <p id="social-progress-summary" role="status" aria-live="polite">Complete a situation to begin tracking your practice.</p>
+    <div role="progressbar" aria-label="Unique social interaction scenarios completed" aria-valuemin="0" aria-valuemax="168" aria-valuenow="0" id="social-progress-bar" style="height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden"><div id="social-progress-fill" style="height:100%;width:0%;background:#39966b;border-radius:999px"></div></div>
+    <p class="story-small" id="social-progress-detail">0 of 168 different situations explored · Progress is saved only in this browser.</p>
+    <ul id="social-skill-progress" class="story-small"><li>Friendship: 0</li><li>Listening: 0</li><li>Feelings: 0</li><li>Problem-solving: 0</li><li>Online safety: 0</li><li>Getting help: 0</li></ul>
+    <button type="button" id="social-progress-clear" class="secondary">Reset my progress on this device</button>
+  </div>
   <div class="story-tools">
     <div><label for="social-age">Age group</label><select id="social-age"><option value="3-5">Ages 3–5</option><option value="6-8">Ages 6–8</option><option value="9-10">Ages 9–10</option></select></div>
     <div><label for="social-topic">Practise a skill</label><select id="social-topic"><option value="all">Surprise me</option><option value="friendship">Making friends</option><option value="listening">Listening and sharing</option><option value="feelings">Understanding feelings</option><option value="conflict">Kind problem-solving</option><option value="safety">Online safety</option><option value="help">Getting help</option></select></div>
@@ -544,16 +552,39 @@ Object.entries(socialExtraPrompts).forEach(([topic,prompts],topicIndex)=>{
  });
 });
 const socialAge=document.getElementById('social-age'),socialTopic=document.getElementById('social-topic'),socialSituation=document.getElementById('social-situation'),socialChoices=document.getElementById('social-choices'),socialFeedback=document.getElementById('social-feedback');
-let currentSocial=null;\nconst allSocialScenarios=socialScenarios.concat(socialExtraScenarios);\ndocument.getElementById('social-heading').textContent='Social Interaction Studio 💬 · '+allSocialScenarios.length+' scenarios';\ndocument.querySelector('#social-interaction .story-intro p').textContent='Explore '+allSocialScenarios.length+' guided situations to practise friendship, communication, empathy, kind problem-solving and online safety.';
+let currentSocial=null,currentSocialIndex=-1;
+const allSocialScenarios=socialScenarios.concat(socialExtraScenarios);
+const socialProgressKey='kids-zone-social-progress-v1:'+((childId&&/^[0-9a-f-]{36}$/i.test(childId))?childId:'this-device');
+const socialSkillNames={friendship:'Friendship',listening:'Listening',feelings:'Understanding feelings',conflict:'Kind problem-solving',safety:'Online safety',help:'Getting help'};
+let socialProgress={completed:[],bySkill:{},totalAnswers:0};
+try{const saved=JSON.parse(localStorage.getItem(socialProgressKey)||'null');if(saved&&Array.isArray(saved.completed)){socialProgress.completed=saved.completed.filter(n=>Number.isInteger(n)&&n>=0&&n<allSocialScenarios.length);socialProgress.bySkill=saved.bySkill&&typeof saved.bySkill==='object'?saved.bySkill:{};socialProgress.totalAnswers=Number.isInteger(saved.totalAnswers)?saved.totalAnswers:0;}}catch(e){}
+document.getElementById('social-heading').textContent='Social Interaction Studio 💬 · '+allSocialScenarios.length+' scenarios';
+document.querySelector('#social-interaction .story-intro p').textContent='Explore '+allSocialScenarios.length+' guided situations to practise friendship, communication, empathy, kind problem-solving and online safety.';
+document.getElementById('social-progress-bar').setAttribute('aria-valuemax',String(allSocialScenarios.length));
+function saveSocialProgress(){try{localStorage.setItem(socialProgressKey,JSON.stringify(socialProgress));}catch(e){document.getElementById('social-progress-summary').textContent='Progress is available while this page is open, but this browser could not save it.';}}
+function renderSocialProgress(){
+ const count=socialProgress.completed.length,pct=Math.round(count/allSocialScenarios.length*100);
+ document.getElementById('social-progress-summary').textContent=count+' of '+allSocialScenarios.length+' different situations explored ('+pct+'%). Every thoughtful try helps you practise!';
+ document.getElementById('social-progress-detail').textContent=count+' of '+allSocialScenarios.length+' different situations explored · '+socialProgress.totalAnswers+' answers practised · Saved only in this browser.';
+ document.getElementById('social-progress-bar').setAttribute('aria-valuenow',String(count));
+ document.getElementById('social-progress-fill').style.width=pct+'%';
+ const list=document.getElementById('social-skill-progress');list.replaceChildren();
+ Object.entries(socialSkillNames).forEach(([key,name])=>{const li=document.createElement('li');li.textContent=name+': '+(Number(socialProgress.bySkill[key])||0)+' situations';list.append(li);});
+}
 function chooseSocialScenario(){
  const age=socialAge.value,topic=socialTopic.value;
- let options=allSocialScenarios.filter(s=>(s.age===age||age==='9-10'&&s.age==='6-8')&&(topic==='all'||s.topic===topic));
- if(!options.length)options=allSocialScenarios.filter(s=>s.age===age);
- currentSocial=options[Math.floor(Math.random()*options.length)];
+ let options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>(s.age===age||age==='9-10'&&s.age==='6-8')&&(topic==='all'||s.topic===topic));
+ if(!options.length)options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>s.age===age);
+ const pick=options[Math.floor(Math.random()*options.length)];currentSocial=pick.s;currentSocialIndex=pick.index;
  socialSituation.textContent=currentSocial.situation;socialFeedback.textContent='Think about how each choice might make someone feel, then choose an answer.';
  socialChoices.replaceChildren();
- currentSocial.choices.forEach((choice,index)=>{const b=document.createElement('button');b.type='button';b.textContent=choice[0];b.addEventListener('click',()=>{socialFeedback.textContent=(choice[2]?'🌟 Kind idea! ':'💡 Let’s think about that. ')+choice[1];socialChoices.querySelectorAll('button').forEach(x=>x.disabled=true);});socialChoices.append(b);});
+ currentSocial.choices.forEach((choice,index)=>{const b=document.createElement('button');b.type='button';b.textContent=choice[0];b.addEventListener('click',()=>{socialFeedback.textContent=(choice[2]?'🌟 Kind idea! ':'💡 Let’s think about that. ')+choice[1];socialChoices.querySelectorAll('button').forEach(x=>x.disabled=true);
+  if(!socialProgress.completed.includes(currentSocialIndex)){socialProgress.completed.push(currentSocialIndex);socialProgress.bySkill[currentSocial.topic]=(Number(socialProgress.bySkill[currentSocial.topic])||0)+1;}
+  socialProgress.totalAnswers++;saveSocialProgress();renderSocialProgress();
+ });socialChoices.append(b);});
 }
+document.getElementById('social-progress-clear').addEventListener('click',()=>{if(!window.confirm('Reset all Social Interaction practice progress saved in this browser?'))return;socialProgress={completed:[],bySkill:{},totalAnswers:0};try{localStorage.removeItem(socialProgressKey);}catch(e){}renderSocialProgress();socialFeedback.textContent='Your progress has been reset. Choose an answer when you are ready to practise again.';});
+renderSocialProgress();
 document.getElementById('social-next').addEventListener('click',chooseSocialScenario);
 document.getElementById('social-reset').addEventListener('click',chooseSocialScenario);
 socialAge.addEventListener('change',chooseSocialScenario);socialTopic.addEventListener('change',chooseSocialScenario);
