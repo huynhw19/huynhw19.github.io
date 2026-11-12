@@ -81,7 +81,7 @@ Deno.serve(async (req: Request) => {
         .eq("child_user_id", user.id).maybeSingle();
       if (!child || !child.messaging_enabled) return json({ error: "Messaging is not enabled" }, 403);
       const code = String(body.friend_code || "").trim().toUpperCase();
-      if (!/^[A-F0-9]{10}$/.test(code)) return json({ error: "Enter the 10-character friend code" }, 400);
+      if (!/^[A-F0-9]{16}$/.test(code)) return json({ error: "Enter the 16-character friend code" }, 400);
       const { data: friendshipId, error } = await admin.rpc("kids_send_friend_request", {
         p_requester_child_id: child.id, p_recipient_code: code,
       });
