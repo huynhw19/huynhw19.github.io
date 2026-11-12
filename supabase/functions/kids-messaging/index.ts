@@ -16,7 +16,8 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   try {
-    const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+    const authHeader = (req.headers.get("Authorization") || "").trim();
+    const token = authHeader.toLowerCase().startsWith("bearer ") ? authHeader.slice(7).trim() : authHeader;
     if (!token) return json({ error: "Sign-in required" }, 401);
     const caller = createClient(url, anonKey, { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false, autoRefreshToken: false } });
     const { data: userData, error: userError } = await caller.auth.getUser(token);
@@ -33,7 +34,7 @@ Deno.serve(async (req: Request) => {
       if (childError || !child) return json({ error: "Child profile not found" }, 404);
       if (action === "set_pin") {
         const pin = String(body.pin || "");
-        if (!/^\d{6}$/.test(pin)) return json({ error: "Choose a six-digit PIN" }, 400);
+        if (pin.length !== 6 || [...pin].some((char) => char < "0" || char > "9")) return json({ error: "Choose a six-digit PIN" }, 400);
         let childUserId = child.child_user_id as string | null;
         if (!childUserId) {
           const password = `${crypto.randomUUID()}-${crypto.randomUUID()}-K9!`;
@@ -54,8 +55,9 @@ Deno.serve(async (req: Request) => {
         if (pinError) return json({ error: pinError.message || "Could not save PIN" }, 400);
         return json({ ok: true });
       }
+      if (!child.child_user_id) return json({ error: "This profile has no PIN yet. Ask your parent or guardian to set one in Family Dashboard." }, 409);
       const pin = String(body.pin || "");
-      if (!/^\d{6}$/.test(pin)) return json({ error: "Enter the six-digit PIN" }, 400);
+      if (pin.length !== 6 || [...pin].some((char) => char < "0" || char > "9")) return json({ error: "Enter the six-digit PIN" }, 400);
       const { data: childUserId, error: verifyError } = await admin.rpc("kids_check_pin", {
         p_child_id: child.id, p_parent_id: user.id, p_pin: pin,
       });
