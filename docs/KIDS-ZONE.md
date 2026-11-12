@@ -31,6 +31,17 @@ Story writing is session-only: the Studio does not save children's free-text wri
 - Story scenes and activity feedback use readable text and live status regions.
 - The layout adapts to mobile and desktop screens and respects reduced-motion preferences.
 
+## Social Interaction Studio
+
+The Social Interaction Studio provides short, age-banded pretend-play scenarios for ages 3–5, 6–8 and 9–10. Children can practise:
+- Making friends and including others.
+- Listening, sharing and taking turns.
+- Recognising feelings and responding with empathy.
+- Solving everyday disagreements with calm, fair choices.
+- Keeping personal information private online and asking a trusted adult for help.
+
+Children choose from suggested responses and receive supportive explanations. Scenarios run entirely in the browser: responses are not sent to Supabase, stored in a profile or shared with other users. The activities are learning prompts, not live chat or matchmaking. The existing Kids Messages service remains separate and is available only through the child profile's parent-approved friend connections.
+
 ## Family features
 
 Kids Zone uses the site's existing Supabase sign-in flow. Existing family video playlists, child profiles and game progress behavior are unchanged. Generated storytelling content runs locally and does not add new database tables or collect children's story text.
