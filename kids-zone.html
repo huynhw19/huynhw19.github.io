@@ -27,7 +27,7 @@
 <main>
 <div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
 <div id="zone" hidden>
-<section class="hero"><span class="eyebrow">✦ Play • Learn • Have fun</span><h1>Welcome to the Kids Zone! 🎈</h1><p>Pick a game and give it a go. These little games run right here in your browser—no chat, public profiles, or purchases.</p><p class="muted">Remember to take breaks and ask a parent or guardian before using any website or sharing information online.</p></section>
+<section class="hero"><span class="eyebrow">✦ Play • Learn • Have fun</span><h1>Welcome to the Kids Zone! 🎈</h1><p>Pick a game and give it a go. These games run in your browser. For parent-approved chats with friends, open Kids Messages.</p><p class="muted">Remember to take breaks and ask a parent or guardian before using any website or sharing information online.</p><p id="kids-messages-entry" hidden><a id="kids-messages-link" href="#">Open Kids Messages ✉️</a></p></section>
 
 <div class="game-search" role="search">
   <label for="game-search">🔎 Find a game</label>
@@ -65,7 +65,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (()=> {
-const status=document.getElementById('status'),zone=document.getElementById('zone'),signout=document.getElementById('signout'),config=window.CONFIGKIT_AUTH||{};
+const status=document.getElementById('status'),zone=document.getElementById('zone'),signout=document.getElementById('signout'),config=window.CONFIGKIT_AUTH||{};const childId=new URLSearchParams(location.search).get('child');if(childId&&/^[0-9a-f-]{36}$/i.test(childId)){document.getElementById('kids-messages-link').href='kids-messages.html?child='+encodeURIComponent(childId);document.getElementById('kids-messages-entry').hidden=false;}
 const say=(message,error=false)=>{status.hidden=false;status.classList.toggle('error',error);status.textContent=message;};
 if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){say('Sign-in is not configured. Please contact the site owner.',true);return;}
 const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
