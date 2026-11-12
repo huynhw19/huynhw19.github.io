@@ -13,6 +13,7 @@
     .record { padding: 12px 0; border-top: 1px solid #e5ece8; }
     .assignment { padding:14px 0; border-top:1px solid #e5ece8; }
     .assignment-meta { color:#56645e; font-size:.95rem; }
+    .document-content { white-space:pre-wrap; overflow-wrap:anywhere; }
     button, .button { display: inline-block; padding: 10px 14px; border: 0; border-radius: 8px; background: #226b51; color: white; text-decoration: none; cursor: pointer; }
   </style>
 </head>
@@ -24,6 +25,10 @@
       <p id="status" class="status" role="status" aria-live="polite">Checking your sign in…</p>
       <div id="records"></div>
       <section id="student-slideshows" aria-labelledby="student-slideshows-title" hidden><h2 id="student-slideshows-title">My lesson slideshows</h2><div id="student-slideshow-records"></div></section>
+      <section id="student-documents" aria-labelledby="student-documents-title" hidden>
+        <h2 id="student-documents-title">My documents</h2>
+        <div id="student-document-records"></div>
+      </section>
       <section id="assignments" aria-labelledby="assignments-title" hidden>
         <h2 id="assignments-title">My assignments</h2>
         <div id="assignment-records"></div>
@@ -41,6 +46,8 @@
       const slideshowsPanel = document.getElementById('student-slideshows');
       const slideshowRecords = document.getElementById('student-slideshow-records');
       const assignmentRecords = document.getElementById('assignment-records');
+      const documentsPanel = document.getElementById('student-documents');
+      const documentRecords = document.getElementById('student-document-records');
       const signout = document.getElementById('signout');
       const config = window.CONFIGKIT_AUTH || {};
       const showStatus = (message, isError = false) => {
@@ -106,6 +113,32 @@
             slideshowRecords.append(article);
           });
         }
+        const {data: publishedDocuments, error: documentsError} = await client.from('education_documents')
+          .select('id,user_id,student_id,title,content,created_at,updated_at')
+          .in('user_id',teacherIds).eq('status','published').order('updated_at',{ascending:false});
+        documentsPanel.hidden = false;
+        documentRecords.replaceChildren();
+        if (documentsError) {
+          const warning=document.createElement('p'); warning.className='error';
+          warning.textContent='Could not load your documents. Please ask your teacher to check the document setup.';
+          documentRecords.append(warning);
+        } else if (!publishedDocuments || !publishedDocuments.length) {
+          const empty=document.createElement('p');
+          empty.textContent='Your teachers have not published any documents for you yet.';
+          documentRecords.append(empty);
+        } else {
+          publishedDocuments.forEach(doc=>{
+            const article=document.createElement('article'); article.className='assignment';
+            const title=document.createElement('h3'); title.textContent=doc.title;
+            const relatedStudent=studentRecords.find(student=>student.id===doc.student_id);
+            const meta=document.createElement('p'); meta.className='assignment-meta';
+            meta.textContent=(doc.student_id ? (relatedStudent?.student_name || 'Shared with you') : 'Shared with your class')
+              + ' · Updated ' + new Date(doc.updated_at || doc.created_at).toLocaleDateString();
+            const body=document.createElement('div'); body.className='document-content'; body.textContent=doc.content || '';
+            article.append(title,meta,body); documentRecords.append(article);
+          });
+        }
+
         const studentIds = studentRecords.map(student => student.id);
         const { data: assignments, error: assignmentsError } = await client
           .from('education_assignments')
