@@ -17,7 +17,7 @@
       <span class="eyebrow">Personal account</span>
       <h1>Family dashboard</h1>
       <p id="account-label" class="muted">Checking your account…</p>
-      <p class="muted">Create private child profiles managed by your signed-in adult account. These are family records, not separate sign-in accounts.</p>
+      <p class="muted">Create private child profiles managed by your signed-in adult account. Each child profile gets its own six-digit PIN for a separate Kids Zone session. Adults control messaging and friend approvals.</p>
     </section>
     <section class="card" aria-labelledby="getting-started-title">
       <span class="eyebrow">Getting started</span>
@@ -28,7 +28,7 @@
         <li>Choose <strong>Edit</strong> to update a profile or <strong>Delete</strong> to remove it.</li>
         <li>Keep notes appropriate for a private family record. Do not enter passwords or highly sensitive information.</li>
       </ol>
-      <p class="muted">Child profiles are managed by your adult account; children do not get separate sign-in accounts.</p>
+      <p class="muted">Children use a separate PIN-protected session. Your adult account remains in control of setup and approvals.</p>
       <div class="qr-panel">
         <a href="https://huynhw19.github.io/family-dashboard.html" aria-label="Open the ConfigKit family dashboard">
           <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&amp;margin=12&amp;data=https%3A%2F%2Fhuynhw19.github.io%2Ffamily-dashboard.html" alt="QR code linking to the ConfigKit family dashboard">
@@ -66,7 +66,7 @@
       const accountLabel = document.getElementById('account-label');
       const creator = document.getElementById('creator');
       const panel = document.getElementById('children-panel');
-      const list = document.getElementById('children-list');
+      const list = document.getElementById('children-list');\n      const requestsPanel=document.getElementById('kids-requests');\n      const requestsList=document.getElementById('kids-requests-list');\n      const reportsList=document.getElementById('kids-reports-list');
       const form = document.getElementById('child-form');
       const status = document.getElementById('status');
       const cancel = document.getElementById('cancel-edit');
@@ -83,9 +83,9 @@
       const field = id => document.getElementById(id);
       async function loadChildren() {
         list.replaceChildren();
-        const {data,error} = await client.from('family_children').select('id,child_name,age_years,grade,notes,created_at').eq('parent_id',userId).order('created_at',{ascending:false});
+        const {data,error} = await client.from('family_children').select('id,child_name,age_years,grade,notes,created_at,child_user_id,messaging_enabled,friend_code').eq('parent_id',userId).order('created_at',{ascending:false});
         if (error) { say(error.message || 'Could not load child profiles.',true); return; }
-        if (!data.length) { const p=document.createElement('p'); p.className='muted'; p.textContent='No child profiles yet. Add your first child above.'; list.append(p); return; }
+        if (!data.length) { const p=document.createElement('p'); p.className='muted'; p.textContent='No child profiles yet. Add your first child above.'; list.append(p); await loadKidsApprovals(); return; }
         data.forEach(child => {
           const article=document.createElement('article'); article.className='child';
           const heading=document.createElement('h3'); heading.textContent=child.child_name;
@@ -98,7 +98,17 @@
           edit.addEventListener('click',()=>{editingId=child.id;field('child-name').value=child.child_name;field('child-age').value=child.age_years ?? '';field('child-grade').value=child.grade || '';field('child-notes').value=child.notes || '';title.textContent='Edit child profile';save.textContent='Save changes';cancel.hidden=false;form.scrollIntoView({behavior:'smooth',block:'start'});});
           const remove=document.createElement('button'); remove.type='button'; remove.className='danger'; remove.textContent='Delete';
           remove.addEventListener('click',async()=>{if(!window.confirm('Delete the profile for '+child.child_name+'?'))return;const result=await client.from('family_children').delete().eq('id',child.id).eq('parent_id',userId);if(result.error){say(result.error.message,true);return;}say('Child profile deleted.');await loadChildren();});
-          const play=document.createElement('a'); play.href='kids-zone.html?child='+encodeURIComponent(child.id); play.className='button'; play.textContent='Open Kids Zone 🎮'; play.style.marginTop='.6rem'; article.append(actions,play);list.append(article);
+          const play=document.createElement('a'); play.href='kids-zone.html?child='+encodeURIComponent(child.id); play.className='button'; play.textContent='Open Kids Zone 🎮'; play.style.marginTop='.6rem';
+          const messages=document.createElement('a'); messages.href='kids-messages.html?child='+encodeURIComponent(child.id); messages.className='button'; messages.textContent='Open Kids Messages ✉️'; messages.style.cssText='display:inline-block;margin:.6rem 0 0 .5rem';
+          const settings=document.createElement('div'); settings.className='child'; settings.style.marginTop='.8rem';
+          const pinLabel=document.createElement('label'); pinLabel.textContent=child.child_user_id?'Reset child PIN (six digits)':'Create child PIN (six digits)';
+          const pinInput=document.createElement('input'); pinInput.type='password'; pinInput.inputMode='numeric'; pinInput.pattern='[0-9]{6}'; pinInput.maxLength=6; pinInput.autocomplete='new-password'; pinInput.placeholder='Six-digit PIN'; pinLabel.append(pinInput);
+          const pinButton=document.createElement('button'); pinButton.type='button'; pinButton.textContent='Save PIN'; pinButton.addEventListener('click',async()=>{const pin=pinInput.value.trim();if(!/^\\d{6}$/.test(pin)){say('Enter exactly six digits for the child PIN.',true);return;}pinButton.disabled=true;say('Saving child PIN…');const result=await client.functions.invoke('kids-messaging',{body:{action:'set_pin',child_id:child.id,pin}});pinButton.disabled=false;if(result.error||result.data?.error){say(result.data?.error||result.error?.message||'Could not save PIN.',true);return;}pinInput.value='';say('PIN saved for '+child.child_name+'.');await loadChildren();});
+          const messagingLabel=document.createElement('label');messagingLabel.style.marginTop='.7rem';const messaging=document.createElement('input');messaging.type='checkbox';messaging.checked=child.messaging_enabled;messaging.style.width='auto';messaging.addEventListener('change',async()=>{messaging.disabled=true;const result=await client.from('family_children').update({messaging_enabled:messaging.checked}).eq('id',child.id).eq('parent_id',userId);messaging.disabled=false;if(result.error){messaging.checked=!messaging.checked;say(result.error.message,true);}else say('Messaging '+(messaging.checked?'enabled':'disabled')+' for '+child.child_name+'.');});messagingLabel.append(messaging,document.createTextNode(' Allow this child to use messaging'));
+          const code=document.createElement('p');code.className='muted';code.textContent='Private friend code to share with another parent: '+child.friend_code;
+          const note=document.createElement('p');note.className='muted';note.textContent=child.child_user_id?'PIN is set. The child can sign in to Messages using this profile and PIN.':'Set a PIN before the child can open Messages.';
+          settings.append(pinLabel,pinButton,messagingLabel,code,note);
+          article.append(actions,play,messages,settings);list.append(article);
         });
       }
       cancel.addEventListener('click',()=>{reset();say('Editing cancelled.');});
