@@ -1,40 +1,42 @@
-# Kids Zone — Game Guide
+# Kids Zone — Game and Storytelling Guide
 
-Kids Zone is a browser-based collection of 100,000 family-friendly mini-games.
+Kids Zone is a browser-based collection of family-friendly games and creative activities for signed-in ConfigKit members.
 
-## Playing
+## Games
 
 1. Open [Kids Zone](https://huynhw19.github.io/kids-zone.html) and sign in.
-2. Use the search field at the top to find games by title, series, or topic.
+2. Use the game search and age filter to find activities.
 3. Choose **Play game** on a generated mini-game card.
-4. Select an answer to see feedback, then choose **New round** to play again.
+4. Select an answer to see feedback, then choose **Next round**.
 
-The first 20 games are hand-built interactive games. The remaining 99,980 are generated from reusable puzzle templates. Only 100 generated cards are rendered at a time; use **Load more games** to browse in batches. This keeps the page responsive despite the large catalog.
+The page contains 10,000 games: 20 hand-built games and 9,980 generated games. Generated games are rendered in batches of 100 so mobile browsers do not need to create the entire catalogue at once. The first 5,000 generated games are two-player pass-and-play games. Players take turns on the same device; there is no online matchmaking, chat or cross-device multiplayer.
 
-## Multiplayer games\n\nThere are 5,000 two-player pass-and-play games in the generated catalog. Players take turns answering on the same device, and each game tracks Player 1 and Player 2 scores locally. These are not online matches: no player accounts, matchmaking, chat, or cross-device synchronization are provided.\n\n## Game families
+## Interactive Storytelling Studio
 
-Generated games rotate through these families:
+The Storytelling Studio adds three connected ways to create and explore:
 
-- Number Quest — arithmetic practice
-- Pattern Patrol — number patterns
-- Word Wizard — word unscrambling
-- Alphabet Ace — alphabet sequence questions
-- Quick Science — basic science facts
-- World Wonders — geography questions
-- Logic Lab — shapes, numbers, and reasoning
-- Animal Academy — animal facts
-- Shape Shifter — geometry basics
-- Memory Master — simple memory and reasoning questions
+- **5,000 interactive stories** with searchable titles, age bands, characters, settings, story challenges and branching choices.
+- **Choose-your-own-adventure play** with decisions that lead to different scenes and hopeful endings. Children can restart a story or explore another adventure.
+- **5,000 storytelling activities** with prompts for character creation, drawing story maps, kindness quests, magical objects, alternate viewpoints, short stories and more.
 
-## Search and accessibility
+Stories and activities can be searched by keyword and filtered for ages 3–5, 6–8 and 9–10. Only a small batch of catalogue cards is rendered at a time. The story experience is generated locally in the browser and does not require a separate account, public profile, chat, upload or sharing feature.
 
-- Search filters the game cards as you type and updates the visible game count.
-- Game answers and feedback are presented in the page.
-- Buttons are keyboard-focusable and game feedback uses live regions where appropriate.
-- The layout adapts to desktop and mobile screens.
+Story writing is session-only: the Studio does not save children's free-text writing to a server. Children are reminded not to enter private information such as full names, addresses, school names or passwords. Parents and caregivers are encouraged to explore together and talk about kindness, feelings, safe choices and asking a trusted adult for help.
+
+## Age groups and accessibility
+
+- Age filters are available for 3–5, 6–8 and 9–10 across the storytelling catalogues.
+- Search and result counts update as the user types or changes the age group.
+- Interactive controls are native buttons and form fields and can be used with a keyboard.
+- Story scenes and activity feedback use readable text and live status regions.
+- The layout adapts to mobile and desktop screens and respects reduced-motion preferences.
+
+## Family features
+
+Kids Zone uses the site's existing Supabase sign-in flow. Existing family video playlists, child profiles and game progress behavior are unchanged. Generated storytelling content runs locally and does not add new database tables or collect children's story text.
 
 ## Development notes
 
-The game catalog is generated client-side in `kids-zone.html`. The catalog contains 99,980 generated entries plus the original 20 games, for 100,000 total. The first 5,000 generated entries are two-player pass-and-play games. Generated cards are rendered in batches of 100; search filters the catalog index before rendering matching cards.
+The game catalogue is generated client-side in `kids-zone.html`. It contains 20 hand-built games plus 9,980 generated games, for 10,000 total. The first 5,000 generated entries support two-player pass-and-play. Game cards are rendered in batches of 100.
 
-The Kids Zone uses the site's existing Supabase sign-in flow and does not introduce accounts, chat, public profiles, or purchases.
+The storytelling catalogue is generated client-side from reusable, age-banded templates: 5,000 story records and 5,000 activity records. Story choices and endings are handled in the browser. Story and activity cards are rendered in small batches of 12. No external AI service or user-generated content endpoint is used.
