@@ -1,0 +1,1 @@
+revoke delete on public.family_children from authenticated;
