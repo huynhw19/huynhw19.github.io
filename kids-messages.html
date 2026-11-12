@@ -114,12 +114,11 @@
          await sendSignal({type:'answer',sdp:peer.localDescription});
          callStatus('Connected. Tell a trusted adult if anything feels uncomfortable.');
        }else if(payload.type==='answer'&&peer){await peer.setRemoteDescription(new RTCSessionDescription(payload.sdp));for(const c of queuedIce.splice(0))await peer.addIceCandidate(new RTCIceCandidate(c));callStatus('Call connected.');}
-       else if(payload.type==='ice'&&peer){if(peer.remoteDescription)await peer.addIceCandidate(new RTCIceCandidate(payload.candidate));else queuedIce.push(payload.candidate);}
+       else if(payload.type==='ice'){if(peer?.remoteDescription)await peer.addIceCandidate(new RTCIceCandidate(payload.candidate));else queuedIce.push(payload.candidate);}
        else if(payload.type==='hangup'||payload.type==='decline'){await endCall(false);callStatus(payload.type==='decline'?'The friend declined the call.':'The call ended.');}
      }catch(err){callStatus('Call could not connect. Check microphone/camera permissions and try again.');await endCall(false);}
    });
-   const result=await callChannel.subscribe();
-   if(result!=='SUBSCRIBED')callStatus('Calling is unavailable right now. Please try again.');
+   callChannel.subscribe(status=>{if(status==='SUBSCRIBED')callStatus('Ready for a private call.');else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')callStatus('Calling is unavailable. Both families must enable calls.');});
  }
  const callStatus=message=>{document.getElementById('call-status').textContent=message;};
  async function sendSignal(payload){if(callChannel)await callChannel.send({type:'broadcast',event:'signal',payload:{...payload,from:profile.child_id}});}
