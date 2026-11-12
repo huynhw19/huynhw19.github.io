@@ -1,0 +1,1 @@
+alter table public.family_children add column if not exists call_enabled boolean not null default false;

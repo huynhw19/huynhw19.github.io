@@ -70,10 +70,26 @@ Deno.serve(async (req: Request) => {
 
     if (action === "child_status") {
       const { data: child, error } = await admin.from("family_children")
-        .select("id,child_name,messaging_enabled,friend_code").eq("child_user_id", user.id).maybeSingle();
+        .select("id,child_name,messaging_enabled,call_enabled,friend_code").eq("child_user_id", user.id).maybeSingle();
       if (error || !child) return json({ error: "This is not a child profile" }, 403);
       if (!child.messaging_enabled) return json({ error: "Messaging is turned off by your parent or guardian" }, 403);
-      return json({ child_id: child.id, child_name: child.child_name, friend_code: child.friend_code });
+      return json({ child_id: child.id, child_name: child.child_name, friend_code: child.friend_code, call_enabled: child.call_enabled });
+    }
+
+    if (action === "call_permission") {
+      const friendshipId = String(body.friendship_id || "");
+      const { data: child } = await admin.from("family_children").select("id,call_enabled,messaging_enabled")
+        .eq("child_user_id", user.id).maybeSingle();
+      if (!child || !child.messaging_enabled || !child.call_enabled) return json({ allowed: false });
+      const { data: friendship } = await admin.from("kids_friendships")
+        .select("id,child_a_id,child_b_id,parent_a_approved,parent_b_approved,status")
+        .eq("id", friendshipId).maybeSingle();
+      if (!friendship || friendship.status !== "approved" || !friendship.parent_a_approved || !friendship.parent_b_approved ||
+          ![friendship.child_a_id, friendship.child_b_id].includes(child.id)) return json({ allowed: false });
+      const otherId = friendship.child_a_id === child.id ? friendship.child_b_id : friendship.child_a_id;
+      const { data: other } = await admin.from("family_children").select("call_enabled,messaging_enabled")
+        .eq("id", otherId).maybeSingle();
+      return json({ allowed: !!other?.call_enabled && !!other?.messaging_enabled });
     }
 
     if (action === "send_friend_request") {

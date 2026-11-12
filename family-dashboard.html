@@ -93,7 +93,7 @@
       const field = id => document.getElementById(id);
       async function loadChildren() {
         list.replaceChildren();
-        const {data,error} = await client.from('family_children').select('id,child_name,age_years,grade,notes,created_at,child_user_id,messaging_enabled,friend_code').eq('parent_id',userId).order('created_at',{ascending:false});
+        const {data,error} = await client.from('family_children').select('id,child_name,age_years,grade,notes,created_at,child_user_id,messaging_enabled,call_enabled,friend_code').eq('parent_id',userId).order('created_at',{ascending:false});
         if (error) { say(error.message || 'Could not load child profiles.',true); return; }
         if (!data.length) { const p=document.createElement('p'); p.className='muted'; p.textContent='No child profiles yet. Add your first child above.'; list.append(p); await loadKidsApprovals(); return; }
         data.forEach(child => {
@@ -115,9 +115,10 @@
           const pinInput=document.createElement('input'); pinInput.type='password'; pinInput.inputMode='numeric'; pinInput.pattern='[0-9]{6}'; pinInput.maxLength=6; pinInput.autocomplete='new-password'; pinInput.placeholder='Six-digit PIN'; pinLabel.append(pinInput);
           const pinButton=document.createElement('button'); pinButton.type='button'; pinButton.textContent='Save PIN'; pinButton.addEventListener('click',async()=>{const pin=pinInput.value.trim();if(!/^\\d{6}$/.test(pin)){say('Enter exactly six digits for the child PIN.',true);return;}pinButton.disabled=true;say('Saving child PIN…');const result=await client.functions.invoke('kids-messaging',{body:{action:'set_pin',child_id:child.id,pin}});pinButton.disabled=false;if(result.error||result.data?.error){say(result.data?.error||result.error?.message||'Could not save PIN.',true);return;}pinInput.value='';say('PIN saved for '+child.child_name+'.');await loadChildren();});
           const messagingLabel=document.createElement('label');messagingLabel.style.marginTop='.7rem';const messaging=document.createElement('input');messaging.type='checkbox';messaging.checked=child.messaging_enabled;messaging.style.width='auto';messaging.addEventListener('change',async()=>{messaging.disabled=true;const result=await client.from('family_children').update({messaging_enabled:messaging.checked}).eq('id',child.id).eq('parent_id',userId);messaging.disabled=false;if(result.error){messaging.checked=!messaging.checked;say(result.error.message,true);}else say('Messaging '+(messaging.checked?'enabled':'disabled')+' for '+child.child_name+'.');});messagingLabel.append(messaging,document.createTextNode(' Allow this child to use messaging'));
-          const code=document.createElement('p');code.className='muted';code.textContent='Private friend code to share with another parent: '+child.friend_code;
+          const callingLabel=document.createElement('label');callingLabel.style.marginTop='.5rem';const calling=document.createElement('input');calling.type='checkbox';calling.checked=!!child.call_enabled;calling.style.width='auto';calling.addEventListener('change',async()=>{calling.disabled=true;const result=await client.from('family_children').update({call_enabled:calling.checked}).eq('id',child.id).eq('parent_id',userId);calling.disabled=false;if(result.error){calling.checked=!calling.checked;say(result.error.message,true);}else say('Calls '+(calling.checked?'enabled':'disabled')+' for '+child.child_name+'. Both families must enable calls.');});callingLabel.append(calling,document.createTextNode(' Allow voice and video calls (both families must enable)'));
+                    const code=document.createElement('p');code.className='muted';code.textContent='Private friend code to share with another parent: '+child.friend_code;
           const note=document.createElement('p');note.className='muted';note.textContent=child.child_user_id?'PIN is set. The child can sign in to Messages using this profile and PIN.':'Set a PIN before the child can open Messages.';
-          settings.append(pinLabel,pinButton,messagingLabel,code,note);
+          settings.append(pinLabel,pinButton,messagingLabel,callingLabel,code,note);
           article.append(actions,play,messages,settings);list.append(article);
         });
         await loadKidsApprovals();
