@@ -352,12 +352,203 @@ const socialScenarios=[
  {topic:'friendship',age:'9-10',situation:'A classmate is often left out when teams are chosen. What could you do?',choices:[['Suggest making teams in a fair way that includes everyone.','You are helping create a welcoming group.',true],['Tell others not to let them play.','Excluding someone can hurt and does not solve the problem.',false],['Check in kindly and ask what they would like.','A kind check-in respects their feelings and choices.',true]]},
  {topic:'safety',age:'3-5',situation:'A game or video shows something that makes you feel worried. What can you do?',choices:[['Stop and tell your grown-up.','You can always stop and ask a trusted grown-up for help.',true],['Keep watching even though you feel worried.','You do not need to keep watching something uncomfortable.',false],['Ask a grown-up to watch with you.','Watching together helps your grown-up guide you.',true]]}
 ];
+// 160 additional guided scenarios, balanced across six social-emotional learning themes.
+const socialExtraPrompts={
+ friendship:[
+ 'You notice someone has no partner for a classroom activity. What could you do?',
+ 'A new neighbour your age moves in. How might you say hello?',
+ 'A friend wants to play a different game from you. How can you decide together?',
+ 'Someone has a different favourite hobby. How can you show interest?',
+ 'A classmate joins your club for the first time. How can you help them feel welcome?',
+ 'You see someone waiting to join a game. What is a friendly way to invite them?',
+ 'Your friend wants some quiet time alone. How can you respect that?',
+ 'A group is choosing roles for a pretend game. How can everyone have a part?',
+ 'You made a new friend but your old friend feels left out. What could help?',
+ 'Someone makes a mistake during a team game. How can you encourage them?',
+ 'A friend speaks a different language at home. How can you be curious and respectful?',
+ 'You and a friend have different ideas for a playdate. How can you plan together?',
+ 'A classmate is nervous about joining an activity. What kind words could you offer?',
+ 'You notice a child playing by themselves at the park. What is a respectful way to approach?',
+ 'Your friend is good at something you find difficult. How can you celebrate their success?',
+ 'A team member has not had a turn yet. What could you suggest?',
+ 'Someone new sits beside you at lunch. How might you start a friendly conversation?',
+ 'Your friend enjoys a game you do not know. How could you learn about it?',
+ 'Two friends want you to join different activities. How can you respond kindly?',
+ 'A group project has a job nobody wants. How can you share the work fairly?',
+ 'Your friend is moving away soon. How can you show you care?',
+ 'A child has different abilities and needs more time in a game. How can the group include them?',
+ 'You accidentally leave someone out of an invitation. How could you make it right?',
+ 'A friend is proud of something they made. How can you show genuine interest?',
+ 'You want to join a group conversation. What is a polite way to enter?',
+ 'A friend asks you to keep another person out of a game. What could you say?',
+ 'You disagree about the rules of a playground game. How can you find a fair solution?'
+ ],
+ listening:[
+ 'A friend is excited to tell you about their weekend. How can you show you are listening?',
+ 'Someone is explaining game rules you have not heard before. What could you do?',
+ 'Your partner is sharing an idea during group work. How can you make space for it?',
+ 'You do not understand what someone said. What is a kind way to ask?',
+ 'A friend is speaking slowly because they are finding the words. How can you be patient?',
+ 'You are excited to answer but another person is still talking. What should you do?',
+ 'A friend tells you they would rather play something else. How can you listen respectfully?',
+ 'Someone shares a different opinion in a discussion. How can you respond?',
+ 'You are distracted while a friend is talking. What could help you focus?',
+ 'A teammate suggests a new plan. How can you ask questions before deciding?',
+ 'Your friend says they feel left out. What could you say to show you heard them?',
+ 'You need to interrupt because something is important. How can you do it politely?',
+ 'A classmate is giving directions for an activity. How can you check you understood?',
+ 'Someone tells a long story and you need a break. What could you say kindly?',
+ 'Your friend asks what you think about their idea. How can you answer honestly and kindly?',
+ 'You and a partner both want to speak first. What could you agree on?',
+ 'A person is sharing something personal with you. How can you listen without spreading it?',
+ 'A teammate has a suggestion you did not expect. How can you give it a fair hearing?',
+ 'You notice you misunderstood a friend. What could you do next?',
+ 'A friend is using gestures to explain an idea. How can you pay attention?',
+ 'Someone asks you to repeat what you heard. How can you check carefully?',
+ 'Your group is making a decision. How can you make sure quieter people are heard?',
+ 'A friend asks for advice but mostly wants someone to listen. How can you tell?',
+ 'You are talking with someone who has a different communication style. How can you be patient?',
+ 'A friend says no to your suggestion. How can you show you heard their answer?',
+ 'You realise you have been talking about yourself for a long time. What could you do?',
+ 'Someone is upset and needs time before talking. How can you respect that?'
+ ],
+ feelings:[
+ 'Your friend is disappointed after losing a game. What might they be feeling?',
+ 'You feel nervous before meeting a new group. What could help you name that feeling?',
+ 'A classmate looks frustrated with a tricky puzzle. How could you check in?',
+ 'Your friend is excited about good news while you feel tired. How can both feelings fit?',
+ 'Someone looks quiet after a joke. How could you find out how they feel?',
+ 'You feel jealous when a friend wins a prize. What is a healthy way to handle it?',
+ 'A friend seems worried about trying something new. What supportive words might help?',
+ 'You accidentally hurt a friend’s feelings. How can you listen to their feelings?',
+ 'A teammate is proud of finishing a difficult task. How can you celebrate with them?',
+ 'You feel angry because plans changed. What can you do before responding?',
+ 'A friend is homesick on a school trip. How could you show care?',
+ 'Someone is embarrassed after making a mistake. How can you help them feel safe?',
+ 'You feel left out when friends make plans. What could you say calmly?',
+ 'A friend is overwhelmed by a noisy room. How could you respect their needs?',
+ 'A classmate is very excited and speaking quickly. How can you respond kindly?',
+ 'You feel disappointed when a playdate ends. What could help you say goodbye?',
+ 'A friend says they are fine but seems sad. How can you offer support without pressure?',
+ 'You feel proud of your work but another person gets attention. How can you manage that?',
+ 'Someone is scared to ask a question. How could you encourage them?',
+ 'A friend is frustrated because they cannot explain an idea. How can you be patient?',
+ 'You feel confused by a friend’s reaction. What respectful question could you ask?',
+ 'A classmate is celebrating a tradition important to them. How can you show interest?',
+ 'You are worried you made the wrong choice. Who could you talk to?',
+ 'A friend feels disappointed about a cancelled activity. How can you acknowledge it?',
+ 'You feel overwhelmed by too many instructions. What could you ask for?',
+ 'Someone is happy about an achievement you also wanted. How can you respond graciously?',
+ 'A friend needs space after a hard day. How can you show care from a distance?'
+ ],
+ conflict:[
+ 'Two people reach for the same seat. How could you work it out fairly?',
+ 'A friend changes the rules halfway through a game. What could you say calmly?',
+ 'You and a teammate disagree about how to finish a project. What is a fair next step?',
+ 'Someone accidentally bumps into you. How could you check what happened before reacting?',
+ 'A friend borrows a pencil and forgets to return it. How can you ask for it back?',
+ 'You both want to choose the music. How could you take turns?',
+ 'A game feels unfair to one player. How could the group pause and discuss it?',
+ 'You said something unkind when you were angry. How can you repair the friendship?',
+ 'A friend blames you for a mistake you did not make. How could you explain calmly?',
+ 'Two friends argue and ask you to take sides. How can you avoid making it worse?',
+ 'Someone keeps interrupting during a group task. What respectful request could help?',
+ 'A teammate is not doing their share. How could you raise the concern constructively?',
+ 'You disagree about whose turn it is. What fair way could help you remember?',
+ 'A friend wants to keep playing after you are ready to stop. How can you set a boundary?',
+ 'Someone knocks over your building by accident. What could you do before getting upset?',
+ 'A group cannot agree on a game. How could you find a choice everyone can accept?',
+ 'You receive feedback that feels hard to hear. How can you respond thoughtfully?',
+ 'A friend apologises after an argument. How might you respond honestly?',
+ 'You need to apologise but feel embarrassed. What could you say?',
+ 'A classmate says your idea will not work. How could you discuss it respectfully?',
+ 'A disagreement is getting louder. What could help everyone pause safely?',
+ 'Someone will not follow an agreed game rule. What could the group do?',
+ 'You want to change teams after a disagreement. How can you explain your choice kindly?',
+ 'A friend misunderstands your joke. How can you clarify and check their feelings?',
+ 'You and a sibling both want the same family activity. How could you plan turns?',
+ 'A group decision leaves one person unhappy. How could you hear their concern?',
+ 'You notice an argument becoming physical. What is the safest next step?'
+ ],
+ safety:[
+ 'A player online asks you to share your password. What should you do?',
+ 'Someone in a game asks for your home address. How can you stay safe?',
+ 'A stranger sends a friend request. What should you do before responding?',
+ 'A person online asks you to keep a conversation secret from your family. What is a safe choice?',
+ 'A game asks for your full name and school. What should you check with a grown-up?',
+ 'Someone sends an unexpected picture that makes you uncomfortable. What can you do?',
+ 'A player uses mean words in a chat. How can you respond safely?',
+ 'A person you only know online wants to meet in person. What should happen?',
+ 'You see someone sharing another child’s private photo. What should you do?',
+ 'A link appears promising a free prize if you enter details. What is the safe next step?',
+ 'A friend wants to post a photo that shows your school uniform. What could you discuss?',
+ 'Someone asks you to move a conversation to a private app. What should you do?',
+ 'A game chat asks where you will be after school. What information should stay private?',
+ 'You see a hurtful rumour being shared online. Should you forward it?',
+ 'A person online says they are your age but you are unsure. What is a safe approach?',
+ 'You receive a message that makes you feel pressured to reply quickly. What can you do?',
+ 'A game asks permission to use your camera or microphone. Who should help decide?',
+ 'Someone wants a picture of your face to prove you are a friend. What should you do?',
+ 'You notice a chat has become unkind. How can you leave and get support?',
+ 'A player offers a gift in exchange for personal information. What is the safe response?',
+ 'You accidentally share something private in a chat. Who should you tell?',
+ 'A website asks for your birthday and location. What should you do first?',
+ 'Someone tells you to delete messages so your grown-up cannot see them. What is a safe choice?',
+ 'A friend wants to use your account. Why should passwords remain private?',
+ 'You see a video that feels frightening or confusing. What could you do?',
+ 'A person online says you will get in trouble if you tell an adult. What should you remember?',
+ 'A group chat is sharing unkind jokes about a classmate. What is a safe, kind response?'
+ ],
+ help:[
+ 'You see a classmate being repeatedly teased. Which trusted adult could you tell?',
+ 'A friend says they are worried but asks you to solve everything alone. What can you do?',
+ 'You feel unsafe during an activity. How can you get help straight away?',
+ 'Someone tells you about a problem that feels too big to handle. What is your next step?',
+ 'You are unsure whether a joke has gone too far. Who could help you think it through?',
+ 'A friend is being excluded again and again. How could you support them and involve an adult?',
+ 'You receive a message that makes you feel frightened. What should you do?',
+ 'You cannot find your group on a school outing. What is the safest action?',
+ 'A person asks you to do something that feels wrong. How can you say no and get help?',
+ 'You notice a younger child is lost at an event. Which grown-up should you find?',
+ 'A friend says someone has been unkind online. How can you help them report it to an adult?',
+ 'You made a mistake and are afraid to tell someone. Why can asking for help be brave?',
+ 'You are worried about a friend who has stopped joining activities. How could you check in safely?',
+ 'A disagreement keeps happening even after you try to solve it. Who can help?',
+ 'You do not know which adult to talk to first. What trusted people could you choose from?',
+ 'A friend asks you to keep a safety concern secret. What should you explain?',
+ 'You feel overwhelmed in a busy place. How can you find a safe adult?',
+ 'Someone is hurt during a game. What should you do before trying to help?',
+ 'A child tells you they are being bullied. How can you listen and get adult support?',
+ 'You are unsure if an online account is genuine. Who can help you check?',
+ 'A friend is scared to report an uncomfortable message. How can you encourage them?',
+ 'You are being pressured to join an activity you do not want. What can you say?',
+ 'A trusted adult is not nearby when you need help. Which other safe adult could you approach?',
+ 'You see a safety rule being ignored near water or roads. What should you do?',
+ 'A friend says they feel unsafe going home. What adult or emergency support should be involved?',
+ 'You need help understanding a confusing online message. Who can look at it with you?'
+ ]
+};
+const socialTopicChoices={
+ friendship:[['Invite them kindly or ask if they would like to join.','A friendly invitation helps people feel welcome while respecting their choice.',true],['Leave them out on purpose.','Excluding someone can hurt. Look for a way to be welcoming.',false],['Ask a trusted adult for ideas if you are unsure.','A trusted grown-up can help you find a safe, kind approach.',true]],
+ listening:[['Pause, listen, and let them finish.','Giving someone time to speak shows respect and helps you understand.',true],['Interrupt and talk over them.','Interrupting can make it hard for others to share their thoughts.',false],['Ask a kind question to check what they mean.','Checking your understanding is a thoughtful listening skill.',true]],
+ feelings:[['Name the feeling gently and ask what support they want.','Noticing feelings and asking before helping shows empathy.',true],['Tell them their feeling is silly.','Feelings matter, even when people experience things differently.',false],['Give them space and offer to listen later.','Respectful space can help someone feel safe and understood.',true]],
+ conflict:[['Use calm words and look for a fair solution together.','Calm communication helps people solve problems without blame.',true],['Shout or grab to get your way.','Aggressive actions can make a disagreement less safe.',false],['Pause and ask a trusted adult to help if needed.','Getting help is a sensible choice when a problem feels too big.',true]],
+ safety:[['Keep private details private and tell a trusted adult.','Personal information should stay private. A trusted adult can help you decide what to do.',true],['Share the information to keep the person happy.','You never need to share private details to please someone.',false],['Stop, block or leave if appropriate, and ask an adult for help.','Pausing and getting support are safe steps when something feels wrong.',true]],
+ help:[['Tell a trusted adult clearly what happened.','You do not have to manage a difficult or unsafe situation alone.',true],['Keep a worrying problem secret.','Safety worries should be shared with a trusted adult who can help.',false],['Move to a safe place and ask an adult to stay with you.','Finding a safe adult and place is a strong next step.',true]]
+};
+const socialExtraScenarios=[];
+Object.entries(socialExtraPrompts).forEach(([topic,prompts],topicIndex)=>{
+ prompts.forEach((situation,index)=>{
+  const age=['3-5','6-8','9-10'][(index+topicIndex)%3];
+  socialExtraScenarios.push({topic,age,situation,choices:socialTopicChoices[topic]});
+ });
+});
 const socialAge=document.getElementById('social-age'),socialTopic=document.getElementById('social-topic'),socialSituation=document.getElementById('social-situation'),socialChoices=document.getElementById('social-choices'),socialFeedback=document.getElementById('social-feedback');
-let currentSocial=null;
+let currentSocial=null;\nconst allSocialScenarios=socialScenarios.concat(socialExtraScenarios);\ndocument.getElementById('social-heading').textContent='Social Interaction Studio 💬 · '+allSocialScenarios.length+' scenarios';\ndocument.querySelector('#social-interaction .story-intro p').textContent='Explore '+allSocialScenarios.length+' guided situations to practise friendship, communication, empathy, kind problem-solving and online safety.';
 function chooseSocialScenario(){
  const age=socialAge.value,topic=socialTopic.value;
- let options=socialScenarios.filter(s=>(s.age===age||age==='9-10'&&s.age==='6-8')&&(topic==='all'||s.topic===topic));
- if(!options.length)options=socialScenarios.filter(s=>s.age===age);
+ let options=allSocialScenarios.filter(s=>(s.age===age||age==='9-10'&&s.age==='6-8')&&(topic==='all'||s.topic===topic));
+ if(!options.length)options=allSocialScenarios.filter(s=>s.age===age);
  currentSocial=options[Math.floor(Math.random()*options.length)];
  socialSituation.textContent=currentSocial.situation;socialFeedback.textContent='Think about how each choice might make someone feel, then choose an answer.';
  socialChoices.replaceChildren();
