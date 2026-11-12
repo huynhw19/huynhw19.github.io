@@ -124,6 +124,20 @@ Deno.serve(async (req: Request) => {
       return json({ ok: true });
     }
 
+    if (action === "delete_child_profile") {
+      const childId = String(body.child_id || "");
+      const { data: child } = await admin.from("family_children")
+        .select("id,child_user_id").eq("id", childId).eq("parent_id", user.id).maybeSingle();
+      if (!child) return json({ error: "Child profile not found" }, 404);
+      if (child.child_user_id) {
+        const { error: deleteUserError } = await admin.auth.admin.deleteUser(child.child_user_id);
+        if (deleteUserError) return json({ error: "Could not close the child sign-in securely" }, 500);
+      }
+      const { error } = await admin.from("family_children").delete().eq("id", child.id).eq("parent_id", user.id);
+      if (error) return json({ error: "Could not delete child profile" }, 500);
+      return json({ ok: true });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (_) {
     return json({ error: "The request could not be completed. Please try again." }, 500);
