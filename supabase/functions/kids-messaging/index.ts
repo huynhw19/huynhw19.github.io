@@ -110,6 +110,20 @@ Deno.serve(async (req: Request) => {
       return json({ ok: true });
     }
 
+    if (action === "parent_remove_friendship") {
+      const friendshipId = String(body.friendship_id || "");
+      const { data: f } = await admin.from("kids_friendships")
+        .select("id,child_a_id,child_b_id").eq("id", friendshipId).maybeSingle();
+      if (!f) return json({ error: "Friendship not found" }, 404);
+      const { data: owned } = await admin.from("family_children").select("id")
+        .eq("parent_id", user.id).in("id", [f.child_a_id, f.child_b_id]).limit(1);
+      if (!owned?.length) return json({ error: "You cannot manage this friendship" }, 403);
+      const { error } = await admin.from("kids_friendships")
+        .update({ status: "blocked", updated_at: new Date().toISOString() }).eq("id", friendshipId);
+      if (error) return json({ error: "Could not remove this friendship" }, 400);
+      return json({ ok: true });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (_) {
     return json({ error: "The request could not be completed. Please try again." }, 500);
