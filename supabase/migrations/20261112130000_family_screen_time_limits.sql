@@ -32,7 +32,7 @@ revoke insert, update, delete on public.family_screen_time_usage from anon, auth
 create index if not exists family_screen_time_usage_last_seen_idx
   on public.family_screen_time_usage(last_seen_at desc);
 
-create or replace function public.kids_screen_time_heartbeat(
+create or replace function private.kids_screen_time_heartbeat(
   p_child_id uuid,
   p_activity text
 )
@@ -49,43 +49,48 @@ begin
   if auth.uid() is null then
     raise exception 'Authentication required' using errcode = '42501';
   end if;
-
   if p_activity not in ('kids_zone','kids_messages') then
     raise exception 'Invalid activity' using errcode = '22023';
   end if;
 
-  select c.daily_screen_time_limit_minutes
-    into v_limit
+  select c.daily_screen_time_limit_minutes into v_limit
     from public.family_children c
    where c.id = p_child_id
      and (c.child_user_id = auth.uid() or c.parent_id = auth.uid());
-
   if not found then
     raise exception 'Child profile not found for this session' using errcode = '42501';
   end if;
 
-  insert into public.family_screen_time_usage as usage (
-    child_id, usage_date, seconds_used, last_seen_at, current_activity
-  )
+  insert into public.family_screen_time_usage as usage
+    (child_id, usage_date, seconds_used, last_seen_at, current_activity)
   values (p_child_id, v_date, 0, pg_catalog.now(), p_activity)
   on conflict (child_id, usage_date) do update
     set seconds_used = usage.seconds_used +
-          case
-            when usage.last_seen_at >= pg_catalog.now() - interval '2 minutes'
-              then least(90, greatest(0, floor(extract(epoch from (pg_catalog.now() - usage.last_seen_at)))::integer))
-            else 0
-          end,
-        last_seen_at = pg_catalog.now(),
-        current_activity = excluded.current_activity
-  returning usage.seconds_used
-       into v_used;
+      case when usage.last_seen_at >= pg_catalog.now() - interval '2 minutes'
+        then least(90, greatest(0, floor(extract(epoch from (pg_catalog.now() - usage.last_seen_at)))::integer))
+        else 0 end,
+      last_seen_at = pg_catalog.now(),
+      current_activity = excluded.current_activity
+  returning usage.seconds_used into v_used;
 
-  return query select
-    (v_limit is null or v_used < v_limit * 60),
-    v_used,
-    v_limit,
-    v_date;
+  return query select (v_limit is null or v_used < v_limit * 60), v_used, v_limit, v_date;
 end;
+$function$;
+
+revoke all on function private.kids_screen_time_heartbeat(uuid,text) from public, anon;
+grant usage on schema private to authenticated;
+grant execute on function private.kids_screen_time_heartbeat(uuid,text) to authenticated;
+
+create or replace function public.kids_screen_time_heartbeat(
+  p_child_id uuid,
+  p_activity text
+)
+returns table(allowed boolean, used_seconds integer, limit_minutes integer, activity_date date)
+language sql
+security invoker
+set search_path = ''
+as $function$
+  select * from private.kids_screen_time_heartbeat(p_child_id,p_activity);
 $function$;
 
 revoke all on function public.kids_screen_time_heartbeat(uuid,text) from public, anon;
