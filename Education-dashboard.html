@@ -124,6 +124,23 @@
       <div id="slideshow-list"><p class="muted">Loading slideshows…</p></div>
     </section>
 
+    <section class="card" id="documents-panel" aria-labelledby="documents-title">
+      <h2 id="documents-title">Create document</h2>
+      <p class="muted">Write lesson notes, reading material, study guides or other class documents. Keep a document as a draft, publish it to linked students, or archive it.</p>
+      <form id="document-form">
+        <label>Document title<input id="document-title" maxlength="160" required></label>
+        <label>Share with<select id="document-student"><option value="">All linked students</option></select></label>
+        <label>Document content<textarea id="document-content" rows="12" maxlength="50000" placeholder="Write your document here…" required></textarea></label>
+        <label>Visibility<select id="document-status"><option value="draft">Draft — only you can see it</option><option value="published">Published — visible to the selected students</option><option value="archived">Archived — hidden from students</option></select></label>
+        <div class="form-actions"><button id="document-submit" type="submit">Save document</button><button id="document-cancel" class="secondary" type="button" hidden>Cancel editing</button></div>
+      </form>
+      <div id="document-message" class="status" role="status" aria-live="polite"></div>
+    </section>
+    <section class="card" aria-labelledby="manage-documents-title">
+      <h2 id="manage-documents-title">Manage documents</h2>
+      <div id="document-list"><p class="muted">Loading documents…</p></div>
+    </section>
+
     <section class="card" id="assignments-panel">
       <h2 id="assignment-form-title">Create assignment</h2>
       <p class="muted">Create work for one of your students. Drafts are private to you; publish an assignment when it is ready for the student to view.</p>
@@ -521,6 +538,110 @@
       });
       resetSlideshowForm();
 
+      const documentForm = document.getElementById('document-form');
+      const documentTitle = document.getElementById('document-title');
+      const documentContent = document.getElementById('document-content');
+      const documentStudent = document.getElementById('document-student');
+      const documentStatus = document.getElementById('document-status');
+      const documentList = document.getElementById('document-list');
+      const documentMessage = document.getElementById('document-message');
+      const documentSubmit = document.getElementById('document-submit');
+      const documentCancel = document.getElementById('document-cancel');
+      let editingDocumentId = null;
+      function setDocumentMessage(message, isError = false) {
+        documentMessage.textContent = message;
+        documentMessage.className = 'status' + (isError ? ' error' : '');
+      }
+      async function loadDocumentStudents(selectedId = '') {
+        const {data,error} = await client.from('education_students')
+          .select('id,student_name,student_email').eq('user_id',currentUserId)
+          .order('student_name',{ascending:true});
+        if (error) { setDocumentMessage('Could not load your student list.',true); return; }
+        documentStudent.replaceChildren();
+        const allOption = document.createElement('option');
+        allOption.value = ''; allOption.textContent = 'All linked students';
+        documentStudent.append(allOption);
+        (data || []).forEach(student => {
+          const option = document.createElement('option');
+          option.value = student.id;
+          option.textContent = student.student_name + ' (' + student.student_email + ')';
+          documentStudent.append(option);
+        });
+        documentStudent.value = selectedId || '';
+      }
+      function resetDocumentForm() {
+        documentForm.reset(); editingDocumentId = null;
+        documentStatus.value = 'draft';
+        documentSubmit.textContent = 'Save document';
+        documentCancel.hidden = true;
+      }
+      async function loadDocuments() {
+        documentList.replaceChildren();
+        const {data,error} = await client.from('education_documents')
+          .select('id,student_id,title,content,status,created_at,updated_at,education_students(student_name)')
+          .eq('user_id',currentUserId).order('updated_at',{ascending:false});
+        if (error) {
+          const p=document.createElement('p'); p.className='error';
+          p.textContent='Could not load documents. ' + (error.message || 'Please refresh and try again.');
+          documentList.append(p); return;
+        }
+        if (!data || !data.length) {
+          const p=document.createElement('p'); p.className='muted';
+          p.textContent='No documents yet. Create your first document above.';
+          documentList.append(p); return;
+        }
+        data.forEach(doc => {
+          const article=document.createElement('article'); article.className='assignment-item';
+          const heading=document.createElement('h3'); heading.textContent=doc.title;
+          const meta=document.createElement('p'); meta.className='assignment-meta';
+          meta.textContent=(doc.student_id ? (doc.education_students?.student_name || 'Selected student') : 'All linked students')
+            + ' · ' + doc.status.charAt(0).toUpperCase()+doc.status.slice(1)
+            + ' · Updated ' + new Date(doc.updated_at || doc.created_at).toLocaleDateString();
+          const preview=document.createElement('p');
+          const plain=(doc.content || '').trim();
+          preview.textContent=plain.length>240 ? plain.slice(0,240)+'…' : plain;
+          article.append(heading,meta);
+          if (plain) article.append(preview);
+          const actions=document.createElement('div'); actions.className='assignment-actions';
+          const edit=document.createElement('button'); edit.type='button'; edit.className='secondary'; edit.textContent='Edit';
+          edit.addEventListener('click',async()=>{
+            editingDocumentId=doc.id; documentTitle.value=doc.title;
+            documentContent.value=doc.content || ''; documentStatus.value=doc.status;
+            await loadDocumentStudents(doc.student_id);
+            documentSubmit.textContent='Save changes'; documentCancel.hidden=false;
+            documentForm.scrollIntoView({behavior:'smooth',block:'start'}); documentTitle.focus();
+          });
+          const remove=document.createElement('button'); remove.type='button'; remove.className='danger'; remove.textContent='Delete';
+          remove.addEventListener('click',async()=>{
+            if(!window.confirm('Delete the document "'+doc.title+'"? This cannot be undone.')) return;
+            const {error:deleteError}=await client.from('education_documents').delete()
+              .eq('id',doc.id).eq('user_id',currentUserId);
+            if(deleteError){setDocumentMessage(deleteError.message || 'Could not delete document.',true);return;}
+            if(editingDocumentId===doc.id) resetDocumentForm();
+            setDocumentMessage('Document deleted.'); await loadDocuments();
+          });
+          actions.append(edit,remove); article.append(actions); documentList.append(article);
+        });
+      }
+      documentCancel.addEventListener('click',()=>{resetDocumentForm();setDocumentMessage('Editing cancelled.');});
+      documentForm.addEventListener('submit',async event=>{
+        event.preventDefault();
+        const title=documentTitle.value.trim(), content=documentContent.value.trim();
+        if(!title || !content){setDocumentMessage('Enter a document title and some content.',true);return;}
+        const record={title,content,student_id:documentStudent.value || null,status:documentStatus.value,updated_at:new Date().toISOString()};
+        documentSubmit.disabled=true;
+        setDocumentMessage(editingDocumentId ? 'Saving document…' : 'Creating document…');
+        const result=editingDocumentId
+          ? await client.from('education_documents').update(record).eq('id',editingDocumentId).eq('user_id',currentUserId)
+          : await client.from('education_documents').insert({...record,user_id:currentUserId});
+        documentSubmit.disabled=false;
+        if(result.error){setDocumentMessage(result.error.message || 'Could not save document.',true);return;}
+        const savedStatus=record.status;
+        resetDocumentForm();
+        setDocumentMessage(savedStatus==='published' ? 'Document published for the selected linked students.' : 'Document saved.');
+        await loadDocuments();
+      });
+
       const assignmentForm = document.getElementById('assignment-form');
       const assignmentStudent = document.getElementById('assignment-student');
       const assignmentTitle = document.getElementById('assignment-title');
@@ -608,6 +729,8 @@
             if (updateError) { setAssignmentMessage(updateError.message || 'Could not update assignment.', true); return; }
             setAssignmentMessage(nextStatus === 'published' ? 'Assignment published for the student.' : 'Assignment moved back to draft.');
             await loadAssignments();
+        await loadDocumentStudents();
+        await loadDocuments();
         await loadSlideshows();
           });
           const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Delete';
