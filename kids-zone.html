@@ -86,6 +86,11 @@
   <div class="kids-video-grid"><div><h3 id="kids-video-title">Choose a video</h3><div id="kids-video-player" class="kids-video-player"><p class="muted">Your videos will play here.</p></div></div>
   <div><h3>My playlist</h3><ul id="kids-video-list" class="kids-video-list"><li class="muted">Loading…</li></ul></div></div>
 </section>
+<section class="kids-video-section" id="kids-resources-library" aria-labelledby="kids-resources-heading">
+  <span class="kids-video-tag">Chosen by your parent</span><h2 id="kids-resources-heading">📚 My Learning Resources</h2>
+  <p class="muted" id="kids-resources-message">Loading resources chosen for you…</p>
+  <div id="kids-resources-list" class="story-card-grid"><p class="muted">Your parent-approved resources will appear here.</p></div>
+</section>
 <section class="storytelling-section" id="social-interaction" aria-labelledby="social-heading">
   <span class="eyebrow">🤝 Connect • Listen • Include</span>
   <div class="story-intro"><h2 id="social-heading">Social Interaction Studio 💬</h2>
@@ -167,6 +172,16 @@ const say=(message,error=false)=>{status.hidden=false;status.classList.toggle('e
 if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){say('Sign-in is not configured. Please contact the site owner.',true);return;}
 const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 
+
+async function loadKidsResources(profile){
+ const message=document.getElementById('kids-resources-message'),list=document.getElementById('kids-resources-list');
+ const {data,error}=await client.from('family_kids_resources').select('id,title,description,resource_type,subject,age_group,resource_url').eq('child_id',profile.id).eq('status','published').order('created_at',{ascending:false});
+ list.replaceChildren();if(error){message.textContent='Your learning resources could not be loaded. Please ask a parent to check the Family Dashboard.';return;}
+ message.textContent='These resources were chosen by your parent for '+profile.child_name+'.';
+ if(!data?.length){const p=document.createElement('p');p.className='muted';p.textContent='Your parent has not published any resources for you yet.';list.append(p);return;}
+ data.forEach(r=>{const card=document.createElement('article');card.className='story-card';const h=document.createElement('h3');h.textContent=r.title;const m=document.createElement('p');m.className='story-meta';m.textContent=[r.resource_type,r.subject,r.age_group?'Ages '+r.age_group:''].filter(Boolean).join(' · ');card.append(h,m);if(r.description){const d=document.createElement('p');d.textContent=r.description;card.append(d);}if(r.resource_url){const a=document.createElement('a');a.href=r.resource_url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Open resource';card.append(a);}list.append(card);});
+}
+
 async function loadKidsVideos(userId){
   const message=document.getElementById('kids-video-message'),list=document.getElementById('kids-video-list'),player=document.getElementById('kids-video-player'),title=document.getElementById('kids-video-title');
   const profileQuery=client.from('family_children').select('id,child_name,parent_id,child_user_id,age_years');
@@ -175,6 +190,7 @@ async function loadKidsVideos(userId){
     :await profileQuery.eq('child_user_id',userId).maybeSingle();
   if(profileError||!profile||(profile.parent_id!==userId&&profile.child_user_id!==userId)){activeChildProfile=null;message.textContent='Parent-approved videos appear here when you open your own child profile from the family dashboard or sign in with your child account.';list.replaceChildren();const li=document.createElement('li');li.className='muted';li.textContent='No matching child profile is available for this sign-in.';list.append(li);document.getElementById('progress-status').textContent='Progress is not linked to a child profile. Open Kids Zone from the Family Dashboard.';return;}
   activeChildProfile=profile;
+   await loadKidsResources(profile);
   const ageBand=profile.age_years!==null&&profile.age_years!==undefined?(profile.age_years<=5?'3-5':profile.age_years<=8?'6-8':profile.age_years<=10?'9-10':''):'';
   if(ageBand){document.getElementById('age-filter').value=ageBand;filterGames();}
   document.getElementById('progress-status').textContent='Progress will be saved for '+profile.child_name+' and shown in the Family Dashboard.';
