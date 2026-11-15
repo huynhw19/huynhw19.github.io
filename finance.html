@@ -20,7 +20,7 @@
 <section class="card balance"><span class="muted">Total tracked balance</span><div class="amount" id="total-balance">$0.00</div><span class="muted small" id="balance-caption">Across your tracked accounts</span><div class="stats"><div class="stat"><span class="muted small">Money in · this month</span><strong id="month-income">$0.00</strong></div><div class="stat"><span class="muted small">Money out · this month</span><strong id="month-spend">$0.00</strong></div></div></section>
 <section class="card"><h2>Spending breakdown</h2><p class="muted small">Expenses this month by category</p><div id="spending-chart" class="empty">Add transactions to see your spending.</div></section>
 </div>
-<div class="toolbar"><h2>Your accounts</h2><button id="show-account-form" type="button">＋ Open an account</button></div>
+<div class="toolbar"><h2>Your accounts</h2><button id="show-account-form" type="button">＋ Add account</button></div>
 <section class="accounts" id="accounts"></section>
 <div class="layout section">
 <section class="card"><h2 id="entry-title">Record a payment or deposit</h2><form id="transaction-form"><div class="form-grid">
@@ -28,7 +28,7 @@
 <div class="field"><label for="tx-account">Pay from account</label><select id="tx-account" required></select></div>
 <div class="field"><label for="tx-amount">Amount (AUD)</label><input id="tx-amount" type="number" min="0.01" max="100000000" step="0.01" required placeholder="0.00"></div>
 <div class="field"><label for="tx-category">Category</label><select id="tx-category"><option>Food & dining</option><option>Transport</option><option>Shopping</option><option>Bills</option><option>Entertainment</option><option>Health</option><option>Income</option><option>Other</option></select></div>
-<div class="field"><label for="tx-description">Description</label><input id="tx-description" maxlength="160" required placeholder="e.g. Weekly groceries"></div><div class="field"><label for="tx-merchant">Payee / shop (optional)</label><input id="tx-merchant" maxlength="100" placeholder="e.g. Woolworths, Kmart, Amazon"></div>
+<div class="field"><label for="tx-description">Description</label><input id="tx-description" maxlength="160" required placeholder="e.g. Weekly groceries"></div><div class="field"><label for="tx-merchant">Payee / shop (optional)</label><input id="tx-merchant" list="payee-suggestions" maxlength="100" placeholder="e.g. Woolworths, Kmart, AGL"><datalist id="payee-suggestions"></datalist>></div>
 </div><div class="actions"><button type="submit">Record transaction</button></div></form></section>
 <section class="card" id="account-form-card" hidden><h2>Add an account</h2><form id="account-form"><div class="form-grid">
 <div class="field full"><label for="account-name">Account name</label><input id="account-name" maxlength="80" required placeholder="Everyday account"></div>
@@ -86,6 +86,7 @@ function render(){
  ['tx-account','transfer-from','transfer-to'].forEach(id=>$(id).innerHTML=opts);
  const usable=accounts.length>1;
  $('transfer-form').querySelector('button').disabled=!usable;
+ const knownPayees=[...new Map(transactions.filter(t=>t.merchant&&t.merchant.trim()).map(t=>[t.merchant.trim().toLocaleLowerCase(),t.merchant.trim()])).values()].sort((a,b)=>a.localeCompare(b));$('payee-suggestions').innerHTML=knownPayees.map(n=>'<option value="'+escapeHtml(n)+'">').join('');
  const shopTotals=new Map();transactions.filter(t=>t.kind==='expense'&&t.merchant&&t.merchant.trim()).forEach(t=>{const cur=accountById(t.account_id)?.currency||'AUD',name=t.merchant.trim(),key=name.toLocaleLowerCase()+'|'+cur,old=shopTotals.get(key)||{name,currency:cur,total:0,count:0,last:t.created_at};old.total+=Number(t.amount);old.count++;if(new Date(t.created_at)>new Date(old.last))old.last=t.created_at;shopTotals.set(key,old)});
  const shops=[...shopTotals.values()].sort((a,b)=>b.total-a.total);
  $('shops-list').innerHTML=shops.length?shops.map(s=>'<article class="account"><strong>'+escapeHtml(s.name)+'</strong><span class="muted small">'+s.count+' payment'+(s.count===1?'':'s')+' · '+escapeHtml(s.currency)+'</span><div class="acct-balance">'+money(s.total,s.currency)+'</div><span class="muted small">Last paid '+new Date(s.last).toLocaleDateString('en-AU')+'</span></article>').join(''):'<div class="empty">No shops recorded yet. Add a shop name to an expense above.</div>';
