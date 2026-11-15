@@ -167,10 +167,19 @@
       }
 
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,experimental:{passkey:true}}});
-      const requestedNext = new URLSearchParams(window.location.search).get('next');
-      // Only allow known same-site destinations; never redirect to an arbitrary URL.
-      const allowedDestinations = new Set(['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','family.html']);
-      const postLoginDestination = allowedDestinations.has(requestedNext) ? requestedNext : 'dashboard.html';
+      const loginParams = new URLSearchParams(window.location.search);
+      const requestedNext = loginParams.get('next');
+      // Only allow known same-site destinations. OAuth consent keeps its authorization id.
+      const allowedDestinations = new Set(['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','family.html','oauth-consent.html']);
+      let postLoginDestination = allowedDestinations.has(requestedNext) ? requestedNext : 'dashboard.html';
+      if (requestedNext === 'oauth-consent.html') {
+        const authorizationId = loginParams.get('authorization_id') || '';
+        if (authorizationId && authorizationId.length <= 256 && /^[a-zA-Z0-9_-]+$/.test(authorizationId)) {
+          postLoginDestination += '?authorization_id=' + encodeURIComponent(authorizationId);
+        } else {
+          postLoginDestination = 'dashboard.html';
+        }
+      }
       const callbackUrlObject = new URL('login.html', window.location.href);
       if (postLoginDestination !== 'dashboard.html') callbackUrlObject.searchParams.set('next', postLoginDestination);
       const pendingEmail2FALink = new URLSearchParams(window.location.search).get('email_2fa_token');
