@@ -1,7 +1,7 @@
 create table if not exists public.family_accounts (
   id uuid primary key default gen_random_uuid(),
   family_id text not null unique
-    check (family_id ~ '^[A-Z0-9]{12}$'),
+    check (family_id ~ '^[A-Z0-9]{16}$'),
   created_by uuid not null references auth.users(id) on delete cascade,
   created_at timestamptz not null default now()
 );
@@ -45,7 +45,7 @@ as $$
 declare
   existing_family public.family_accounts%rowtype;
   new_family_id uuid := gen_random_uuid();
-  new_code text := upper(substr(encode(extensions.gen_random_bytes(8), 'hex'), 1, 12));
+  new_code text := upper(encode(extensions.gen_random_bytes(8), 'hex'));
 begin
   if auth.uid() is null then raise exception 'Sign in is required.'; end if;
 
@@ -78,8 +78,8 @@ declare
   existing_family public.family_accounts%rowtype;
 begin
   if auth.uid() is null then raise exception 'Sign in is required.'; end if;
-  if char_length(clean_code) <> 12 or clean_code !~ '^[A-Z0-9]{12}$' then
-    raise exception 'Enter a valid 12-character Family ID.';
+  if char_length(clean_code) <> 16 or clean_code !~ '^[A-Z0-9]{16}$' then
+    raise exception 'Enter a valid 16-character Family ID.';
   end if;
 
   select f.* into target_family
