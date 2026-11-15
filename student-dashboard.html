@@ -303,9 +303,19 @@
             });
           }
           async function saveAnswers(){
-            const {error}=await client.from('education_test_responses')
-              .upsert(collectAnswers(),{onConflict:'attempt_id,question_id'});
-            if(error){showStatus(error.message||'Could not save answers.',true);return false}
+            const rows=collectAnswers();
+            const {data:existing,error:loadError}=await client.from('education_test_responses')
+              .select('id,question_id').eq('attempt_id',attemptId);
+            if(loadError){showStatus(loadError.message||'Could not load saved answers.',true);return false}
+            const existingIds=new Map((existing||[]).map(row=>[row.question_id,row.id]));
+            const writes=await Promise.all(rows.map(row=>{
+              const id=existingIds.get(row.question_id);
+              return id
+                ? client.from('education_test_responses').update({answer:row.answer}).eq('id',id)
+                : client.from('education_test_responses').insert(row);
+            }));
+            const failed=writes.find(result=>result.error);
+            if(failed){showStatus(failed.error.message||'Could not save answers.',true);return false}
             showStatus('Your answers have been saved.');return true;
           }
           async function submitTest(auto=false){
