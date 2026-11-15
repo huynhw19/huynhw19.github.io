@@ -19,6 +19,16 @@
       <p id="account-label" class="muted">Checking your account…</p>
       <p class="muted">Create private child profiles managed by your signed-in adult account. Each child profile has its own six-digit PIN for a separate Kids Messages session. Adults control messaging and friend approvals. Screen Time shows usage inside ConfigKit Kids Zone and Kids Messages only; it cannot monitor other apps on a phone.</p>
     </section>
+    <section class="card" id="family-id-panel" hidden aria-labelledby="family-id-title">
+      <span class="eyebrow">Your household</span>
+      <h2 id="family-id-title">Family ID</h2>
+      <p class="muted">This shared 16-character ID belongs to your household. Share it only with people you want to invite to your family account. All child profiles in this dashboard belong to this family.</p>
+      <div class="family-id-row" style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+        <code id="family-id-value" style="font-size:1.25rem;font-weight:750;letter-spacing:.12em;padding:.65rem .8rem;background:#e8f4ed;border-radius:.55rem;overflow-wrap:anywhere">Loading…</code>
+        <button id="copy-family-id" type="button" class="secondary">Copy Family ID</button>
+      </div>
+      <p id="family-id-status" class="muted" role="status" aria-live="polite"></p>
+    </section>
     <section class="card" aria-labelledby="getting-started-title">
       <span class="eyebrow">Getting started</span>
       <h2 id="getting-started-title">Set up your family dashboard</h2>
@@ -340,13 +350,45 @@
         resetResourceForm();resourceMessageText(wasEditing?'Resource updated.':'Resource created.');await loadKidsResources();
       });
 
+      async function loadFamilyId(){
+        const familyPanel=document.getElementById('family-id-panel');
+        const familyValue=document.getElementById('family-id-value');
+        const familyStatus=document.getElementById('family-id-status');
+        const copyButton=document.getElementById('copy-family-id');
+        const {data,error}=await client.from('family_account_members')
+          .select('role,family:family_accounts(family_id)')
+          .eq('user_id',userId).maybeSingle();
+        if(error){
+          familyPanel.hidden=false;familyValue.textContent='Unavailable';
+          familyStatus.textContent='Could not load your Family ID. Please refresh the page.';
+          return;
+        }
+        const family=Array.isArray(data?.family)?data.family[0]:data?.family;
+        if(!family?.family_id){
+          familyPanel.hidden=false;familyValue.textContent='Not set up';
+          familyStatus.textContent='Your household does not have a Family ID yet. Create or join a family from the family setup flow.';
+          copyButton.hidden=true;return;
+        }
+        const familyId=family.family_id;
+        familyPanel.hidden=false;familyValue.textContent=familyId;copyButton.hidden=false;
+        copyButton.addEventListener('click',async()=>{
+          try{
+            await navigator.clipboard.writeText(familyId);
+            familyStatus.textContent='Family ID copied to clipboard.';
+          }catch(_){
+            familyStatus.textContent='Copy is unavailable in this browser. Select the Family ID above to copy it manually.';
+          }
+        });
+      }
       async function init(){
         const {data,error}=await client.auth.getSession();
         if(error||!data.session){window.location.replace('login.html?next=family-dashboard.html');return;}
         const user=data.session.user; const accountType=user.user_metadata?.account_type || 'personal';
         if(accountType!=='personal'){accountLabel.textContent='This dashboard is available only to personal accounts.';return;}
         userId=user.id; accountLabel.textContent='Signed in as '+(user.email || 'your personal account');
-        creator.hidden=false;panel.hidden=false;kidsVideos.hidden=false;resourcesPanel.hidden=false;await loadChildren();
+        creator.hidden=false;panel.hidden=false;kidsVideos.hidden=false;resourcesPanel.hidden=false;
+        await loadFamilyId();
+        await loadChildren();
       }
       client.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace('login.html');});
       void init();
