@@ -9,7 +9,11 @@ Kids Zone is a browser-based collection of family-friendly games and creative ac
 3. Choose **Play game** on a generated mini-game card.
 4. Select an answer to see feedback, then choose **Next round**.
 
-The page contains 10,000 games: 20 hand-built games and 9,980 generated games. Generated games are rendered in batches of 100 so mobile browsers do not need to create the entire catalogue at once. The first 5,000 generated games are two-player pass-and-play games. Players take turns on the same device; there is no online matchmaking, chat or cross-device multiplayer.
+The page now contains 60,000 games: 20 hand-built games and 59,980 generated game entries, adding 50,000 entries to the previous catalogue. The generated entries draw from 17 age-banded mini-game templates covering maths, patterns, spelling, science, geography, logic, animals, shapes, time, nature, space, money, coding, riddles, measurement and kindness. Generated games are rendered in batches of 100 so mobile browsers do not need to create the entire catalogue at once. The first 5,000 generated games are two-player pass-and-play games. Players take turns on the same device; there is no online matchmaking, chat or cross-device multiplayer.
+
+## Rainbow Runner
+
+Rainbow Runner is a 500-level canvas game in `runner-game.html`. Obstacle and star spawning use elapsed-frame countdowns rather than exact floating-point modulo checks, so spawning remains reliable when animation-frame timing is fractional or varies across devices. Pausing cancels and clears the active animation-frame request.
 
 ## Interactive Storytelling Studio
 
@@ -48,7 +52,7 @@ Kids Zone uses the site's existing Supabase sign-in flow. Existing family video 
 
 ## Development notes
 
-The game catalogue is generated client-side in `kids-zone.html`. It contains 20 hand-built games plus 9,980 generated games, for 10,000 total. The first 5,000 generated entries support two-player pass-and-play. Game cards are rendered in batches of 100.
+The game catalogue is generated client-side in `kids-zone.html`. It contains 20 hand-built games plus 59,980 generated games, for 60,000 total, including 50,000 additional entries. The 17 generated templates are age-banded and are rendered in batches of 100. The first 5,000 generated entries support two-player pass-and-play. Game cards are rendered in batches of 100.
 
 The storytelling catalogue is generated client-side from reusable, age-banded templates: 5,000 story records and 5,000 activity records. Story choices and endings are handled in the browser. Story and activity cards are rendered in small batches of 12. No external AI service or user-generated content endpoint is used.
 
