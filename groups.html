@@ -1,161 +1,168 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Create or join private ConfigKit groups to coordinate mobileconfig profile work.">
-  <title>ConfigKit Groups</title>
-  <style>
-    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,880px);margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650}main{padding:36px 0 56px}h1{font-size:clamp(2rem,6vw,3rem);line-height:1.15;margin:8px 0}h2{font-size:1.25rem;margin:0 0 10px}.lead,.muted{color:var(--muted)}.lead{font-size:1.1rem;max-width:680px}.notice{padding:14px 16px;background:var(--gold);border:1px solid #f1e4c9;border-radius:12px;color:#62512d;margin:20px 0}.status{padding:12px 14px;background:var(--white);border:1px solid var(--line);border-radius:10px}.error{color:var(--red)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin-top:22px}.panel,.group{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;margin:16px 0}.field{margin:14px 0}.field label{display:block;font-weight:650;margin-bottom:5px}input{width:100%;padding:11px 12px;border:1px solid #b9c9bf;border-radius:8px;font:inherit}button{padding:10px 15px;border:1px solid var(--green);border-radius:9px;background:var(--green);color:white;font:inherit;font-weight:650;cursor:pointer}button.secondary{background:white;color:var(--green-dark);border-color:var(--line)}button:disabled{opacity:.6;cursor:wait}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.code{font:700 1.05rem ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;overflow-wrap:anywhere}.group-list{list-style:none;padding:0}.group{margin:12px 0}.group h3{margin:0 0 6px}.group-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.edit-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.edit-form input{flex:1;min-width:180px}.danger{background:#fff;color:var(--red);border-color:#e8caca}footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted)}[hidden]{display:none!important}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Private ConfigKit groups for sharing mobileconfig profiles, discussing setup, and collaborating safely.">
+<title>ConfigKit Groups · Community</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e1e9e4;--paper:#f5f8f5;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,1040px);margin:auto}header{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line)}a{color:var(--dark);font-weight:650}main{padding:30px 0 54px}h1{font-size:clamp(2rem,5vw,2.8rem);line-height:1.15;margin:8px 0}h2{font-size:1.25rem;margin:0 0 10px}h3{font-size:1.05rem;margin:0 0 5px}.lead,.muted{color:var(--muted)}.lead{font-size:1.08rem;max-width:760px}.notice,.status{padding:13px 15px;border-radius:12px;margin:16px 0}.notice{background:var(--gold);border:1px solid #f1e4c9;color:#62512d}.status{background:white;border:1px solid var(--line)}.error{color:var(--red)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:15px;margin:18px 0}.panel,.group,.post{background:white;border:1px solid var(--line);border-radius:15px;padding:19px;margin:14px 0}.field{margin:12px 0}.field label{display:block;font-weight:650;margin-bottom:5px}input,textarea,select{width:100%;padding:10px 12px;border:1px solid #b9c9bf;border-radius:8px;font:inherit;background:white}textarea{min-height:82px;resize:vertical}button{padding:9px 14px;border:1px solid var(--green);border-radius:9px;background:var(--green);color:white;font:inherit;font-weight:650;cursor:pointer}button.secondary{background:white;color:var(--dark);border-color:var(--line)}button.danger{background:white;color:var(--red);border-color:#e8caca}button:disabled{opacity:.55;cursor:wait}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.tabs{display:flex;gap:7px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:10px;margin:15px 0}.tabs button[aria-pressed=true]{background:var(--dark)}.group-list{list-style:none;padding:0}.group{margin:10px 0}.group-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.workspace{margin-top:20px}.post-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.post-meta{font-size:.88rem;color:var(--muted)}.post-body{white-space:pre-wrap;overflow-wrap:anywhere}.comment{border-top:1px solid var(--line);padding:10px 0}.comment p{margin:4px 0}.small{font-size:.88rem}.hidden-content{opacity:.8;border-left:3px solid #c99b48;padding-left:10px}.pill{display:inline-block;background:var(--mint);color:var(--dark);padding:2px 8px;border-radius:20px;font-size:.8rem;font-weight:650}.code{font:700 1.02rem ui-monospace,monospace;letter-spacing:.06em;overflow-wrap:anywhere}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:650px){.two-col{grid-template-columns:1fr}header{align-items:flex-start;padding:15px 0;flex-direction:column}}footer{border-top:1px solid var(--line);padding:20px 0 28px;color:var(--muted)}[hidden]{display:none!important}
+</style>
 </head>
 <body>
-  <header><a href="dashboard.html">← ConfigKit dashboard</a><a href="mobileconfig-builder.html">Mobileconfig Studio</a></header>
-  <main>
-    <h1>Your ConfigKit groups</h1>
-    <p class="lead">Create a group for your team or join one with an invite code. Group membership helps coordinate profile work; it does not share or store your mobileconfig files or settings.</p>
-    <p class="notice"><strong>Keep profiles private.</strong> Group features store only the group name and membership. Invite codes let people join, so share them privately. Never post Wi-Fi passwords, profile XML, or other secrets in a group name.</p>
-    <p id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</p>
-    <div id="groups-app" hidden>
-      <div class="grid">
-        <section class="panel" aria-labelledby="create-title">
-          <h2 id="create-title">Create a group</h2>
-          <form id="create-form"><div class="field"><label for="group-name">Group name</label><input id="group-name" maxlength="80" required placeholder="For example, Device setup team"></div><button id="create-button" type="submit">Create group</button></form>
-          <div id="created-code" class="notice" hidden aria-live="polite"></div>
-        </section>
-        <section class="panel" aria-labelledby="join-title">
-          <h2 id="join-title">Join a group</h2>
-          <form id="join-form"><div class="field"><label for="invite-code">Invite code</label><input id="invite-code" maxlength="64" autocomplete="off" autocapitalize="none" required placeholder="Paste the code shared by a member"></div><button id="join-button" type="submit">Join group</button></form>
-        </section>
-      </div>
-      <section class="panel" aria-labelledby="memberships-title"><h2 id="memberships-title">Your groups</h2><ul id="group-list" class="group-list"></ul></section>
-    </div>
-  </main>
-  <footer>ConfigKit · Independent mobileconfig builder demo · <a href="safety.html">Safety &amp; contact</a> · <a href="privacy.html">Privacy</a></footer>
-  <script src="auth-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    (() => {
-      const status = document.getElementById('status');
-      const app = document.getElementById('groups-app');
-      const list = document.getElementById('group-list');
-      const config = window.CONFIGKIT_AUTH || {};
-      const setStatus = (message, error = false) => {
-        status.hidden = false;
-        status.textContent = message;
-        status.classList.toggle('error', error);
-      };
-      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
-        setStatus('Groups are not configured. The site owner must set up Supabase using GROUPS-SETUP.md.', true);
-        return;
-      }
-      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-      let user;
-      const friendlyError = error => {
-        const message = error?.message || '';
-        if (/gen_random_bytes|is ambiguous|42883|42702/i.test(message + (error?.code || ''))) return 'Groups need a one-time database update before they work. Site owner: run GROUPS-REPAIR.sql in the Supabase SQL Editor (see fixgroup.md).';
-        if (error?.code === 'PGRST202' || /could not find the function/i.test(message)) return 'Groups are not set up yet. Site owner: run the SQL in GROUPS-SETUP.md in Supabase.';
-        if (/invite code not found/i.test(message)) return 'That invite code wasn’t found. Check you copied the whole code and try again.';
-        if (/sign in is required|jwt|not authenticated/i.test(message)) return 'Your sign-in has expired. Please sign in again.';
-        return message || 'Something went wrong. Please try again.';
-      };
-      const showError = error => setStatus(friendlyError(error), true);
-      async function loadGroups() {
-        list.replaceChildren();
-        const {data: memberships, error: membershipError} = await client.from('configkit_group_members').select('group_id').eq('user_id', user.id);
-        if (membershipError) { showError(membershipError); return; }
-        if (!memberships?.length) {
-          const item = document.createElement('li'); item.className = 'muted'; item.textContent = 'You have not joined any groups yet.'; list.append(item); return;
-        }
-        const ids = memberships.map(row => row.group_id);
-        const {data: groups, error: groupError} = await client.from('configkit_groups').select('id,name,created_at,created_by').in('id', ids).order('created_at', {ascending:false});
-        if (groupError) { showError(groupError); return; }
-        for (const group of groups || []) {
-          const item = document.createElement('li'); item.className = 'group';
-          const heading = document.createElement('h3'); heading.textContent = group.name;
-          const meta = document.createElement('p'); meta.className = 'muted'; meta.textContent = `Joined group · created ${new Date(group.created_at).toLocaleDateString()}`;
-          const actions = document.createElement('div'); actions.className = 'group-actions';
-          if (group.created_by === user.id) {
-            const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'secondary'; edit.textContent = 'Edit group';
-            edit.addEventListener('click', () => {
-              if (item.querySelector('.edit-form')) return;
-              const form = document.createElement('form'); form.className = 'edit-form';
-              const input = document.createElement('input'); input.type = 'text'; input.maxLength = 80; input.required = true; input.value = group.name; input.setAttribute('aria-label', 'New group name');
-              const save = document.createElement('button'); save.type = 'submit'; save.textContent = 'Save name';
-              const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'secondary'; cancel.textContent = 'Cancel';
-              cancel.addEventListener('click', () => form.remove());
-              form.addEventListener('submit', async event => {
-                event.preventDefault(); const name = input.value.trim(); if (!name) return;
-                save.disabled = true;
-                const {error} = await client.rpc('update_configkit_group', {group_id:group.id, group_name:name});
-                if (error) { save.disabled = false; showError(error); return; }
-                setStatus('Group name updated.'); await loadGroups();
-              });
-              form.append(input, save, cancel); item.append(form); input.focus();
-            });
-            const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Delete group';
-            remove.addEventListener('click', async () => {
-              if (!window.confirm(`Permanently delete “${group.name}” and remove all its members? This cannot be undone.`)) return;
-              remove.disabled = true;
-              const {error} = await client.rpc('delete_configkit_group', {group_id:group.id});
-              if (error) { remove.disabled = false; showError(error); return; }
-              setStatus(`“${group.name}” was deleted.`); await loadGroups();
-            });
-            actions.append(edit, remove);
-          } else {
-            const leave = document.createElement('button'); leave.type = 'button'; leave.className = 'secondary'; leave.textContent = 'Leave group';
-            leave.addEventListener('click', async () => {
-              if (!window.confirm(`Leave “${group.name}”? You will need a new invite code to rejoin.`)) return;
-              leave.disabled = true;
-              const {error} = await client.from('configkit_group_members').delete().eq('group_id', group.id).eq('user_id', user.id);
-              if (error) { leave.disabled = false; showError(error); return; }
-              setStatus(`You left ${group.name}.`); await loadGroups();
-            });
-            actions.append(leave);
-          }
-          item.append(heading, meta, actions); list.append(item);
-        }
-      }
-      async function start() {
-        const {data, error} = await client.auth.getSession();
-        if (error) { setStatus('Could not check your sign-in. Please refresh and try again.', true); return; }
-        if (!data.session) {
-          setStatus('Please sign in to create or join groups. ');
-          const link = document.createElement('a'); link.href = 'login.html'; link.textContent = 'Go to sign in'; status.append(link); return;
-        }
-        user = data.session.user; app.hidden = false; status.hidden = true; await loadGroups();
-      }
-      document.getElementById('create-form').addEventListener('submit', async event => {
-        event.preventDefault();
-        const button = document.getElementById('create-button'); const name = document.getElementById('group-name').value.trim();
-        if (!name) return;
-        button.disabled = true; setStatus('Creating your group…');
-        const {data, error} = await client.rpc('create_configkit_group', {group_name:name});
-        button.disabled = false;
-        if (error) { showError(error); return; }
-        const result = Array.isArray(data) ? data[0] : data;
-        if (!result?.invite_code) { setStatus('The group was created, but no invite code was returned. Check the Supabase setup.', true); return; }
-        const panel = document.getElementById('created-code'); panel.replaceChildren(); panel.hidden = false;
-        const label = document.createElement('strong'); label.textContent = 'Copy this invite code now. It is shown only once:';
-        const code = document.createElement('p'); code.className = 'code'; code.textContent = result.invite_code;
-        const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'secondary'; copy.textContent = 'Copy invite code';
-        copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(result.invite_code); copy.textContent = 'Copied'; } catch { code.textContent = result.invite_code; setStatus('Clipboard access is unavailable; select and copy the invite code manually.'); } });
-        panel.append(label, code, copy); document.getElementById('create-form').reset(); setStatus('Group created. Share its invite code privately.'); await loadGroups();
-      });
-      document.getElementById('join-form').addEventListener('submit', async event => {
-        event.preventDefault(); const button = document.getElementById('join-button'); const invite = document.getElementById('invite-code').value.replace(/\s+/g, '').toLowerCase();
-        if (!invite) return;
-        button.disabled = true; setStatus('Checking invite code…');
-        const {data, error} = await client.rpc('join_configkit_group', {invite_code:invite}); button.disabled = false;
-        if (error) { showError(error); return; }
-        const result = Array.isArray(data) ? data[0] : data;
-        if (!result?.group_name) { setStatus('That invite code was not accepted.', true); return; }
-        document.getElementById('join-form').reset(); setStatus(`You joined ${result.group_name}.`); await loadGroups();
-      });
-      client.auth.onAuthStateChange((_event, session) => { if (!session) window.location.replace('login.html'); });
-      void start();
-    })();
-  </script>
-</body>
-</html>
+<header><a href="dashboard.html">← ConfigKit dashboard</a><nav class="row"><a href="mobileconfig-builder.html">Mobileconfig Studio</a><a href="safety.html">Safety</a></nav></header>
+<main>
+<h1>ConfigKit Groups</h1>
+<p class="lead">A private space for your team to share mobileconfig profiles, exchange feedback, and keep device setup work organized.</p>
+<div class="notice"><strong>Private by default.</strong> Only current group members can see group profiles, comments, and downloads. Mobileconfig files can contain Wi-Fi passwords, VPN credentials, certificates, and other sensitive settings. Share only profiles you are authorized to disclose. Uploads are limited to 10 MB and stored in a private bucket.</div>
+<p id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</p>
+<div id="app" hidden>
+<div class="grid">
+<section class="panel"><h2>Create a group</h2><form id="create-form"><div class="field"><label for="group-name">Group name</label><input id="group-name" maxlength="80" required placeholder="Device setup team"></div><button id="create-button">Create group</button></form><div id="created-code" class="notice" hidden></div></section>
+<section class="panel"><h2>Join a group</h2><form id="join-form"><div class="field"><label for="invite-code">Invite code</label><input id="invite-code" maxlength="64" autocomplete="off" autocapitalize="none" required placeholder="Paste a private invite code"></div><button id="join-button">Join group</button></form></section>
+</div>
+<section class="panel"><h2>Your groups</h2><ul id="group-list" class="group-list"></ul></section>
+<section id="workspace" class="workspace" hidden>
+<div class="panel"><div class="post-head"><div><span id="group-role" class="pill"></span><h2 id="workspace-title"></h2><p id="workspace-meta" class="muted small"></p></div><div id="workspace-actions" class="row"></div></div>
+<div class="tabs" role="group" aria-label="Group sections"><button data-tab="feed" aria-pressed="true">Community feed</button><button data-tab="members" aria-pressed="false">Members</button><button data-tab="moderation" aria-pressed="false" id="moderation-tab" hidden>Moderation</button></div>
+<div id="feed-panel">
+<section class="panel"><h3>Share a mobileconfig profile</h3><p class="muted small">Upload a .mobileconfig file (max 10 MB). Files remain private to this group. Avoid profiles containing live secrets unless every member is trusted.</p>
+<form id="upload-form"><div class="two-col"><div class="field"><label for="profile-title">Profile title</label><input id="profile-title" maxlength="100" required placeholder="e.g. Office Wi-Fi"></div><div class="field"><label for="profile-file">Mobileconfig file</label><input id="profile-file" type="file" accept=".mobileconfig,application/x-apple-aspen-config,application/xml,text/xml" required></div></div><div class="field"><label for="profile-description">Description / notes</label><textarea id="profile-description" maxlength="1000" placeholder="What does this profile configure? Remove passwords and private keys from notes."></textarea></div><button id="upload-button">Upload to this group</button></form></section>
+<div id="feed"></div>
+</div>
+<div id="members-panel" hidden><div id="member-list"></div></div>
+<div id="moderation-panel" hidden><div id="reports-list"></div></div>
+</div>
+</section>
+</div>
+</main>
+<footer>ConfigKit · Private group community · <a href="privacy.html">Privacy</a> · <a href="safety.html">Safety &amp; contact</a></footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+ const $=id=>document.getElementById(id), status=$('status'), app=$('app');
+ const config=window.CONFIGKIT_AUTH||{};
+ const setStatus=(m,error=false)=>{status.hidden=false;status.textContent=m;status.classList.toggle('error',error)};
+ if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){setStatus('Groups are not configured. Check auth-config.js and the Supabase setup.',true);return}
+ const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ let user=null, activeGroup=null, activeRole='member', groups=[];
+ const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const niceError=e=>{const m=e?.message||'Something went wrong.';if(/sign in|jwt|not authenticated/i.test(m))return 'Your sign-in has expired. Please sign in again.';if(/row-level security|permission denied/i.test(m))return 'You do not have permission to do that in this group.';return m};
+ const fail=e=>setStatus(niceError(e),true);
+ const isMod=()=>['owner','moderator'].includes(activeRole);
+ async function loadGroups(){
+  const {data:ms,error}=await db.from('configkit_group_members').select('group_id,role,joined_at').eq('user_id',user.id);
+  if(error){fail(error);return}
+  const ids=(ms||[]).map(x=>x.group_id);
+  if(!ids.length){$('group-list').innerHTML='<li class="muted">You have not joined a group yet.</li>';return}
+  const {data:gs,error:ge}=await db.from('configkit_groups').select('id,name,created_at,created_by').in('id',ids).order('created_at',{ascending:false});
+  if(ge){fail(ge);return} groups=gs||[];
+  $('group-list').replaceChildren();
+  for(const g of groups){
+   const li=document.createElement('li');li.className='group';
+   const h=document.createElement('h3');h.textContent=g.name;
+   const meta=document.createElement('p');meta.className='muted small';meta.textContent='Created '+new Date(g.created_at).toLocaleDateString();
+   const actions=document.createElement('div');actions.className='group-actions';
+   const open=document.createElement('button');open.textContent='Open community';open.addEventListener('click',()=>openGroup(g,ms.find(x=>x.group_id===g.id)?.role||'member'));
+   actions.append(open);
+   if(g.created_by===user.id){
+    const edit=document.createElement('button');edit.className='secondary';edit.textContent='Rename';edit.addEventListener('click',async()=>{const name=prompt('New group name',g.name)?.trim();if(!name||name===g.name)return;const {error}=await db.rpc('update_configkit_group',{group_id:g.id,group_name:name});if(error)fail(error);else{setStatus('Group renamed.');await loadGroups();if(activeGroup?.id===g.id){activeGroup.name=name;$('workspace-title').textContent=name}}});
+    const del=document.createElement('button');del.className='danger';del.textContent='Delete';del.addEventListener('click',async()=>{if(!confirm('Permanently delete this group and its shared content? This cannot be undone.'))return;const {error}=await db.rpc('delete_configkit_group',{group_id:g.id});if(error)fail(error);else{setStatus('Group deleted.');if(activeGroup?.id===g.id)$('workspace').hidden=true;await loadGroups()}});
+    actions.append(edit,del);
+   }else{
+    const leave=document.createElement('button');leave.className='secondary';leave.textContent='Leave';leave.addEventListener('click',async()=>{if(!confirm('Leave this group?'))return;const {error}=await db.from('configkit_group_members').delete().eq('group_id',g.id).eq('user_id',user.id);if(error)fail(error);else{if(activeGroup?.id===g.id)$('workspace').hidden=true;setStatus('You left the group.');await loadGroups()}});
+    actions.append(leave);
+   }
+   li.append(h,meta,actions);$('group-list').append(li);
+  }
+ }
+ function showTab(tab){
+  for(const name of ['feed','members','moderation']){$(name+'-panel').hidden=name!==tab;document.querySelector('[data-tab="'+name+'"]')?.setAttribute('aria-pressed',String(name===tab))}
+  if(tab==='members')void loadMembers();if(tab==='moderation')void loadReports();
+ }
+ async function openGroup(group,role){
+  activeGroup=group;activeRole=role;$('workspace').hidden=false;$('workspace-title').textContent=group.name;$('group-role').textContent=role;$('workspace-meta').textContent='Members-only · created '+new Date(group.created_at).toLocaleDateString();
+  $('moderation-tab').hidden=!isMod();$('workspace-actions').replaceChildren();
+  const refresh=document.createElement('button');refresh.className='secondary';refresh.textContent='Refresh';refresh.addEventListener('click',()=>void loadFeed());$('workspace-actions').append(refresh);
+  showTab('feed');await loadFeed();$('workspace').scrollIntoView({behavior:'smooth',block:'start'});
+ }
+ async function loadFeed(){
+  if(!activeGroup)return;
+  const feed=$('feed');feed.textContent='Loading group profiles…';
+  const {data:posts,error}=await db.from('configkit_group_profiles').select('*').eq('group_id',activeGroup.id).order('created_at',{ascending:false});
+  if(error){feed.textContent=niceError(error);return}
+  feed.replaceChildren();
+  if(!posts?.length){feed.innerHTML='<p class="muted">No shared profiles yet. Upload the first profile to start the conversation.</p>';return}
+  for(const post of posts){
+   const card=document.createElement('article');card.className='post';
+   const head=document.createElement('div');head.className='post-head';
+   const title=document.createElement('h3');title.textContent=post.title;
+   const meta=document.createElement('span');meta.className='post-meta';meta.textContent=new Date(post.created_at).toLocaleString()+' · '+(post.file_size/1024).toFixed(0)+' KB';
+   head.append(title,meta);
+   const desc=document.createElement('p');desc.className='post-body';desc.textContent=post.description||'No description provided.';
+   const file=document.createElement('p');file.className='small muted';file.textContent=post.filename;
+   const actions=document.createElement('div');actions.className='row';
+   const download=document.createElement('button');download.textContent='Download profile';download.addEventListener('click',async()=>{download.disabled=true;const {data,error}=await db.storage.from('configkit-group-profiles').download(post.storage_path);download.disabled=false;if(error){fail(error);return}const url=URL.createObjectURL(data);const a=document.createElement('a');a.href=url;a.download=post.filename;a.click();URL.revokeObjectURL(url)});
+   const like=document.createElement('button');like.className='secondary';like.textContent='♥ Like';like.addEventListener('click',async()=>{const {error}=await db.from('configkit_group_reactions').upsert({profile_id:post.id,group_id:activeGroup.id,user_id:user.id,reaction:'like'},{onConflict:'profile_id,user_id,reaction'});if(error)fail(error);else{setStatus('Reaction saved.');await loadFeed()}});
+   const commentToggle=document.createElement('button');commentToggle.className='secondary';commentToggle.textContent='Comments';commentToggle.addEventListener('click',()=>{const el=card.querySelector('.comments');el.hidden=!el.hidden});
+   const report=document.createElement('button');report.className='secondary';report.textContent='Report';report.addEventListener('click',()=>void reportContent({profile_id:post.id}));
+   actions.append(download,like,commentToggle,report);
+   if(post.user_id===user.id||isMod()){
+    const remove=document.createElement('button');remove.className='danger';remove.textContent=isMod()?'Remove / hide':'Delete';remove.addEventListener('click',async()=>{if(!confirm('Remove this shared profile?'))return;const {error}=await db.from('configkit_group_profiles').update({moderation_status:'removed',moderated_by:user.id,moderated_at:new Date().toISOString()}).eq('id',post.id);if(error)fail(error);else{await db.storage.from('configkit-group-profiles').remove([post.storage_path]);setStatus('Profile removed.');await loadFeed()}});actions.append(remove);
+   }
+   const comments=document.createElement('section');comments.className='comments';comments.hidden=true;comments.innerHTML='<h4>Discussion</h4><div class="comment-list muted">Loading comments…</div>';
+   const form=document.createElement('form');form.className='field';const textarea=document.createElement('textarea');textarea.maxLength=2000;textarea.required=true;textarea.placeholder='Write a comment…';const submit=document.createElement('button');submit.textContent='Post comment';form.append(textarea,submit);form.addEventListener('submit',async e=>{e.preventDefault();submit.disabled=true;const {error}=await db.from('configkit_group_comments').insert({profile_id:post.id,group_id:activeGroup.id,user_id:user.id,body:textarea.value.trim()});submit.disabled=false;if(error){fail(error);return}textarea.value='';await loadComments(post.id,comments.querySelector('.comment-list'))});
+   comments.append(form);commentsToggleSetup(commentToggle,comments,post.id);
+   card.append(head,desc,file,actions,comments);feed.append(card);
+  }
+ }
+ function commentsToggleSetup(button,section,profileId){button.addEventListener('click',()=>{if(!section.hidden)void loadComments(profileId,section.querySelector('.comment-list'))})}
+ async function loadComments(profileId,target){
+  const {data,error}=await db.from('configkit_group_comments').select('*').eq('profile_id',profileId).order('created_at',{ascending:true});if(error){target.textContent=niceError(error);return}target.replaceChildren();
+  for(const c of data||[]){const wrap=document.createElement('div');wrap.className='comment';const body=document.createElement('p');body.textContent=c.body;const meta=document.createElement('span');meta.className='post-meta';meta.textContent=new Date(c.created_at).toLocaleString();wrap.append(body,meta);
+   if(c.user_id===user.id||isMod()){const del=document.createElement('button');del.className='danger';del.textContent='Remove';del.addEventListener('click',async()=>{const {error}=await db.from('configkit_group_comments').update({moderation_status:'removed',moderated_by:user.id,moderated_at:new Date().toISOString()}).eq('id',c.id);if(error)fail(error);else await loadComments(profileId,target)});wrap.append(del)}
+   target.append(wrap)}
+  if(!data?.length)target.textContent='No comments yet.';
+ }
+ async function reportContent(target){
+  const reason=prompt('Report reason: spam, unsafe_file, personal_information, harassment, or other','unsafe_file');if(!reason)return;const allowed=['spam','unsafe_file','personal_information','harassment','other'];if(!allowed.includes(reason)){setStatus('Choose one of: '+allowed.join(', '),true);return}
+  const details=prompt('Optional details (do not include passwords or secrets)','')||'';const {error}=await db.from('configkit_group_reports').insert({group_id:activeGroup.id,reporter_id:user.id,reason,details,...target});if(error)fail(error);else setStatus('Report sent to this group’s moderators. Thank you.');
+ }
+ async function loadMembers(){
+  const root=$('member-list');root.textContent='Loading members…';
+  const {data:members,error}=await db.from('configkit_group_members').select('user_id,role,joined_at').eq('group_id',activeGroup.id).order('joined_at');if(error){root.textContent=niceError(error);return}
+  root.replaceChildren();const heading=document.createElement('h3');heading.textContent='Group members ('+(members||[]).length+')';root.append(heading);
+  for(const m of members||[]){const row=document.createElement('div');row.className='comment row';const label=document.createElement('span');label.textContent=m.user_id===user.id?'You · '+m.role:m.user_id.slice(0,8)+'… · '+m.role;row.append(label);
+   if(activeRole==='owner'&&m.user_id!==user.id&&m.role!=='owner'){const select=document.createElement('select');select.setAttribute('aria-label','Member role');select.innerHTML='<option value="member">Member</option><option value="moderator">Moderator</option>';select.value=m.role;select.addEventListener('change',async()=>{const {error}=await db.from('configkit_group_members').update({role:select.value}).eq('group_id',activeGroup.id).eq('user_id',m.user_id);if(error){fail(error);select.value=m.role}else{setStatus('Member role updated.');await loadMembers()}});row.append(select)}
+   root.append(row)}
+ }
+ async function loadReports(){
+  const root=$('reports-list');root.textContent='Loading moderation queue…';
+  const {data:reports,error}=await db.from('configkit_group_reports').select('*').eq('group_id',activeGroup.id).order('created_at',{ascending:false});if(error){root.textContent=niceError(error);return}
+  root.replaceChildren();const h=document.createElement('h3');h.textContent='Moderation queue';root.append(h);
+  if(!reports?.length){root.append('No reports. Keep the group welcoming and safe.');return}
+  for(const r of reports){const card=document.createElement('article');card.className='post';const title=document.createElement('h3');title.textContent=r.reason.replaceAll('_',' ')+' · '+r.status;const detail=document.createElement('p');detail.textContent=r.details||'No extra details.';const actions=document.createElement('div');actions.className='row';
+   for(const state of ['reviewing','resolved','dismissed']){const b=document.createElement('button');b.className='secondary';b.textContent=state;b.addEventListener('click',async()=>{const note=prompt('Moderator note (optional)','')||'';const {error}=await db.from('configkit_group_reports').update({status:state,moderator_id:user.id,moderator_note:note,resolved_at:state==='reviewing'?null:new Date().toISOString()}).eq('id',r.id);if(error)fail(error);else{await db.from('configkit_group_moderation_log').insert({group_id:activeGroup.id,moderator_id:user.id,profile_id:r.profile_id,comment_id:r.comment_id,action:state==='dismissed'?'dismiss_report':'resolve_report',note});await loadReports()}});actions.append(b)}
+   card.append(title,detail,actions);root.append(card)}
+ }
+ $('upload-form').addEventListener('submit',async e=>{
+  e.preventDefault();const file=$('profile-file').files[0],title=$('profile-title').value.trim(),description=$('profile-description').value.trim();
+  if(!file||!activeGroup)return;
+  if(!/\.mobileconfig$/i.test(file.name)){setStatus('Please choose a .mobileconfig file.',true);return}
+  if(file.size<1||file.size>10*1024*1024){setStatus('File must be between 1 byte and 10 MB.',true);return}
+  const btn=$('upload-button');btn.disabled=true;setStatus('Uploading securely…');
+  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').slice(-140),path=activeGroup.id+'/'+user.id+'/'+crypto.randomUUID()+'-'+safeName;
+  const {error:upError}=await db.storage.from('configkit-group-profiles').upload(path,file,{contentType:'application/x-apple-aspen-config',upsert:false});
+  if(upError){btn.disabled=false;fail(upError);return}
+  const {error:insertError}=await db.from('configkit_group_profiles').insert({group_id:activeGroup.id,user_id:user.id,title,description,filename:safeName,storage_path:path,mime_type:'application/x-apple-aspen-config',file_size:file.size});
+  if(insertError){await db.storage.from('configkit-group-profiles').remove([path]);btn.disabled=false;fail(insertError);return}
+  $('upload-form').reset();btn.disabled=false;setStatus('Profile shared with group members.');await loadFeed();
+ });
+ document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+ $('create-form').addEventListener('submit',async e=>{e.preventDefault();const btn=$('create-button');btn.disabled=true;const {data,error}=await db.rpc('create_configkit_group',{group_name:$('group-name').value.trim()});btn.disabled=false;if(error){fail(error);return}const row=Array.isArray(data)?data[0]:data;const panel=$('created-code');panel.hidden=false;panel.innerHTML='<strong>Copy this invite code now. It is shown only once:</strong><p class="code"></p>';panel.querySelector('p').textContent=row.invite_code;const copy=document.createElement('button');copy.className='secondary';copy.textContent='Copy code';copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(row.invite_code);copy.textContent='Copied'}catch{setStatus('Select and copy the invite code manually.')}});panel.append(copy);$('create-form').reset();setStatus('Group created. Share the invite code privately.');await loadGroups()});
+ $('join-form').addEventListener('submit',async e=>{e.preventDefault();const btn=$('join-button');btn.disabled=true;const {data,error}=await db.rpc('join_configkit_group',{invite_code:$('invite-code').value.replace(/\s+/g,'').toLowerCase()});btn.disabled=false;if(error){fail(error);return}const row=Array.isArray(data)?data[0]:data;$('join-form').reset();setStatus('You joined '+row.group_name+'.');await loadGroups()});
+ async function start(){const {data,error}=await db.auth.getSession();if(error){setStatus('Could not check your sign-in.',true);return}if(!data.session){setStatus('Please sign in to use private groups. ');const a=document.createElement('a');a.href='login.html';a.textContent='Go to sign in';status.append(a);return}user=data.session.user;app.hidden=false;status.hidden=true;await loadGroups()}
+ db.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace('login.html')});void start();
+})();
+</script>
+</body></html>
