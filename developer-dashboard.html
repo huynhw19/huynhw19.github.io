@@ -133,17 +133,29 @@
           const user = data.session.user;
           const metadata = user.user_metadata || {};
           const name = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username;
-          const type = metadata.account_type || 'personal';
-          if (type !== 'developer') {
+          const {data: developerApproval, error: developerApprovalError} = await client
+            .from('configkit_developer_applications')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('status', 'approved')
+            .limit(1)
+            .maybeSingle();
+          if (developerApprovalError) {
             dashboard.hidden = true; signout.hidden = false;
-            setStatus('Developer Studio is available to developer accounts. Switch to a developer account or return to your dashboard.');
-            const link = document.createElement('a'); link.href = 'dashboard.html'; link.textContent = ' Return to dashboard'; status.append(link);
+            setStatus('We could not verify your developer approval. Please refresh and try again.', true);
             return;
           }
+          if (!developerApproval) {
+            dashboard.hidden = true; signout.hidden = false;
+            setStatus('The Developer Dashboard is available after your ConfigKit developer application has been approved. You can check your application in Account settings.');
+            const link = document.createElement('a'); link.href = 'account-settings.html'; link.textContent = ' Open Account settings'; status.append(link);
+            return;
+          }
+          const type = metadata.account_type || 'personal';
           document.getElementById('welcome-title').textContent = name ? `Developer dashboard — ${name}` : 'Developer dashboard';
           document.getElementById('account-label').textContent = user.email ? `Signed in as ${user.email}` : 'You are signed in to your ConfigKit account.';
           const badge = document.getElementById('account-type-badge');
-          badge.textContent = type === 'developer' ? 'Developer account' : type === 'work' ? 'Work account' : type === 'education' ? 'Education account' : (type === 'organization' || type === 'enterprise') ? 'Enterprise account' : 'Personal account';
+          badge.textContent = 'Approved developer';
           badge.hidden = false;
           status.hidden = true; dashboard.hidden = false; signout.hidden = false;
         } catch (error) { setStatus(error.message || 'Could not check your sign-in. Please refresh and try again.', true); }
