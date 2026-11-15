@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Read-only developer control centre for ConfigKit GitHub and Supabase diagnostics.">
+<title>Developer Control Centre — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 28px rgba(17,35,30,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(100% - 32px,1100px);margin:auto}header{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}nav{display:flex;gap:1rem;flex-wrap:wrap}main{padding:2rem 0 3rem}.eyebrow{display:inline-block;padding:.3rem .7rem;border-radius:99px;background:var(--mint);color:var(--green);font-size:.82rem;font-weight:700}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.7rem 0}.muted{color:var(--muted)}.notice,.card{background:var(--white);border:1px solid var(--line);border-radius:1rem;padding:1.1rem;box-shadow:var(--shadow)}.notice{margin:1rem 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1rem;margin:1rem 0}.card h2{font-size:1.2rem;margin:.1rem 0 .5rem}.status{padding:.7rem .85rem;border-radius:.7rem;background:var(--mint);margin:.7rem 0}.status.error{background:#fff0f0;color:var(--red)}.status.loading{background:#f0f2f0;color:var(--muted)}button{font:inherit;font-weight:650;padding:.65rem 1rem;border-radius:.7rem;border:1px solid var(--line);background:white;color:var(--ink);cursor:pointer}button.primary{background:var(--green);border-color:var(--green);color:white}button:disabled{opacity:.55;cursor:wait}ul{padding-left:1.2rem;margin:.5rem 0}li{padding:.22rem 0;overflow-wrap:anywhere}.meta{font-size:.9rem;color:var(--muted)}.toolbar{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin:1rem 0}code{overflow-wrap:anywhere}footer{padding:1.5rem 0 2rem;color:var(--muted)}[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><a href="index.html"><strong>⌘ ConfigKit</strong></a><nav><a href="developer-dashboard.html">Developer dashboard</a><a href="account-settings.html">Account settings</a><button id="signout" hidden>Sign out</button></nav></header>
+<main>
+<div id="auth-status" class="notice" role="status" aria-live="polite">Checking developer access…</div>
+<div id="workspace" hidden>
+<span class="eyebrow">Read-only · Phase 1</span>
+<h1>Developer Control Centre</h1>
+<p class="muted">A safe overview of the connected ConfigKit GitHub repository and Supabase project. This first version only makes read requests; it cannot edit files, change settings, run SQL, or delete anything.</p>
+<div class="notice"><strong>Access boundary:</strong> GitHub information shown here is public repository metadata. Supabase status uses the existing public publishable key and does not expose database rows, secrets, service-role keys, or project-management credentials.</div>
+<div class="toolbar"><button class="primary" id="refresh">Refresh diagnostics</button><span id="last-refresh" class="meta">Not refreshed yet</span></div>
+<div class="grid">
+<section class="card"><h2>GitHub repository</h2><div id="github-status" class="status loading">Waiting for refresh…</div><p class="meta"><a href="https://github.com/huynhw19/huynhw19.github.io" target="_blank" rel="noopener noreferrer">Open repository ↗</a></p><ul id="repo-details"></ul></section>
+<section class="card"><h2>Recent commits</h2><div id="commits-status" class="status loading">Waiting for refresh…</div><ul id="commits-list"></ul></section>
+<section class="card"><h2>Repository files</h2><div id="files-status" class="status loading">Waiting for refresh…</div><ul id="files-list"></ul></section>
+<section class="card"><h2>Supabase connection</h2><div id="supabase-status" class="status loading">Waiting for refresh…</div><ul id="supabase-details"></ul><p class="meta">Project dashboard: <a href="https://supabase.com/dashboard/project/gwhqnqzzlgslwgijkkpt" target="_blank" rel="noopener noreferrer">Open Supabase ↗</a></p></section>
+</div>
+<p class="meta">This page is an operational overview, not an account-wide administrator console. Private repositories, organization-wide controls, table contents and privileged Supabase operations are intentionally not available in this read-only phase.</p>
+</div>
+</main>
+<footer>ConfigKit · Developer tools · <a href="privacy.html">Privacy</a></footer>
+<script src="auth-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+ const $ = id => document.getElementById(id);
+ const setStatus = (id,msg,error=false) => { const el=$(id); el.textContent=msg; el.className='status'+(error?' error':''); };
+ const addItem = (listId,text,href) => { const li=document.createElement('li'); if(href){const a=document.createElement('a');a.href=href;a.textContent=text;a.target='_blank';a.rel='noopener noreferrer';li.append(a)}else li.textContent=text; $(listId).append(li); };
+ const config=window.CONFIGKIT_AUTH||{};
+ if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){setStatus('auth-status','Authentication is not configured.',true);return}
+ const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ async function checkAccess(){
+  try{
+   const {data,error}=await client.auth.getSession();if(error)throw error;
+   if(!data.session){$('auth-status').textContent='Please sign in with your ConfigKit account.';const a=document.createElement('a');a.href='login.html';a.textContent=' Sign in';$('auth-status').append(a);return}
+   const {data:approval,error:approvalError}=await client.from('configkit_developer_applications').select('id').eq('user_id',data.session.user.id).eq('status','approved').limit(1).maybeSingle();
+   if(approvalError)throw approvalError;
+   if(!approval){$('auth-status').textContent='Developer access is not approved for this account. Check your application in Account settings.';const a=document.createElement('a');a.href='account-settings.html';a.textContent=' Open Account settings';$('auth-status').append(a);$('signout').hidden=false;return}
+   $('auth-status').hidden=true;$('workspace').hidden=false;$('signout').hidden=false;await refresh();
+  }catch(e){$('auth-status').textContent='Could not verify developer access: '+(e.message||'unknown error');$('auth-status').classList.add('error')}
+ }
+ async function getJson(url,options={}){
+  const response=await fetch(url,{...options,headers:{Accept:'application/vnd.github+json',...(options.headers||{})}});
+  if(!response.ok)throw new Error('HTTP '+response.status+' '+response.statusText);
+  return response.json();
+ }
+ async function refresh(){
+  $('refresh').disabled=true;
+  ['github-status','commits-status','files-status','supabase-status'].forEach(id=>setStatus(id,'Loading…'));
+  ['repo-details','commits-list','files-list','supabase-details'].forEach(id=>$(id).replaceChildren());
+  const repo='https://api.github.com/repos/huynhw19/huynhw19.github.io';
+  const jobs=[
+   (async()=>{try{const r=await getJson(repo);setStatus('github-status','Connected · public repository');addItem('repo-details','Default branch: '+r.default_branch);addItem('repo-details','Visibility: '+r.visibility);addItem('repo-details','Last updated: '+new Date(r.updated_at).toLocaleString());addItem('repo-details','Stars: '+r.stargazers_count+' · Forks: '+r.forks_count);addItem('repo-details','Repository details',r.html_url)}catch(e){setStatus('github-status','Could not load repository: '+e.message,true)}})(),
+   (async()=>{try{const items=await getJson(repo+'/commits?per_page=6');setStatus('commits-status',items.length+' recent commits');items.forEach(c=>addItem('commits-list',(c.commit.message.split('\n')[0]||'Commit')+' · '+c.commit.author.name+' · '+new Date(c.commit.author.date).toLocaleDateString(),c.html_url))}catch(e){setStatus('commits-status','Could not load commits: '+e.message,true)}})(),
+   (async()=>{try{const items=await getJson(repo+'/contents?ref=main');setStatus('files-status',items.length+' root entries');items.slice(0,24).forEach(f=>addItem('files-list',(f.type==='dir'?'📁 ':'')+f.name,f.html_url||f.url))}catch(e){setStatus('files-status','Could not load files: '+e.message,true)}})(),
+   (async()=>{try{const url=config.supabaseUrl.replace(/\/$/,'')+'/auth/v1/health';const r=await fetch(url,{method:'GET',headers:{apikey:config.supabaseAnonKey,Accept:'application/json'}});if(!r.ok)throw new Error('HTTP '+r.status);setStatus('supabase-status','Authentication API reachable');addItem('supabase-details','Project ref: gwhqnqzzlgslwgijkkpt');addItem('supabase-details','Region: Tokyo');addItem('supabase-details','Auth health endpoint responded successfully');addItem('supabase-details','Project API URL: '+config.supabaseUrl)}catch(e){setStatus('supabase-status','Could not reach Supabase Auth: '+e.message,true)}})()
+  ];
+  await Promise.all(jobs);$('last-refresh').textContent='Updated '+new Date().toLocaleString();$('refresh').disabled=false;
+ }
+ $('refresh').addEventListener('click',refresh);
+ $('signout').addEventListener('click',async()=>{const {error}=await client.auth.signOut();if(error){setStatus('auth-status','Sign out failed: '+error.message,true);return}location.replace('login.html')});
+ client.auth.onAuthStateChange((_event,session)=>{if(!session)location.replace('login.html')});
+ void checkAccess();
+})();
+</script>
+</body>
+</html>
