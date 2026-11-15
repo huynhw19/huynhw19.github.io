@@ -798,7 +798,7 @@
             assignmentInstructions.value = assignment.instructions || '';
             assignmentDueDate.value = assignment.due_date || '';
             assignmentStatus.value = assignment.status;
-            assignmentFormTitle.textContent = 'Edit assignment';
+            assignmentFormTitle.textContent = 'Edit homework / assignment';
             assignmentSubmit.textContent = 'Save changes'; assignmentCancel.hidden = false;
             assignmentForm.scrollIntoView({ behavior: 'smooth', block: 'start' }); assignmentTitle.focus();
           });
@@ -809,7 +809,7 @@
             const { error: updateError } = await client.from('education_assignments')
               .update({ status: nextStatus }).eq('id', assignment.id).eq('user_id', currentUserId);
             if (updateError) { setAssignmentMessage(updateError.message || 'Could not update assignment.', true); return; }
-            setAssignmentMessage(nextStatus === 'published' ? 'Assignment published for the student.' : 'Assignment moved back to draft.');
+            setAssignmentMessage(nextStatus === 'published' ? 'Homework published for the student.' : 'Homework moved back to draft.');
             await loadAssignments();
         await loadDocumentStudents();
         await loadDocuments();
@@ -999,7 +999,9 @@
             });actions.append(edit);
           }
           const publish=document.createElement('button');publish.type='button';publish.className='secondary';
-          publish.textContent=test.status==='published'?'Move to draft':'Publish';
+          const activeAttempt=(attempts||[]).some(a=>a.status==='in_progress');
+          publish.textContent=test.status==='published'?'Move to draft':'Publish';publish.disabled=activeAttempt;
+          if(activeAttempt)publish.title='This test has an active attempt and cannot be unpublished yet.';
           publish.addEventListener('click',async()=>{
             const next=test.status==='published'?'draft':'published';
             const {error:updateError}=await client.from('education_tests').update({status:next}).eq('id',test.id).eq('user_id',currentUserId);
@@ -1007,7 +1009,8 @@
             setTestMessage(next==='published'?'Test published to the selected student.':'Test moved to draft.');await loadTests();
           });actions.append(publish);
           if(test.status!=='archived'){
-            const archive=document.createElement('button');archive.type='button';archive.className='secondary';archive.textContent='Archive';
+            const archive=document.createElement('button');archive.type='button';archive.className='secondary';archive.textContent='Archive';archive.disabled=activeAttempt;
+            if(activeAttempt)archive.title='Wait for the active attempt to be submitted before archiving this test.';
             archive.addEventListener('click',async()=>{
               const {error:e}=await client.from('education_tests').update({status:'archived'}).eq('id',test.id).eq('user_id',currentUserId);
               if(e){setTestMessage(e.message,true);return}setTestMessage('Test archived.');await loadTests();
