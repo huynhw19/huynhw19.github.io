@@ -157,7 +157,7 @@
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,experimental:{passkey:true}}});
       const requestedNext = new URLSearchParams(window.location.search).get('next');
       // Only allow known same-site destinations; never redirect to an arbitrary URL.
-      const allowedDestinations = new Set(['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html','community.html']);
+      const allowedDestinations = new Set(['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','family.html']);
       const postLoginDestination = allowedDestinations.has(requestedNext) ? requestedNext : 'dashboard.html';
       const callbackUrlObject = new URL('login.html', window.location.href);
       if (postLoginDestination !== 'dashboard.html') callbackUrlObject.searchParams.set('next', postLoginDestination);
@@ -376,6 +376,7 @@
               oauthMetadata = JSON.parse(pendingIntent);
               const {error:metadataError} = await client.auth.updateUser({data:oauthMetadata});
               if (metadataError) throw metadataError;
+              sessionStorage.removeItem(accountIntentKey);
             } catch (error) {
               setStatus(`Signed in, but the account profile could not be saved: ${error.message || 'Please try again in account settings.'}`, true);
               return;
@@ -603,7 +604,7 @@
         setStatus(mode === 'signup' ? 'Creating your account…' : 'Logging in…');
         try {
           const result = mode === 'signup'
-            ? await client.auth.signUp({email:email.value.trim(), password:password.value, options:{emailRedirectTo:callbackUrl, data:{...selectedMetadata(), ...familySetupMetadata()}}}})
+            ? await client.auth.signUp({email:email.value.trim(), password:password.value, options:{emailRedirectTo:callbackUrl, data:{...selectedMetadata(), ...familySetupMetadata()}}})
             : await client.auth.signInWithPassword({email:email.value.trim(), password:password.value});
           if (result.error) throw result.error;
           // Existing users can opt into the self-declared Developer account label at login.
