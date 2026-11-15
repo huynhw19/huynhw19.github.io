@@ -237,7 +237,15 @@
           document.getElementById('work-collaboration-card').hidden = !isWork;
           document.getElementById('work-getting-started').hidden = !isWork;
           document.getElementById('enterprise-dashboard-card').hidden = !isEnterprise;
-          document.getElementById('developer-dashboard-card').hidden = type !== 'developer';
+          const {data: developerApproval, error: developerApprovalError} = await client
+            .from('configkit_developer_applications')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('status', 'approved')
+            .limit(1)
+            .maybeSingle();
+          // Fail closed: only an approved application returned by Supabase can reveal the link.
+          document.getElementById('developer-dashboard-card').hidden = !!developerApprovalError || !developerApproval;
           status.hidden = true; dashboard.hidden = false; signout.hidden = false; document.getElementById('about-nav-link').hidden = false;
         } catch (error) { setStatus(error.message || 'Could not check your sign-in. Please refresh and try again.', true); }
       }
