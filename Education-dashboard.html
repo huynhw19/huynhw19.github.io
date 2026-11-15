@@ -289,6 +289,10 @@
             student.grade || 'No grade set'
           ].join(' · ');
           item.append(name, document.createElement('br'), details);
+          const studentIdLine = document.createElement('div');
+          studentIdLine.className = 'muted';
+          studentIdLine.textContent = 'Student ID: ' + (student.student_id || 'Not assigned');
+          item.appendChild(studentIdLine);
 
           if (student.notes) {
             const notes = document.createElement('p');
@@ -348,7 +352,19 @@
             await loadAssignmentStudents();
           });
 
-          actions.append(editButton, deleteButton);
+          const copyIdButton = document.createElement('button');
+          copyIdButton.type = 'button';
+          copyIdButton.className = 'secondary';
+          copyIdButton.textContent = 'Copy Student ID';
+          copyIdButton.addEventListener('click', async () => {
+            try {
+              await navigator.clipboard.writeText(student.student_id || '');
+              setStatus('Student ID copied. Share it only with that student.');
+            } catch (_) {
+              setStatus('Could not copy the Student ID. Select and copy it from the student record.', true);
+            }
+          });
+          actions.append(editButton, copyIdButton, deleteButton);
           item.appendChild(actions);
           listEl.appendChild(item);
         });
