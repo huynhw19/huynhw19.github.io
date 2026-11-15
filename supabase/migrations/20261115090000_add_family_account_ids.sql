@@ -45,7 +45,7 @@ as $$
 declare
   existing_family public.family_accounts%rowtype;
   new_family_id uuid := gen_random_uuid();
-  new_code text := upper(substr(encode(gen_random_bytes(8), 'hex'), 1, 12));
+  new_code text := upper(substr(encode(extensions.gen_random_bytes(8), 'hex'), 1, 12));
 begin
   if auth.uid() is null then raise exception 'Sign in is required.'; end if;
 
