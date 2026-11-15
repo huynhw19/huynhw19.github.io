@@ -100,12 +100,14 @@ window.CONFIGKIT_AUTH = {
       const settingsLink = account.querySelector('.account-settings-link');
       const organizationLink = account.querySelector('.organization-dashboard-link');
       const mailLink = account.querySelector('.configkit-mail-link');
+      const moneyLink = account.querySelector('.configkit-money-link');
       if (account.hidden) {
         dashboardLink?.remove();
         discussionLink?.remove();
         settingsLink?.remove();
         organizationLink?.remove();
         mailLink?.remove();
+        moneyLink?.remove();
         return;
       }
       if (!dashboardLink) {
@@ -137,6 +139,14 @@ window.CONFIGKIT_AUTH = {
         link.className = 'configkit-mail-link';
         link.href = 'mail.html';
         link.textContent = 'Open ConfigKit Mail →';
+        link.style.cssText = 'display:block;margin-top:6px;font-weight:600';
+        account.append(document.createElement('br'), link);
+      }
+      if (!moneyLink) {
+        const link = document.createElement('a');
+        link.className = 'configkit-money-link';
+        link.href = 'finance.html';
+        link.textContent = 'Open Money Manager →';
         link.style.cssText = 'display:block;margin-top:6px;font-weight:600';
         account.append(document.createElement('br'), link);
       }
