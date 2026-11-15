@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="View and share your ConfigKit Family ID.">
+  <title>Your Family — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,680px);margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}a{color:var(--green-dark);font-weight:650}main{padding:42px 0 60px}.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:clamp(22px,5vw,36px)}h1{line-height:1.2}.muted{color:var(--muted)}.notice{padding:14px 16px;background:var(--mint);border-radius:10px;margin:18px 0}.status{padding:12px 14px;background:var(--white);border:1px solid var(--line);border-radius:10px}.error{color:var(--red)}.family-id{font:750 clamp(1.5rem,7vw,2.2rem) ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;overflow-wrap:anywhere;padding:16px;background:var(--paper);border-radius:10px;text-align:center}button{padding:11px 16px;border:0;border-radius:9px;background:var(--green);color:#fff;font:inherit;font-weight:650;cursor:pointer}button:hover{background:var(--green-dark)}footer{padding:24px 0;border-top:1px solid var(--line);color:var(--muted)}[hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <header><a href="dashboard.html">← Dashboard</a><a href="login.html">Account</a></header>
+  <main>
+    <section class="card">
+      <h1>Your family</h1>
+      <p class="muted">Share this Family ID with people you want to invite. They can enter it on the sign-up page to join your family.</p>
+      <p id="status" class="status" role="status" aria-live="polite">Loading your Family ID…</p>
+      <section id="familyPanel" hidden>
+        <div class="notice"><strong>Your Family ID</strong><p id="familyId" class="family-id"></p><button id="copyFamilyId" type="button">Copy Family ID</button></div>
+        <p id="role" class="muted"></p>
+        <p class="muted">Treat this ID like an invitation: anyone who has it can request to join your family. Only share it with people you trust.</p>
+      </section>
+      <p><a href="dashboard.html">Continue to your ConfigKit dashboard</a></p>
+    </section>
+  </main>
+  <footer>ConfigKit · <a href="privacy.html">Privacy</a> · <a href="safety.html">Safety &amp; contact</a></footer>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+  <script>
+    (() => {
+      const status = document.getElementById('status');
+      const panel = document.getElementById('familyPanel');
+      const codeElement = document.getElementById('familyId');
+      const roleElement = document.getElementById('role');
+      const config = window.CONFIGKIT_AUTH || {};
+      const say = (message, error=false) => {
+        status.textContent = message;
+        status.classList.toggle('error', error);
+      };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+        say('Family details are not configured. Please contact the site owner.', true);
+        return;
+      }
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      async function loadFamily() {
+        const {data:sessionData,error:sessionError} = await client.auth.getSession();
+        if (sessionError) { say('Could not verify your sign-in. Please refresh and try again.', true); return; }
+        if (!sessionData.session) { window.location.replace('login.html'); return; }
+        const userId = sessionData.session.user.id;
+        const {data:membership,error:membershipError} = await client.from('family_account_members').select('family_id,role').eq('user_id',userId).maybeSingle();
+        if (membershipError) { say(membershipError.message || 'Could not load your family membership.', true); return; }
+        if (!membership) { say('This account is not linked to a family yet. Sign up and choose Create a new family or Join an existing family.'); return; }
+        const {data:family,error:familyError} = await client.from('family_accounts').select('family_id').eq('id',membership.family_id).maybeSingle();
+        if (familyError || !family?.family_id) { say(familyError?.message || 'Your Family ID could not be loaded.', true); return; }
+        codeElement.textContent = family.family_id;
+        roleElement.textContent = membership.role === 'owner' ? 'You created this family.' : 'You are a member of this family.';
+        panel.hidden = false;
+        say('Your Family ID is ready.');
+      }
+      document.getElementById('copyFamilyId').addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(codeElement.textContent);
+          document.getElementById('copyFamilyId').textContent = 'Copied';
+        } catch (_) {
+          say('Clipboard access is unavailable. Select the Family ID above and copy it manually.');
+        }
+      });
+      client.auth.onAuthStateChange((_event,session) => { if (!session) window.location.replace('login.html'); });
+      void loadFamily();
+    })();
+  </script>
+</body>
+</html>
