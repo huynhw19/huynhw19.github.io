@@ -125,7 +125,7 @@
 
 <div class="game-search" role="search">
   <label for="game-search">🔎 Find a game</label>
-  <input id="game-search" type="search" placeholder="Search 10,000 games by name or topic…" autocomplete="off">
+  <input id="game-search" type="search" placeholder="Search 60,000 games by name or topic…" autocomplete="off">
   <label for="age-filter">Choose an age group</label>
   <select id="age-filter" aria-label="Filter games by age group">
     <option value="">All age groups</option>
@@ -133,7 +133,7 @@
     <option value="6-8">Ages 6–8</option>
     <option value="9-10">Ages 9–10</option>
   </select>
-  <p id="game-count" class="muted" aria-live="polite">Showing 10,000 games</p>
+  <p id="game-count" class="muted" aria-live="polite">Showing 60,000 games</p>
   <p id="progress-status" class="muted" role="status" aria-live="polite">Open Kids Zone from a child profile to save progress for that child.</p>
 </div>
 <section class="games" aria-label="Games">
@@ -291,7 +291,7 @@ function filterActivities(){const q=document.getElementById('activity-search').v
 document.getElementById('activity-search').addEventListener('input',filterActivities);document.getElementById('activity-age').addEventListener('change',filterActivities);document.getElementById('activity-load-more').addEventListener('click',()=>renderActivities());document.getElementById('activity-new').addEventListener('click',()=>chooseActivity(activityCatalog[Math.floor(Math.random()*activityCatalog.length)]));
 document.getElementById('activity-complete').addEventListener('click',async()=>{if(!activeActivity)return;const button=document.getElementById('activity-complete');button.disabled=true;const saved=await saveStoryRecord('activity',activeActivity,{completed:true});button.disabled=false;if(saved)button.textContent='✓ Activity finished';});document.getElementById('activity-hint').addEventListener('click',()=>{document.getElementById('activity-hint-text').textContent=activeActivity?activeActivity.hint:'Choose an activity first, then ask for a hint.';});filterActivities();chooseActivity(activityCatalog[0]);
 
-// Build a searchable 10,000-game catalog, but render cards in small batches
+// Build a searchable 60,000-game catalog, including 50,000 additional generated games, but render cards in small batches
 // so mobile browsers do not need to create 10,000 DOM nodes at once.
 const gameTypes=[
   {name:'Number Quest',ageBand:'6-8',desc:'Practise addition, subtraction, multiplication and division',make:n=>{const mode=n%4,a=(n*7)%90+10,b=(n*11)%20+2;if(mode===0)return ['What is '+a+' + '+b+'?',a+b];if(mode===1)return ['What is '+(a+b)+' − '+b+'?',a];if(mode===2)return ['What is '+(n%12+2)+' × '+(n%9+2)+'?',(n%12+2)*(n%9+2)];const divisor=n%9+2,quotient=n%12+2;return ['What is '+(divisor*quotient)+' ÷ '+divisor+'?',quotient];}},
@@ -303,11 +303,13 @@ const gameTypes=[
   {name:'Logic Lab',ageBand:'9-10',desc:'Use reasoning, comparisons and problem-solving',make:n=>{const a=n%40+10,b=n%9+2;const qs=[['Which number is even?',[12,15,19,21][n%4].toString(),['12','15','19','21']],['How many sides has a hexagon?','6',['5','6','7','8']],['What is half of '+(b*2)+'?',String(b),[String(b),String(b+1),String(b+3),String(b+5)]],['Which is the smallest number?',String(n%5),[String(n%5+3),String(n%5),String(n%5+6),String(n%5+9)]]];return qs[n%qs.length];}},
   {name:'Animal Academy',ageBand:'6-8',desc:'Explore animal habitats and adaptations',make:n=>{const qs=[['I have eight arms. What am I?','Octopus',['Crab','Octopus','Dolphin','Seal']],['I make honey. What am I?','Bee',['Ant','Bee','Fly','Moth']],['I sleep upside down. What am I?','Bat',['Owl','Bat','Squirrel','Fox']],['I am the fastest land animal.','Cheetah',['Lion','Horse','Cheetah','Leopard']],['Which animal is a mammal that lays eggs?','Platypus',['Koala','Platypus','Dingo','Kangaroo']],['Which habitat is home to a camel?','Desert',['Rainforest','Desert','Coral reef','Arctic']]];return qs[n%qs.length];}},
   {name:'Shape Shifter',ageBand:'3-5',desc:'Recognise shapes, angles and measurement',make:n=>{const qs=[['How many corners has a triangle?','3',['2','3','4','5']],['Which shape has no corners?','Circle',['Square','Triangle','Circle','Rectangle']],['How many sides has an octagon?','8',['6','7','8','9']],['Which shape has four equal sides?','Square',['Oval','Square','Triangle','Pentagon']],['How many degrees are in a right angle?','90',['45','60','90','180']],['How many faces has a cube?','6',['4','6','8','12']]];return qs[n%qs.length];}}
-];
-const gameGrid=document.querySelector('.games');
+  {name:'Time Travellers',ageBand:'6-8',desc:'Read clocks and work with time',make:n=>{const h=n%12+1,m=[0,15,30,45][Math.floor(n/12)%4],next=(h%12)+1;return ['The clock shows '+h+':'+String(m).padStart(2,'0')+'. What hour comes next?',String(next),[String(next),String(h),String((h+2-1)%12+1),String((h+4-1)%12+1)]];}},
+  {name:'Nature Detectives',ageBand:'6-8',desc:'Explore habitats, weather and the natural world',make:n=>{const qs=[['Which part of a tree carries water from its roots?','Trunk',['Trunk','Flower','Seed','Fruit']],['What is a baby frog called?','Tadpole',['Cub','Tadpole','Chick','Calf']],['Which season usually follows spring?','Summer',['Winter','Autumn','Summer','Spring']],['What do we call water falling from clouds?','Rain',['Dew','Rain','Mist','Steam']],['Which animal is a pollinator?','Butterfly',['Shark','Butterfly','Penguin','Tiger']]];return qs[n%qs.length];}},
+  {name:'Space Explorers',ageBand:'9-10',desc:'Discover planets, stars and space science',make:n=>{const qs=[['Which star is closest to Earth?','The Sun',['Sirius','The Sun','Polaris','Vega']],['What do astronauts wear outside a spacecraft?','Spacesuit',['Raincoat','Spacesuit','Life jacket','Lab coat']],['Which planet has famous rings?','Saturn',['Mars','Mercury','Saturn','Venus']],['What is the path of a planet around a star called?','Orbit',['Crater','Orbit','Galaxy','Comet']],['What galaxy contains our Solar System?','Milky Way',['Andromeda','Milky Way','Whirlpool','Sombrero']]];return qs[n%qs.length];}},
+  {name:'Money Makers',ageBand:'6-8',desc:'Practise simple money and shopping maths',make:n=>{const price=n%8+2,count=n%5+2;return ['A toy costs 
 const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
 const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
-const catalog=Array.from({length:9980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
 let shown=0,activeMatches=null;
 async function recordGameProgress(item,isCorrect){
   if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
@@ -322,7 +324,1873 @@ function makeCard(item){
   const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
   const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
   const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
-  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 10,000';
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
+  const challenge=document.createElement('div');challenge.hidden=true;
+  const question=document.createElement('p');question.className='mini-question';
+  const options=document.createElement('div');options.className='mini-options';
+  const result=document.createElement('p');result.className='mini-result';result.setAttribute('aria-live','polite');
+  const again=document.createElement('button');again.type='button';again.className='secondary';again.textContent='Next round';again.hidden=true;
+  challenge.append(question,options,result,again);article.append(heading,description,play,challenge);
+  let answer='',turnNumber=0,scores=[0,0];
+  function newRound(){
+    const data=type.make(n+turnNumber++);
+    let q,correct,choices;if(data.length===4){[q,correct,choices]=data;}else{[q,correct]=data;choices=[String(correct),String(Number(correct)+1),String(Math.max(0,Number(correct)-2)),String(Number(correct)+3)];}
+    answer=String(correct);question.textContent=(multiplayer?'Player '+(turnNumber%2===1?1:2)+' — ':'')+q;
+    result.textContent=multiplayer?'Players take turns on this device. Player 1: '+scores[0]+' · Player 2: '+scores[1]:'Choose the correct answer.';
+    options.replaceChildren();const unique=[...new Set(choices.map(String))];while(unique.length<4)unique.push(String(Number(correct)+unique.length+2));
+    unique.sort(()=>Math.random()-.5).forEach(choice=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.addEventListener('click',()=>{
+      if(multiplayer){const player=(turnNumber-1)%2;scores[player]+=choice===answer?1:0;result.textContent=(choice===answer?'Correct! ':'Not quite. Answer: '+answer+'. ')+(player===0?'Player 1':'Player 2')+' score — Player 1: '+scores[0]+' · Player 2: '+scores[1];}
+      else result.textContent=choice===answer?'🎉 Correct! Great work.':'Good try! The answer is '+answer+'.';
+      void recordGameProgress(item,choice===answer);
+      options.querySelectorAll('button').forEach(x=>x.disabled=true);again.hidden=false;
+    });options.append(b);});again.hidden=true;
+  }
+  play.addEventListener('click',()=>{challenge.hidden=false;play.hidden=true;newRound();});
+  again.addEventListener('click',newRound);
+  return article;
+}
+function renderBatch(items,reset=false){
+  if(reset){gameGrid.querySelectorAll('.generated-game').forEach(card=>card.remove());shown=0;}
+  const next=items.slice(shown,shown+100);next.forEach(item=>gameGrid.append(makeCard(item)));shown+=next.length;
+  loadMore.hidden=shown>=items.length;loadMore.textContent='Load '+Math.min(100,items.length-shown)+' more games';
+  const staticCount=[...gameGrid.querySelectorAll(':scope > .game:not(.generated-game)')].filter(card=>!card.hidden).length;
+  const totalMatches=staticCount+items.length;
+  gameCount.textContent='Showing '+(staticCount+shown).toLocaleString()+' of '+totalMatches.toLocaleString()+' matching games';
+}
+function filterGames(){
+  const query=searchInput.value.trim().toLowerCase(),band=ageFilter.value;
+  gameGrid.querySelectorAll(':scope > .game:not(.generated-game)').forEach(card=>{
+    const searchMatch=!query||card.textContent.toLowerCase().includes(query);
+    const ageMatch=!band||card.dataset.ageBand===band;
+    card.hidden=!(searchMatch&&ageMatch);
+  });
+  activeMatches=catalog.filter(item=>(!query||item.search.includes(query))&&(!band||item.ageBand===band));
+  renderBatch(activeMatches,true);
+}
+ageFilter.addEventListener('change',filterGames);
+loadMore.addEventListener('click',()=>renderBatch(activeMatches||catalog));
+searchInput.addEventListener('input',filterGames);
+filterGames();
+
+// Social Interaction Studio: guided, offline practice scenarios (no child-generated content is uploaded).
+const socialScenarios=[
+ {topic:'friendship',age:'3-5',situation:'A new child is sitting by themselves. What could you do?',choices:[['Invite them to join your game.','A warm invitation helps someone feel welcome. They can say yes or no, and that is okay.',true],['Laugh at them.','Laughing can hurt feelings and make someone feel left out.',false],['Ask a trusted adult how to help.','A trusted grown-up can help you find a kind way to include someone.',true]]},
+ {topic:'listening',age:'3-5',situation:'Your friend is telling you about their favourite toy. What shows you are listening?',choices:[['Look towards them and let them finish.','Taking turns talking helps your friend feel heard.',true],['Talk over them.','Talking over someone makes it hard for them to share.',false],['Walk away without saying anything.','If you need a break, use kind words to let them know.',false]]},
+ {topic:'feelings',age:'6-8',situation:'A friend looks upset because their drawing did not turn out as they hoped. What might help?',choices:[['Ask if they would like to talk.','You noticed their feelings and offered support without pressuring them.',true],['Tell them they are being silly.','Everyone has feelings. Dismissing them can make things harder.',false],['Offer to make another drawing together.','A friendly offer can help, while letting them choose is important.',true]]},
+ {topic:'conflict',age:'6-8',situation:'You and a friend both want the same game first. What is a fair next step?',choices:[['Take turns or agree on a timer.','A fair plan helps both people have a turn.',true],['Grab it and refuse to share.','Taking things can make the disagreement bigger.',false],['Use calm words to explain what you want.','Calm words help others understand your point of view.',true]]},
+ {topic:'safety',age:'6-8',situation:'Someone you do not know online asks which school you go to. What should you do?',choices:[['Do not share it; tell a trusted adult.','School details are private. Stop the conversation and get help from a trusted adult.',true],['Tell them so they can be your friend.','People online may not be who they say they are. Keep school details private.',false],['Ask them for their school first.','It is safest not to exchange identifying details with strangers.',false]]},
+ {topic:'help',age:'9-10',situation:'A group chat message makes you feel worried or uncomfortable. What is a safe response?',choices:[['Pause, do not reply or forward it, and tell a trusted adult.','Pausing and getting help is a strong choice. You do not have to handle it alone.',true],['Keep it secret because it is probably nothing.','If something feels wrong, you can always talk to a trusted adult.',false],['Send an angry message back.','A heated reply can make things worse. Step away and ask for help.',false]]},
+ {topic:'friendship',age:'9-10',situation:'A classmate is often left out when teams are chosen. What could you do?',choices:[['Suggest making teams in a fair way that includes everyone.','You are helping create a welcoming group.',true],['Tell others not to let them play.','Excluding someone can hurt and does not solve the problem.',false],['Check in kindly and ask what they would like.','A kind check-in respects their feelings and choices.',true]]},
+ {topic:'safety',age:'3-5',situation:'A game or video shows something that makes you feel worried. What can you do?',choices:[['Stop and tell your grown-up.','You can always stop and ask a trusted grown-up for help.',true],['Keep watching even though you feel worried.','You do not need to keep watching something uncomfortable.',false],['Ask a grown-up to watch with you.','Watching together helps your grown-up guide you.',true]]}
+];
+// 160 additional guided scenarios, balanced across six social-emotional learning themes.
+const socialExtraPrompts={
+ friendship:[
+ 'You notice someone has no partner for a classroom activity. What could you do?',
+ 'A new neighbour your age moves in. How might you say hello?',
+ 'A friend wants to play a different game from you. How can you decide together?',
+ 'Someone has a different favourite hobby. How can you show interest?',
+ 'A classmate joins your club for the first time. How can you help them feel welcome?',
+ 'You see someone waiting to join a game. What is a friendly way to invite them?',
+ 'Your friend wants some quiet time alone. How can you respect that?',
+ 'A group is choosing roles for a pretend game. How can everyone have a part?',
+ 'You made a new friend but your old friend feels left out. What could help?',
+ 'Someone makes a mistake during a team game. How can you encourage them?',
+ 'A friend speaks a different language at home. How can you be curious and respectful?',
+ 'You and a friend have different ideas for a playdate. How can you plan together?',
+ 'A classmate is nervous about joining an activity. What kind words could you offer?',
+ 'You notice a child playing by themselves at the park. What is a respectful way to approach?',
+ 'Your friend is good at something you find difficult. How can you celebrate their success?',
+ 'A team member has not had a turn yet. What could you suggest?',
+ 'Someone new sits beside you at lunch. How might you start a friendly conversation?',
+ 'Your friend enjoys a game you do not know. How could you learn about it?',
+ 'Two friends want you to join different activities. How can you respond kindly?',
+ 'A group project has a job nobody wants. How can you share the work fairly?',
+ 'Your friend is moving away soon. How can you show you care?',
+ 'A child has different abilities and needs more time in a game. How can the group include them?',
+ 'You accidentally leave someone out of an invitation. How could you make it right?',
+ 'A friend is proud of something they made. How can you show genuine interest?',
+ 'You want to join a group conversation. What is a polite way to enter?',
+ 'A friend asks you to keep another person out of a game. What could you say?',
+ 'You disagree about the rules of a playground game. How can you find a fair solution?'
+ ],
+ listening:[
+ 'A friend is excited to tell you about their weekend. How can you show you are listening?',
+ 'Someone is explaining game rules you have not heard before. What could you do?',
+ 'Your partner is sharing an idea during group work. How can you make space for it?',
+ 'You do not understand what someone said. What is a kind way to ask?',
+ 'A friend is speaking slowly because they are finding the words. How can you be patient?',
+ 'You are excited to answer but another person is still talking. What should you do?',
+ 'A friend tells you they would rather play something else. How can you listen respectfully?',
+ 'Someone shares a different opinion in a discussion. How can you respond?',
+ 'You are distracted while a friend is talking. What could help you focus?',
+ 'A teammate suggests a new plan. How can you ask questions before deciding?',
+ 'Your friend says they feel left out. What could you say to show you heard them?',
+ 'You need to interrupt because something is important. How can you do it politely?',
+ 'A classmate is giving directions for an activity. How can you check you understood?',
+ 'Someone tells a long story and you need a break. What could you say kindly?',
+ 'Your friend asks what you think about their idea. How can you answer honestly and kindly?',
+ 'You and a partner both want to speak first. What could you agree on?',
+ 'A person is sharing something personal with you. How can you listen without spreading it?',
+ 'A teammate has a suggestion you did not expect. How can you give it a fair hearing?',
+ 'You notice you misunderstood a friend. What could you do next?',
+ 'A friend is using gestures to explain an idea. How can you pay attention?',
+ 'Someone asks you to repeat what you heard. How can you check carefully?',
+ 'Your group is making a decision. How can you make sure quieter people are heard?',
+ 'A friend asks for advice but mostly wants someone to listen. How can you tell?',
+ 'You are talking with someone who has a different communication style. How can you be patient?',
+ 'A friend says no to your suggestion. How can you show you heard their answer?',
+ 'You realise you have been talking about yourself for a long time. What could you do?',
+ 'Someone is upset and needs time before talking. How can you respect that?'
+ ],
+ feelings:[
+ 'Your friend is disappointed after losing a game. What might they be feeling?',
+ 'You feel nervous before meeting a new group. What could help you name that feeling?',
+ 'A classmate looks frustrated with a tricky puzzle. How could you check in?',
+ 'Your friend is excited about good news while you feel tired. How can both feelings fit?',
+ 'Someone looks quiet after a joke. How could you find out how they feel?',
+ 'You feel jealous when a friend wins a prize. What is a healthy way to handle it?',
+ 'A friend seems worried about trying something new. What supportive words might help?',
+ 'You accidentally hurt a friend’s feelings. How can you listen to their feelings?',
+ 'A teammate is proud of finishing a difficult task. How can you celebrate with them?',
+ 'You feel angry because plans changed. What can you do before responding?',
+ 'A friend is homesick on a school trip. How could you show care?',
+ 'Someone is embarrassed after making a mistake. How can you help them feel safe?',
+ 'You feel left out when friends make plans. What could you say calmly?',
+ 'A friend is overwhelmed by a noisy room. How could you respect their needs?',
+ 'A classmate is very excited and speaking quickly. How can you respond kindly?',
+ 'You feel disappointed when a playdate ends. What could help you say goodbye?',
+ 'A friend says they are fine but seems sad. How can you offer support without pressure?',
+ 'You feel proud of your work but another person gets attention. How can you manage that?',
+ 'Someone is scared to ask a question. How could you encourage them?',
+ 'A friend is frustrated because they cannot explain an idea. How can you be patient?',
+ 'You feel confused by a friend’s reaction. What respectful question could you ask?',
+ 'A classmate is celebrating a tradition important to them. How can you show interest?',
+ 'You are worried you made the wrong choice. Who could you talk to?',
+ 'A friend feels disappointed about a cancelled activity. How can you acknowledge it?',
+ 'You feel overwhelmed by too many instructions. What could you ask for?',
+ 'Someone is happy about an achievement you also wanted. How can you respond graciously?',
+ 'A friend needs space after a hard day. How can you show care from a distance?'
+ ],
+ conflict:[
+ 'Two people reach for the same seat. How could you work it out fairly?',
+ 'A friend changes the rules halfway through a game. What could you say calmly?',
+ 'You and a teammate disagree about how to finish a project. What is a fair next step?',
+ 'Someone accidentally bumps into you. How could you check what happened before reacting?',
+ 'A friend borrows a pencil and forgets to return it. How can you ask for it back?',
+ 'You both want to choose the music. How could you take turns?',
+ 'A game feels unfair to one player. How could the group pause and discuss it?',
+ 'You said something unkind when you were angry. How can you repair the friendship?',
+ 'A friend blames you for a mistake you did not make. How could you explain calmly?',
+ 'Two friends argue and ask you to take sides. How can you avoid making it worse?',
+ 'Someone keeps interrupting during a group task. What respectful request could help?',
+ 'A teammate is not doing their share. How could you raise the concern constructively?',
+ 'You disagree about whose turn it is. What fair way could help you remember?',
+ 'A friend wants to keep playing after you are ready to stop. How can you set a boundary?',
+ 'Someone knocks over your building by accident. What could you do before getting upset?',
+ 'A group cannot agree on a game. How could you find a choice everyone can accept?',
+ 'You receive feedback that feels hard to hear. How can you respond thoughtfully?',
+ 'A friend apologises after an argument. How might you respond honestly?',
+ 'You need to apologise but feel embarrassed. What could you say?',
+ 'A classmate says your idea will not work. How could you discuss it respectfully?',
+ 'A disagreement is getting louder. What could help everyone pause safely?',
+ 'Someone will not follow an agreed game rule. What could the group do?',
+ 'You want to change teams after a disagreement. How can you explain your choice kindly?',
+ 'A friend misunderstands your joke. How can you clarify and check their feelings?',
+ 'You and a sibling both want the same family activity. How could you plan turns?',
+ 'A group decision leaves one person unhappy. How could you hear their concern?',
+ 'You notice an argument becoming physical. What is the safest next step?'
+ ],
+ safety:[
+ 'A player online asks you to share your password. What should you do?',
+ 'Someone in a game asks for your home address. How can you stay safe?',
+ 'A stranger sends a friend request. What should you do before responding?',
+ 'A person online asks you to keep a conversation secret from your family. What is a safe choice?',
+ 'A game asks for your full name and school. What should you check with a grown-up?',
+ 'Someone sends an unexpected picture that makes you uncomfortable. What can you do?',
+ 'A player uses mean words in a chat. How can you respond safely?',
+ 'A person you only know online wants to meet in person. What should happen?',
+ 'You see someone sharing another child’s private photo. What should you do?',
+ 'A link appears promising a free prize if you enter details. What is the safe next step?',
+ 'A friend wants to post a photo that shows your school uniform. What could you discuss?',
+ 'Someone asks you to move a conversation to a private app. What should you do?',
+ 'A game chat asks where you will be after school. What information should stay private?',
+ 'You see a hurtful rumour being shared online. Should you forward it?',
+ 'A person online says they are your age but you are unsure. What is a safe approach?',
+ 'You receive a message that makes you feel pressured to reply quickly. What can you do?',
+ 'A game asks permission to use your camera or microphone. Who should help decide?',
+ 'Someone wants a picture of your face to prove you are a friend. What should you do?',
+ 'You notice a chat has become unkind. How can you leave and get support?',
+ 'A player offers a gift in exchange for personal information. What is the safe response?',
+ 'You accidentally share something private in a chat. Who should you tell?',
+ 'A website asks for your birthday and location. What should you do first?',
+ 'Someone tells you to delete messages so your grown-up cannot see them. What is a safe choice?',
+ 'A friend wants to use your account. Why should passwords remain private?',
+ 'You see a video that feels frightening or confusing. What could you do?',
+ 'A person online says you will get in trouble if you tell an adult. What should you remember?',
+ 'A group chat is sharing unkind jokes about a classmate. What is a safe, kind response?'
+ ],
+ help:[
+ 'You see a classmate being repeatedly teased. Which trusted adult could you tell?',
+ 'A friend says they are worried but asks you to solve everything alone. What can you do?',
+ 'You feel unsafe during an activity. How can you get help straight away?',
+ 'Someone tells you about a problem that feels too big to handle. What is your next step?',
+ 'You are unsure whether a joke has gone too far. Who could help you think it through?',
+ 'A friend is being excluded again and again. How could you support them and involve an adult?',
+ 'You receive a message that makes you feel frightened. What should you do?',
+ 'You cannot find your group on a school outing. What is the safest action?',
+ 'A person asks you to do something that feels wrong. How can you say no and get help?',
+ 'You notice a younger child is lost at an event. Which grown-up should you find?',
+ 'A friend says someone has been unkind online. How can you help them report it to an adult?',
+ 'You made a mistake and are afraid to tell someone. Why can asking for help be brave?',
+ 'You are worried about a friend who has stopped joining activities. How could you check in safely?',
+ 'A disagreement keeps happening even after you try to solve it. Who can help?',
+ 'You do not know which adult to talk to first. What trusted people could you choose from?',
+ 'A friend asks you to keep a safety concern secret. What should you explain?',
+ 'You feel overwhelmed in a busy place. How can you find a safe adult?',
+ 'Someone is hurt during a game. What should you do before trying to help?',
+ 'A child tells you they are being bullied. How can you listen and get adult support?',
+ 'You are unsure if an online account is genuine. Who can help you check?',
+ 'A friend is scared to report an uncomfortable message. How can you encourage them?',
+ 'You are being pressured to join an activity you do not want. What can you say?',
+ 'A trusted adult is not nearby when you need help. Which other safe adult could you approach?',
+ 'You see a safety rule being ignored near water or roads. What should you do?',
+ 'You need help understanding a confusing online message. Who can look at it with you?'
+ ]
+};
+const socialTopicChoices={
+ friendship:[['Invite them kindly or ask if they would like to join.','A friendly invitation helps people feel welcome while respecting their choice.',true],['Leave them out on purpose.','Excluding someone can hurt. Look for a way to be welcoming.',false],['Ask a trusted adult for ideas if you are unsure.','A trusted grown-up can help you find a safe, kind approach.',true]],
+ listening:[['Pause, listen, and let them finish.','Giving someone time to speak shows respect and helps you understand.',true],['Interrupt and talk over them.','Interrupting can make it hard for others to share their thoughts.',false],['Ask a kind question to check what they mean.','Checking your understanding is a thoughtful listening skill.',true]],
+ feelings:[['Name the feeling gently and ask what support they want.','Noticing feelings and asking before helping shows empathy.',true],['Tell them their feeling is silly.','Feelings matter, even when people experience things differently.',false],['Give them space and offer to listen later.','Respectful space can help someone feel safe and understood.',true]],
+ conflict:[['Use calm words and look for a fair solution together.','Calm communication helps people solve problems without blame.',true],['Shout or grab to get your way.','Aggressive actions can make a disagreement less safe.',false],['Pause and ask a trusted adult to help if needed.','Getting help is a sensible choice when a problem feels too big.',true]],
+ safety:[['Keep private details private and tell a trusted adult.','Personal information should stay private. A trusted adult can help you decide what to do.',true],['Share the information to keep the person happy.','You never need to share private details to please someone.',false],['Stop, block or leave if appropriate, and ask an adult for help.','Pausing and getting support are safe steps when something feels wrong.',true]],
+ help:[['Tell a trusted adult clearly what happened.','You do not have to manage a difficult or unsafe situation alone.',true],['Keep a worrying problem secret.','Safety worries should be shared with a trusted adult who can help.',false],['Move to a safe place and ask an adult to stay with you.','Finding a safe adult and place is a strong next step.',true]]
+};
+const socialExtraScenarios=[];
+Object.entries(socialExtraPrompts).forEach(([topic,prompts],topicIndex)=>{
+ prompts.forEach((situation,index)=>{
+  const age=['3-5','6-8','9-10'][(index+topicIndex)%3];
+  socialExtraScenarios.push({topic,age,situation,choices:socialTopicChoices[topic]});
+ });
+});
+const socialAge=document.getElementById('social-age'),socialTopic=document.getElementById('social-topic'),socialSituation=document.getElementById('social-situation'),socialChoices=document.getElementById('social-choices'),socialFeedback=document.getElementById('social-feedback');
+let currentSocial=null,currentSocialIndex=-1;
+const allSocialScenarios=socialScenarios.concat(socialExtraScenarios);
+const socialProgressKey='kids-zone-social-progress-v1:'+((childId&&/^[0-9a-f-]{36}$/i.test(childId))?childId:'this-device');
+const socialSkillNames={friendship:'Friendship',listening:'Listening',feelings:'Understanding feelings',conflict:'Kind problem-solving',safety:'Online safety',help:'Getting help'};
+let socialProgress={completed:[],bySkill:{},totalAnswers:0};
+try{const saved=JSON.parse(localStorage.getItem(socialProgressKey)||'null');if(saved&&Array.isArray(saved.completed)){socialProgress.completed=saved.completed.filter(n=>Number.isInteger(n)&&n>=0&&n<allSocialScenarios.length);socialProgress.bySkill=saved.bySkill&&typeof saved.bySkill==='object'?saved.bySkill:{};socialProgress.totalAnswers=Number.isInteger(saved.totalAnswers)?saved.totalAnswers:0;}}catch(e){}
+document.getElementById('social-heading').textContent='Social Interaction Studio 💬 · '+allSocialScenarios.length+' scenarios';
+document.querySelector('#social-interaction .story-intro p').textContent='Explore '+allSocialScenarios.length+' guided situations to practise friendship, communication, empathy, kind problem-solving and online safety.';
+document.getElementById('social-progress-bar').setAttribute('aria-valuemax',String(allSocialScenarios.length));
+function saveSocialProgress(){try{localStorage.setItem(socialProgressKey,JSON.stringify(socialProgress));}catch(e){document.getElementById('social-progress-summary').textContent='Progress is available while this page is open, but this browser could not save it.';}}
+function renderSocialProgress(){
+ const count=socialProgress.completed.length,pct=Math.round(count/allSocialScenarios.length*100);
+ document.getElementById('social-progress-summary').textContent=count+' of '+allSocialScenarios.length+' different situations explored ('+pct+'%). Every thoughtful try helps you practise!';
+ document.getElementById('social-progress-detail').textContent=count+' of '+allSocialScenarios.length+' different situations explored · '+socialProgress.totalAnswers+' answers practised · Saved only in this browser.';
+ document.getElementById('social-progress-bar').setAttribute('aria-valuenow',String(count));
+ document.getElementById('social-progress-fill').style.width=pct+'%';
+ const list=document.getElementById('social-skill-progress');list.replaceChildren();
+ Object.entries(socialSkillNames).forEach(([key,name])=>{const li=document.createElement('li');li.textContent=name+': '+(Number(socialProgress.bySkill[key])||0)+' situations';list.append(li);});
+}
+function chooseSocialScenario(){
+ const age=socialAge.value,topic=socialTopic.value;
+ let options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>(s.age===age||age==='9-10'&&s.age==='6-8')&&(topic==='all'||s.topic===topic));
+ if(!options.length)options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>s.age===age);
+ const pick=options[Math.floor(Math.random()*options.length)];currentSocial=pick.s;currentSocialIndex=pick.index;
+ socialSituation.textContent=currentSocial.situation;socialFeedback.textContent='Think about how each choice might make someone feel, then choose an answer.';
+ socialChoices.replaceChildren();
+ currentSocial.choices.forEach((choice,index)=>{const b=document.createElement('button');b.type='button';b.textContent=choice[0];b.addEventListener('click',()=>{socialFeedback.textContent=(choice[2]?'🌟 Kind idea! ':'💡 Let’s think about that. ')+choice[1];socialChoices.querySelectorAll('button').forEach(x=>x.disabled=true);
+  if(!socialProgress.completed.includes(currentSocialIndex)){socialProgress.completed.push(currentSocialIndex);socialProgress.bySkill[currentSocial.topic]=(Number(socialProgress.bySkill[currentSocial.topic])||0)+1;}
+  socialProgress.totalAnswers++;saveSocialProgress();renderSocialProgress();
+ });socialChoices.append(b);});
+}
+document.getElementById('social-progress-clear').addEventListener('click',()=>{if(!window.confirm('Reset all Social Interaction practice progress saved in this browser?'))return;socialProgress={completed:[],bySkill:{},totalAnswers:0};try{localStorage.removeItem(socialProgressKey);}catch(e){}renderSocialProgress();socialFeedback.textContent='Your progress has been reset. Choose an answer when you are ready to practise again.';});
+renderSocialProgress();
+document.getElementById('social-next').addEventListener('click',chooseSocialScenario);
+document.getElementById('social-reset').addEventListener('click',chooseSocialScenario);
+socialAge.addEventListener('change',chooseSocialScenario);socialTopic.addEventListener('change',chooseSocialScenario);
+chooseSocialScenario();
+
+})();
+</script>
+</body>
+</html>+price+'. How much do '+count+' toys cost?','
+const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
+const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
+const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+let shown=0,activeMatches=null;
+async function recordGameProgress(item,isCorrect){
+  if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
+  const {error}=await client.from('family_educational_game_progress').insert({
+    child_id:activeChildProfile.id,game_number:item.number,game_title:item.type.name,
+    category:item.type.name,age_band:item.ageBand,is_correct:isCorrect
+  });
+  if(error){progressStatus.textContent='Could not save game progress. Please ask a parent to check the Family Dashboard.';console.warn('Educational game progress save failed:',error.message||error);return;}
+  progressStatus.textContent='Saved progress for '+activeChildProfile.child_name+'.';
+}
+function makeCard(item){
+  const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
+  const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
+  const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
+  const challenge=document.createElement('div');challenge.hidden=true;
+  const question=document.createElement('p');question.className='mini-question';
+  const options=document.createElement('div');options.className='mini-options';
+  const result=document.createElement('p');result.className='mini-result';result.setAttribute('aria-live','polite');
+  const again=document.createElement('button');again.type='button';again.className='secondary';again.textContent='Next round';again.hidden=true;
+  challenge.append(question,options,result,again);article.append(heading,description,play,challenge);
+  let answer='',turnNumber=0,scores=[0,0];
+  function newRound(){
+    const data=type.make(n+turnNumber++);
+    let q,correct,choices;if(data.length===4){[q,correct,choices]=data;}else{[q,correct]=data;choices=[String(correct),String(Number(correct)+1),String(Math.max(0,Number(correct)-2)),String(Number(correct)+3)];}
+    answer=String(correct);question.textContent=(multiplayer?'Player '+(turnNumber%2===1?1:2)+' — ':'')+q;
+    result.textContent=multiplayer?'Players take turns on this device. Player 1: '+scores[0]+' · Player 2: '+scores[1]:'Choose the correct answer.';
+    options.replaceChildren();const unique=[...new Set(choices.map(String))];while(unique.length<4)unique.push(String(Number(correct)+unique.length+2));
+    unique.sort(()=>Math.random()-.5).forEach(choice=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.addEventListener('click',()=>{
+      if(multiplayer){const player=(turnNumber-1)%2;scores[player]+=choice===answer?1:0;result.textContent=(choice===answer?'Correct! ':'Not quite. Answer: '+answer+'. ')+(player===0?'Player 1':'Player 2')+' score — Player 1: '+scores[0]+' · Player 2: '+scores[1];}
+      else result.textContent=choice===answer?'🎉 Correct! Great work.':'Good try! The answer is '+answer+'.';
+      void recordGameProgress(item,choice===answer);
+      options.querySelectorAll('button').forEach(x=>x.disabled=true);again.hidden=false;
+    });options.append(b);});again.hidden=true;
+  }
+  play.addEventListener('click',()=>{challenge.hidden=false;play.hidden=true;newRound();});
+  again.addEventListener('click',newRound);
+  return article;
+}
+function renderBatch(items,reset=false){
+  if(reset){gameGrid.querySelectorAll('.generated-game').forEach(card=>card.remove());shown=0;}
+  const next=items.slice(shown,shown+100);next.forEach(item=>gameGrid.append(makeCard(item)));shown+=next.length;
+  loadMore.hidden=shown>=items.length;loadMore.textContent='Load '+Math.min(100,items.length-shown)+' more games';
+  const staticCount=[...gameGrid.querySelectorAll(':scope > .game:not(.generated-game)')].filter(card=>!card.hidden).length;
+  const totalMatches=staticCount+items.length;
+  gameCount.textContent='Showing '+(staticCount+shown).toLocaleString()+' of '+totalMatches.toLocaleString()+' matching games';
+}
+function filterGames(){
+  const query=searchInput.value.trim().toLowerCase(),band=ageFilter.value;
+  gameGrid.querySelectorAll(':scope > .game:not(.generated-game)').forEach(card=>{
+    const searchMatch=!query||card.textContent.toLowerCase().includes(query);
+    const ageMatch=!band||card.dataset.ageBand===band;
+    card.hidden=!(searchMatch&&ageMatch);
+  });
+  activeMatches=catalog.filter(item=>(!query||item.search.includes(query))&&(!band||item.ageBand===band));
+  renderBatch(activeMatches,true);
+}
+ageFilter.addEventListener('change',filterGames);
+loadMore.addEventListener('click',()=>renderBatch(activeMatches||catalog));
+searchInput.addEventListener('input',filterGames);
+filterGames();
+
+// Social Interaction Studio: guided, offline practice scenarios (no child-generated content is uploaded).
+const socialScenarios=[
+ {topic:'friendship',age:'3-5',situation:'A new child is sitting by themselves. What could you do?',choices:[['Invite them to join your game.','A warm invitation helps someone feel welcome. They can say yes or no, and that is okay.',true],['Laugh at them.','Laughing can hurt feelings and make someone feel left out.',false],['Ask a trusted adult how to help.','A trusted grown-up can help you find a kind way to include someone.',true]]},
+ {topic:'listening',age:'3-5',situation:'Your friend is telling you about their favourite toy. What shows you are listening?',choices:[['Look towards them and let them finish.','Taking turns talking helps your friend feel heard.',true],['Talk over them.','Talking over someone makes it hard for them to share.',false],['Walk away without saying anything.','If you need a break, use kind words to let them know.',false]]},
+ {topic:'feelings',age:'6-8',situation:'A friend looks upset because their drawing did not turn out as they hoped. What might help?',choices:[['Ask if they would like to talk.','You noticed their feelings and offered support without pressuring them.',true],['Tell them they are being silly.','Everyone has feelings. Dismissing them can make things harder.',false],['Offer to make another drawing together.','A friendly offer can help, while letting them choose is important.',true]]},
+ {topic:'conflict',age:'6-8',situation:'You and a friend both want the same game first. What is a fair next step?',choices:[['Take turns or agree on a timer.','A fair plan helps both people have a turn.',true],['Grab it and refuse to share.','Taking things can make the disagreement bigger.',false],['Use calm words to explain what you want.','Calm words help others understand your point of view.',true]]},
+ {topic:'safety',age:'6-8',situation:'Someone you do not know online asks which school you go to. What should you do?',choices:[['Do not share it; tell a trusted adult.','School details are private. Stop the conversation and get help from a trusted adult.',true],['Tell them so they can be your friend.','People online may not be who they say they are. Keep school details private.',false],['Ask them for their school first.','It is safest not to exchange identifying details with strangers.',false]]},
+ {topic:'help',age:'9-10',situation:'A group chat message makes you feel worried or uncomfortable. What is a safe response?',choices:[['Pause, do not reply or forward it, and tell a trusted adult.','Pausing and getting help is a strong choice. You do not have to handle it alone.',true],['Keep it secret because it is probably nothing.','If something feels wrong, you can always talk to a trusted adult.',false],['Send an angry message back.','A heated reply can make things worse. Step away and ask for help.',false]]},
+ {topic:'friendship',age:'9-10',situation:'A classmate is often left out when teams are chosen. What could you do?',choices:[['Suggest making teams in a fair way that includes everyone.','You are helping create a welcoming group.',true],['Tell others not to let them play.','Excluding someone can hurt and does not solve the problem.',false],['Check in kindly and ask what they would like.','A kind check-in respects their feelings and choices.',true]]},
+ {topic:'safety',age:'3-5',situation:'A game or video shows something that makes you feel worried. What can you do?',choices:[['Stop and tell your grown-up.','You can always stop and ask a trusted grown-up for help.',true],['Keep watching even though you feel worried.','You do not need to keep watching something uncomfortable.',false],['Ask a grown-up to watch with you.','Watching together helps your grown-up guide you.',true]]}
+];
+// 160 additional guided scenarios, balanced across six social-emotional learning themes.
+const socialExtraPrompts={
+ friendship:[
+ 'You notice someone has no partner for a classroom activity. What could you do?',
+ 'A new neighbour your age moves in. How might you say hello?',
+ 'A friend wants to play a different game from you. How can you decide together?',
+ 'Someone has a different favourite hobby. How can you show interest?',
+ 'A classmate joins your club for the first time. How can you help them feel welcome?',
+ 'You see someone waiting to join a game. What is a friendly way to invite them?',
+ 'Your friend wants some quiet time alone. How can you respect that?',
+ 'A group is choosing roles for a pretend game. How can everyone have a part?',
+ 'You made a new friend but your old friend feels left out. What could help?',
+ 'Someone makes a mistake during a team game. How can you encourage them?',
+ 'A friend speaks a different language at home. How can you be curious and respectful?',
+ 'You and a friend have different ideas for a playdate. How can you plan together?',
+ 'A classmate is nervous about joining an activity. What kind words could you offer?',
+ 'You notice a child playing by themselves at the park. What is a respectful way to approach?',
+ 'Your friend is good at something you find difficult. How can you celebrate their success?',
+ 'A team member has not had a turn yet. What could you suggest?',
+ 'Someone new sits beside you at lunch. How might you start a friendly conversation?',
+ 'Your friend enjoys a game you do not know. How could you learn about it?',
+ 'Two friends want you to join different activities. How can you respond kindly?',
+ 'A group project has a job nobody wants. How can you share the work fairly?',
+ 'Your friend is moving away soon. How can you show you care?',
+ 'A child has different abilities and needs more time in a game. How can the group include them?',
+ 'You accidentally leave someone out of an invitation. How could you make it right?',
+ 'A friend is proud of something they made. How can you show genuine interest?',
+ 'You want to join a group conversation. What is a polite way to enter?',
+ 'A friend asks you to keep another person out of a game. What could you say?',
+ 'You disagree about the rules of a playground game. How can you find a fair solution?'
+ ],
+ listening:[
+ 'A friend is excited to tell you about their weekend. How can you show you are listening?',
+ 'Someone is explaining game rules you have not heard before. What could you do?',
+ 'Your partner is sharing an idea during group work. How can you make space for it?',
+ 'You do not understand what someone said. What is a kind way to ask?',
+ 'A friend is speaking slowly because they are finding the words. How can you be patient?',
+ 'You are excited to answer but another person is still talking. What should you do?',
+ 'A friend tells you they would rather play something else. How can you listen respectfully?',
+ 'Someone shares a different opinion in a discussion. How can you respond?',
+ 'You are distracted while a friend is talking. What could help you focus?',
+ 'A teammate suggests a new plan. How can you ask questions before deciding?',
+ 'Your friend says they feel left out. What could you say to show you heard them?',
+ 'You need to interrupt because something is important. How can you do it politely?',
+ 'A classmate is giving directions for an activity. How can you check you understood?',
+ 'Someone tells a long story and you need a break. What could you say kindly?',
+ 'Your friend asks what you think about their idea. How can you answer honestly and kindly?',
+ 'You and a partner both want to speak first. What could you agree on?',
+ 'A person is sharing something personal with you. How can you listen without spreading it?',
+ 'A teammate has a suggestion you did not expect. How can you give it a fair hearing?',
+ 'You notice you misunderstood a friend. What could you do next?',
+ 'A friend is using gestures to explain an idea. How can you pay attention?',
+ 'Someone asks you to repeat what you heard. How can you check carefully?',
+ 'Your group is making a decision. How can you make sure quieter people are heard?',
+ 'A friend asks for advice but mostly wants someone to listen. How can you tell?',
+ 'You are talking with someone who has a different communication style. How can you be patient?',
+ 'A friend says no to your suggestion. How can you show you heard their answer?',
+ 'You realise you have been talking about yourself for a long time. What could you do?',
+ 'Someone is upset and needs time before talking. How can you respect that?'
+ ],
+ feelings:[
+ 'Your friend is disappointed after losing a game. What might they be feeling?',
+ 'You feel nervous before meeting a new group. What could help you name that feeling?',
+ 'A classmate looks frustrated with a tricky puzzle. How could you check in?',
+ 'Your friend is excited about good news while you feel tired. How can both feelings fit?',
+ 'Someone looks quiet after a joke. How could you find out how they feel?',
+ 'You feel jealous when a friend wins a prize. What is a healthy way to handle it?',
+ 'A friend seems worried about trying something new. What supportive words might help?',
+ 'You accidentally hurt a friend’s feelings. How can you listen to their feelings?',
+ 'A teammate is proud of finishing a difficult task. How can you celebrate with them?',
+ 'You feel angry because plans changed. What can you do before responding?',
+ 'A friend is homesick on a school trip. How could you show care?',
+ 'Someone is embarrassed after making a mistake. How can you help them feel safe?',
+ 'You feel left out when friends make plans. What could you say calmly?',
+ 'A friend is overwhelmed by a noisy room. How could you respect their needs?',
+ 'A classmate is very excited and speaking quickly. How can you respond kindly?',
+ 'You feel disappointed when a playdate ends. What could help you say goodbye?',
+ 'A friend says they are fine but seems sad. How can you offer support without pressure?',
+ 'You feel proud of your work but another person gets attention. How can you manage that?',
+ 'Someone is scared to ask a question. How could you encourage them?',
+ 'A friend is frustrated because they cannot explain an idea. How can you be patient?',
+ 'You feel confused by a friend’s reaction. What respectful question could you ask?',
+ 'A classmate is celebrating a tradition important to them. How can you show interest?',
+ 'You are worried you made the wrong choice. Who could you talk to?',
+ 'A friend feels disappointed about a cancelled activity. How can you acknowledge it?',
+ 'You feel overwhelmed by too many instructions. What could you ask for?',
+ 'Someone is happy about an achievement you also wanted. How can you respond graciously?',
+ 'A friend needs space after a hard day. How can you show care from a distance?'
+ ],
+ conflict:[
+ 'Two people reach for the same seat. How could you work it out fairly?',
+ 'A friend changes the rules halfway through a game. What could you say calmly?',
+ 'You and a teammate disagree about how to finish a project. What is a fair next step?',
+ 'Someone accidentally bumps into you. How could you check what happened before reacting?',
+ 'A friend borrows a pencil and forgets to return it. How can you ask for it back?',
+ 'You both want to choose the music. How could you take turns?',
+ 'A game feels unfair to one player. How could the group pause and discuss it?',
+ 'You said something unkind when you were angry. How can you repair the friendship?',
+ 'A friend blames you for a mistake you did not make. How could you explain calmly?',
+ 'Two friends argue and ask you to take sides. How can you avoid making it worse?',
+ 'Someone keeps interrupting during a group task. What respectful request could help?',
+ 'A teammate is not doing their share. How could you raise the concern constructively?',
+ 'You disagree about whose turn it is. What fair way could help you remember?',
+ 'A friend wants to keep playing after you are ready to stop. How can you set a boundary?',
+ 'Someone knocks over your building by accident. What could you do before getting upset?',
+ 'A group cannot agree on a game. How could you find a choice everyone can accept?',
+ 'You receive feedback that feels hard to hear. How can you respond thoughtfully?',
+ 'A friend apologises after an argument. How might you respond honestly?',
+ 'You need to apologise but feel embarrassed. What could you say?',
+ 'A classmate says your idea will not work. How could you discuss it respectfully?',
+ 'A disagreement is getting louder. What could help everyone pause safely?',
+ 'Someone will not follow an agreed game rule. What could the group do?',
+ 'You want to change teams after a disagreement. How can you explain your choice kindly?',
+ 'A friend misunderstands your joke. How can you clarify and check their feelings?',
+ 'You and a sibling both want the same family activity. How could you plan turns?',
+ 'A group decision leaves one person unhappy. How could you hear their concern?',
+ 'You notice an argument becoming physical. What is the safest next step?'
+ ],
+ safety:[
+ 'A player online asks you to share your password. What should you do?',
+ 'Someone in a game asks for your home address. How can you stay safe?',
+ 'A stranger sends a friend request. What should you do before responding?',
+ 'A person online asks you to keep a conversation secret from your family. What is a safe choice?',
+ 'A game asks for your full name and school. What should you check with a grown-up?',
+ 'Someone sends an unexpected picture that makes you uncomfortable. What can you do?',
+ 'A player uses mean words in a chat. How can you respond safely?',
+ 'A person you only know online wants to meet in person. What should happen?',
+ 'You see someone sharing another child’s private photo. What should you do?',
+ 'A link appears promising a free prize if you enter details. What is the safe next step?',
+ 'A friend wants to post a photo that shows your school uniform. What could you discuss?',
+ 'Someone asks you to move a conversation to a private app. What should you do?',
+ 'A game chat asks where you will be after school. What information should stay private?',
+ 'You see a hurtful rumour being shared online. Should you forward it?',
+ 'A person online says they are your age but you are unsure. What is a safe approach?',
+ 'You receive a message that makes you feel pressured to reply quickly. What can you do?',
+ 'A game asks permission to use your camera or microphone. Who should help decide?',
+ 'Someone wants a picture of your face to prove you are a friend. What should you do?',
+ 'You notice a chat has become unkind. How can you leave and get support?',
+ 'A player offers a gift in exchange for personal information. What is the safe response?',
+ 'You accidentally share something private in a chat. Who should you tell?',
+ 'A website asks for your birthday and location. What should you do first?',
+ 'Someone tells you to delete messages so your grown-up cannot see them. What is a safe choice?',
+ 'A friend wants to use your account. Why should passwords remain private?',
+ 'You see a video that feels frightening or confusing. What could you do?',
+ 'A person online says you will get in trouble if you tell an adult. What should you remember?',
+ 'A group chat is sharing unkind jokes about a classmate. What is a safe, kind response?'
+ ],
+ help:[
+ 'You see a classmate being repeatedly teased. Which trusted adult could you tell?',
+ 'A friend says they are worried but asks you to solve everything alone. What can you do?',
+ 'You feel unsafe during an activity. How can you get help straight away?',
+ 'Someone tells you about a problem that feels too big to handle. What is your next step?',
+ 'You are unsure whether a joke has gone too far. Who could help you think it through?',
+ 'A friend is being excluded again and again. How could you support them and involve an adult?',
+ 'You receive a message that makes you feel frightened. What should you do?',
+ 'You cannot find your group on a school outing. What is the safest action?',
+ 'A person asks you to do something that feels wrong. How can you say no and get help?',
+ 'You notice a younger child is lost at an event. Which grown-up should you find?',
+ 'A friend says someone has been unkind online. How can you help them report it to an adult?',
+ 'You made a mistake and are afraid to tell someone. Why can asking for help be brave?',
+ 'You are worried about a friend who has stopped joining activities. How could you check in safely?',
+ 'A disagreement keeps happening even after you try to solve it. Who can help?',
+ 'You do not know which adult to talk to first. What trusted people could you choose from?',
+ 'A friend asks you to keep a safety concern secret. What should you explain?',
+ 'You feel overwhelmed in a busy place. How can you find a safe adult?',
+ 'Someone is hurt during a game. What should you do before trying to help?',
+ 'A child tells you they are being bullied. How can you listen and get adult support?',
+ 'You are unsure if an online account is genuine. Who can help you check?',
+ 'A friend is scared to report an uncomfortable message. How can you encourage them?',
+ 'You are being pressured to join an activity you do not want. What can you say?',
+ 'A trusted adult is not nearby when you need help. Which other safe adult could you approach?',
+ 'You see a safety rule being ignored near water or roads. What should you do?',
+ 'You need help understanding a confusing online message. Who can look at it with you?'
+ ]
+};
+const socialTopicChoices={
+ friendship:[['Invite them kindly or ask if they would like to join.','A friendly invitation helps people feel welcome while respecting their choice.',true],['Leave them out on purpose.','Excluding someone can hurt. Look for a way to be welcoming.',false],['Ask a trusted adult for ideas if you are unsure.','A trusted grown-up can help you find a safe, kind approach.',true]],
+ listening:[['Pause, listen, and let them finish.','Giving someone time to speak shows respect and helps you understand.',true],['Interrupt and talk over them.','Interrupting can make it hard for others to share their thoughts.',false],['Ask a kind question to check what they mean.','Checking your understanding is a thoughtful listening skill.',true]],
+ feelings:[['Name the feeling gently and ask what support they want.','Noticing feelings and asking before helping shows empathy.',true],['Tell them their feeling is silly.','Feelings matter, even when people experience things differently.',false],['Give them space and offer to listen later.','Respectful space can help someone feel safe and understood.',true]],
+ conflict:[['Use calm words and look for a fair solution together.','Calm communication helps people solve problems without blame.',true],['Shout or grab to get your way.','Aggressive actions can make a disagreement less safe.',false],['Pause and ask a trusted adult to help if needed.','Getting help is a sensible choice when a problem feels too big.',true]],
+ safety:[['Keep private details private and tell a trusted adult.','Personal information should stay private. A trusted adult can help you decide what to do.',true],['Share the information to keep the person happy.','You never need to share private details to please someone.',false],['Stop, block or leave if appropriate, and ask an adult for help.','Pausing and getting support are safe steps when something feels wrong.',true]],
+ help:[['Tell a trusted adult clearly what happened.','You do not have to manage a difficult or unsafe situation alone.',true],['Keep a worrying problem secret.','Safety worries should be shared with a trusted adult who can help.',false],['Move to a safe place and ask an adult to stay with you.','Finding a safe adult and place is a strong next step.',true]]
+};
+const socialExtraScenarios=[];
+Object.entries(socialExtraPrompts).forEach(([topic,prompts],topicIndex)=>{
+ prompts.forEach((situation,index)=>{
+  const age=['3-5','6-8','9-10'][(index+topicIndex)%3];
+  socialExtraScenarios.push({topic,age,situation,choices:socialTopicChoices[topic]});
+ });
+});
+const socialAge=document.getElementById('social-age'),socialTopic=document.getElementById('social-topic'),socialSituation=document.getElementById('social-situation'),socialChoices=document.getElementById('social-choices'),socialFeedback=document.getElementById('social-feedback');
+let currentSocial=null,currentSocialIndex=-1;
+const allSocialScenarios=socialScenarios.concat(socialExtraScenarios);
+const socialProgressKey='kids-zone-social-progress-v1:'+((childId&&/^[0-9a-f-]{36}$/i.test(childId))?childId:'this-device');
+const socialSkillNames={friendship:'Friendship',listening:'Listening',feelings:'Understanding feelings',conflict:'Kind problem-solving',safety:'Online safety',help:'Getting help'};
+let socialProgress={completed:[],bySkill:{},totalAnswers:0};
+try{const saved=JSON.parse(localStorage.getItem(socialProgressKey)||'null');if(saved&&Array.isArray(saved.completed)){socialProgress.completed=saved.completed.filter(n=>Number.isInteger(n)&&n>=0&&n<allSocialScenarios.length);socialProgress.bySkill=saved.bySkill&&typeof saved.bySkill==='object'?saved.bySkill:{};socialProgress.totalAnswers=Number.isInteger(saved.totalAnswers)?saved.totalAnswers:0;}}catch(e){}
+document.getElementById('social-heading').textContent='Social Interaction Studio 💬 · '+allSocialScenarios.length+' scenarios';
+document.querySelector('#social-interaction .story-intro p').textContent='Explore '+allSocialScenarios.length+' guided situations to practise friendship, communication, empathy, kind problem-solving and online safety.';
+document.getElementById('social-progress-bar').setAttribute('aria-valuemax',String(allSocialScenarios.length));
+function saveSocialProgress(){try{localStorage.setItem(socialProgressKey,JSON.stringify(socialProgress));}catch(e){document.getElementById('social-progress-summary').textContent='Progress is available while this page is open, but this browser could not save it.';}}
+function renderSocialProgress(){
+ const count=socialProgress.completed.length,pct=Math.round(count/allSocialScenarios.length*100);
+ document.getElementById('social-progress-summary').textContent=count+' of '+allSocialScenarios.length+' different situations explored ('+pct+'%). Every thoughtful try helps you practise!';
+ document.getElementById('social-progress-detail').textContent=count+' of '+allSocialScenarios.length+' different situations explored · '+socialProgress.totalAnswers+' answers practised · Saved only in this browser.';
+ document.getElementById('social-progress-bar').setAttribute('aria-valuenow',String(count));
+ document.getElementById('social-progress-fill').style.width=pct+'%';
+ const list=document.getElementById('social-skill-progress');list.replaceChildren();
+ Object.entries(socialSkillNames).forEach(([key,name])=>{const li=document.createElement('li');li.textContent=name+': '+(Number(socialProgress.bySkill[key])||0)+' situations';list.append(li);});
+}
+function chooseSocialScenario(){
+ const age=socialAge.value,topic=socialTopic.value;
+ let options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>(s.age===age||age==='9-10'&&s.age==='6-8')&&(topic==='all'||s.topic===topic));
+ if(!options.length)options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>s.age===age);
+ const pick=options[Math.floor(Math.random()*options.length)];currentSocial=pick.s;currentSocialIndex=pick.index;
+ socialSituation.textContent=currentSocial.situation;socialFeedback.textContent='Think about how each choice might make someone feel, then choose an answer.';
+ socialChoices.replaceChildren();
+ currentSocial.choices.forEach((choice,index)=>{const b=document.createElement('button');b.type='button';b.textContent=choice[0];b.addEventListener('click',()=>{socialFeedback.textContent=(choice[2]?'🌟 Kind idea! ':'💡 Let’s think about that. ')+choice[1];socialChoices.querySelectorAll('button').forEach(x=>x.disabled=true);
+  if(!socialProgress.completed.includes(currentSocialIndex)){socialProgress.completed.push(currentSocialIndex);socialProgress.bySkill[currentSocial.topic]=(Number(socialProgress.bySkill[currentSocial.topic])||0)+1;}
+  socialProgress.totalAnswers++;saveSocialProgress();renderSocialProgress();
+ });socialChoices.append(b);});
+}
+document.getElementById('social-progress-clear').addEventListener('click',()=>{if(!window.confirm('Reset all Social Interaction practice progress saved in this browser?'))return;socialProgress={completed:[],bySkill:{},totalAnswers:0};try{localStorage.removeItem(socialProgressKey);}catch(e){}renderSocialProgress();socialFeedback.textContent='Your progress has been reset. Choose an answer when you are ready to practise again.';});
+renderSocialProgress();
+document.getElementById('social-next').addEventListener('click',chooseSocialScenario);
+document.getElementById('social-reset').addEventListener('click',chooseSocialScenario);
+socialAge.addEventListener('change',chooseSocialScenario);socialTopic.addEventListener('change',chooseSocialScenario);
+chooseSocialScenario();
+
+})();
+</script>
+</body>
+</html>+(price*count),['
+const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
+const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
+const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+let shown=0,activeMatches=null;
+async function recordGameProgress(item,isCorrect){
+  if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
+  const {error}=await client.from('family_educational_game_progress').insert({
+    child_id:activeChildProfile.id,game_number:item.number,game_title:item.type.name,
+    category:item.type.name,age_band:item.ageBand,is_correct:isCorrect
+  });
+  if(error){progressStatus.textContent='Could not save game progress. Please ask a parent to check the Family Dashboard.';console.warn('Educational game progress save failed:',error.message||error);return;}
+  progressStatus.textContent='Saved progress for '+activeChildProfile.child_name+'.';
+}
+function makeCard(item){
+  const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
+  const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
+  const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
+  const challenge=document.createElement('div');challenge.hidden=true;
+  const question=document.createElement('p');question.className='mini-question';
+  const options=document.createElement('div');options.className='mini-options';
+  const result=document.createElement('p');result.className='mini-result';result.setAttribute('aria-live','polite');
+  const again=document.createElement('button');again.type='button';again.className='secondary';again.textContent='Next round';again.hidden=true;
+  challenge.append(question,options,result,again);article.append(heading,description,play,challenge);
+  let answer='',turnNumber=0,scores=[0,0];
+  function newRound(){
+    const data=type.make(n+turnNumber++);
+    let q,correct,choices;if(data.length===4){[q,correct,choices]=data;}else{[q,correct]=data;choices=[String(correct),String(Number(correct)+1),String(Math.max(0,Number(correct)-2)),String(Number(correct)+3)];}
+    answer=String(correct);question.textContent=(multiplayer?'Player '+(turnNumber%2===1?1:2)+' — ':'')+q;
+    result.textContent=multiplayer?'Players take turns on this device. Player 1: '+scores[0]+' · Player 2: '+scores[1]:'Choose the correct answer.';
+    options.replaceChildren();const unique=[...new Set(choices.map(String))];while(unique.length<4)unique.push(String(Number(correct)+unique.length+2));
+    unique.sort(()=>Math.random()-.5).forEach(choice=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.addEventListener('click',()=>{
+      if(multiplayer){const player=(turnNumber-1)%2;scores[player]+=choice===answer?1:0;result.textContent=(choice===answer?'Correct! ':'Not quite. Answer: '+answer+'. ')+(player===0?'Player 1':'Player 2')+' score — Player 1: '+scores[0]+' · Player 2: '+scores[1];}
+      else result.textContent=choice===answer?'🎉 Correct! Great work.':'Good try! The answer is '+answer+'.';
+      void recordGameProgress(item,choice===answer);
+      options.querySelectorAll('button').forEach(x=>x.disabled=true);again.hidden=false;
+    });options.append(b);});again.hidden=true;
+  }
+  play.addEventListener('click',()=>{challenge.hidden=false;play.hidden=true;newRound();});
+  again.addEventListener('click',newRound);
+  return article;
+}
+function renderBatch(items,reset=false){
+  if(reset){gameGrid.querySelectorAll('.generated-game').forEach(card=>card.remove());shown=0;}
+  const next=items.slice(shown,shown+100);next.forEach(item=>gameGrid.append(makeCard(item)));shown+=next.length;
+  loadMore.hidden=shown>=items.length;loadMore.textContent='Load '+Math.min(100,items.length-shown)+' more games';
+  const staticCount=[...gameGrid.querySelectorAll(':scope > .game:not(.generated-game)')].filter(card=>!card.hidden).length;
+  const totalMatches=staticCount+items.length;
+  gameCount.textContent='Showing '+(staticCount+shown).toLocaleString()+' of '+totalMatches.toLocaleString()+' matching games';
+}
+function filterGames(){
+  const query=searchInput.value.trim().toLowerCase(),band=ageFilter.value;
+  gameGrid.querySelectorAll(':scope > .game:not(.generated-game)').forEach(card=>{
+    const searchMatch=!query||card.textContent.toLowerCase().includes(query);
+    const ageMatch=!band||card.dataset.ageBand===band;
+    card.hidden=!(searchMatch&&ageMatch);
+  });
+  activeMatches=catalog.filter(item=>(!query||item.search.includes(query))&&(!band||item.ageBand===band));
+  renderBatch(activeMatches,true);
+}
+ageFilter.addEventListener('change',filterGames);
+loadMore.addEventListener('click',()=>renderBatch(activeMatches||catalog));
+searchInput.addEventListener('input',filterGames);
+filterGames();
+
+// Social Interaction Studio: guided, offline practice scenarios (no child-generated content is uploaded).
+const socialScenarios=[
+ {topic:'friendship',age:'3-5',situation:'A new child is sitting by themselves. What could you do?',choices:[['Invite them to join your game.','A warm invitation helps someone feel welcome. They can say yes or no, and that is okay.',true],['Laugh at them.','Laughing can hurt feelings and make someone feel left out.',false],['Ask a trusted adult how to help.','A trusted grown-up can help you find a kind way to include someone.',true]]},
+ {topic:'listening',age:'3-5',situation:'Your friend is telling you about their favourite toy. What shows you are listening?',choices:[['Look towards them and let them finish.','Taking turns talking helps your friend feel heard.',true],['Talk over them.','Talking over someone makes it hard for them to share.',false],['Walk away without saying anything.','If you need a break, use kind words to let them know.',false]]},
+ {topic:'feelings',age:'6-8',situation:'A friend looks upset because their drawing did not turn out as they hoped. What might help?',choices:[['Ask if they would like to talk.','You noticed their feelings and offered support without pressuring them.',true],['Tell them they are being silly.','Everyone has feelings. Dismissing them can make things harder.',false],['Offer to make another drawing together.','A friendly offer can help, while letting them choose is important.',true]]},
+ {topic:'conflict',age:'6-8',situation:'You and a friend both want the same game first. What is a fair next step?',choices:[['Take turns or agree on a timer.','A fair plan helps both people have a turn.',true],['Grab it and refuse to share.','Taking things can make the disagreement bigger.',false],['Use calm words to explain what you want.','Calm words help others understand your point of view.',true]]},
+ {topic:'safety',age:'6-8',situation:'Someone you do not know online asks which school you go to. What should you do?',choices:[['Do not share it; tell a trusted adult.','School details are private. Stop the conversation and get help from a trusted adult.',true],['Tell them so they can be your friend.','People online may not be who they say they are. Keep school details private.',false],['Ask them for their school first.','It is safest not to exchange identifying details with strangers.',false]]},
+ {topic:'help',age:'9-10',situation:'A group chat message makes you feel worried or uncomfortable. What is a safe response?',choices:[['Pause, do not reply or forward it, and tell a trusted adult.','Pausing and getting help is a strong choice. You do not have to handle it alone.',true],['Keep it secret because it is probably nothing.','If something feels wrong, you can always talk to a trusted adult.',false],['Send an angry message back.','A heated reply can make things worse. Step away and ask for help.',false]]},
+ {topic:'friendship',age:'9-10',situation:'A classmate is often left out when teams are chosen. What could you do?',choices:[['Suggest making teams in a fair way that includes everyone.','You are helping create a welcoming group.',true],['Tell others not to let them play.','Excluding someone can hurt and does not solve the problem.',false],['Check in kindly and ask what they would like.','A kind check-in respects their feelings and choices.',true]]},
+ {topic:'safety',age:'3-5',situation:'A game or video shows something that makes you feel worried. What can you do?',choices:[['Stop and tell your grown-up.','You can always stop and ask a trusted grown-up for help.',true],['Keep watching even though you feel worried.','You do not need to keep watching something uncomfortable.',false],['Ask a grown-up to watch with you.','Watching together helps your grown-up guide you.',true]]}
+];
+// 160 additional guided scenarios, balanced across six social-emotional learning themes.
+const socialExtraPrompts={
+ friendship:[
+ 'You notice someone has no partner for a classroom activity. What could you do?',
+ 'A new neighbour your age moves in. How might you say hello?',
+ 'A friend wants to play a different game from you. How can you decide together?',
+ 'Someone has a different favourite hobby. How can you show interest?',
+ 'A classmate joins your club for the first time. How can you help them feel welcome?',
+ 'You see someone waiting to join a game. What is a friendly way to invite them?',
+ 'Your friend wants some quiet time alone. How can you respect that?',
+ 'A group is choosing roles for a pretend game. How can everyone have a part?',
+ 'You made a new friend but your old friend feels left out. What could help?',
+ 'Someone makes a mistake during a team game. How can you encourage them?',
+ 'A friend speaks a different language at home. How can you be curious and respectful?',
+ 'You and a friend have different ideas for a playdate. How can you plan together?',
+ 'A classmate is nervous about joining an activity. What kind words could you offer?',
+ 'You notice a child playing by themselves at the park. What is a respectful way to approach?',
+ 'Your friend is good at something you find difficult. How can you celebrate their success?',
+ 'A team member has not had a turn yet. What could you suggest?',
+ 'Someone new sits beside you at lunch. How might you start a friendly conversation?',
+ 'Your friend enjoys a game you do not know. How could you learn about it?',
+ 'Two friends want you to join different activities. How can you respond kindly?',
+ 'A group project has a job nobody wants. How can you share the work fairly?',
+ 'Your friend is moving away soon. How can you show you care?',
+ 'A child has different abilities and needs more time in a game. How can the group include them?',
+ 'You accidentally leave someone out of an invitation. How could you make it right?',
+ 'A friend is proud of something they made. How can you show genuine interest?',
+ 'You want to join a group conversation. What is a polite way to enter?',
+ 'A friend asks you to keep another person out of a game. What could you say?',
+ 'You disagree about the rules of a playground game. How can you find a fair solution?'
+ ],
+ listening:[
+ 'A friend is excited to tell you about their weekend. How can you show you are listening?',
+ 'Someone is explaining game rules you have not heard before. What could you do?',
+ 'Your partner is sharing an idea during group work. How can you make space for it?',
+ 'You do not understand what someone said. What is a kind way to ask?',
+ 'A friend is speaking slowly because they are finding the words. How can you be patient?',
+ 'You are excited to answer but another person is still talking. What should you do?',
+ 'A friend tells you they would rather play something else. How can you listen respectfully?',
+ 'Someone shares a different opinion in a discussion. How can you respond?',
+ 'You are distracted while a friend is talking. What could help you focus?',
+ 'A teammate suggests a new plan. How can you ask questions before deciding?',
+ 'Your friend says they feel left out. What could you say to show you heard them?',
+ 'You need to interrupt because something is important. How can you do it politely?',
+ 'A classmate is giving directions for an activity. How can you check you understood?',
+ 'Someone tells a long story and you need a break. What could you say kindly?',
+ 'Your friend asks what you think about their idea. How can you answer honestly and kindly?',
+ 'You and a partner both want to speak first. What could you agree on?',
+ 'A person is sharing something personal with you. How can you listen without spreading it?',
+ 'A teammate has a suggestion you did not expect. How can you give it a fair hearing?',
+ 'You notice you misunderstood a friend. What could you do next?',
+ 'A friend is using gestures to explain an idea. How can you pay attention?',
+ 'Someone asks you to repeat what you heard. How can you check carefully?',
+ 'Your group is making a decision. How can you make sure quieter people are heard?',
+ 'A friend asks for advice but mostly wants someone to listen. How can you tell?',
+ 'You are talking with someone who has a different communication style. How can you be patient?',
+ 'A friend says no to your suggestion. How can you show you heard their answer?',
+ 'You realise you have been talking about yourself for a long time. What could you do?',
+ 'Someone is upset and needs time before talking. How can you respect that?'
+ ],
+ feelings:[
+ 'Your friend is disappointed after losing a game. What might they be feeling?',
+ 'You feel nervous before meeting a new group. What could help you name that feeling?',
+ 'A classmate looks frustrated with a tricky puzzle. How could you check in?',
+ 'Your friend is excited about good news while you feel tired. How can both feelings fit?',
+ 'Someone looks quiet after a joke. How could you find out how they feel?',
+ 'You feel jealous when a friend wins a prize. What is a healthy way to handle it?',
+ 'A friend seems worried about trying something new. What supportive words might help?',
+ 'You accidentally hurt a friend’s feelings. How can you listen to their feelings?',
+ 'A teammate is proud of finishing a difficult task. How can you celebrate with them?',
+ 'You feel angry because plans changed. What can you do before responding?',
+ 'A friend is homesick on a school trip. How could you show care?',
+ 'Someone is embarrassed after making a mistake. How can you help them feel safe?',
+ 'You feel left out when friends make plans. What could you say calmly?',
+ 'A friend is overwhelmed by a noisy room. How could you respect their needs?',
+ 'A classmate is very excited and speaking quickly. How can you respond kindly?',
+ 'You feel disappointed when a playdate ends. What could help you say goodbye?',
+ 'A friend says they are fine but seems sad. How can you offer support without pressure?',
+ 'You feel proud of your work but another person gets attention. How can you manage that?',
+ 'Someone is scared to ask a question. How could you encourage them?',
+ 'A friend is frustrated because they cannot explain an idea. How can you be patient?',
+ 'You feel confused by a friend’s reaction. What respectful question could you ask?',
+ 'A classmate is celebrating a tradition important to them. How can you show interest?',
+ 'You are worried you made the wrong choice. Who could you talk to?',
+ 'A friend feels disappointed about a cancelled activity. How can you acknowledge it?',
+ 'You feel overwhelmed by too many instructions. What could you ask for?',
+ 'Someone is happy about an achievement you also wanted. How can you respond graciously?',
+ 'A friend needs space after a hard day. How can you show care from a distance?'
+ ],
+ conflict:[
+ 'Two people reach for the same seat. How could you work it out fairly?',
+ 'A friend changes the rules halfway through a game. What could you say calmly?',
+ 'You and a teammate disagree about how to finish a project. What is a fair next step?',
+ 'Someone accidentally bumps into you. How could you check what happened before reacting?',
+ 'A friend borrows a pencil and forgets to return it. How can you ask for it back?',
+ 'You both want to choose the music. How could you take turns?',
+ 'A game feels unfair to one player. How could the group pause and discuss it?',
+ 'You said something unkind when you were angry. How can you repair the friendship?',
+ 'A friend blames you for a mistake you did not make. How could you explain calmly?',
+ 'Two friends argue and ask you to take sides. How can you avoid making it worse?',
+ 'Someone keeps interrupting during a group task. What respectful request could help?',
+ 'A teammate is not doing their share. How could you raise the concern constructively?',
+ 'You disagree about whose turn it is. What fair way could help you remember?',
+ 'A friend wants to keep playing after you are ready to stop. How can you set a boundary?',
+ 'Someone knocks over your building by accident. What could you do before getting upset?',
+ 'A group cannot agree on a game. How could you find a choice everyone can accept?',
+ 'You receive feedback that feels hard to hear. How can you respond thoughtfully?',
+ 'A friend apologises after an argument. How might you respond honestly?',
+ 'You need to apologise but feel embarrassed. What could you say?',
+ 'A classmate says your idea will not work. How could you discuss it respectfully?',
+ 'A disagreement is getting louder. What could help everyone pause safely?',
+ 'Someone will not follow an agreed game rule. What could the group do?',
+ 'You want to change teams after a disagreement. How can you explain your choice kindly?',
+ 'A friend misunderstands your joke. How can you clarify and check their feelings?',
+ 'You and a sibling both want the same family activity. How could you plan turns?',
+ 'A group decision leaves one person unhappy. How could you hear their concern?',
+ 'You notice an argument becoming physical. What is the safest next step?'
+ ],
+ safety:[
+ 'A player online asks you to share your password. What should you do?',
+ 'Someone in a game asks for your home address. How can you stay safe?',
+ 'A stranger sends a friend request. What should you do before responding?',
+ 'A person online asks you to keep a conversation secret from your family. What is a safe choice?',
+ 'A game asks for your full name and school. What should you check with a grown-up?',
+ 'Someone sends an unexpected picture that makes you uncomfortable. What can you do?',
+ 'A player uses mean words in a chat. How can you respond safely?',
+ 'A person you only know online wants to meet in person. What should happen?',
+ 'You see someone sharing another child’s private photo. What should you do?',
+ 'A link appears promising a free prize if you enter details. What is the safe next step?',
+ 'A friend wants to post a photo that shows your school uniform. What could you discuss?',
+ 'Someone asks you to move a conversation to a private app. What should you do?',
+ 'A game chat asks where you will be after school. What information should stay private?',
+ 'You see a hurtful rumour being shared online. Should you forward it?',
+ 'A person online says they are your age but you are unsure. What is a safe approach?',
+ 'You receive a message that makes you feel pressured to reply quickly. What can you do?',
+ 'A game asks permission to use your camera or microphone. Who should help decide?',
+ 'Someone wants a picture of your face to prove you are a friend. What should you do?',
+ 'You notice a chat has become unkind. How can you leave and get support?',
+ 'A player offers a gift in exchange for personal information. What is the safe response?',
+ 'You accidentally share something private in a chat. Who should you tell?',
+ 'A website asks for your birthday and location. What should you do first?',
+ 'Someone tells you to delete messages so your grown-up cannot see them. What is a safe choice?',
+ 'A friend wants to use your account. Why should passwords remain private?',
+ 'You see a video that feels frightening or confusing. What could you do?',
+ 'A person online says you will get in trouble if you tell an adult. What should you remember?',
+ 'A group chat is sharing unkind jokes about a classmate. What is a safe, kind response?'
+ ],
+ help:[
+ 'You see a classmate being repeatedly teased. Which trusted adult could you tell?',
+ 'A friend says they are worried but asks you to solve everything alone. What can you do?',
+ 'You feel unsafe during an activity. How can you get help straight away?',
+ 'Someone tells you about a problem that feels too big to handle. What is your next step?',
+ 'You are unsure whether a joke has gone too far. Who could help you think it through?',
+ 'A friend is being excluded again and again. How could you support them and involve an adult?',
+ 'You receive a message that makes you feel frightened. What should you do?',
+ 'You cannot find your group on a school outing. What is the safest action?',
+ 'A person asks you to do something that feels wrong. How can you say no and get help?',
+ 'You notice a younger child is lost at an event. Which grown-up should you find?',
+ 'A friend says someone has been unkind online. How can you help them report it to an adult?',
+ 'You made a mistake and are afraid to tell someone. Why can asking for help be brave?',
+ 'You are worried about a friend who has stopped joining activities. How could you check in safely?',
+ 'A disagreement keeps happening even after you try to solve it. Who can help?',
+ 'You do not know which adult to talk to first. What trusted people could you choose from?',
+ 'A friend asks you to keep a safety concern secret. What should you explain?',
+ 'You feel overwhelmed in a busy place. How can you find a safe adult?',
+ 'Someone is hurt during a game. What should you do before trying to help?',
+ 'A child tells you they are being bullied. How can you listen and get adult support?',
+ 'You are unsure if an online account is genuine. Who can help you check?',
+ 'A friend is scared to report an uncomfortable message. How can you encourage them?',
+ 'You are being pressured to join an activity you do not want. What can you say?',
+ 'A trusted adult is not nearby when you need help. Which other safe adult could you approach?',
+ 'You see a safety rule being ignored near water or roads. What should you do?',
+ 'You need help understanding a confusing online message. Who can look at it with you?'
+ ]
+};
+const socialTopicChoices={
+ friendship:[['Invite them kindly or ask if they would like to join.','A friendly invitation helps people feel welcome while respecting their choice.',true],['Leave them out on purpose.','Excluding someone can hurt. Look for a way to be welcoming.',false],['Ask a trusted adult for ideas if you are unsure.','A trusted grown-up can help you find a safe, kind approach.',true]],
+ listening:[['Pause, listen, and let them finish.','Giving someone time to speak shows respect and helps you understand.',true],['Interrupt and talk over them.','Interrupting can make it hard for others to share their thoughts.',false],['Ask a kind question to check what they mean.','Checking your understanding is a thoughtful listening skill.',true]],
+ feelings:[['Name the feeling gently and ask what support they want.','Noticing feelings and asking before helping shows empathy.',true],['Tell them their feeling is silly.','Feelings matter, even when people experience things differently.',false],['Give them space and offer to listen later.','Respectful space can help someone feel safe and understood.',true]],
+ conflict:[['Use calm words and look for a fair solution together.','Calm communication helps people solve problems without blame.',true],['Shout or grab to get your way.','Aggressive actions can make a disagreement less safe.',false],['Pause and ask a trusted adult to help if needed.','Getting help is a sensible choice when a problem feels too big.',true]],
+ safety:[['Keep private details private and tell a trusted adult.','Personal information should stay private. A trusted adult can help you decide what to do.',true],['Share the information to keep the person happy.','You never need to share private details to please someone.',false],['Stop, block or leave if appropriate, and ask an adult for help.','Pausing and getting support are safe steps when something feels wrong.',true]],
+ help:[['Tell a trusted adult clearly what happened.','You do not have to manage a difficult or unsafe situation alone.',true],['Keep a worrying problem secret.','Safety worries should be shared with a trusted adult who can help.',false],['Move to a safe place and ask an adult to stay with you.','Finding a safe adult and place is a strong next step.',true]]
+};
+const socialExtraScenarios=[];
+Object.entries(socialExtraPrompts).forEach(([topic,prompts],topicIndex)=>{
+ prompts.forEach((situation,index)=>{
+  const age=['3-5','6-8','9-10'][(index+topicIndex)%3];
+  socialExtraScenarios.push({topic,age,situation,choices:socialTopicChoices[topic]});
+ });
+});
+const socialAge=document.getElementById('social-age'),socialTopic=document.getElementById('social-topic'),socialSituation=document.getElementById('social-situation'),socialChoices=document.getElementById('social-choices'),socialFeedback=document.getElementById('social-feedback');
+let currentSocial=null,currentSocialIndex=-1;
+const allSocialScenarios=socialScenarios.concat(socialExtraScenarios);
+const socialProgressKey='kids-zone-social-progress-v1:'+((childId&&/^[0-9a-f-]{36}$/i.test(childId))?childId:'this-device');
+const socialSkillNames={friendship:'Friendship',listening:'Listening',feelings:'Understanding feelings',conflict:'Kind problem-solving',safety:'Online safety',help:'Getting help'};
+let socialProgress={completed:[],bySkill:{},totalAnswers:0};
+try{const saved=JSON.parse(localStorage.getItem(socialProgressKey)||'null');if(saved&&Array.isArray(saved.completed)){socialProgress.completed=saved.completed.filter(n=>Number.isInteger(n)&&n>=0&&n<allSocialScenarios.length);socialProgress.bySkill=saved.bySkill&&typeof saved.bySkill==='object'?saved.bySkill:{};socialProgress.totalAnswers=Number.isInteger(saved.totalAnswers)?saved.totalAnswers:0;}}catch(e){}
+document.getElementById('social-heading').textContent='Social Interaction Studio 💬 · '+allSocialScenarios.length+' scenarios';
+document.querySelector('#social-interaction .story-intro p').textContent='Explore '+allSocialScenarios.length+' guided situations to practise friendship, communication, empathy, kind problem-solving and online safety.';
+document.getElementById('social-progress-bar').setAttribute('aria-valuemax',String(allSocialScenarios.length));
+function saveSocialProgress(){try{localStorage.setItem(socialProgressKey,JSON.stringify(socialProgress));}catch(e){document.getElementById('social-progress-summary').textContent='Progress is available while this page is open, but this browser could not save it.';}}
+function renderSocialProgress(){
+ const count=socialProgress.completed.length,pct=Math.round(count/allSocialScenarios.length*100);
+ document.getElementById('social-progress-summary').textContent=count+' of '+allSocialScenarios.length+' different situations explored ('+pct+'%). Every thoughtful try helps you practise!';
+ document.getElementById('social-progress-detail').textContent=count+' of '+allSocialScenarios.length+' different situations explored · '+socialProgress.totalAnswers+' answers practised · Saved only in this browser.';
+ document.getElementById('social-progress-bar').setAttribute('aria-valuenow',String(count));
+ document.getElementById('social-progress-fill').style.width=pct+'%';
+ const list=document.getElementById('social-skill-progress');list.replaceChildren();
+ Object.entries(socialSkillNames).forEach(([key,name])=>{const li=document.createElement('li');li.textContent=name+': '+(Number(socialProgress.bySkill[key])||0)+' situations';list.append(li);});
+}
+function chooseSocialScenario(){
+ const age=socialAge.value,topic=socialTopic.value;
+ let options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>(s.age===age||age==='9-10'&&s.age==='6-8')&&(topic==='all'||s.topic===topic));
+ if(!options.length)options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>s.age===age);
+ const pick=options[Math.floor(Math.random()*options.length)];currentSocial=pick.s;currentSocialIndex=pick.index;
+ socialSituation.textContent=currentSocial.situation;socialFeedback.textContent='Think about how each choice might make someone feel, then choose an answer.';
+ socialChoices.replaceChildren();
+ currentSocial.choices.forEach((choice,index)=>{const b=document.createElement('button');b.type='button';b.textContent=choice[0];b.addEventListener('click',()=>{socialFeedback.textContent=(choice[2]?'🌟 Kind idea! ':'💡 Let’s think about that. ')+choice[1];socialChoices.querySelectorAll('button').forEach(x=>x.disabled=true);
+  if(!socialProgress.completed.includes(currentSocialIndex)){socialProgress.completed.push(currentSocialIndex);socialProgress.bySkill[currentSocial.topic]=(Number(socialProgress.bySkill[currentSocial.topic])||0)+1;}
+  socialProgress.totalAnswers++;saveSocialProgress();renderSocialProgress();
+ });socialChoices.append(b);});
+}
+document.getElementById('social-progress-clear').addEventListener('click',()=>{if(!window.confirm('Reset all Social Interaction practice progress saved in this browser?'))return;socialProgress={completed:[],bySkill:{},totalAnswers:0};try{localStorage.removeItem(socialProgressKey);}catch(e){}renderSocialProgress();socialFeedback.textContent='Your progress has been reset. Choose an answer when you are ready to practise again.';});
+renderSocialProgress();
+document.getElementById('social-next').addEventListener('click',chooseSocialScenario);
+document.getElementById('social-reset').addEventListener('click',chooseSocialScenario);
+socialAge.addEventListener('change',chooseSocialScenario);socialTopic.addEventListener('change',chooseSocialScenario);
+chooseSocialScenario();
+
+})();
+</script>
+</body>
+</html>+(price*count),'
+const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
+const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
+const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+let shown=0,activeMatches=null;
+async function recordGameProgress(item,isCorrect){
+  if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
+  const {error}=await client.from('family_educational_game_progress').insert({
+    child_id:activeChildProfile.id,game_number:item.number,game_title:item.type.name,
+    category:item.type.name,age_band:item.ageBand,is_correct:isCorrect
+  });
+  if(error){progressStatus.textContent='Could not save game progress. Please ask a parent to check the Family Dashboard.';console.warn('Educational game progress save failed:',error.message||error);return;}
+  progressStatus.textContent='Saved progress for '+activeChildProfile.child_name+'.';
+}
+function makeCard(item){
+  const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
+  const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
+  const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
+  const challenge=document.createElement('div');challenge.hidden=true;
+  const question=document.createElement('p');question.className='mini-question';
+  const options=document.createElement('div');options.className='mini-options';
+  const result=document.createElement('p');result.className='mini-result';result.setAttribute('aria-live','polite');
+  const again=document.createElement('button');again.type='button';again.className='secondary';again.textContent='Next round';again.hidden=true;
+  challenge.append(question,options,result,again);article.append(heading,description,play,challenge);
+  let answer='',turnNumber=0,scores=[0,0];
+  function newRound(){
+    const data=type.make(n+turnNumber++);
+    let q,correct,choices;if(data.length===4){[q,correct,choices]=data;}else{[q,correct]=data;choices=[String(correct),String(Number(correct)+1),String(Math.max(0,Number(correct)-2)),String(Number(correct)+3)];}
+    answer=String(correct);question.textContent=(multiplayer?'Player '+(turnNumber%2===1?1:2)+' — ':'')+q;
+    result.textContent=multiplayer?'Players take turns on this device. Player 1: '+scores[0]+' · Player 2: '+scores[1]:'Choose the correct answer.';
+    options.replaceChildren();const unique=[...new Set(choices.map(String))];while(unique.length<4)unique.push(String(Number(correct)+unique.length+2));
+    unique.sort(()=>Math.random()-.5).forEach(choice=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.addEventListener('click',()=>{
+      if(multiplayer){const player=(turnNumber-1)%2;scores[player]+=choice===answer?1:0;result.textContent=(choice===answer?'Correct! ':'Not quite. Answer: '+answer+'. ')+(player===0?'Player 1':'Player 2')+' score — Player 1: '+scores[0]+' · Player 2: '+scores[1];}
+      else result.textContent=choice===answer?'🎉 Correct! Great work.':'Good try! The answer is '+answer+'.';
+      void recordGameProgress(item,choice===answer);
+      options.querySelectorAll('button').forEach(x=>x.disabled=true);again.hidden=false;
+    });options.append(b);});again.hidden=true;
+  }
+  play.addEventListener('click',()=>{challenge.hidden=false;play.hidden=true;newRound();});
+  again.addEventListener('click',newRound);
+  return article;
+}
+function renderBatch(items,reset=false){
+  if(reset){gameGrid.querySelectorAll('.generated-game').forEach(card=>card.remove());shown=0;}
+  const next=items.slice(shown,shown+100);next.forEach(item=>gameGrid.append(makeCard(item)));shown+=next.length;
+  loadMore.hidden=shown>=items.length;loadMore.textContent='Load '+Math.min(100,items.length-shown)+' more games';
+  const staticCount=[...gameGrid.querySelectorAll(':scope > .game:not(.generated-game)')].filter(card=>!card.hidden).length;
+  const totalMatches=staticCount+items.length;
+  gameCount.textContent='Showing '+(staticCount+shown).toLocaleString()+' of '+totalMatches.toLocaleString()+' matching games';
+}
+function filterGames(){
+  const query=searchInput.value.trim().toLowerCase(),band=ageFilter.value;
+  gameGrid.querySelectorAll(':scope > .game:not(.generated-game)').forEach(card=>{
+    const searchMatch=!query||card.textContent.toLowerCase().includes(query);
+    const ageMatch=!band||card.dataset.ageBand===band;
+    card.hidden=!(searchMatch&&ageMatch);
+  });
+  activeMatches=catalog.filter(item=>(!query||item.search.includes(query))&&(!band||item.ageBand===band));
+  renderBatch(activeMatches,true);
+}
+ageFilter.addEventListener('change',filterGames);
+loadMore.addEventListener('click',()=>renderBatch(activeMatches||catalog));
+searchInput.addEventListener('input',filterGames);
+filterGames();
+
+// Social Interaction Studio: guided, offline practice scenarios (no child-generated content is uploaded).
+const socialScenarios=[
+ {topic:'friendship',age:'3-5',situation:'A new child is sitting by themselves. What could you do?',choices:[['Invite them to join your game.','A warm invitation helps someone feel welcome. They can say yes or no, and that is okay.',true],['Laugh at them.','Laughing can hurt feelings and make someone feel left out.',false],['Ask a trusted adult how to help.','A trusted grown-up can help you find a kind way to include someone.',true]]},
+ {topic:'listening',age:'3-5',situation:'Your friend is telling you about their favourite toy. What shows you are listening?',choices:[['Look towards them and let them finish.','Taking turns talking helps your friend feel heard.',true],['Talk over them.','Talking over someone makes it hard for them to share.',false],['Walk away without saying anything.','If you need a break, use kind words to let them know.',false]]},
+ {topic:'feelings',age:'6-8',situation:'A friend looks upset because their drawing did not turn out as they hoped. What might help?',choices:[['Ask if they would like to talk.','You noticed their feelings and offered support without pressuring them.',true],['Tell them they are being silly.','Everyone has feelings. Dismissing them can make things harder.',false],['Offer to make another drawing together.','A friendly offer can help, while letting them choose is important.',true]]},
+ {topic:'conflict',age:'6-8',situation:'You and a friend both want the same game first. What is a fair next step?',choices:[['Take turns or agree on a timer.','A fair plan helps both people have a turn.',true],['Grab it and refuse to share.','Taking things can make the disagreement bigger.',false],['Use calm words to explain what you want.','Calm words help others understand your point of view.',true]]},
+ {topic:'safety',age:'6-8',situation:'Someone you do not know online asks which school you go to. What should you do?',choices:[['Do not share it; tell a trusted adult.','School details are private. Stop the conversation and get help from a trusted adult.',true],['Tell them so they can be your friend.','People online may not be who they say they are. Keep school details private.',false],['Ask them for their school first.','It is safest not to exchange identifying details with strangers.',false]]},
+ {topic:'help',age:'9-10',situation:'A group chat message makes you feel worried or uncomfortable. What is a safe response?',choices:[['Pause, do not reply or forward it, and tell a trusted adult.','Pausing and getting help is a strong choice. You do not have to handle it alone.',true],['Keep it secret because it is probably nothing.','If something feels wrong, you can always talk to a trusted adult.',false],['Send an angry message back.','A heated reply can make things worse. Step away and ask for help.',false]]},
+ {topic:'friendship',age:'9-10',situation:'A classmate is often left out when teams are chosen. What could you do?',choices:[['Suggest making teams in a fair way that includes everyone.','You are helping create a welcoming group.',true],['Tell others not to let them play.','Excluding someone can hurt and does not solve the problem.',false],['Check in kindly and ask what they would like.','A kind check-in respects their feelings and choices.',true]]},
+ {topic:'safety',age:'3-5',situation:'A game or video shows something that makes you feel worried. What can you do?',choices:[['Stop and tell your grown-up.','You can always stop and ask a trusted grown-up for help.',true],['Keep watching even though you feel worried.','You do not need to keep watching something uncomfortable.',false],['Ask a grown-up to watch with you.','Watching together helps your grown-up guide you.',true]]}
+];
+// 160 additional guided scenarios, balanced across six social-emotional learning themes.
+const socialExtraPrompts={
+ friendship:[
+ 'You notice someone has no partner for a classroom activity. What could you do?',
+ 'A new neighbour your age moves in. How might you say hello?',
+ 'A friend wants to play a different game from you. How can you decide together?',
+ 'Someone has a different favourite hobby. How can you show interest?',
+ 'A classmate joins your club for the first time. How can you help them feel welcome?',
+ 'You see someone waiting to join a game. What is a friendly way to invite them?',
+ 'Your friend wants some quiet time alone. How can you respect that?',
+ 'A group is choosing roles for a pretend game. How can everyone have a part?',
+ 'You made a new friend but your old friend feels left out. What could help?',
+ 'Someone makes a mistake during a team game. How can you encourage them?',
+ 'A friend speaks a different language at home. How can you be curious and respectful?',
+ 'You and a friend have different ideas for a playdate. How can you plan together?',
+ 'A classmate is nervous about joining an activity. What kind words could you offer?',
+ 'You notice a child playing by themselves at the park. What is a respectful way to approach?',
+ 'Your friend is good at something you find difficult. How can you celebrate their success?',
+ 'A team member has not had a turn yet. What could you suggest?',
+ 'Someone new sits beside you at lunch. How might you start a friendly conversation?',
+ 'Your friend enjoys a game you do not know. How could you learn about it?',
+ 'Two friends want you to join different activities. How can you respond kindly?',
+ 'A group project has a job nobody wants. How can you share the work fairly?',
+ 'Your friend is moving away soon. How can you show you care?',
+ 'A child has different abilities and needs more time in a game. How can the group include them?',
+ 'You accidentally leave someone out of an invitation. How could you make it right?',
+ 'A friend is proud of something they made. How can you show genuine interest?',
+ 'You want to join a group conversation. What is a polite way to enter?',
+ 'A friend asks you to keep another person out of a game. What could you say?',
+ 'You disagree about the rules of a playground game. How can you find a fair solution?'
+ ],
+ listening:[
+ 'A friend is excited to tell you about their weekend. How can you show you are listening?',
+ 'Someone is explaining game rules you have not heard before. What could you do?',
+ 'Your partner is sharing an idea during group work. How can you make space for it?',
+ 'You do not understand what someone said. What is a kind way to ask?',
+ 'A friend is speaking slowly because they are finding the words. How can you be patient?',
+ 'You are excited to answer but another person is still talking. What should you do?',
+ 'A friend tells you they would rather play something else. How can you listen respectfully?',
+ 'Someone shares a different opinion in a discussion. How can you respond?',
+ 'You are distracted while a friend is talking. What could help you focus?',
+ 'A teammate suggests a new plan. How can you ask questions before deciding?',
+ 'Your friend says they feel left out. What could you say to show you heard them?',
+ 'You need to interrupt because something is important. How can you do it politely?',
+ 'A classmate is giving directions for an activity. How can you check you understood?',
+ 'Someone tells a long story and you need a break. What could you say kindly?',
+ 'Your friend asks what you think about their idea. How can you answer honestly and kindly?',
+ 'You and a partner both want to speak first. What could you agree on?',
+ 'A person is sharing something personal with you. How can you listen without spreading it?',
+ 'A teammate has a suggestion you did not expect. How can you give it a fair hearing?',
+ 'You notice you misunderstood a friend. What could you do next?',
+ 'A friend is using gestures to explain an idea. How can you pay attention?',
+ 'Someone asks you to repeat what you heard. How can you check carefully?',
+ 'Your group is making a decision. How can you make sure quieter people are heard?',
+ 'A friend asks for advice but mostly wants someone to listen. How can you tell?',
+ 'You are talking with someone who has a different communication style. How can you be patient?',
+ 'A friend says no to your suggestion. How can you show you heard their answer?',
+ 'You realise you have been talking about yourself for a long time. What could you do?',
+ 'Someone is upset and needs time before talking. How can you respect that?'
+ ],
+ feelings:[
+ 'Your friend is disappointed after losing a game. What might they be feeling?',
+ 'You feel nervous before meeting a new group. What could help you name that feeling?',
+ 'A classmate looks frustrated with a tricky puzzle. How could you check in?',
+ 'Your friend is excited about good news while you feel tired. How can both feelings fit?',
+ 'Someone looks quiet after a joke. How could you find out how they feel?',
+ 'You feel jealous when a friend wins a prize. What is a healthy way to handle it?',
+ 'A friend seems worried about trying something new. What supportive words might help?',
+ 'You accidentally hurt a friend’s feelings. How can you listen to their feelings?',
+ 'A teammate is proud of finishing a difficult task. How can you celebrate with them?',
+ 'You feel angry because plans changed. What can you do before responding?',
+ 'A friend is homesick on a school trip. How could you show care?',
+ 'Someone is embarrassed after making a mistake. How can you help them feel safe?',
+ 'You feel left out when friends make plans. What could you say calmly?',
+ 'A friend is overwhelmed by a noisy room. How could you respect their needs?',
+ 'A classmate is very excited and speaking quickly. How can you respond kindly?',
+ 'You feel disappointed when a playdate ends. What could help you say goodbye?',
+ 'A friend says they are fine but seems sad. How can you offer support without pressure?',
+ 'You feel proud of your work but another person gets attention. How can you manage that?',
+ 'Someone is scared to ask a question. How could you encourage them?',
+ 'A friend is frustrated because they cannot explain an idea. How can you be patient?',
+ 'You feel confused by a friend’s reaction. What respectful question could you ask?',
+ 'A classmate is celebrating a tradition important to them. How can you show interest?',
+ 'You are worried you made the wrong choice. Who could you talk to?',
+ 'A friend feels disappointed about a cancelled activity. How can you acknowledge it?',
+ 'You feel overwhelmed by too many instructions. What could you ask for?',
+ 'Someone is happy about an achievement you also wanted. How can you respond graciously?',
+ 'A friend needs space after a hard day. How can you show care from a distance?'
+ ],
+ conflict:[
+ 'Two people reach for the same seat. How could you work it out fairly?',
+ 'A friend changes the rules halfway through a game. What could you say calmly?',
+ 'You and a teammate disagree about how to finish a project. What is a fair next step?',
+ 'Someone accidentally bumps into you. How could you check what happened before reacting?',
+ 'A friend borrows a pencil and forgets to return it. How can you ask for it back?',
+ 'You both want to choose the music. How could you take turns?',
+ 'A game feels unfair to one player. How could the group pause and discuss it?',
+ 'You said something unkind when you were angry. How can you repair the friendship?',
+ 'A friend blames you for a mistake you did not make. How could you explain calmly?',
+ 'Two friends argue and ask you to take sides. How can you avoid making it worse?',
+ 'Someone keeps interrupting during a group task. What respectful request could help?',
+ 'A teammate is not doing their share. How could you raise the concern constructively?',
+ 'You disagree about whose turn it is. What fair way could help you remember?',
+ 'A friend wants to keep playing after you are ready to stop. How can you set a boundary?',
+ 'Someone knocks over your building by accident. What could you do before getting upset?',
+ 'A group cannot agree on a game. How could you find a choice everyone can accept?',
+ 'You receive feedback that feels hard to hear. How can you respond thoughtfully?',
+ 'A friend apologises after an argument. How might you respond honestly?',
+ 'You need to apologise but feel embarrassed. What could you say?',
+ 'A classmate says your idea will not work. How could you discuss it respectfully?',
+ 'A disagreement is getting louder. What could help everyone pause safely?',
+ 'Someone will not follow an agreed game rule. What could the group do?',
+ 'You want to change teams after a disagreement. How can you explain your choice kindly?',
+ 'A friend misunderstands your joke. How can you clarify and check their feelings?',
+ 'You and a sibling both want the same family activity. How could you plan turns?',
+ 'A group decision leaves one person unhappy. How could you hear their concern?',
+ 'You notice an argument becoming physical. What is the safest next step?'
+ ],
+ safety:[
+ 'A player online asks you to share your password. What should you do?',
+ 'Someone in a game asks for your home address. How can you stay safe?',
+ 'A stranger sends a friend request. What should you do before responding?',
+ 'A person online asks you to keep a conversation secret from your family. What is a safe choice?',
+ 'A game asks for your full name and school. What should you check with a grown-up?',
+ 'Someone sends an unexpected picture that makes you uncomfortable. What can you do?',
+ 'A player uses mean words in a chat. How can you respond safely?',
+ 'A person you only know online wants to meet in person. What should happen?',
+ 'You see someone sharing another child’s private photo. What should you do?',
+ 'A link appears promising a free prize if you enter details. What is the safe next step?',
+ 'A friend wants to post a photo that shows your school uniform. What could you discuss?',
+ 'Someone asks you to move a conversation to a private app. What should you do?',
+ 'A game chat asks where you will be after school. What information should stay private?',
+ 'You see a hurtful rumour being shared online. Should you forward it?',
+ 'A person online says they are your age but you are unsure. What is a safe approach?',
+ 'You receive a message that makes you feel pressured to reply quickly. What can you do?',
+ 'A game asks permission to use your camera or microphone. Who should help decide?',
+ 'Someone wants a picture of your face to prove you are a friend. What should you do?',
+ 'You notice a chat has become unkind. How can you leave and get support?',
+ 'A player offers a gift in exchange for personal information. What is the safe response?',
+ 'You accidentally share something private in a chat. Who should you tell?',
+ 'A website asks for your birthday and location. What should you do first?',
+ 'Someone tells you to delete messages so your grown-up cannot see them. What is a safe choice?',
+ 'A friend wants to use your account. Why should passwords remain private?',
+ 'You see a video that feels frightening or confusing. What could you do?',
+ 'A person online says you will get in trouble if you tell an adult. What should you remember?',
+ 'A group chat is sharing unkind jokes about a classmate. What is a safe, kind response?'
+ ],
+ help:[
+ 'You see a classmate being repeatedly teased. Which trusted adult could you tell?',
+ 'A friend says they are worried but asks you to solve everything alone. What can you do?',
+ 'You feel unsafe during an activity. How can you get help straight away?',
+ 'Someone tells you about a problem that feels too big to handle. What is your next step?',
+ 'You are unsure whether a joke has gone too far. Who could help you think it through?',
+ 'A friend is being excluded again and again. How could you support them and involve an adult?',
+ 'You receive a message that makes you feel frightened. What should you do?',
+ 'You cannot find your group on a school outing. What is the safest action?',
+ 'A person asks you to do something that feels wrong. How can you say no and get help?',
+ 'You notice a younger child is lost at an event. Which grown-up should you find?',
+ 'A friend says someone has been unkind online. How can you help them report it to an adult?',
+ 'You made a mistake and are afraid to tell someone. Why can asking for help be brave?',
+ 'You are worried about a friend who has stopped joining activities. How could you check in safely?',
+ 'A disagreement keeps happening even after you try to solve it. Who can help?',
+ 'You do not know which adult to talk to first. What trusted people could you choose from?',
+ 'A friend asks you to keep a safety concern secret. What should you explain?',
+ 'You feel overwhelmed in a busy place. How can you find a safe adult?',
+ 'Someone is hurt during a game. What should you do before trying to help?',
+ 'A child tells you they are being bullied. How can you listen and get adult support?',
+ 'You are unsure if an online account is genuine. Who can help you check?',
+ 'A friend is scared to report an uncomfortable message. How can you encourage them?',
+ 'You are being pressured to join an activity you do not want. What can you say?',
+ 'A trusted adult is not nearby when you need help. Which other safe adult could you approach?',
+ 'You see a safety rule being ignored near water or roads. What should you do?',
+ 'You need help understanding a confusing online message. Who can look at it with you?'
+ ]
+};
+const socialTopicChoices={
+ friendship:[['Invite them kindly or ask if they would like to join.','A friendly invitation helps people feel welcome while respecting their choice.',true],['Leave them out on purpose.','Excluding someone can hurt. Look for a way to be welcoming.',false],['Ask a trusted adult for ideas if you are unsure.','A trusted grown-up can help you find a safe, kind approach.',true]],
+ listening:[['Pause, listen, and let them finish.','Giving someone time to speak shows respect and helps you understand.',true],['Interrupt and talk over them.','Interrupting can make it hard for others to share their thoughts.',false],['Ask a kind question to check what they mean.','Checking your understanding is a thoughtful listening skill.',true]],
+ feelings:[['Name the feeling gently and ask what support they want.','Noticing feelings and asking before helping shows empathy.',true],['Tell them their feeling is silly.','Feelings matter, even when people experience things differently.',false],['Give them space and offer to listen later.','Respectful space can help someone feel safe and understood.',true]],
+ conflict:[['Use calm words and look for a fair solution together.','Calm communication helps people solve problems without blame.',true],['Shout or grab to get your way.','Aggressive actions can make a disagreement less safe.',false],['Pause and ask a trusted adult to help if needed.','Getting help is a sensible choice when a problem feels too big.',true]],
+ safety:[['Keep private details private and tell a trusted adult.','Personal information should stay private. A trusted adult can help you decide what to do.',true],['Share the information to keep the person happy.','You never need to share private details to please someone.',false],['Stop, block or leave if appropriate, and ask an adult for help.','Pausing and getting support are safe steps when something feels wrong.',true]],
+ help:[['Tell a trusted adult clearly what happened.','You do not have to manage a difficult or unsafe situation alone.',true],['Keep a worrying problem secret.','Safety worries should be shared with a trusted adult who can help.',false],['Move to a safe place and ask an adult to stay with you.','Finding a safe adult and place is a strong next step.',true]]
+};
+const socialExtraScenarios=[];
+Object.entries(socialExtraPrompts).forEach(([topic,prompts],topicIndex)=>{
+ prompts.forEach((situation,index)=>{
+  const age=['3-5','6-8','9-10'][(index+topicIndex)%3];
+  socialExtraScenarios.push({topic,age,situation,choices:socialTopicChoices[topic]});
+ });
+});
+const socialAge=document.getElementById('social-age'),socialTopic=document.getElementById('social-topic'),socialSituation=document.getElementById('social-situation'),socialChoices=document.getElementById('social-choices'),socialFeedback=document.getElementById('social-feedback');
+let currentSocial=null,currentSocialIndex=-1;
+const allSocialScenarios=socialScenarios.concat(socialExtraScenarios);
+const socialProgressKey='kids-zone-social-progress-v1:'+((childId&&/^[0-9a-f-]{36}$/i.test(childId))?childId:'this-device');
+const socialSkillNames={friendship:'Friendship',listening:'Listening',feelings:'Understanding feelings',conflict:'Kind problem-solving',safety:'Online safety',help:'Getting help'};
+let socialProgress={completed:[],bySkill:{},totalAnswers:0};
+try{const saved=JSON.parse(localStorage.getItem(socialProgressKey)||'null');if(saved&&Array.isArray(saved.completed)){socialProgress.completed=saved.completed.filter(n=>Number.isInteger(n)&&n>=0&&n<allSocialScenarios.length);socialProgress.bySkill=saved.bySkill&&typeof saved.bySkill==='object'?saved.bySkill:{};socialProgress.totalAnswers=Number.isInteger(saved.totalAnswers)?saved.totalAnswers:0;}}catch(e){}
+document.getElementById('social-heading').textContent='Social Interaction Studio 💬 · '+allSocialScenarios.length+' scenarios';
+document.querySelector('#social-interaction .story-intro p').textContent='Explore '+allSocialScenarios.length+' guided situations to practise friendship, communication, empathy, kind problem-solving and online safety.';
+document.getElementById('social-progress-bar').setAttribute('aria-valuemax',String(allSocialScenarios.length));
+function saveSocialProgress(){try{localStorage.setItem(socialProgressKey,JSON.stringify(socialProgress));}catch(e){document.getElementById('social-progress-summary').textContent='Progress is available while this page is open, but this browser could not save it.';}}
+function renderSocialProgress(){
+ const count=socialProgress.completed.length,pct=Math.round(count/allSocialScenarios.length*100);
+ document.getElementById('social-progress-summary').textContent=count+' of '+allSocialScenarios.length+' different situations explored ('+pct+'%). Every thoughtful try helps you practise!';
+ document.getElementById('social-progress-detail').textContent=count+' of '+allSocialScenarios.length+' different situations explored · '+socialProgress.totalAnswers+' answers practised · Saved only in this browser.';
+ document.getElementById('social-progress-bar').setAttribute('aria-valuenow',String(count));
+ document.getElementById('social-progress-fill').style.width=pct+'%';
+ const list=document.getElementById('social-skill-progress');list.replaceChildren();
+ Object.entries(socialSkillNames).forEach(([key,name])=>{const li=document.createElement('li');li.textContent=name+': '+(Number(socialProgress.bySkill[key])||0)+' situations';list.append(li);});
+}
+function chooseSocialScenario(){
+ const age=socialAge.value,topic=socialTopic.value;
+ let options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>(s.age===age||age==='9-10'&&s.age==='6-8')&&(topic==='all'||s.topic===topic));
+ if(!options.length)options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>s.age===age);
+ const pick=options[Math.floor(Math.random()*options.length)];currentSocial=pick.s;currentSocialIndex=pick.index;
+ socialSituation.textContent=currentSocial.situation;socialFeedback.textContent='Think about how each choice might make someone feel, then choose an answer.';
+ socialChoices.replaceChildren();
+ currentSocial.choices.forEach((choice,index)=>{const b=document.createElement('button');b.type='button';b.textContent=choice[0];b.addEventListener('click',()=>{socialFeedback.textContent=(choice[2]?'🌟 Kind idea! ':'💡 Let’s think about that. ')+choice[1];socialChoices.querySelectorAll('button').forEach(x=>x.disabled=true);
+  if(!socialProgress.completed.includes(currentSocialIndex)){socialProgress.completed.push(currentSocialIndex);socialProgress.bySkill[currentSocial.topic]=(Number(socialProgress.bySkill[currentSocial.topic])||0)+1;}
+  socialProgress.totalAnswers++;saveSocialProgress();renderSocialProgress();
+ });socialChoices.append(b);});
+}
+document.getElementById('social-progress-clear').addEventListener('click',()=>{if(!window.confirm('Reset all Social Interaction practice progress saved in this browser?'))return;socialProgress={completed:[],bySkill:{},totalAnswers:0};try{localStorage.removeItem(socialProgressKey);}catch(e){}renderSocialProgress();socialFeedback.textContent='Your progress has been reset. Choose an answer when you are ready to practise again.';});
+renderSocialProgress();
+document.getElementById('social-next').addEventListener('click',chooseSocialScenario);
+document.getElementById('social-reset').addEventListener('click',chooseSocialScenario);
+socialAge.addEventListener('change',chooseSocialScenario);socialTopic.addEventListener('change',chooseSocialScenario);
+chooseSocialScenario();
+
+})();
+</script>
+</body>
+</html>+(price+count),'
+const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
+const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
+const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+let shown=0,activeMatches=null;
+async function recordGameProgress(item,isCorrect){
+  if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
+  const {error}=await client.from('family_educational_game_progress').insert({
+    child_id:activeChildProfile.id,game_number:item.number,game_title:item.type.name,
+    category:item.type.name,age_band:item.ageBand,is_correct:isCorrect
+  });
+  if(error){progressStatus.textContent='Could not save game progress. Please ask a parent to check the Family Dashboard.';console.warn('Educational game progress save failed:',error.message||error);return;}
+  progressStatus.textContent='Saved progress for '+activeChildProfile.child_name+'.';
+}
+function makeCard(item){
+  const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
+  const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
+  const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
+  const challenge=document.createElement('div');challenge.hidden=true;
+  const question=document.createElement('p');question.className='mini-question';
+  const options=document.createElement('div');options.className='mini-options';
+  const result=document.createElement('p');result.className='mini-result';result.setAttribute('aria-live','polite');
+  const again=document.createElement('button');again.type='button';again.className='secondary';again.textContent='Next round';again.hidden=true;
+  challenge.append(question,options,result,again);article.append(heading,description,play,challenge);
+  let answer='',turnNumber=0,scores=[0,0];
+  function newRound(){
+    const data=type.make(n+turnNumber++);
+    let q,correct,choices;if(data.length===4){[q,correct,choices]=data;}else{[q,correct]=data;choices=[String(correct),String(Number(correct)+1),String(Math.max(0,Number(correct)-2)),String(Number(correct)+3)];}
+    answer=String(correct);question.textContent=(multiplayer?'Player '+(turnNumber%2===1?1:2)+' — ':'')+q;
+    result.textContent=multiplayer?'Players take turns on this device. Player 1: '+scores[0]+' · Player 2: '+scores[1]:'Choose the correct answer.';
+    options.replaceChildren();const unique=[...new Set(choices.map(String))];while(unique.length<4)unique.push(String(Number(correct)+unique.length+2));
+    unique.sort(()=>Math.random()-.5).forEach(choice=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.addEventListener('click',()=>{
+      if(multiplayer){const player=(turnNumber-1)%2;scores[player]+=choice===answer?1:0;result.textContent=(choice===answer?'Correct! ':'Not quite. Answer: '+answer+'. ')+(player===0?'Player 1':'Player 2')+' score — Player 1: '+scores[0]+' · Player 2: '+scores[1];}
+      else result.textContent=choice===answer?'🎉 Correct! Great work.':'Good try! The answer is '+answer+'.';
+      void recordGameProgress(item,choice===answer);
+      options.querySelectorAll('button').forEach(x=>x.disabled=true);again.hidden=false;
+    });options.append(b);});again.hidden=true;
+  }
+  play.addEventListener('click',()=>{challenge.hidden=false;play.hidden=true;newRound();});
+  again.addEventListener('click',newRound);
+  return article;
+}
+function renderBatch(items,reset=false){
+  if(reset){gameGrid.querySelectorAll('.generated-game').forEach(card=>card.remove());shown=0;}
+  const next=items.slice(shown,shown+100);next.forEach(item=>gameGrid.append(makeCard(item)));shown+=next.length;
+  loadMore.hidden=shown>=items.length;loadMore.textContent='Load '+Math.min(100,items.length-shown)+' more games';
+  const staticCount=[...gameGrid.querySelectorAll(':scope > .game:not(.generated-game)')].filter(card=>!card.hidden).length;
+  const totalMatches=staticCount+items.length;
+  gameCount.textContent='Showing '+(staticCount+shown).toLocaleString()+' of '+totalMatches.toLocaleString()+' matching games';
+}
+function filterGames(){
+  const query=searchInput.value.trim().toLowerCase(),band=ageFilter.value;
+  gameGrid.querySelectorAll(':scope > .game:not(.generated-game)').forEach(card=>{
+    const searchMatch=!query||card.textContent.toLowerCase().includes(query);
+    const ageMatch=!band||card.dataset.ageBand===band;
+    card.hidden=!(searchMatch&&ageMatch);
+  });
+  activeMatches=catalog.filter(item=>(!query||item.search.includes(query))&&(!band||item.ageBand===band));
+  renderBatch(activeMatches,true);
+}
+ageFilter.addEventListener('change',filterGames);
+loadMore.addEventListener('click',()=>renderBatch(activeMatches||catalog));
+searchInput.addEventListener('input',filterGames);
+filterGames();
+
+// Social Interaction Studio: guided, offline practice scenarios (no child-generated content is uploaded).
+const socialScenarios=[
+ {topic:'friendship',age:'3-5',situation:'A new child is sitting by themselves. What could you do?',choices:[['Invite them to join your game.','A warm invitation helps someone feel welcome. They can say yes or no, and that is okay.',true],['Laugh at them.','Laughing can hurt feelings and make someone feel left out.',false],['Ask a trusted adult how to help.','A trusted grown-up can help you find a kind way to include someone.',true]]},
+ {topic:'listening',age:'3-5',situation:'Your friend is telling you about their favourite toy. What shows you are listening?',choices:[['Look towards them and let them finish.','Taking turns talking helps your friend feel heard.',true],['Talk over them.','Talking over someone makes it hard for them to share.',false],['Walk away without saying anything.','If you need a break, use kind words to let them know.',false]]},
+ {topic:'feelings',age:'6-8',situation:'A friend looks upset because their drawing did not turn out as they hoped. What might help?',choices:[['Ask if they would like to talk.','You noticed their feelings and offered support without pressuring them.',true],['Tell them they are being silly.','Everyone has feelings. Dismissing them can make things harder.',false],['Offer to make another drawing together.','A friendly offer can help, while letting them choose is important.',true]]},
+ {topic:'conflict',age:'6-8',situation:'You and a friend both want the same game first. What is a fair next step?',choices:[['Take turns or agree on a timer.','A fair plan helps both people have a turn.',true],['Grab it and refuse to share.','Taking things can make the disagreement bigger.',false],['Use calm words to explain what you want.','Calm words help others understand your point of view.',true]]},
+ {topic:'safety',age:'6-8',situation:'Someone you do not know online asks which school you go to. What should you do?',choices:[['Do not share it; tell a trusted adult.','School details are private. Stop the conversation and get help from a trusted adult.',true],['Tell them so they can be your friend.','People online may not be who they say they are. Keep school details private.',false],['Ask them for their school first.','It is safest not to exchange identifying details with strangers.',false]]},
+ {topic:'help',age:'9-10',situation:'A group chat message makes you feel worried or uncomfortable. What is a safe response?',choices:[['Pause, do not reply or forward it, and tell a trusted adult.','Pausing and getting help is a strong choice. You do not have to handle it alone.',true],['Keep it secret because it is probably nothing.','If something feels wrong, you can always talk to a trusted adult.',false],['Send an angry message back.','A heated reply can make things worse. Step away and ask for help.',false]]},
+ {topic:'friendship',age:'9-10',situation:'A classmate is often left out when teams are chosen. What could you do?',choices:[['Suggest making teams in a fair way that includes everyone.','You are helping create a welcoming group.',true],['Tell others not to let them play.','Excluding someone can hurt and does not solve the problem.',false],['Check in kindly and ask what they would like.','A kind check-in respects their feelings and choices.',true]]},
+ {topic:'safety',age:'3-5',situation:'A game or video shows something that makes you feel worried. What can you do?',choices:[['Stop and tell your grown-up.','You can always stop and ask a trusted grown-up for help.',true],['Keep watching even though you feel worried.','You do not need to keep watching something uncomfortable.',false],['Ask a grown-up to watch with you.','Watching together helps your grown-up guide you.',true]]}
+];
+// 160 additional guided scenarios, balanced across six social-emotional learning themes.
+const socialExtraPrompts={
+ friendship:[
+ 'You notice someone has no partner for a classroom activity. What could you do?',
+ 'A new neighbour your age moves in. How might you say hello?',
+ 'A friend wants to play a different game from you. How can you decide together?',
+ 'Someone has a different favourite hobby. How can you show interest?',
+ 'A classmate joins your club for the first time. How can you help them feel welcome?',
+ 'You see someone waiting to join a game. What is a friendly way to invite them?',
+ 'Your friend wants some quiet time alone. How can you respect that?',
+ 'A group is choosing roles for a pretend game. How can everyone have a part?',
+ 'You made a new friend but your old friend feels left out. What could help?',
+ 'Someone makes a mistake during a team game. How can you encourage them?',
+ 'A friend speaks a different language at home. How can you be curious and respectful?',
+ 'You and a friend have different ideas for a playdate. How can you plan together?',
+ 'A classmate is nervous about joining an activity. What kind words could you offer?',
+ 'You notice a child playing by themselves at the park. What is a respectful way to approach?',
+ 'Your friend is good at something you find difficult. How can you celebrate their success?',
+ 'A team member has not had a turn yet. What could you suggest?',
+ 'Someone new sits beside you at lunch. How might you start a friendly conversation?',
+ 'Your friend enjoys a game you do not know. How could you learn about it?',
+ 'Two friends want you to join different activities. How can you respond kindly?',
+ 'A group project has a job nobody wants. How can you share the work fairly?',
+ 'Your friend is moving away soon. How can you show you care?',
+ 'A child has different abilities and needs more time in a game. How can the group include them?',
+ 'You accidentally leave someone out of an invitation. How could you make it right?',
+ 'A friend is proud of something they made. How can you show genuine interest?',
+ 'You want to join a group conversation. What is a polite way to enter?',
+ 'A friend asks you to keep another person out of a game. What could you say?',
+ 'You disagree about the rules of a playground game. How can you find a fair solution?'
+ ],
+ listening:[
+ 'A friend is excited to tell you about their weekend. How can you show you are listening?',
+ 'Someone is explaining game rules you have not heard before. What could you do?',
+ 'Your partner is sharing an idea during group work. How can you make space for it?',
+ 'You do not understand what someone said. What is a kind way to ask?',
+ 'A friend is speaking slowly because they are finding the words. How can you be patient?',
+ 'You are excited to answer but another person is still talking. What should you do?',
+ 'A friend tells you they would rather play something else. How can you listen respectfully?',
+ 'Someone shares a different opinion in a discussion. How can you respond?',
+ 'You are distracted while a friend is talking. What could help you focus?',
+ 'A teammate suggests a new plan. How can you ask questions before deciding?',
+ 'Your friend says they feel left out. What could you say to show you heard them?',
+ 'You need to interrupt because something is important. How can you do it politely?',
+ 'A classmate is giving directions for an activity. How can you check you understood?',
+ 'Someone tells a long story and you need a break. What could you say kindly?',
+ 'Your friend asks what you think about their idea. How can you answer honestly and kindly?',
+ 'You and a partner both want to speak first. What could you agree on?',
+ 'A person is sharing something personal with you. How can you listen without spreading it?',
+ 'A teammate has a suggestion you did not expect. How can you give it a fair hearing?',
+ 'You notice you misunderstood a friend. What could you do next?',
+ 'A friend is using gestures to explain an idea. How can you pay attention?',
+ 'Someone asks you to repeat what you heard. How can you check carefully?',
+ 'Your group is making a decision. How can you make sure quieter people are heard?',
+ 'A friend asks for advice but mostly wants someone to listen. How can you tell?',
+ 'You are talking with someone who has a different communication style. How can you be patient?',
+ 'A friend says no to your suggestion. How can you show you heard their answer?',
+ 'You realise you have been talking about yourself for a long time. What could you do?',
+ 'Someone is upset and needs time before talking. How can you respect that?'
+ ],
+ feelings:[
+ 'Your friend is disappointed after losing a game. What might they be feeling?',
+ 'You feel nervous before meeting a new group. What could help you name that feeling?',
+ 'A classmate looks frustrated with a tricky puzzle. How could you check in?',
+ 'Your friend is excited about good news while you feel tired. How can both feelings fit?',
+ 'Someone looks quiet after a joke. How could you find out how they feel?',
+ 'You feel jealous when a friend wins a prize. What is a healthy way to handle it?',
+ 'A friend seems worried about trying something new. What supportive words might help?',
+ 'You accidentally hurt a friend’s feelings. How can you listen to their feelings?',
+ 'A teammate is proud of finishing a difficult task. How can you celebrate with them?',
+ 'You feel angry because plans changed. What can you do before responding?',
+ 'A friend is homesick on a school trip. How could you show care?',
+ 'Someone is embarrassed after making a mistake. How can you help them feel safe?',
+ 'You feel left out when friends make plans. What could you say calmly?',
+ 'A friend is overwhelmed by a noisy room. How could you respect their needs?',
+ 'A classmate is very excited and speaking quickly. How can you respond kindly?',
+ 'You feel disappointed when a playdate ends. What could help you say goodbye?',
+ 'A friend says they are fine but seems sad. How can you offer support without pressure?',
+ 'You feel proud of your work but another person gets attention. How can you manage that?',
+ 'Someone is scared to ask a question. How could you encourage them?',
+ 'A friend is frustrated because they cannot explain an idea. How can you be patient?',
+ 'You feel confused by a friend’s reaction. What respectful question could you ask?',
+ 'A classmate is celebrating a tradition important to them. How can you show interest?',
+ 'You are worried you made the wrong choice. Who could you talk to?',
+ 'A friend feels disappointed about a cancelled activity. How can you acknowledge it?',
+ 'You feel overwhelmed by too many instructions. What could you ask for?',
+ 'Someone is happy about an achievement you also wanted. How can you respond graciously?',
+ 'A friend needs space after a hard day. How can you show care from a distance?'
+ ],
+ conflict:[
+ 'Two people reach for the same seat. How could you work it out fairly?',
+ 'A friend changes the rules halfway through a game. What could you say calmly?',
+ 'You and a teammate disagree about how to finish a project. What is a fair next step?',
+ 'Someone accidentally bumps into you. How could you check what happened before reacting?',
+ 'A friend borrows a pencil and forgets to return it. How can you ask for it back?',
+ 'You both want to choose the music. How could you take turns?',
+ 'A game feels unfair to one player. How could the group pause and discuss it?',
+ 'You said something unkind when you were angry. How can you repair the friendship?',
+ 'A friend blames you for a mistake you did not make. How could you explain calmly?',
+ 'Two friends argue and ask you to take sides. How can you avoid making it worse?',
+ 'Someone keeps interrupting during a group task. What respectful request could help?',
+ 'A teammate is not doing their share. How could you raise the concern constructively?',
+ 'You disagree about whose turn it is. What fair way could help you remember?',
+ 'A friend wants to keep playing after you are ready to stop. How can you set a boundary?',
+ 'Someone knocks over your building by accident. What could you do before getting upset?',
+ 'A group cannot agree on a game. How could you find a choice everyone can accept?',
+ 'You receive feedback that feels hard to hear. How can you respond thoughtfully?',
+ 'A friend apologises after an argument. How might you respond honestly?',
+ 'You need to apologise but feel embarrassed. What could you say?',
+ 'A classmate says your idea will not work. How could you discuss it respectfully?',
+ 'A disagreement is getting louder. What could help everyone pause safely?',
+ 'Someone will not follow an agreed game rule. What could the group do?',
+ 'You want to change teams after a disagreement. How can you explain your choice kindly?',
+ 'A friend misunderstands your joke. How can you clarify and check their feelings?',
+ 'You and a sibling both want the same family activity. How could you plan turns?',
+ 'A group decision leaves one person unhappy. How could you hear their concern?',
+ 'You notice an argument becoming physical. What is the safest next step?'
+ ],
+ safety:[
+ 'A player online asks you to share your password. What should you do?',
+ 'Someone in a game asks for your home address. How can you stay safe?',
+ 'A stranger sends a friend request. What should you do before responding?',
+ 'A person online asks you to keep a conversation secret from your family. What is a safe choice?',
+ 'A game asks for your full name and school. What should you check with a grown-up?',
+ 'Someone sends an unexpected picture that makes you uncomfortable. What can you do?',
+ 'A player uses mean words in a chat. How can you respond safely?',
+ 'A person you only know online wants to meet in person. What should happen?',
+ 'You see someone sharing another child’s private photo. What should you do?',
+ 'A link appears promising a free prize if you enter details. What is the safe next step?',
+ 'A friend wants to post a photo that shows your school uniform. What could you discuss?',
+ 'Someone asks you to move a conversation to a private app. What should you do?',
+ 'A game chat asks where you will be after school. What information should stay private?',
+ 'You see a hurtful rumour being shared online. Should you forward it?',
+ 'A person online says they are your age but you are unsure. What is a safe approach?',
+ 'You receive a message that makes you feel pressured to reply quickly. What can you do?',
+ 'A game asks permission to use your camera or microphone. Who should help decide?',
+ 'Someone wants a picture of your face to prove you are a friend. What should you do?',
+ 'You notice a chat has become unkind. How can you leave and get support?',
+ 'A player offers a gift in exchange for personal information. What is the safe response?',
+ 'You accidentally share something private in a chat. Who should you tell?',
+ 'A website asks for your birthday and location. What should you do first?',
+ 'Someone tells you to delete messages so your grown-up cannot see them. What is a safe choice?',
+ 'A friend wants to use your account. Why should passwords remain private?',
+ 'You see a video that feels frightening or confusing. What could you do?',
+ 'A person online says you will get in trouble if you tell an adult. What should you remember?',
+ 'A group chat is sharing unkind jokes about a classmate. What is a safe, kind response?'
+ ],
+ help:[
+ 'You see a classmate being repeatedly teased. Which trusted adult could you tell?',
+ 'A friend says they are worried but asks you to solve everything alone. What can you do?',
+ 'You feel unsafe during an activity. How can you get help straight away?',
+ 'Someone tells you about a problem that feels too big to handle. What is your next step?',
+ 'You are unsure whether a joke has gone too far. Who could help you think it through?',
+ 'A friend is being excluded again and again. How could you support them and involve an adult?',
+ 'You receive a message that makes you feel frightened. What should you do?',
+ 'You cannot find your group on a school outing. What is the safest action?',
+ 'A person asks you to do something that feels wrong. How can you say no and get help?',
+ 'You notice a younger child is lost at an event. Which grown-up should you find?',
+ 'A friend says someone has been unkind online. How can you help them report it to an adult?',
+ 'You made a mistake and are afraid to tell someone. Why can asking for help be brave?',
+ 'You are worried about a friend who has stopped joining activities. How could you check in safely?',
+ 'A disagreement keeps happening even after you try to solve it. Who can help?',
+ 'You do not know which adult to talk to first. What trusted people could you choose from?',
+ 'A friend asks you to keep a safety concern secret. What should you explain?',
+ 'You feel overwhelmed in a busy place. How can you find a safe adult?',
+ 'Someone is hurt during a game. What should you do before trying to help?',
+ 'A child tells you they are being bullied. How can you listen and get adult support?',
+ 'You are unsure if an online account is genuine. Who can help you check?',
+ 'A friend is scared to report an uncomfortable message. How can you encourage them?',
+ 'You are being pressured to join an activity you do not want. What can you say?',
+ 'A trusted adult is not nearby when you need help. Which other safe adult could you approach?',
+ 'You see a safety rule being ignored near water or roads. What should you do?',
+ 'You need help understanding a confusing online message. Who can look at it with you?'
+ ]
+};
+const socialTopicChoices={
+ friendship:[['Invite them kindly or ask if they would like to join.','A friendly invitation helps people feel welcome while respecting their choice.',true],['Leave them out on purpose.','Excluding someone can hurt. Look for a way to be welcoming.',false],['Ask a trusted adult for ideas if you are unsure.','A trusted grown-up can help you find a safe, kind approach.',true]],
+ listening:[['Pause, listen, and let them finish.','Giving someone time to speak shows respect and helps you understand.',true],['Interrupt and talk over them.','Interrupting can make it hard for others to share their thoughts.',false],['Ask a kind question to check what they mean.','Checking your understanding is a thoughtful listening skill.',true]],
+ feelings:[['Name the feeling gently and ask what support they want.','Noticing feelings and asking before helping shows empathy.',true],['Tell them their feeling is silly.','Feelings matter, even when people experience things differently.',false],['Give them space and offer to listen later.','Respectful space can help someone feel safe and understood.',true]],
+ conflict:[['Use calm words and look for a fair solution together.','Calm communication helps people solve problems without blame.',true],['Shout or grab to get your way.','Aggressive actions can make a disagreement less safe.',false],['Pause and ask a trusted adult to help if needed.','Getting help is a sensible choice when a problem feels too big.',true]],
+ safety:[['Keep private details private and tell a trusted adult.','Personal information should stay private. A trusted adult can help you decide what to do.',true],['Share the information to keep the person happy.','You never need to share private details to please someone.',false],['Stop, block or leave if appropriate, and ask an adult for help.','Pausing and getting support are safe steps when something feels wrong.',true]],
+ help:[['Tell a trusted adult clearly what happened.','You do not have to manage a difficult or unsafe situation alone.',true],['Keep a worrying problem secret.','Safety worries should be shared with a trusted adult who can help.',false],['Move to a safe place and ask an adult to stay with you.','Finding a safe adult and place is a strong next step.',true]]
+};
+const socialExtraScenarios=[];
+Object.entries(socialExtraPrompts).forEach(([topic,prompts],topicIndex)=>{
+ prompts.forEach((situation,index)=>{
+  const age=['3-5','6-8','9-10'][(index+topicIndex)%3];
+  socialExtraScenarios.push({topic,age,situation,choices:socialTopicChoices[topic]});
+ });
+});
+const socialAge=document.getElementById('social-age'),socialTopic=document.getElementById('social-topic'),socialSituation=document.getElementById('social-situation'),socialChoices=document.getElementById('social-choices'),socialFeedback=document.getElementById('social-feedback');
+let currentSocial=null,currentSocialIndex=-1;
+const allSocialScenarios=socialScenarios.concat(socialExtraScenarios);
+const socialProgressKey='kids-zone-social-progress-v1:'+((childId&&/^[0-9a-f-]{36}$/i.test(childId))?childId:'this-device');
+const socialSkillNames={friendship:'Friendship',listening:'Listening',feelings:'Understanding feelings',conflict:'Kind problem-solving',safety:'Online safety',help:'Getting help'};
+let socialProgress={completed:[],bySkill:{},totalAnswers:0};
+try{const saved=JSON.parse(localStorage.getItem(socialProgressKey)||'null');if(saved&&Array.isArray(saved.completed)){socialProgress.completed=saved.completed.filter(n=>Number.isInteger(n)&&n>=0&&n<allSocialScenarios.length);socialProgress.bySkill=saved.bySkill&&typeof saved.bySkill==='object'?saved.bySkill:{};socialProgress.totalAnswers=Number.isInteger(saved.totalAnswers)?saved.totalAnswers:0;}}catch(e){}
+document.getElementById('social-heading').textContent='Social Interaction Studio 💬 · '+allSocialScenarios.length+' scenarios';
+document.querySelector('#social-interaction .story-intro p').textContent='Explore '+allSocialScenarios.length+' guided situations to practise friendship, communication, empathy, kind problem-solving and online safety.';
+document.getElementById('social-progress-bar').setAttribute('aria-valuemax',String(allSocialScenarios.length));
+function saveSocialProgress(){try{localStorage.setItem(socialProgressKey,JSON.stringify(socialProgress));}catch(e){document.getElementById('social-progress-summary').textContent='Progress is available while this page is open, but this browser could not save it.';}}
+function renderSocialProgress(){
+ const count=socialProgress.completed.length,pct=Math.round(count/allSocialScenarios.length*100);
+ document.getElementById('social-progress-summary').textContent=count+' of '+allSocialScenarios.length+' different situations explored ('+pct+'%). Every thoughtful try helps you practise!';
+ document.getElementById('social-progress-detail').textContent=count+' of '+allSocialScenarios.length+' different situations explored · '+socialProgress.totalAnswers+' answers practised · Saved only in this browser.';
+ document.getElementById('social-progress-bar').setAttribute('aria-valuenow',String(count));
+ document.getElementById('social-progress-fill').style.width=pct+'%';
+ const list=document.getElementById('social-skill-progress');list.replaceChildren();
+ Object.entries(socialSkillNames).forEach(([key,name])=>{const li=document.createElement('li');li.textContent=name+': '+(Number(socialProgress.bySkill[key])||0)+' situations';list.append(li);});
+}
+function chooseSocialScenario(){
+ const age=socialAge.value,topic=socialTopic.value;
+ let options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>(s.age===age||age==='9-10'&&s.age==='6-8')&&(topic==='all'||s.topic===topic));
+ if(!options.length)options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>s.age===age);
+ const pick=options[Math.floor(Math.random()*options.length)];currentSocial=pick.s;currentSocialIndex=pick.index;
+ socialSituation.textContent=currentSocial.situation;socialFeedback.textContent='Think about how each choice might make someone feel, then choose an answer.';
+ socialChoices.replaceChildren();
+ currentSocial.choices.forEach((choice,index)=>{const b=document.createElement('button');b.type='button';b.textContent=choice[0];b.addEventListener('click',()=>{socialFeedback.textContent=(choice[2]?'🌟 Kind idea! ':'💡 Let’s think about that. ')+choice[1];socialChoices.querySelectorAll('button').forEach(x=>x.disabled=true);
+  if(!socialProgress.completed.includes(currentSocialIndex)){socialProgress.completed.push(currentSocialIndex);socialProgress.bySkill[currentSocial.topic]=(Number(socialProgress.bySkill[currentSocial.topic])||0)+1;}
+  socialProgress.totalAnswers++;saveSocialProgress();renderSocialProgress();
+ });socialChoices.append(b);});
+}
+document.getElementById('social-progress-clear').addEventListener('click',()=>{if(!window.confirm('Reset all Social Interaction practice progress saved in this browser?'))return;socialProgress={completed:[],bySkill:{},totalAnswers:0};try{localStorage.removeItem(socialProgressKey);}catch(e){}renderSocialProgress();socialFeedback.textContent='Your progress has been reset. Choose an answer when you are ready to practise again.';});
+renderSocialProgress();
+document.getElementById('social-next').addEventListener('click',chooseSocialScenario);
+document.getElementById('social-reset').addEventListener('click',chooseSocialScenario);
+socialAge.addEventListener('change',chooseSocialScenario);socialTopic.addEventListener('change',chooseSocialScenario);
+chooseSocialScenario();
+
+})();
+</script>
+</body>
+</html>+(price*count+2),'
+const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
+const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
+const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+let shown=0,activeMatches=null;
+async function recordGameProgress(item,isCorrect){
+  if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
+  const {error}=await client.from('family_educational_game_progress').insert({
+    child_id:activeChildProfile.id,game_number:item.number,game_title:item.type.name,
+    category:item.type.name,age_band:item.ageBand,is_correct:isCorrect
+  });
+  if(error){progressStatus.textContent='Could not save game progress. Please ask a parent to check the Family Dashboard.';console.warn('Educational game progress save failed:',error.message||error);return;}
+  progressStatus.textContent='Saved progress for '+activeChildProfile.child_name+'.';
+}
+function makeCard(item){
+  const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
+  const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
+  const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
+  const challenge=document.createElement('div');challenge.hidden=true;
+  const question=document.createElement('p');question.className='mini-question';
+  const options=document.createElement('div');options.className='mini-options';
+  const result=document.createElement('p');result.className='mini-result';result.setAttribute('aria-live','polite');
+  const again=document.createElement('button');again.type='button';again.className='secondary';again.textContent='Next round';again.hidden=true;
+  challenge.append(question,options,result,again);article.append(heading,description,play,challenge);
+  let answer='',turnNumber=0,scores=[0,0];
+  function newRound(){
+    const data=type.make(n+turnNumber++);
+    let q,correct,choices;if(data.length===4){[q,correct,choices]=data;}else{[q,correct]=data;choices=[String(correct),String(Number(correct)+1),String(Math.max(0,Number(correct)-2)),String(Number(correct)+3)];}
+    answer=String(correct);question.textContent=(multiplayer?'Player '+(turnNumber%2===1?1:2)+' — ':'')+q;
+    result.textContent=multiplayer?'Players take turns on this device. Player 1: '+scores[0]+' · Player 2: '+scores[1]:'Choose the correct answer.';
+    options.replaceChildren();const unique=[...new Set(choices.map(String))];while(unique.length<4)unique.push(String(Number(correct)+unique.length+2));
+    unique.sort(()=>Math.random()-.5).forEach(choice=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.addEventListener('click',()=>{
+      if(multiplayer){const player=(turnNumber-1)%2;scores[player]+=choice===answer?1:0;result.textContent=(choice===answer?'Correct! ':'Not quite. Answer: '+answer+'. ')+(player===0?'Player 1':'Player 2')+' score — Player 1: '+scores[0]+' · Player 2: '+scores[1];}
+      else result.textContent=choice===answer?'🎉 Correct! Great work.':'Good try! The answer is '+answer+'.';
+      void recordGameProgress(item,choice===answer);
+      options.querySelectorAll('button').forEach(x=>x.disabled=true);again.hidden=false;
+    });options.append(b);});again.hidden=true;
+  }
+  play.addEventListener('click',()=>{challenge.hidden=false;play.hidden=true;newRound();});
+  again.addEventListener('click',newRound);
+  return article;
+}
+function renderBatch(items,reset=false){
+  if(reset){gameGrid.querySelectorAll('.generated-game').forEach(card=>card.remove());shown=0;}
+  const next=items.slice(shown,shown+100);next.forEach(item=>gameGrid.append(makeCard(item)));shown+=next.length;
+  loadMore.hidden=shown>=items.length;loadMore.textContent='Load '+Math.min(100,items.length-shown)+' more games';
+  const staticCount=[...gameGrid.querySelectorAll(':scope > .game:not(.generated-game)')].filter(card=>!card.hidden).length;
+  const totalMatches=staticCount+items.length;
+  gameCount.textContent='Showing '+(staticCount+shown).toLocaleString()+' of '+totalMatches.toLocaleString()+' matching games';
+}
+function filterGames(){
+  const query=searchInput.value.trim().toLowerCase(),band=ageFilter.value;
+  gameGrid.querySelectorAll(':scope > .game:not(.generated-game)').forEach(card=>{
+    const searchMatch=!query||card.textContent.toLowerCase().includes(query);
+    const ageMatch=!band||card.dataset.ageBand===band;
+    card.hidden=!(searchMatch&&ageMatch);
+  });
+  activeMatches=catalog.filter(item=>(!query||item.search.includes(query))&&(!band||item.ageBand===band));
+  renderBatch(activeMatches,true);
+}
+ageFilter.addEventListener('change',filterGames);
+loadMore.addEventListener('click',()=>renderBatch(activeMatches||catalog));
+searchInput.addEventListener('input',filterGames);
+filterGames();
+
+// Social Interaction Studio: guided, offline practice scenarios (no child-generated content is uploaded).
+const socialScenarios=[
+ {topic:'friendship',age:'3-5',situation:'A new child is sitting by themselves. What could you do?',choices:[['Invite them to join your game.','A warm invitation helps someone feel welcome. They can say yes or no, and that is okay.',true],['Laugh at them.','Laughing can hurt feelings and make someone feel left out.',false],['Ask a trusted adult how to help.','A trusted grown-up can help you find a kind way to include someone.',true]]},
+ {topic:'listening',age:'3-5',situation:'Your friend is telling you about their favourite toy. What shows you are listening?',choices:[['Look towards them and let them finish.','Taking turns talking helps your friend feel heard.',true],['Talk over them.','Talking over someone makes it hard for them to share.',false],['Walk away without saying anything.','If you need a break, use kind words to let them know.',false]]},
+ {topic:'feelings',age:'6-8',situation:'A friend looks upset because their drawing did not turn out as they hoped. What might help?',choices:[['Ask if they would like to talk.','You noticed their feelings and offered support without pressuring them.',true],['Tell them they are being silly.','Everyone has feelings. Dismissing them can make things harder.',false],['Offer to make another drawing together.','A friendly offer can help, while letting them choose is important.',true]]},
+ {topic:'conflict',age:'6-8',situation:'You and a friend both want the same game first. What is a fair next step?',choices:[['Take turns or agree on a timer.','A fair plan helps both people have a turn.',true],['Grab it and refuse to share.','Taking things can make the disagreement bigger.',false],['Use calm words to explain what you want.','Calm words help others understand your point of view.',true]]},
+ {topic:'safety',age:'6-8',situation:'Someone you do not know online asks which school you go to. What should you do?',choices:[['Do not share it; tell a trusted adult.','School details are private. Stop the conversation and get help from a trusted adult.',true],['Tell them so they can be your friend.','People online may not be who they say they are. Keep school details private.',false],['Ask them for their school first.','It is safest not to exchange identifying details with strangers.',false]]},
+ {topic:'help',age:'9-10',situation:'A group chat message makes you feel worried or uncomfortable. What is a safe response?',choices:[['Pause, do not reply or forward it, and tell a trusted adult.','Pausing and getting help is a strong choice. You do not have to handle it alone.',true],['Keep it secret because it is probably nothing.','If something feels wrong, you can always talk to a trusted adult.',false],['Send an angry message back.','A heated reply can make things worse. Step away and ask for help.',false]]},
+ {topic:'friendship',age:'9-10',situation:'A classmate is often left out when teams are chosen. What could you do?',choices:[['Suggest making teams in a fair way that includes everyone.','You are helping create a welcoming group.',true],['Tell others not to let them play.','Excluding someone can hurt and does not solve the problem.',false],['Check in kindly and ask what they would like.','A kind check-in respects their feelings and choices.',true]]},
+ {topic:'safety',age:'3-5',situation:'A game or video shows something that makes you feel worried. What can you do?',choices:[['Stop and tell your grown-up.','You can always stop and ask a trusted grown-up for help.',true],['Keep watching even though you feel worried.','You do not need to keep watching something uncomfortable.',false],['Ask a grown-up to watch with you.','Watching together helps your grown-up guide you.',true]]}
+];
+// 160 additional guided scenarios, balanced across six social-emotional learning themes.
+const socialExtraPrompts={
+ friendship:[
+ 'You notice someone has no partner for a classroom activity. What could you do?',
+ 'A new neighbour your age moves in. How might you say hello?',
+ 'A friend wants to play a different game from you. How can you decide together?',
+ 'Someone has a different favourite hobby. How can you show interest?',
+ 'A classmate joins your club for the first time. How can you help them feel welcome?',
+ 'You see someone waiting to join a game. What is a friendly way to invite them?',
+ 'Your friend wants some quiet time alone. How can you respect that?',
+ 'A group is choosing roles for a pretend game. How can everyone have a part?',
+ 'You made a new friend but your old friend feels left out. What could help?',
+ 'Someone makes a mistake during a team game. How can you encourage them?',
+ 'A friend speaks a different language at home. How can you be curious and respectful?',
+ 'You and a friend have different ideas for a playdate. How can you plan together?',
+ 'A classmate is nervous about joining an activity. What kind words could you offer?',
+ 'You notice a child playing by themselves at the park. What is a respectful way to approach?',
+ 'Your friend is good at something you find difficult. How can you celebrate their success?',
+ 'A team member has not had a turn yet. What could you suggest?',
+ 'Someone new sits beside you at lunch. How might you start a friendly conversation?',
+ 'Your friend enjoys a game you do not know. How could you learn about it?',
+ 'Two friends want you to join different activities. How can you respond kindly?',
+ 'A group project has a job nobody wants. How can you share the work fairly?',
+ 'Your friend is moving away soon. How can you show you care?',
+ 'A child has different abilities and needs more time in a game. How can the group include them?',
+ 'You accidentally leave someone out of an invitation. How could you make it right?',
+ 'A friend is proud of something they made. How can you show genuine interest?',
+ 'You want to join a group conversation. What is a polite way to enter?',
+ 'A friend asks you to keep another person out of a game. What could you say?',
+ 'You disagree about the rules of a playground game. How can you find a fair solution?'
+ ],
+ listening:[
+ 'A friend is excited to tell you about their weekend. How can you show you are listening?',
+ 'Someone is explaining game rules you have not heard before. What could you do?',
+ 'Your partner is sharing an idea during group work. How can you make space for it?',
+ 'You do not understand what someone said. What is a kind way to ask?',
+ 'A friend is speaking slowly because they are finding the words. How can you be patient?',
+ 'You are excited to answer but another person is still talking. What should you do?',
+ 'A friend tells you they would rather play something else. How can you listen respectfully?',
+ 'Someone shares a different opinion in a discussion. How can you respond?',
+ 'You are distracted while a friend is talking. What could help you focus?',
+ 'A teammate suggests a new plan. How can you ask questions before deciding?',
+ 'Your friend says they feel left out. What could you say to show you heard them?',
+ 'You need to interrupt because something is important. How can you do it politely?',
+ 'A classmate is giving directions for an activity. How can you check you understood?',
+ 'Someone tells a long story and you need a break. What could you say kindly?',
+ 'Your friend asks what you think about their idea. How can you answer honestly and kindly?',
+ 'You and a partner both want to speak first. What could you agree on?',
+ 'A person is sharing something personal with you. How can you listen without spreading it?',
+ 'A teammate has a suggestion you did not expect. How can you give it a fair hearing?',
+ 'You notice you misunderstood a friend. What could you do next?',
+ 'A friend is using gestures to explain an idea. How can you pay attention?',
+ 'Someone asks you to repeat what you heard. How can you check carefully?',
+ 'Your group is making a decision. How can you make sure quieter people are heard?',
+ 'A friend asks for advice but mostly wants someone to listen. How can you tell?',
+ 'You are talking with someone who has a different communication style. How can you be patient?',
+ 'A friend says no to your suggestion. How can you show you heard their answer?',
+ 'You realise you have been talking about yourself for a long time. What could you do?',
+ 'Someone is upset and needs time before talking. How can you respect that?'
+ ],
+ feelings:[
+ 'Your friend is disappointed after losing a game. What might they be feeling?',
+ 'You feel nervous before meeting a new group. What could help you name that feeling?',
+ 'A classmate looks frustrated with a tricky puzzle. How could you check in?',
+ 'Your friend is excited about good news while you feel tired. How can both feelings fit?',
+ 'Someone looks quiet after a joke. How could you find out how they feel?',
+ 'You feel jealous when a friend wins a prize. What is a healthy way to handle it?',
+ 'A friend seems worried about trying something new. What supportive words might help?',
+ 'You accidentally hurt a friend’s feelings. How can you listen to their feelings?',
+ 'A teammate is proud of finishing a difficult task. How can you celebrate with them?',
+ 'You feel angry because plans changed. What can you do before responding?',
+ 'A friend is homesick on a school trip. How could you show care?',
+ 'Someone is embarrassed after making a mistake. How can you help them feel safe?',
+ 'You feel left out when friends make plans. What could you say calmly?',
+ 'A friend is overwhelmed by a noisy room. How could you respect their needs?',
+ 'A classmate is very excited and speaking quickly. How can you respond kindly?',
+ 'You feel disappointed when a playdate ends. What could help you say goodbye?',
+ 'A friend says they are fine but seems sad. How can you offer support without pressure?',
+ 'You feel proud of your work but another person gets attention. How can you manage that?',
+ 'Someone is scared to ask a question. How could you encourage them?',
+ 'A friend is frustrated because they cannot explain an idea. How can you be patient?',
+ 'You feel confused by a friend’s reaction. What respectful question could you ask?',
+ 'A classmate is celebrating a tradition important to them. How can you show interest?',
+ 'You are worried you made the wrong choice. Who could you talk to?',
+ 'A friend feels disappointed about a cancelled activity. How can you acknowledge it?',
+ 'You feel overwhelmed by too many instructions. What could you ask for?',
+ 'Someone is happy about an achievement you also wanted. How can you respond graciously?',
+ 'A friend needs space after a hard day. How can you show care from a distance?'
+ ],
+ conflict:[
+ 'Two people reach for the same seat. How could you work it out fairly?',
+ 'A friend changes the rules halfway through a game. What could you say calmly?',
+ 'You and a teammate disagree about how to finish a project. What is a fair next step?',
+ 'Someone accidentally bumps into you. How could you check what happened before reacting?',
+ 'A friend borrows a pencil and forgets to return it. How can you ask for it back?',
+ 'You both want to choose the music. How could you take turns?',
+ 'A game feels unfair to one player. How could the group pause and discuss it?',
+ 'You said something unkind when you were angry. How can you repair the friendship?',
+ 'A friend blames you for a mistake you did not make. How could you explain calmly?',
+ 'Two friends argue and ask you to take sides. How can you avoid making it worse?',
+ 'Someone keeps interrupting during a group task. What respectful request could help?',
+ 'A teammate is not doing their share. How could you raise the concern constructively?',
+ 'You disagree about whose turn it is. What fair way could help you remember?',
+ 'A friend wants to keep playing after you are ready to stop. How can you set a boundary?',
+ 'Someone knocks over your building by accident. What could you do before getting upset?',
+ 'A group cannot agree on a game. How could you find a choice everyone can accept?',
+ 'You receive feedback that feels hard to hear. How can you respond thoughtfully?',
+ 'A friend apologises after an argument. How might you respond honestly?',
+ 'You need to apologise but feel embarrassed. What could you say?',
+ 'A classmate says your idea will not work. How could you discuss it respectfully?',
+ 'A disagreement is getting louder. What could help everyone pause safely?',
+ 'Someone will not follow an agreed game rule. What could the group do?',
+ 'You want to change teams after a disagreement. How can you explain your choice kindly?',
+ 'A friend misunderstands your joke. How can you clarify and check their feelings?',
+ 'You and a sibling both want the same family activity. How could you plan turns?',
+ 'A group decision leaves one person unhappy. How could you hear their concern?',
+ 'You notice an argument becoming physical. What is the safest next step?'
+ ],
+ safety:[
+ 'A player online asks you to share your password. What should you do?',
+ 'Someone in a game asks for your home address. How can you stay safe?',
+ 'A stranger sends a friend request. What should you do before responding?',
+ 'A person online asks you to keep a conversation secret from your family. What is a safe choice?',
+ 'A game asks for your full name and school. What should you check with a grown-up?',
+ 'Someone sends an unexpected picture that makes you uncomfortable. What can you do?',
+ 'A player uses mean words in a chat. How can you respond safely?',
+ 'A person you only know online wants to meet in person. What should happen?',
+ 'You see someone sharing another child’s private photo. What should you do?',
+ 'A link appears promising a free prize if you enter details. What is the safe next step?',
+ 'A friend wants to post a photo that shows your school uniform. What could you discuss?',
+ 'Someone asks you to move a conversation to a private app. What should you do?',
+ 'A game chat asks where you will be after school. What information should stay private?',
+ 'You see a hurtful rumour being shared online. Should you forward it?',
+ 'A person online says they are your age but you are unsure. What is a safe approach?',
+ 'You receive a message that makes you feel pressured to reply quickly. What can you do?',
+ 'A game asks permission to use your camera or microphone. Who should help decide?',
+ 'Someone wants a picture of your face to prove you are a friend. What should you do?',
+ 'You notice a chat has become unkind. How can you leave and get support?',
+ 'A player offers a gift in exchange for personal information. What is the safe response?',
+ 'You accidentally share something private in a chat. Who should you tell?',
+ 'A website asks for your birthday and location. What should you do first?',
+ 'Someone tells you to delete messages so your grown-up cannot see them. What is a safe choice?',
+ 'A friend wants to use your account. Why should passwords remain private?',
+ 'You see a video that feels frightening or confusing. What could you do?',
+ 'A person online says you will get in trouble if you tell an adult. What should you remember?',
+ 'A group chat is sharing unkind jokes about a classmate. What is a safe, kind response?'
+ ],
+ help:[
+ 'You see a classmate being repeatedly teased. Which trusted adult could you tell?',
+ 'A friend says they are worried but asks you to solve everything alone. What can you do?',
+ 'You feel unsafe during an activity. How can you get help straight away?',
+ 'Someone tells you about a problem that feels too big to handle. What is your next step?',
+ 'You are unsure whether a joke has gone too far. Who could help you think it through?',
+ 'A friend is being excluded again and again. How could you support them and involve an adult?',
+ 'You receive a message that makes you feel frightened. What should you do?',
+ 'You cannot find your group on a school outing. What is the safest action?',
+ 'A person asks you to do something that feels wrong. How can you say no and get help?',
+ 'You notice a younger child is lost at an event. Which grown-up should you find?',
+ 'A friend says someone has been unkind online. How can you help them report it to an adult?',
+ 'You made a mistake and are afraid to tell someone. Why can asking for help be brave?',
+ 'You are worried about a friend who has stopped joining activities. How could you check in safely?',
+ 'A disagreement keeps happening even after you try to solve it. Who can help?',
+ 'You do not know which adult to talk to first. What trusted people could you choose from?',
+ 'A friend asks you to keep a safety concern secret. What should you explain?',
+ 'You feel overwhelmed in a busy place. How can you find a safe adult?',
+ 'Someone is hurt during a game. What should you do before trying to help?',
+ 'A child tells you they are being bullied. How can you listen and get adult support?',
+ 'You are unsure if an online account is genuine. Who can help you check?',
+ 'A friend is scared to report an uncomfortable message. How can you encourage them?',
+ 'You are being pressured to join an activity you do not want. What can you say?',
+ 'A trusted adult is not nearby when you need help. Which other safe adult could you approach?',
+ 'You see a safety rule being ignored near water or roads. What should you do?',
+ 'You need help understanding a confusing online message. Who can look at it with you?'
+ ]
+};
+const socialTopicChoices={
+ friendship:[['Invite them kindly or ask if they would like to join.','A friendly invitation helps people feel welcome while respecting their choice.',true],['Leave them out on purpose.','Excluding someone can hurt. Look for a way to be welcoming.',false],['Ask a trusted adult for ideas if you are unsure.','A trusted grown-up can help you find a safe, kind approach.',true]],
+ listening:[['Pause, listen, and let them finish.','Giving someone time to speak shows respect and helps you understand.',true],['Interrupt and talk over them.','Interrupting can make it hard for others to share their thoughts.',false],['Ask a kind question to check what they mean.','Checking your understanding is a thoughtful listening skill.',true]],
+ feelings:[['Name the feeling gently and ask what support they want.','Noticing feelings and asking before helping shows empathy.',true],['Tell them their feeling is silly.','Feelings matter, even when people experience things differently.',false],['Give them space and offer to listen later.','Respectful space can help someone feel safe and understood.',true]],
+ conflict:[['Use calm words and look for a fair solution together.','Calm communication helps people solve problems without blame.',true],['Shout or grab to get your way.','Aggressive actions can make a disagreement less safe.',false],['Pause and ask a trusted adult to help if needed.','Getting help is a sensible choice when a problem feels too big.',true]],
+ safety:[['Keep private details private and tell a trusted adult.','Personal information should stay private. A trusted adult can help you decide what to do.',true],['Share the information to keep the person happy.','You never need to share private details to please someone.',false],['Stop, block or leave if appropriate, and ask an adult for help.','Pausing and getting support are safe steps when something feels wrong.',true]],
+ help:[['Tell a trusted adult clearly what happened.','You do not have to manage a difficult or unsafe situation alone.',true],['Keep a worrying problem secret.','Safety worries should be shared with a trusted adult who can help.',false],['Move to a safe place and ask an adult to stay with you.','Finding a safe adult and place is a strong next step.',true]]
+};
+const socialExtraScenarios=[];
+Object.entries(socialExtraPrompts).forEach(([topic,prompts],topicIndex)=>{
+ prompts.forEach((situation,index)=>{
+  const age=['3-5','6-8','9-10'][(index+topicIndex)%3];
+  socialExtraScenarios.push({topic,age,situation,choices:socialTopicChoices[topic]});
+ });
+});
+const socialAge=document.getElementById('social-age'),socialTopic=document.getElementById('social-topic'),socialSituation=document.getElementById('social-situation'),socialChoices=document.getElementById('social-choices'),socialFeedback=document.getElementById('social-feedback');
+let currentSocial=null,currentSocialIndex=-1;
+const allSocialScenarios=socialScenarios.concat(socialExtraScenarios);
+const socialProgressKey='kids-zone-social-progress-v1:'+((childId&&/^[0-9a-f-]{36}$/i.test(childId))?childId:'this-device');
+const socialSkillNames={friendship:'Friendship',listening:'Listening',feelings:'Understanding feelings',conflict:'Kind problem-solving',safety:'Online safety',help:'Getting help'};
+let socialProgress={completed:[],bySkill:{},totalAnswers:0};
+try{const saved=JSON.parse(localStorage.getItem(socialProgressKey)||'null');if(saved&&Array.isArray(saved.completed)){socialProgress.completed=saved.completed.filter(n=>Number.isInteger(n)&&n>=0&&n<allSocialScenarios.length);socialProgress.bySkill=saved.bySkill&&typeof saved.bySkill==='object'?saved.bySkill:{};socialProgress.totalAnswers=Number.isInteger(saved.totalAnswers)?saved.totalAnswers:0;}}catch(e){}
+document.getElementById('social-heading').textContent='Social Interaction Studio 💬 · '+allSocialScenarios.length+' scenarios';
+document.querySelector('#social-interaction .story-intro p').textContent='Explore '+allSocialScenarios.length+' guided situations to practise friendship, communication, empathy, kind problem-solving and online safety.';
+document.getElementById('social-progress-bar').setAttribute('aria-valuemax',String(allSocialScenarios.length));
+function saveSocialProgress(){try{localStorage.setItem(socialProgressKey,JSON.stringify(socialProgress));}catch(e){document.getElementById('social-progress-summary').textContent='Progress is available while this page is open, but this browser could not save it.';}}
+function renderSocialProgress(){
+ const count=socialProgress.completed.length,pct=Math.round(count/allSocialScenarios.length*100);
+ document.getElementById('social-progress-summary').textContent=count+' of '+allSocialScenarios.length+' different situations explored ('+pct+'%). Every thoughtful try helps you practise!';
+ document.getElementById('social-progress-detail').textContent=count+' of '+allSocialScenarios.length+' different situations explored · '+socialProgress.totalAnswers+' answers practised · Saved only in this browser.';
+ document.getElementById('social-progress-bar').setAttribute('aria-valuenow',String(count));
+ document.getElementById('social-progress-fill').style.width=pct+'%';
+ const list=document.getElementById('social-skill-progress');list.replaceChildren();
+ Object.entries(socialSkillNames).forEach(([key,name])=>{const li=document.createElement('li');li.textContent=name+': '+(Number(socialProgress.bySkill[key])||0)+' situations';list.append(li);});
+}
+function chooseSocialScenario(){
+ const age=socialAge.value,topic=socialTopic.value;
+ let options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>(s.age===age||age==='9-10'&&s.age==='6-8')&&(topic==='all'||s.topic===topic));
+ if(!options.length)options=allSocialScenarios.map((s,index)=>({s,index})).filter(({s})=>s.age===age);
+ const pick=options[Math.floor(Math.random()*options.length)];currentSocial=pick.s;currentSocialIndex=pick.index;
+ socialSituation.textContent=currentSocial.situation;socialFeedback.textContent='Think about how each choice might make someone feel, then choose an answer.';
+ socialChoices.replaceChildren();
+ currentSocial.choices.forEach((choice,index)=>{const b=document.createElement('button');b.type='button';b.textContent=choice[0];b.addEventListener('click',()=>{socialFeedback.textContent=(choice[2]?'🌟 Kind idea! ':'💡 Let’s think about that. ')+choice[1];socialChoices.querySelectorAll('button').forEach(x=>x.disabled=true);
+  if(!socialProgress.completed.includes(currentSocialIndex)){socialProgress.completed.push(currentSocialIndex);socialProgress.bySkill[currentSocial.topic]=(Number(socialProgress.bySkill[currentSocial.topic])||0)+1;}
+  socialProgress.totalAnswers++;saveSocialProgress();renderSocialProgress();
+ });socialChoices.append(b);});
+}
+document.getElementById('social-progress-clear').addEventListener('click',()=>{if(!window.confirm('Reset all Social Interaction practice progress saved in this browser?'))return;socialProgress={completed:[],bySkill:{},totalAnswers:0};try{localStorage.removeItem(socialProgressKey);}catch(e){}renderSocialProgress();socialFeedback.textContent='Your progress has been reset. Choose an answer when you are ready to practise again.';});
+renderSocialProgress();
+document.getElementById('social-next').addEventListener('click',chooseSocialScenario);
+document.getElementById('social-reset').addEventListener('click',chooseSocialScenario);
+socialAge.addEventListener('change',chooseSocialScenario);socialTopic.addEventListener('change',chooseSocialScenario);
+chooseSocialScenario();
+
+})();
+</script>
+</body>
+</html>+Math.max(1,price*count-3)]];}},
+  {name:'Coding Puzzles',ageBand:'9-10',desc:'Learn sequences, instructions and computational thinking',make:n=>{const a=n%9+1,b=n%5+2;const qs=[['A robot moves '+a+' steps, then '+b+' more. How many steps?',String(a+b),[String(a+b),String(a*b),String(a-b),String(a+b+2)]],['Which instruction repeats an action?','Loop',['Variable','Loop','Comment','Pixel']],['What comes next in this pattern: 2, 4, 8, 16, ?','32',['24','30','32','34']],['Which is the best first step to solve a big problem?','Break it into smaller steps',['Guess randomly','Break it into smaller steps','Skip the instructions','Make it bigger']]];return qs[n%qs.length];}},
+  {name:'Riddle Rangers',ageBand:'6-8',desc:'Solve friendly riddles and word puzzles',make:n=>{const qs=[['I have keys but open no locks. What am I?','A piano',['A piano','A tree','A shoe','A cloud']],['I get wetter as I dry. What am I?','A towel',['A towel','A candle','A book','A rock']],['I have hands but cannot clap. What am I?','A clock',['A clock','A bird','A fish','A chair']],['What has a face and two hands but no arms?','A clock',['A clock','A mountain','A flower','A bicycle']],['What has many teeth but cannot bite?','A comb',['A comb','A tiger','A shark','A zipper']]];return qs[n%qs.length];}},
+  {name:'Measurement Masters',ageBand:'9-10',desc:'Practise length, mass and measurement',make:n=>{const a=n%9+2,b=n%6+2;const qs=[['How many centimetres are in one metre?','100',['10','50','100','1000']],['How many minutes are in one hour?','60',['30','45','60','90']],['Which unit is best for measuring a pencil?','Centimetres',['Kilometres','Centimetres','Litres','Kilograms']],['How many grams are in one kilogram?','1000',['100','500','1000','10000']],['A ribbon is '+a+' cm long. Another is '+b+' cm. Total length?',String(a+b)+' cm',[String(a+b)+' cm',String(a*b)+' cm',String(Math.abs(a-b))+' cm',String(a+b+5)+' cm']]];return qs[n%qs.length];}},
+  {name:'Kindness Quest',ageBand:'3-5',desc:'Practise empathy, sharing and friendly choices',make:n=>{const qs=[['A friend drops their crayons. What is a kind choice?','Help pick them up',['Walk away','Help pick them up','Hide a crayon','Laugh']],['Someone is speaking. What can you do?','Listen',['Shout over them','Listen','Push ahead','Ignore them']],['You want the same toy as a friend. What can help?','Take turns',['Grab it','Take turns','Hide it','Break it']]];return qs[n%qs.length];}}
+];
+const gameGrid=document.querySelector('.games');
+const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
+const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
+const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+let shown=0,activeMatches=null;
+async function recordGameProgress(item,isCorrect){
+  if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
+  const {error}=await client.from('family_educational_game_progress').insert({
+    child_id:activeChildProfile.id,game_number:item.number,game_title:item.type.name,
+    category:item.type.name,age_band:item.ageBand,is_correct:isCorrect
+  });
+  if(error){progressStatus.textContent='Could not save game progress. Please ask a parent to check the Family Dashboard.';console.warn('Educational game progress save failed:',error.message||error);return;}
+  progressStatus.textContent='Saved progress for '+activeChildProfile.child_name+'.';
+}
+function makeCard(item){
+  const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
+  const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
+  const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
   const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
   const challenge=document.createElement('div');challenge.hidden=true;
   const question=document.createElement('p');question.className='mini-question';
