@@ -18,7 +18,8 @@ create table if not exists public.configkit_apps (
     (delivery_type = 'file' and file_path is not null and file_name is not null and redirect_url is null)
     or (delivery_type = 'link' and redirect_url is not null and file_path is null and file_name is null)
   ),
-  constraint configkit_apps_https_link_check check (redirect_url is null or redirect_url ~ '^https://')
+  constraint configkit_apps_https_link_check check (redirect_url is null or redirect_url ~* '^https://'),
+  constraint configkit_apps_file_owner_path_check check (file_path is null or file_path like owner_id::text || '/%')
 );
 create index if not exists configkit_apps_published_updated_idx on public.configkit_apps(status, updated_at desc);
 create index if not exists configkit_apps_owner_updated_idx on public.configkit_apps(owner_id, updated_at desc);
