@@ -99,3 +99,5 @@ after insert or update of email, email_confirmed_at, raw_user_meta_data on auth.
 for each row execute function public.link_education_student_account();
 
 revoke execute on function public.assign_education_student_id() from public, anon, authenticated;
+
+revoke execute on function public.link_education_student_account() from public, anon, authenticated;
