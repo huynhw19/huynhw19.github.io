@@ -355,18 +355,40 @@
         const familyValue=document.getElementById('family-id-value');
         const familyStatus=document.getElementById('family-id-status');
         const copyButton=document.getElementById('copy-family-id');
-        const {data,error}=await client.from('family_account_members')
+        const loadMembership=()=>client.from('family_account_members')
           .select('role,family:family_accounts(family_id)')
           .eq('user_id',userId).maybeSingle();
+        let {data,error}=await loadMembership();
         if(error){
           familyPanel.hidden=false;familyValue.textContent='Unavailable';
           familyStatus.textContent='Could not load your Family ID. Please refresh the page.';
-          return;
+          copyButton.hidden=true;return;
         }
-        const family=Array.isArray(data?.family)?data.family[0]:data?.family;
+        let family=Array.isArray(data?.family)?data.family[0]:data?.family;
+        // Child profiles are parent-owned and may exist before a household is created.
+        // Create the shared household on demand so the parent can immediately share its ID.
         if(!family?.family_id){
-          familyPanel.hidden=false;familyValue.textContent='Not set up';
-          familyStatus.textContent='Your household does not have a Family ID yet. Create or join a family from the family setup flow.';
+          const created=await client.rpc('create_family_account');
+          if(created.error){
+            familyPanel.hidden=false;familyValue.textContent='Setup needed';
+            familyStatus.textContent=created.error.message || 'Could not create your Family ID. Complete any required account verification, then refresh.';
+            copyButton.hidden=true;return;
+          }
+          const returnedCode=typeof created.data==='string'?created.data:null;
+          ({data,error}=await loadMembership());
+          if(error){
+            familyPanel.hidden=false;familyValue.textContent='Unavailable';
+            familyStatus.textContent='Your Family ID was created, but could not be loaded. Please refresh the page.';
+            copyButton.hidden=true;return;
+          }
+          family=Array.isArray(data?.family)?data.family[0]:data?.family;
+          if(!family?.family_id && returnedCode){
+            family={family_id:returnedCode};
+          }
+        }
+        if(!family?.family_id){
+          familyPanel.hidden=false;familyValue.textContent='Setup needed';
+          familyStatus.textContent='We could not confirm your household ID. Please refresh or contact support.';
           copyButton.hidden=true;return;
         }
         const familyId=family.family_id;
