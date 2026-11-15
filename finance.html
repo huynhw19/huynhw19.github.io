@@ -16,6 +16,12 @@
 <div id="status" class="notice" role="status" aria-live="polite">Checking your sign-in…</div>
 <div id="app" hidden>
 <span class="eyebrow">AUSTRALIAN MONEY DASHBOARD · AUD</span><h1>Your money, at a glance.</h1><p class="muted">Everyday spending, savings, bills and transfers — organised in one simple place.</p><div class="notice small"><strong>Demo banking dashboard.</strong> This is a personal money tracker, not an Australian bank account. Payments and transfers are recorded here only; no money moves through the banking system.</div>
+<section class="card section" aria-labelledby="bank-connect-title">
+ <div class="toolbar"><h2 id="bank-connect-title">Connect an Australian bank</h2><span class="eyebrow">SANDBOX SETUP</span></div>
+ <p class="muted small">Prepare a read-only connection through Basiq. Your bank sign-in happens on Basiq's secure consent page — never enter bank credentials here.</p>
+ <div class="actions"><button id="connect-bank" type="button">Connect bank (sandbox)</button></div>
+ <p id="bank-connect-status" class="notice small" role="status" aria-live="polite" hidden></p>
+</section>
 <div class="layout">
 <section class="card balance"><span class="muted">Total tracked balance</span><div class="amount" id="total-balance">$0.00</div><span class="muted small" id="balance-caption">Across your tracked accounts</span><div class="stats"><div class="stat"><span class="muted small">Money in · this month</span><strong id="month-income">$0.00</strong></div><div class="stat"><span class="muted small">Money out · this month</span><strong id="month-spend">$0.00</strong></div></div></section>
 <section class="card"><h2>Spending breakdown</h2><p class="muted small">Expenses this month by category</p><div id="spending-chart" class="empty">Add transactions to see your spending.</div></section>
@@ -114,6 +120,28 @@ async function init(){
  status.hidden=true;app.hidden=false;await load();
 }
 $('signout').addEventListener('click',async()=>{window.CONFIGKIT_PASSKEY_SESSION?.clear();const {error}=await db.auth.signOut({scope:'local'});if(error)setStatus(error.message,true);else location.replace('login.html')});
+$('connect-bank').addEventListener('click',async()=>{
+ const button=$('connect-bank'),message=$('bank-connect-status');
+ button.disabled=true;button.textContent='Preparing secure connection…';
+ message.hidden=false;message.classList.remove('error');message.textContent='Contacting the secure Basiq sandbox service…';
+ try{
+  const {data,error}=await db.functions.invoke('basiq-connect',{body:{action:'connect'}});
+  if(error){
+   let detail=error.message||'Could not start the bank connection.';
+   if(error.context&&typeof error.context.json==='function'){
+    try{const payload=await error.context.json();if(payload.message)detail=payload.message}catch(_){}
+   }
+   throw new Error(detail);
+  }
+  if(!data?.consent_url)throw new Error(data?.message||'Basiq did not return a consent link.');
+  message.textContent='Opening Basiq’s secure consent page…';
+  location.assign(data.consent_url);
+ }catch(err){
+  message.classList.add('error');
+  message.textContent=err.message||'Could not start the bank connection.';
+  button.disabled=false;button.textContent='Connect bank (sandbox)';
+ }
+});
 $('show-account-form').addEventListener('click',()=>{$('account-form-card').hidden=false;$('account-name').focus()});
 $('cancel-account').addEventListener('click',()=>{$('account-form-card').hidden=true});
 $('account-form').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:user.id,name:$('account-name').value.trim(),account_type:$('account-type').value,currency:$('account-currency').value,opening_balance:Number($('account-opening').value)};const {error}=await db.from('money_accounts').insert(payload);if(error){setStatus(error.message,true);return}$('account-form').reset();$('account-form-card').hidden=true;await load()});
