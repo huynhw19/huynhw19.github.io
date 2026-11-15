@@ -5,7 +5,7 @@
 </style></head><body>
 <header><a href="index.html"><strong>⌘ ConfigKit</strong></a><nav><a href="developer-dashboard.html">Developer dashboard</a> · <a href="tool-studio.html">Tool Studio</a> · <a href="community-tools.html">Community tools</a></nav></header>
 <main><p class="pill">Developer platform</p><h1>OAuth apps</h1><p class="muted">Register an application that may request permission to connect with ConfigKit accounts. Approved registrations are provisioned as public OAuth clients using PKCE; confidential client secrets are not issued by this portal.</p><div class="status"><strong>One-time setup required:</strong> In your Supabase project, open Authentication → OAuth Server, enable OAuth 2.1 Server, and set Authorization Path to <code>/oauth-consent.html</code>. Set the Auth Site URL to <code>https://huynhw19.github.io</code>. The OAuth consent page and client provisioning are ready, but the server setting must be enabled in the Supabase dashboard before OAuth sign-in can work.</div><p class="meta">Provider endpoints: <code>https://gwhqnqzzlgslwgijkkpt.supabase.co/auth/v1/oauth/authorize</code> · <code>/auth/v1/oauth/token</code> · <code>/auth/v1/.well-known/jwks.json</code></p>
-<div id="status" class="status">Checking sign-in…</div>
+<p><a href="oauth-developer-guide.html">Read the OAuth integration guide →</a></p><div id="status" class="status">Checking sign-in…</div>
 <div id="app" class="hidden">
 <section class="panel"><h2>Register an OAuth app</h2><p class="muted">Provide your app details, exact HTTPS callback URLs and least-privilege scopes. Registrations are reviewed by the ConfigKit owner.</p>
 <form id="form"><label for="name">Application name</label><input id="name" maxlength="80" required placeholder="My app">
