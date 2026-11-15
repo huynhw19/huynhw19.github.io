@@ -189,7 +189,7 @@
         if (type === 'education' && institution.value.trim()) metadata.institution = institution.value.trim();
         if (mode === 'signup' && type === 'education' && studentSignup.checked) {
           metadata.configkit_student_signup = true;
-          metadata.configkit_student_id = studentIdInput.value.replace(/\\s+/g, '').toUpperCase();
+          metadata.configkit_student_id = studentIdInput.value.replace(/\s+/g, '').toUpperCase();
         }
         if (type === 'work' && workplace.value.trim()) metadata.workplace = workplace.value.trim();
         if (type === 'organization' && organizationName.value.trim()) metadata.organization_name = organizationName.value.trim();
@@ -460,7 +460,7 @@
           if (mode === 'signup' && type === 'education' && studentSignup.checked && !/^CK-[A-F0-9]{12}$/.test(studentIdInput.value.trim().toUpperCase())) throw new Error('Enter the 15-character Student ID provided by your teacher.');
           if (type === 'work' && !workplace.value.trim()) throw new Error('Enter your company or workplace name first.');
           if (type === 'organization' && !organizationName.value.trim()) throw new Error('Enter your organization name first.');
-          if (mode === 'signup' && familyChoice.value === 'join' && !/^[A-Za-z0-9]{16}$/.test(familyIdInput.value.replace(/\\s+/g, ''))) throw new Error('Enter a valid 16-character Family ID first.');
+          if (mode === 'signup' && familyChoice.value === 'join' && !/^[A-Za-z0-9]{16}$/.test(familyIdInput.value.replace(/\s+/g, ''))) throw new Error('Enter a valid 16-character Family ID first.');
           const oauthIntent = {...selectedMetadata(), ...(mode === 'signup' ? familySetupMetadata() : {})};
           sessionStorage.setItem(accountIntentKey, JSON.stringify(oauthIntent));
           const options = {provider, options:{redirectTo:callbackUrl}};
@@ -618,7 +618,7 @@
       accountType.addEventListener('change', updateAccountFields);
       studentSignup.addEventListener('change', updateStudentFields);
       studentIdInput.addEventListener('input', () => {
-        studentIdInput.value = studentIdInput.value.replace(/\\s+/g, '').toUpperCase().slice(0, 15);
+        studentIdInput.value = studentIdInput.value.replace(/\s+/g, '').toUpperCase().slice(0, 15);
       });
       familyChoice.addEventListener('change', updateFamilyFields);
       familyIdInput.addEventListener('input', () => {
