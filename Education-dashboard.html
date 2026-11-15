@@ -161,8 +161,8 @@
     </section>
 
     <section class="card" id="assignments-panel">
-      <h2 id="assignment-form-title">Create assignment</h2>
-      <p class="muted">Create work for one of your students. Drafts are private to you; publish an assignment when it is ready for the student to view.</p>
+      <h2 id="assignment-form-title">Create homework / assignment</h2>
+      <p class="muted">Create homework or class work for one of your students. Edit it, publish it when ready, move it back to draft, or delete it.</p>
       <form id="assignment-form">
         <label>Student<select id="assignment-student" required><option value="">Choose a student</option></select></label>
         <label>Assignment title<input id="assignment-title" maxlength="160" required></label>
@@ -174,7 +174,7 @@
       <div id="assignment-status-message" class="status" role="status" aria-live="polite"></div>
     </section>
     <section class="card" aria-labelledby="assignment-list-title">
-      <h2 id="assignment-list-title">Manage assignments</h2>
+      <h2 id="assignment-list-title">Manage homework and assignments</h2>
       <div id="assignment-list"><p class="muted">Loading assignments…</p></div>
     </section>
 
@@ -743,8 +743,8 @@
       }
       function resetAssignmentForm() {
         assignmentForm.reset(); editingAssignmentId = null;
-        assignmentFormTitle.textContent = 'Create assignment';
-        assignmentSubmit.textContent = 'Create assignment';
+        assignmentFormTitle.textContent = 'Create homework / assignment';
+        assignmentSubmit.textContent = 'Create homework';
         assignmentCancel.hidden = true;
       }
       async function loadAssignmentStudents(selectedId = '') {
@@ -824,7 +824,7 @@
               .delete().eq('id', assignment.id).eq('user_id', currentUserId);
             if (deleteError) { setAssignmentMessage(deleteError.message || 'Could not delete assignment.', true); return; }
             if (editingAssignmentId === assignment.id) resetAssignmentForm();
-            setAssignmentMessage('Assignment deleted.'); await loadAssignments();
+            setAssignmentMessage('Homework / assignment deleted.'); await loadAssignments();
           });
           actions.append(edit, publish, remove); article.append(actions); assignmentList.append(article);
         });
@@ -842,7 +842,7 @@
           : await client.from('education_assignments').insert({ ...record, user_id: currentUserId });
         assignmentSubmit.disabled = false;
         if (result.error) { setAssignmentMessage(result.error.message || 'Could not save assignment.', true); return; }
-        resetAssignmentForm(); setAssignmentMessage('Assignment saved successfully.'); await loadAssignments();
+        resetAssignmentForm(); setAssignmentMessage('Homework / assignment saved successfully.'); await loadAssignments();
       });
 
 
