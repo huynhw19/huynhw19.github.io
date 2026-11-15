@@ -8,7 +8,7 @@ The private community is available at [groups.html](groups.html). It extends the
 - Upload a `.mobileconfig` profile with a title and optional description.
 - Download a profile, add comments, and react with a like.
 - Report unsafe files, personal information, spam, harassment, or other concerns.
-- View the group roster. Group owners can promote or demote moderators.
+- View the group roster. Group owners can promote or demote moderators. Owners and moderators can remove ordinary members; only owners can remove moderators.
 - Group owners and moderators can review reports and remove profiles or comments.
 
 ## Privacy and file handling
@@ -57,6 +57,7 @@ The following migrations were applied to the connected Supabase project:
 7. `configkit_groups_strict_grants_and_restrictive_gates`
 8. `configkit_groups_verified_session_trigger_guard`
 9. `configkit_groups_rls_policy_performance`
+10. `configkit_groups_moderator_member_removal`
 
 The Storage bucket is private and has a 10 MiB object limit. No service-role key is used in browser code.
 
