@@ -23,7 +23,7 @@ create table if not exists public.configkit_apps (
 create index if not exists configkit_apps_published_updated_idx on public.configkit_apps(status, updated_at desc);
 create index if not exists configkit_apps_owner_updated_idx on public.configkit_apps(owner_id, updated_at desc);
 alter table public.configkit_apps enable row level security;
-revoke all on public.configkit_apps from public;
+revoke all on public.configkit_apps from public, anon, authenticated;
 grant select on public.configkit_apps to anon, authenticated;
 grant insert, update, delete on public.configkit_apps to authenticated;
 drop policy if exists "Published ConfigKit apps are visible" on public.configkit_apps;
