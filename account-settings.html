@@ -45,6 +45,18 @@
           <button id="save-work-hours" type="submit">Save working hours</button><p id="work-hours-status" class="muted" role="status" aria-live="polite">Loading your schedule…</p>
         </form>
       </section>
+
+      <section class="card" aria-labelledby="developer-program-title">
+        <h2 id="developer-program-title">ConfigKit Developer Program</h2>
+        <p class="muted">Apply to join the ConfigKit Developer Program. Share your GitHub profile, a portfolio or project link, and what you plan to build. Applications are reviewed by the ConfigKit team; choosing “Developer account” above does not enroll you or grant program access.</p>
+        <div id="developer-application-status" class="notice" role="status" aria-live="polite">Checking your application…</div>
+        <form id="developer-application-form">
+          <div class="field"><label for="developer-github">GitHub username</label><input id="developer-github" maxlength="39" required pattern="[A-Za-z0-9-]{1,39}" autocomplete="username" placeholder="your-github-username"></div>
+          <div class="field"><label for="developer-portfolio">Portfolio or project URL (optional)</label><input id="developer-portfolio" type="url" maxlength="2048" placeholder="https://github.com/you/your-project"></div>
+          <div class="field"><label for="developer-summary">What would you like to build with ConfigKit?</label><textarea id="developer-summary" rows="5" maxlength="3000" minlength="30" required style="width:100%;padding:11px 12px;border:1px solid #cbd6d0;border-radius:9px;font:inherit"></textarea><p class="muted">30–3,000 characters. Include the project idea, intended users, and relevant experience.</p></div>
+          <div class="actions"><button id="developer-application-submit" type="submit">Submit application</button><button id="developer-application-withdraw" class="danger" type="button" hidden>Withdraw application</button></div>
+        </form>
+      </section>
       <section class="card" aria-labelledby="visibility-title">
         <h2 id="visibility-title">Profile visibility</h2>
         <p class="muted">Choose whether your community profile appears in ConfigKit member discovery. Public profiles are visible to signed-in ConfigKit members only; private profiles are hidden from discovery and remain visible to you.</p>
@@ -164,6 +176,12 @@
         <div id="providers"></div>
         <p id="provider-note" class="notice" hidden></p>
       </section>
+
+      <section class="card" aria-labelledby="devices-title">
+        <h2 id="devices-title">Devices that have accessed your account</h2>
+        <p class="muted">ConfigKit records a browser/device when you open Account Settings. This is an activity history, not a live inventory of every Supabase session. Older sessions that have not visited this page are not shown. Use “Sign out all devices” below to invalidate all refreshable sessions.</p>
+        <div id="device-session-list" aria-live="polite"><p class="muted">Loading device activity…</p></div>
+      </section>
       <section class="card" aria-labelledby="sessions-title">
         <h2 id="sessions-title">Sessions</h2>
         <p class="muted">Sign out on this browser, or end all ConfigKit sessions on your devices.</p>
@@ -248,7 +266,138 @@
         return;
       }
       const nativeMfaVerified = assuranceData.currentLevel === 'aal2';
+
       const user = userData.user;
+
+      // Record this authenticated browser against Supabase's signed session_id claim.
+      // This is an account-settings activity history, not a server-side session revocation API.
+      async function loadDeviceActivity() {
+        const list = document.getElementById('device-session-list');
+        try {
+          const accessToken = sessionData.session.access_token;
+          const payloadPart = accessToken.split('.')[1];
+          if (!payloadPart) throw new Error('The current sign-in session could not be identified.');
+          const payload = JSON.parse(atob(payloadPart.replace(/-/g,'+').replace(/_/g,'/')));
+          const sessionId = payload.session_id;
+          if (!sessionId || !/^[0-9a-f-]{36}$/i.test(sessionId)) throw new Error('The current sign-in session does not include a valid session ID.');
+          const ua = navigator.userAgent || '';
+          const platform = navigator.userAgentData?.platform || navigator.platform || 'Unknown platform';
+          let browser = 'Browser';
+          if (/Edg\//.test(ua)) browser = 'Microsoft Edge';
+          else if (/Firefox\//.test(ua)) browser = 'Firefox';
+          else if (/Chrome\//.test(ua) && !/Edg\//.test(ua)) browser = 'Chrome';
+          else if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) browser = 'Safari';
+          let device = /iPhone/i.test(ua) ? 'iPhone' : /iPad/i.test(ua) ? 'iPad' : /Android/i.test(ua) ? 'Android device' : /Mac/i.test(platform) ? 'Mac' : /Win/i.test(platform) ? 'Windows PC' : /Linux/i.test(platform) ? 'Linux device' : platform;
+          const deviceName = (device + ' · ' + browser).slice(0,120);
+          const {data:existing,error:lookupError} = await client.from('configkit_device_sessions')
+            .select('session_id,first_seen_at').eq('session_id',sessionId).maybeSingle();
+          if (lookupError) throw lookupError;
+          const now = new Date().toISOString();
+          if (existing) {
+            const {error:updateError} = await client.from('configkit_device_sessions')
+              .update({device_name:deviceName,user_agent:ua.slice(0,1000),last_seen_at:now})
+              .eq('session_id',sessionId);
+            if (updateError) throw updateError;
+          } else {
+            const {error:insertError} = await client.from('configkit_device_sessions').insert({
+              session_id:sessionId,user_id:user.id,device_name:deviceName,user_agent:ua.slice(0,1000),last_seen_at:now
+            });
+            if (insertError) throw insertError;
+          }
+          const {data:rows,error:listError} = await client.from('configkit_device_sessions')
+            .select('session_id,device_name,first_seen_at,last_seen_at')
+            .eq('user_id',user.id).order('last_seen_at',{ascending:false}).limit(30);
+          if (listError) throw listError;
+          list.replaceChildren();
+          if (!rows?.length) {
+            const empty = document.createElement('p'); empty.className='muted'; empty.textContent='No device activity has been recorded yet.'; list.append(empty); return;
+          }
+          for (const item of rows) {
+            const row = document.createElement('div'); row.className='provider';
+            const detail = document.createElement('div');
+            const name = document.createElement('strong'); name.textContent=item.device_name || 'Unknown device';
+            const dates = document.createElement('div'); dates.className='muted';
+            dates.textContent='First seen ' + new Date(item.first_seen_at).toLocaleString() + ' · Last active ' + new Date(item.last_seen_at).toLocaleString();
+            detail.append(name,dates);
+            if (item.session_id === sessionId) {
+              const current = document.createElement('span'); current.className='muted'; current.textContent='Current device'; detail.append(current);
+            }
+            row.append(detail); list.append(row);
+          }
+        } catch (error) {
+          list.replaceChildren();
+          const note = document.createElement('p'); note.className='notice';
+          note.textContent='Device activity could not be loaded. ' + (error.message || 'Please refresh and try again.');
+          list.append(note);
+          console.warn('Could not load ConfigKit device activity:',error);
+        }
+      }
+      await loadDeviceActivity();
+
+      // Developer applications are private to the applicant; only the site review
+      // workflow can change an application to approved or declined.
+      async function loadDeveloperApplication() {
+        const statusEl=document.getElementById('developer-application-status');
+        const form=document.getElementById('developer-application-form');
+        const submit=document.getElementById('developer-application-submit');
+        const withdraw=document.getElementById('developer-application-withdraw');
+        const {data,error}=await client.from('configkit_developer_applications')
+          .select('id,github_username,portfolio_url,project_summary,status,submitted_at,updated_at')
+          .eq('user_id',user.id).maybeSingle();
+        if(error) throw error;
+        if(data) {
+          document.getElementById('developer-github').value=data.github_username || '';
+          document.getElementById('developer-portfolio').value=data.portfolio_url || '';
+          document.getElementById('developer-summary').value=data.project_summary || '';
+          const labels={pending:'Pending review',approved:'Approved',declined:'Declined',withdrawn:'Withdrawn'};
+          statusEl.textContent='Application status: ' + (labels[data.status] || data.status) + ' · Submitted ' + new Date(data.submitted_at).toLocaleDateString();
+          const editable=data.status==='pending' || data.status==='withdrawn';
+          for(const field of form.querySelectorAll('input,textarea')) field.disabled=!editable;
+          submit.hidden=!editable;
+          submit.textContent=data.status==='withdrawn'?'Resubmit application':'Save application';
+          withdraw.hidden=data.status!=='pending';
+        } else {
+          statusEl.textContent='You have not applied to the ConfigKit Developer Program yet.';
+          withdraw.hidden=true;
+        }
+        form.addEventListener('submit', async event => {
+          event.preventDefault();
+          if(!form.reportValidity()) return;
+          const github=document.getElementById('developer-github').value.trim().replace(/^@/,'');
+          const portfolio=document.getElementById('developer-portfolio').value.trim();
+          const summary=document.getElementById('developer-summary').value.trim();
+          if(!/^[A-Za-z0-9-]{1,39}$/.test(github)) { setStatus('Enter a valid GitHub username.',true); return; }
+          if(portfolio && !/^https:\/\//i.test(portfolio)) { setStatus('Use an HTTPS portfolio or project URL.',true); return; }
+          submit.disabled=true;
+          try {
+            const payload={user_id:user.id,github_username:github,portfolio_url:portfolio,project_summary:summary,status:'pending',updated_at:new Date().toISOString()};
+            const result=data
+              ? await client.from('configkit_developer_applications').update(payload).eq('user_id',user.id)
+              : await client.from('configkit_developer_applications').insert(payload);
+            if(result.error) throw result.error;
+            setStatus('Your ConfigKit Developer Program application was submitted.');
+            window.location.reload();
+          } catch(error) { setStatus('Could not submit your application: '+(error.message||'Please try again.'),true); }
+          finally { submit.disabled=false; }
+        });
+        withdraw.addEventListener('click', async () => {
+          if(!window.confirm('Withdraw your ConfigKit Developer Program application?')) return;
+          withdraw.disabled=true;
+          try {
+            const {error:withdrawError}=await client.from('configkit_developer_applications')
+              .update({status:'withdrawn',updated_at:new Date().toISOString()}).eq('user_id',user.id);
+            if(withdrawError) throw withdrawError;
+            setStatus('Your developer application was withdrawn.');
+            window.location.reload();
+          } catch(error) { setStatus('Could not withdraw your application: '+(error.message||'Please try again.'),true); withdraw.disabled=false; }
+        });
+      }
+      try { await loadDeveloperApplication(); }
+      catch(error) {
+        const el=document.getElementById('developer-application-status');
+        el.textContent='Developer Program applications are temporarily unavailable. '+(error.message||'Please try again later.');
+        document.getElementById('developer-application-form').querySelectorAll('input,textarea,button').forEach(control=>control.disabled=true);
+      }
       const email2FAStatusElement = document.getElementById('email-2fa-status');
       const email2FAEnableButton = document.getElementById('email-2fa-enable');
       const email2FADisableButton = document.getElementById('email-2fa-disable');
