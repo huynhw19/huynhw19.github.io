@@ -58,6 +58,7 @@ The following migrations were applied to the connected Supabase project:
 8. `configkit_groups_verified_session_trigger_guard`
 9. `configkit_groups_rls_policy_performance`
 10. `configkit_groups_moderator_member_removal`
+11. `configkit_groups_moderator_member_removal`
 
 The Storage bucket is private and has a 10 MiB object limit. No service-role key is used in browser code.
 
