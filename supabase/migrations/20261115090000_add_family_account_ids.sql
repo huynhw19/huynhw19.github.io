@@ -20,8 +20,8 @@ create index if not exists family_account_members_family_id_idx
 alter table public.family_accounts enable row level security;
 alter table public.family_account_members enable row level security;
 
-grant select on public.family_accounts to authenticated;
-grant select on public.family_account_members to authenticated;
+revoke all on table public.family_accounts, public.family_account_members from public, anon, authenticated;
+grant select on table public.family_accounts, public.family_account_members to authenticated;
 
 drop policy if exists "Family members can view their family" on public.family_accounts;
 create policy "Family members can view their family"
