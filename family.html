@@ -49,12 +49,39 @@
         if (sessionError) { say('Could not verify your sign-in. Please refresh and try again.', true); return; }
         if (!sessionData.session) { window.location.replace('login.html'); return; }
         const userId = sessionData.session.user.id;
+        // Child profiles may exist before a household is created. Ensure one exists
+        // before attempting to display the shareable code.
+        const {data:createdCode,error:createError} = await client.rpc('create_family_account');
+        if (createError) {
+          say(createError.message || 'Could not create or load your Family ID. Complete account verification and refresh.', true);
+          return;
+        }
         const {data:membership,error:membershipError} = await client.from('family_account_members').select('family_id,role').eq('user_id',userId).maybeSingle();
-        if (membershipError) { say(membershipError.message || 'Could not load your family membership.', true); return; }
-        if (!membership) { say('This account is not linked to a family yet. Sign up and choose Create a new family or Join an existing family.'); return; }
+        if (membershipError) {
+          if (typeof createdCode === 'string' && /^[A-Z0-9]{16}$/.test(createdCode)) {
+            codeElement.textContent = createdCode;
+            roleElement.textContent = 'Your household Family ID.';
+            panel.hidden = false;
+            say('Your Family ID is ready.');
+            return;
+          }
+          say(membershipError.message || 'Could not load your family membership.', true); return;
+        }
+        if (!membership) {
+          if (typeof createdCode === 'string' && /^[A-Z0-9]{16}$/.test(createdCode)) {
+            codeElement.textContent = createdCode;
+            roleElement.textContent = 'Your household Family ID.';
+            panel.hidden = false;
+            say('Your Family ID is ready.');
+            return;
+          }
+          say('Your family has not been linked yet. Refresh the page to try again.', true); return;
+        }
         const {data:family,error:familyError} = await client.from('family_accounts').select('family_id').eq('id',membership.family_id).maybeSingle();
-        if (familyError || !family?.family_id) { say(familyError?.message || 'Your Family ID could not be loaded.', true); return; }
-        codeElement.textContent = family.family_id;
+        const familyCode=family?.family_id || (typeof createdCode === 'string' ? createdCode : null);
+        if (familyError && !familyCode) { say(familyError.message || 'Your Family ID could not be loaded.', true); return; }
+        if (!familyCode) { say('Your Family ID could not be confirmed. Please refresh.', true); return; }
+        codeElement.textContent = familyCode;
         roleElement.textContent = membership.role === 'owner' ? 'You created this family.' : 'You are a member of this family.';
         panel.hidden = false;
         say('Your Family ID is ready.');
