@@ -28,7 +28,7 @@
 <div class="field"><label for="tx-account">Account</label><select id="tx-account" required></select></div>
 <div class="field"><label for="tx-amount">Amount</label><input id="tx-amount" type="number" min="0.01" max="100000000" step="0.01" required placeholder="0.00"></div>
 <div class="field"><label for="tx-category">Category</label><select id="tx-category"><option>Food & dining</option><option>Transport</option><option>Shopping</option><option>Bills</option><option>Entertainment</option><option>Health</option><option>Income</option><option>Other</option></select></div>
-<div class="field full"><label for="tx-description">Description</label><input id="tx-description" maxlength="160" required placeholder="e.g. Groceries"></div>
+<div class="field"><label for="tx-description">Description</label><input id="tx-description" maxlength="160" required placeholder="e.g. Weekly groceries"></div><div class="field"><label for="tx-merchant">Shop / merchant (optional)</label><input id="tx-merchant" maxlength="100" placeholder="e.g. Woolworths, Kmart, Amazon"></div>
 </div><div class="actions"><button type="submit">Save transaction</button></div></form></section>
 <section class="card" id="account-form-card" hidden><h2>Add an account</h2><form id="account-form"><div class="form-grid">
 <div class="field full"><label for="account-name">Account name</label><input id="account-name" maxlength="80" required placeholder="Everyday account"></div>
@@ -42,7 +42,7 @@
 <div class="field"><label for="transfer-amount">Amount</label><input id="transfer-amount" type="number" min="0.01" max="100000000" step="0.01" required placeholder="0.00"></div>
 <div class="field"><label for="transfer-description">Description</label><input id="transfer-description" maxlength="160" value="Transfer" required></div>
 </div><div class="actions"><button type="submit">Transfer funds</button></div></form></section>
-<section class="card section"><div class="toolbar"><h2>Recent activity</h2><span class="muted small" id="tx-count"></span></div><div class="table-wrap"><table class="transactions"><thead><tr><th>Details</th><th>Category</th><th>Account</th><th>Amount</th></tr></thead><tbody id="transactions"></tbody></table></div></section>
+<section class="card section"><div class="toolbar"><h2>Shops you pay</h2><span class="muted small">Merchants from your expense entries</span></div><div id="shops-list" class="accounts"><div class="empty">Add a shop name to an expense to build your list.</div></div></section>\n<section class="card section"><div class="toolbar"><h2>Recent activity</h2><span class="muted small" id="tx-count"></span></div><div class="table-wrap"><table class="transactions"><thead><tr><th>Details</th><th>Category</th><th>Account</th><th>Amount</th></tr></thead><tbody id="transactions"></tbody></table></div></section>
 <p class="muted small">Privacy: your records are private to your signed-in account. This is a manual budgeting ledger, not a connected bank account or regulated banking service. Never enter bank passwords, card PINs, or full card numbers here.</p>
 </div>
 </main><footer>ConfigKit · Personal money tracker</footer>
@@ -62,7 +62,7 @@ const signedAmount=t=>(t.kind==='income'||t.kind==='transfer_in'?1:-1)*Number(t.
 async function load(){
  const [a,t]=await Promise.all([
   db.from('money_accounts').select('id,name,account_type,currency,opening_balance,created_at').order('created_at'),
-  db.from('money_transactions').select('id,account_id,kind,amount,description,category,created_at,transfer_group').order('created_at',{ascending:false}).limit(500)
+  db.from('money_transactions').select('id,account_id,kind,amount,description,category,merchant,created_at,transfer_group').order('created_at',{ascending:false}).limit(500)
  ]);
  if(a.error)throw a.error;if(t.error)throw t.error;accounts=a.data||[];transactions=t.data||[];render();
 }
@@ -85,10 +85,10 @@ function render(){
  ['tx-account','transfer-from','transfer-to'].forEach(id=>$(id).innerHTML=opts);
  const usable=accounts.length>1;
  $('transfer-form').querySelector('button').disabled=!usable;
- $('transactions').innerHTML=transactions.length?transactions.slice(0,100).map(t=>{
+ const shopTotals=new Map();transactions.filter(t=>t.kind==='expense'&&t.merchant&&t.merchant.trim()).forEach(t=>{const cur=accountById(t.account_id)?.currency||'AUD',name=t.merchant.trim(),key=name.toLocaleLowerCase()+'|'+cur,old=shopTotals.get(key)||{name,currency:cur,total:0,count:0,last:t.created_at};old.total+=Number(t.amount);old.count++;if(new Date(t.created_at)>new Date(old.last))old.last=t.created_at;shopTotals.set(key,old)});\n const shops=[...shopTotals.values()].sort((a,b)=>b.total-a.total);\n $('shops-list').innerHTML=shops.length?shops.map(s=>'<article class="account"><strong>'+escapeHtml(s.name)+'</strong><span class="muted small">'+s.count+' payment'+(s.count===1?'':'s')+' · '+escapeHtml(s.currency)+'</span><div class="acct-balance">'+money(s.total,s.currency)+'</div><span class="muted small">Last paid '+new Date(s.last).toLocaleDateString()+'</span></article>').join(''):'<div class="empty">No shops recorded yet. Add a shop name to an expense above.</div>';\n $('transactions').innerHTML=transactions.length?transactions.slice(0,100).map(t=>{
   const a=accountById(t.account_id),plus=t.kind==='income'||t.kind==='transfer_in';
   const label=t.kind==='transfer_in'?'Transfer received':t.kind==='transfer_out'?'Transfer sent':t.kind==='income'?'Income':'Expense';
-  return '<tr><td><strong>'+escapeHtml(t.description)+'</strong><br><span class="muted small">'+new Date(t.created_at).toLocaleString()+' · '+label+'</span></td><td>'+escapeHtml(t.category)+'</td><td>'+escapeHtml(a?.name||'Account')+'</td><td class="'+(plus?'positive':'negative')+'">'+(plus?'+':'−')+money(t.amount,a?.currency||'AUD')+'</td></tr>'
+  return '<tr><td><strong>'+escapeHtml(t.description)+'</strong>'+(t.merchant?'<br><span class="muted small">'+escapeHtml(t.merchant)+'</span>':'')+'<br><span class="muted small">'+new Date(t.created_at).toLocaleString()+' · '+label+'</span></td><td>'+escapeHtml(t.category)+'</td><td>'+escapeHtml(a?.name||'Account')+'</td><td class="'+(plus?'positive':'negative')+'">'+(plus?'+':'−')+money(t.amount,a?.currency||'AUD')+'</td></tr>'
  }).join(''):'<tr><td colspan="4" class="empty">No activity yet.</td></tr>';
  $('tx-count').textContent=transactions.length+' entries';
  const byCategory={};transactions.filter(t=>t.kind==='expense'&&new Date(t.created_at)>=monthStart).forEach(t=>{byCategory[t.category]=(byCategory[t.category]||0)+Number(t.amount)});
@@ -112,7 +112,7 @@ $('signout').addEventListener('click',async()=>{window.CONFIGKIT_PASSKEY_SESSION
 $('show-account-form').addEventListener('click',()=>{$('account-form-card').hidden=false;$('account-name').focus()});
 $('cancel-account').addEventListener('click',()=>{$('account-form-card').hidden=true});
 $('account-form').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:user.id,name:$('account-name').value.trim(),account_type:$('account-type').value,currency:$('account-currency').value,opening_balance:Number($('account-opening').value)};const {error}=await db.from('money_accounts').insert(payload);if(error){setStatus(error.message,true);return}$('account-form').reset();$('account-form-card').hidden=true;await load()});
-$('transaction-form').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:user.id,account_id:$('tx-account').value,kind:$('tx-kind').value,amount:Number($('tx-amount').value),description:$('tx-description').value.trim(),category:$('tx-category').value};const {error}=await db.from('money_transactions').insert(payload);if(error){setStatus(error.message,true);return}$('transaction-form').reset();await load()});
+$('transaction-form').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:user.id,account_id:$('tx-account').value,kind:$('tx-kind').value,amount:Number($('tx-amount').value),description:$('tx-description').value.trim(),category:$('tx-category').value,merchant:$('tx-merchant').value.trim()||null};const {error}=await db.from('money_transactions').insert(payload);if(error){setStatus(error.message,true);return}$('transaction-form').reset();await load()});
 $('transfer-form').addEventListener('submit',async e=>{e.preventDefault();if($('transfer-from').value===$('transfer-to').value){setStatus('Choose two different accounts.',true);return}const {error}=await db.rpc('transfer_money',{p_from_account:$('transfer-from').value,p_to_account:$('transfer-to').value,p_amount:Number($('transfer-amount').value),p_description:$('transfer-description').value.trim()});if(error){setStatus(error.message,true);return}$('transfer-amount').value='';await load();setStatus('Transfer recorded between your tracked accounts.')});
 $('accounts').addEventListener('click',async e=>{const edit=e.target.closest('.edit-account'),del=e.target.closest('.delete-account');if(edit){const a=accountById(edit.dataset.id),name=prompt('Rename account',a.name);if(name===null)return;if(!name.trim()){setStatus('Account name cannot be empty.',true);return}const {error}=await db.from('money_accounts').update({name:name.trim(),updated_at:new Date().toISOString()}).eq('id',a.id);if(error){setStatus(error.message,true);return}await load()}if(del){const a=accountById(del.dataset.id);if(!confirm('Delete '+a.name+' and all its tracked transactions? This cannot be undone.'))return;const {error}=await db.from('money_accounts').delete().eq('id',a.id);if(error){setStatus(error.message,true);return}await load()}});
 db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)location.replace('login.html')});
