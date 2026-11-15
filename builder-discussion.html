@@ -97,6 +97,8 @@
         return;
       }
       const user = data.session.user;
+      const {data: moderatorResult, error: moderatorCheckError} = await client.rpc('is_builder_discussion_moderator');
+      const isModerator = !moderatorCheckError && moderatorResult === true;
       const accountType = user.user_metadata?.account_type;
       const canPostJobs = accountType === 'enterprise' || accountType === 'organization';
       discussion.hidden = false;
@@ -105,6 +107,15 @@
       const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.preferred_username || user.email || 'Community member';
       const escapeDate = value => new Date(value).toLocaleString();
       const showError = error => { setStatus(error?.message || 'Something went wrong. Please try again.', true); status.hidden = false; };
+      function moderationButton(label, handler) {
+        const button = document.createElement('button'); button.type = 'button'; button.className = 'secondary'; button.textContent = label;
+        button.addEventListener('click', async () => { button.disabled = true; try { await handler(); } catch (error) { showError(error); } finally { button.disabled = false; } });
+        return button;
+      }
+      async function editDiscussion(post) { const title = window.prompt('Edit discussion title:', post.title); if (title === null) return; const body = window.prompt('Edit discussion details:', post.body); if (body === null) return; if (!title.trim() || !body.trim()) { showError(new Error('Title and details cannot be empty.')); return; } const {error} = await client.from('builder_discussions').update({title:title.trim(),body:body.trim()}).eq('id',post.id); if (error) throw error; await loadThreads(); }
+      async function deleteDiscussion(post) { if (!window.confirm('Delete this discussion and all of its comments? This cannot be undone.')) return; const {error} = await client.from('builder_discussions').delete().eq('id',post.id); if (error) throw error; await loadThreads(); }
+      async function editComment(comment) { const body = window.prompt('Edit comment:', comment.body); if (body === null) return; if (!body.trim()) { showError(new Error('Comment cannot be empty.')); return; } const {error} = await client.from('builder_discussion_comments').update({body:body.trim()}).eq('id',comment.id); if (error) throw error; await loadThreads(); }
+      async function deleteComment(comment) { if (!window.confirm('Delete this comment? This cannot be undone.')) return; const {error} = await client.from('builder_discussion_comments').delete().eq('id',comment.id); if (error) throw error; await loadThreads(); }
 
       async function loadFollowedUsers() {
         const {data: follows, error: followError} = await client.from('user_follows').select('following_id').eq('follower_id', user.id);
@@ -142,6 +153,7 @@
       }
       async function loadThreads() {
         threads.replaceChildren();
+        if (isModerator) { const note = document.createElement('p'); note.className = 'status'; note.textContent = 'Moderator mode is active. You can edit or remove any discussion and comment.'; threads.append(note); }
         const {data: posts, error: postError}=await client.from('builder_discussions').select('id,user_id,title,body,created_at').order('created_at',{ascending:false}).limit(50);
         if(postError){showError(postError);return;}
         if(!posts?.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='No discussions yet. Start the first one!';threads.append(empty);return;}
@@ -154,12 +166,14 @@
           const heading=document.createElement('h3');heading.textContent=post.title;
           const meta=document.createElement('p');meta.className='meta';meta.textContent=`Posted by ${post.user_id===user.id?displayName:'a community member'} · ${escapeDate(post.created_at)}`;
           const body=document.createElement('p');body.className='thread-body';body.textContent=post.body;
+          const moderatorActions=document.createElement('div');moderatorActions.className='profile-actions';
+          if(isModerator){moderatorActions.append(moderationButton('Edit discussion',()=>editDiscussion(post)),moderationButton('Delete discussion',()=>deleteDiscussion(post)));}
           const commentSection=document.createElement('section');commentSection.className='comment-list';
           const commentsHeading=document.createElement('h4');commentsHeading.textContent=`Comments (${(commentsByPost.get(post.id)||[]).length})`;commentSection.append(commentsHeading);
-          for(const comment of commentsByPost.get(post.id)||[]){const item=document.createElement('div');item.className='comment';const text=document.createElement('p');text.textContent=comment.body;const byline=document.createElement('small');byline.className='meta';byline.textContent=`${comment.user_id===user.id?displayName:'Community member'} · ${escapeDate(comment.created_at)}`;item.append(text,byline);commentSection.append(item);}
+          for(const comment of commentsByPost.get(post.id)||[]){const item=document.createElement('div');item.className='comment';const text=document.createElement('p');text.textContent=comment.body;const byline=document.createElement('small');byline.className='meta';byline.textContent=`${comment.user_id===user.id?displayName:'Community member'} · ${escapeDate(comment.created_at)}`;item.append(text,byline);if(isModerator){const actions=document.createElement('div');actions.className='profile-actions';actions.append(moderationButton('Edit comment',()=>editComment(comment)),moderationButton('Delete comment',()=>deleteComment(comment)));item.append(actions);}commentSection.append(item);}
           const form=document.createElement('form');form.className='comment-form';const label=document.createElement('label');label.textContent='Add a comment';const input=document.createElement('textarea');input.required=true;input.maxLength=2000;input.placeholder='Write a helpful reply…';const button=document.createElement('button');button.type='submit';button.textContent='Comment';form.append(label,input,button);
           form.addEventListener('submit',async event=>{event.preventDefault();button.disabled=true;const {error:insertError}=await client.from('builder_discussion_comments').insert({discussion_id:post.id,user_id:user.id,body:input.value.trim()});button.disabled=false;if(insertError){showError(insertError);return;}await loadThreads();});
-          article.append(heading,meta,body,commentSection,form);threads.append(article);
+          article.append(heading,meta,body); if(isModerator) article.append(moderatorActions); article.append(commentSection,form);threads.append(article);
         }
       }
       async function loadJobs() {
