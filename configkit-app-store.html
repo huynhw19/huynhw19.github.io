@@ -70,6 +70,7 @@
     try {
       if (action === 'download') {
         if (app.delivery_type === 'link') { window.open(app.redirect_url,'_blank','noopener,noreferrer'); return; }
+        if (!user) { setStatus('Sign in to ConfigKit to download uploaded app files.'); window.location.href='login.html?next=configkit-app-store.html'; return; }
         const {data,error} = await client.storage.from('configkit-app-files').createSignedUrl(app.file_path,90);
         if (error) throw error;
         window.location.assign(data.signedUrl);
