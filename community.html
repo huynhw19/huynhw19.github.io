@@ -136,6 +136,18 @@
      return data.banned;
     };
     getModerationStatus().catch(error=>{moderationButton.disabled=true;moderationButton.textContent='Moderation unavailable';moderationStatus.textContent=error.message||'Could not check account status.';});
+    const recoveryStatus=document.createElement('p');recoveryStatus.className='muted';recoveryStatus.setAttribute('role','status');recoveryStatus.style.flexBasis='100%';recoveryStatus.textContent='Account recovery is available to the owner.';actions.append(recoveryStatus);
+    const recoveryButton=document.createElement('button');recoveryButton.type='button';recoveryButton.className='secondary';recoveryButton.textContent='Send password reset email';actions.append(recoveryButton);
+    recoveryButton.addEventListener('click',async()=>{
+     if(!window.confirm('Send a password-reset link to this member’s registered email address? The email address will not be shown to you.'))return;
+     recoveryButton.disabled=true;recoveryStatus.textContent='Sending password-reset email…';
+     try{
+      const {data,error}=await client.functions.invoke('recover-member-account',{body:{userId:id}});
+      if(error)throw error;if(data?.error)throw new Error(data.error);
+      recoveryStatus.textContent='Password-reset email requested. The member should check their registered email and spam folder.';
+     }catch(error){recoveryStatus.textContent=error.message||'Could not send the password-reset email.';}
+     finally{recoveryButton.disabled=false;}
+    });
     moderationButton.addEventListener('click',async()=>{
      const banning=moderationButton.textContent==='Ban member';
      const action=banning?'ban':'unban';
