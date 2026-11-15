@@ -1146,6 +1146,8 @@
         await loadStudents();
         await loadAssignmentStudents();
         await loadAssignments();
+        await loadTestStudents();
+        await loadTests();
       }
 
       client.auth.onAuthStateChange((_event, session) => {
