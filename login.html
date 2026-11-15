@@ -52,7 +52,7 @@
           </select>
           <div id="familyIdField" hidden>
             <label for="familyId">Family ID</label>
-            <input id="familyId" name="familyId" maxlength="12" minlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" pattern="[A-Za-z0-9]{12}" placeholder="Enter the 12-character Family ID">
+            <input id="familyId" name="familyId" maxlength="16" minlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false" pattern="[A-Za-z0-9]{16}" placeholder="Enter the 16-character Family ID">
           </div>
           <small class="muted">Only share your Family ID with people you want to add to your family.</small>
         </section>
@@ -219,7 +219,7 @@
           result = await client.rpc('create_family_account');
         } else if (action === 'join') {
           const code = String(metadata.configkit_family_id || '').replace(/\s+/g, '').toUpperCase();
-          if (!/^[A-Z0-9]{12}$/.test(code)) throw new Error('The saved Family ID is missing or invalid. Sign up again and enter a valid Family ID.');
+          if (!/^[A-Z0-9]{16}$/.test(code)) throw new Error('The saved Family ID is missing or invalid. Sign up again and enter a valid Family ID.');
           result = await client.rpc('join_family_account', {p_family_id:code});
         } else {
           throw new Error('The family setup choice is invalid. Please try signing up again.');
@@ -591,7 +591,7 @@
       accountType.addEventListener('change', updateAccountFields);
       familyChoice.addEventListener('change', updateFamilyFields);
       familyIdInput.addEventListener('input', () => {
-        familyIdInput.value = familyIdInput.value.replace(/\s+/g, '').toUpperCase().slice(0,12);
+        familyIdInput.value = familyIdInput.value.replace(/\s+/g, '').toUpperCase().slice(0,16);
       });
       loginTab.addEventListener('click', () => setMode('login'));
       signupTab.addEventListener('click', () => setMode('signup'));
