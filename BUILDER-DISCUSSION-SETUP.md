@@ -2456,37 +2456,23 @@ n
 
 n
 
+## Discussion moderation
 
+The live Supabase project now has a moderator allow-list and server-enforced RLS policies for editing and deleting discussions and comments. The builder discussion page checks the `is_builder_discussion_moderator()` RPC and only renders moderation controls for approved accounts. Database policies independently enforce the same role, so hiding the controls is not the security boundary.
 
+The `builder_discussion_moderators` table is intentionally not readable or writable by browser clients. To add another moderator, use the Supabase SQL Editor as a project administrator and insert that person's authenticated user UUID:
 
+```sql
+insert into public.builder_discussion_moderators (user_id)
+values ('AUTH-USER-UUID-HERE')
+on conflict (user_id) do nothing;
+```
 
+To find an account UUID, use **Supabase Dashboard → Authentication → Users** and copy the UUID for the verified account. Do not use editable user metadata or an email address as the authorization check. To revoke moderator access:
 
+```sql
+delete from public.builder_discussion_moderators
+where user_id = 'AUTH-USER-UUID-HERE';
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Moderators can edit/delete any discussion and comment. Deleting a discussion also deletes its comments through the existing cascading foreign key. Normal signed-in members retain the existing create/read/comment permissions.
