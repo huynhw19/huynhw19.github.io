@@ -1,0 +1,41 @@
+* { box-sizing: border-box; }
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #70c5ce;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#game-shell { position: fixed; inset: 0; overflow: hidden; }
+#game { display: block; width: 100%; height: 100%; }
+#sound {
+  position: fixed;
+  z-index: 2;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 50%;
+  background: rgba(255,255,255,.88);
+  font-size: 20px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#help {
+  position: fixed;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 8px 14px;
+  color: rgba(20,65,70,.72);
+  text-align: center;
+  font-size: 12px;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
