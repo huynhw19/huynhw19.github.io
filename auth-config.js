@@ -435,3 +435,14 @@ window.CONFIGKIT_AUTH = {
     })
     .catch(() => { /* Fail open: an unavailable control API must not take the public site offline. */ });
 })();
+
+
+// Load the floating ConfigKit AI assistant on pages that include the shared auth config.
+(() => {
+  if (document.querySelector('script[data-configkit-ai-widget]')) return;
+  const script = document.createElement('script');
+  script.src = 'configkit-ai-widget.js';
+  script.defer = true;
+  script.dataset.configkitAiWidget = 'true';
+  document.head.append(script);
+})();
