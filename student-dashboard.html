@@ -37,6 +37,12 @@
         <h2 id="assignments-title">My assignments</h2>
         <div id="assignment-records"></div>
       </section>
+      <section id="student-tests" aria-labelledby="student-tests-title" hidden>
+        <h2 id="student-tests-title">My tests and quizzes</h2>
+        <p class="muted">Open a published test, save your answers, and submit it when you are finished. Multiple-choice answers are marked automatically; written answers may need teacher review.</p>
+        <div id="student-test-records"></div>
+        <div id="student-test-workspace" class="assignment" hidden></div>
+      </section>
       <button id="signout" type="button" hidden>Sign out</button>
     </section>
   </main>
@@ -191,6 +197,158 @@
             assignmentRecords.append(item);
           });
         }
+
+        // Load private, published tests assigned to the signed-in student's linked records.
+        const testsPanel=document.getElementById('student-tests');
+        const testRecords=document.getElementById('student-test-records');
+        const testWorkspace=document.getElementById('student-test-workspace');
+        testsPanel.hidden=false;testRecords.replaceChildren();testWorkspace.hidden=true;
+        const {data:studentTests,error:testsError}=await client.from('education_tests')
+          .select('id,user_id,student_id,title,description,instructions,due_date,duration_minutes,attempt_limit')
+          .in('student_id',studentIds).eq('status','published').order('due_date',{ascending:true,nullsFirst:false});
+        if(testsError){
+          const warning=document.createElement('p');warning.className='error';
+          warning.textContent='Could not load your tests. Ask your teacher to check the test setup.';testRecords.append(warning);
+        }else if(!studentTests?.length){
+          const empty=document.createElement('p');empty.textContent='Your teachers have not published any tests for you yet.';testRecords.append(empty);
+        }else{
+          for(const test of studentTests){
+            const {data:attempts,error:attemptError}=await client.from('education_test_attempts')
+              .select('id,status,attempt_number,started_at,submitted_at,total_score,points_possible,teacher_feedback')
+              .eq('test_id',test.id).eq('student_user_id',data.session.user.id).order('attempt_number',{ascending:false});
+            const card=document.createElement('article');card.className='assignment';
+            const heading=document.createElement('h3');heading.textContent=test.title;
+            const meta=document.createElement('p');meta.className='assignment-meta';
+            meta.textContent=(test.due_date?'Due '+test.due_date:'No due date')+' · '+(test.duration_minutes?test.duration_minutes+' minute(s)':'No time limit')+' · '+(test.attempt_limit||1)+' allowed attempt(s)';
+            card.append(heading,meta);
+            if(test.description){const desc=document.createElement('p');desc.textContent=test.description;card.append(desc)}
+            if(attemptError){const warning=document.createElement('p');warning.className='error';warning.textContent='Could not load attempt history.';card.append(warning)}
+            const current=(attempts||[]).find(a=>a.status==='in_progress');
+            (attempts||[]).forEach(attempt=>{
+              const history=document.createElement('p');history.className='assignment-meta';
+              history.textContent='Attempt '+attempt.attempt_number+' · '+attempt.status+' · '+(attempt.total_score===null?'Awaiting grade':attempt.total_score+' / '+(attempt.points_possible??'?'));
+              card.append(history);
+              if(attempt.status==='graded'&&attempt.teacher_feedback){
+                const feedback=document.createElement('p');feedback.textContent='Teacher feedback: '+attempt.teacher_feedback;card.append(feedback);
+              }
+            });
+            const canStart=current||(attempts||[]).length<(test.attempt_limit||1);
+            if(canStart){
+              const start=document.createElement('button');start.type='button';start.textContent=current?'Continue test':'Take test';
+              start.addEventListener('click',async()=>{
+                start.disabled=true;
+                const {data:attemptId,error:startError}=await client.rpc('start_education_test',{p_test_id:test.id});
+                start.disabled=false;
+                if(startError){showStatus(startError.message||'Could not start this test.',true);return}
+                await openStudentTest(test,attemptId);
+              });card.append(start);
+            }else{
+              const done=document.createElement('p');done.className='muted';done.textContent='You have used all allowed attempts for this test.';card.append(done);
+            }
+            testRecords.append(card);
+          }
+        }
+
+        async function openStudentTest(test,attemptId){
+          testWorkspace.hidden=false;testWorkspace.replaceChildren();
+          const {data:attempt,error:attemptError}=await client.from('education_test_attempts')
+            .select('id,status,started_at,attempt_number').eq('id',attemptId).single();
+          if(attemptError||!attempt){showStatus(attemptError?.message||'Could not open test attempt.',true);return}
+          const [questionResult,responseResult]=await Promise.all([
+            client.from('education_test_questions').select('id,sort_order,question_type,prompt,options,points')
+              .eq('test_id',test.id).order('sort_order',{ascending:true}),
+            client.from('education_test_responses').select('question_id,answer')
+              .eq('attempt_id',attemptId)
+          ]);
+          if(questionResult.error||responseResult.error){showStatus((questionResult.error||responseResult.error).message||'Could not load test questions.',true);return}
+          const questions=questionResult.data||[];
+          const responseMap=new Map((responseResult.data||[]).map(r=>[r.question_id,r.answer]));
+          const title=document.createElement('h3');title.textContent=test.title+' · Attempt '+attempt.attempt_number;
+          const instructions=document.createElement('p');instructions.textContent=test.instructions||'Answer every question, save your work, then submit.';
+          testWorkspace.append(title,instructions);
+          if(!questions.length){const empty=document.createElement('p');empty.textContent='This test has no questions yet. Contact your teacher.';testWorkspace.append(empty);return}
+          const form=document.createElement('form');form.className='test-taking-form';
+          const timer=document.createElement('p');timer.className='assignment-meta';
+          form.append(timer);
+          const inputById=new Map();
+          questions.forEach((question,index)=>{
+            const block=document.createElement('section');block.className='record';
+            const prompt=document.createElement('h4');prompt.textContent=(index+1)+'. '+question.prompt+' ('+question.points+' points)';
+            block.append(prompt);
+            if(question.question_type==='multiple_choice'){
+              (question.options||[]).forEach((option,optionIndex)=>{
+                const label=document.createElement('label');label.style.display='block';label.style.margin='8px 0';
+                const radio=document.createElement('input');radio.type='radio';radio.name='question-'+question.id;radio.value=option;
+                radio.checked=responseMap.get(question.id)===option;label.append(radio,document.createTextNode(' '+option));block.append(label);
+                if(optionIndex===0)inputById.set(question.id,{type:'radio',name:radio.name});
+              });
+            }else{
+              const answer=document.createElement('textarea');answer.rows=3;answer.maxLength=10000;answer.placeholder='Write your answer…';answer.value=responseMap.get(question.id)||'';
+              answer.style.width='100%';inputById.set(question.id,{type:'text',element:answer});block.append(answer);
+            }
+            form.append(block);
+          });
+          const actions=document.createElement('div');actions.className='form-actions';
+          const save=document.createElement('button');save.type='button';save.className='secondary';save.textContent='Save answers';
+          const submit=document.createElement('button');submit.type='button';submit.textContent='Submit test';
+          actions.append(save,submit);form.append(actions);testWorkspace.append(form);
+          let busy=false, timerHandle=null;
+          function collectAnswers(){
+            return questions.map(q=>{
+              const field=inputById.get(q.id);
+              let answer='';
+              if(field?.type==='radio')answer=form.querySelector('input[name="'+field.name+'"]:checked')?.value||'';
+              else if(field?.element)answer=field.element.value.trim();
+              return {attempt_id:attemptId,question_id:q.id,answer};
+            });
+          }
+          async function saveAnswers(){
+            const {error}=await client.from('education_test_responses')
+              .upsert(collectAnswers(),{onConflict:'attempt_id,question_id'});
+            if(error){showStatus(error.message||'Could not save answers.',true);return false}
+            showStatus('Your answers have been saved.');return true;
+          }
+          async function submitTest(auto=false){
+            if(busy)return;busy=true;save.disabled=true;submit.disabled=true;
+            const saved=await saveAnswers();
+            if(!saved&&!auto){busy=false;save.disabled=false;submit.disabled=false;return}
+            const {error}=await client.rpc('submit_education_test',{p_attempt_id:attemptId});
+            if(error){busy=false;save.disabled=false;submit.disabled=false;showStatus(error.message||'Could not submit test.',true);return}
+            if(timerHandle)clearInterval(timerHandle);
+            testWorkspace.hidden=true;showStatus(auto?'Time limit reached. Your saved answers have been submitted.':'Your test has been submitted. Multiple-choice questions are marked automatically; written answers may need teacher review.');
+            // Refresh the history and remaining attempt count.
+            window.setTimeout(()=>{testRecords.replaceChildren();void (async()=>{
+              const {data:updatedTests}=await client.from('education_tests')
+                .select('id,user_id,student_id,title,description,instructions,due_date,duration_minutes,attempt_limit')
+                .in('student_id',studentIds).eq('status','published').order('due_date',{ascending:true,nullsFirst:false});
+              if(!updatedTests)return;
+              for(const item of updatedTests){
+                const {data:as}=await client.from('education_test_attempts')
+                  .select('id,status,attempt_number,started_at,submitted_at,total_score,points_possible,teacher_feedback')
+                  .eq('test_id',item.id).eq('student_user_id',data.session.user.id).order('attempt_number',{ascending:false});
+                const card=document.createElement('article');card.className='assignment';
+                const h=document.createElement('h3');h.textContent=item.title;card.append(h);
+                (as||[]).forEach(a=>{const p=document.createElement('p');p.className='assignment-meta';p.textContent='Attempt '+a.attempt_number+' · '+a.status+' · '+(a.total_score===null?'Awaiting grade':a.total_score+' / '+(a.points_possible??'?'));card.append(p)});
+                if((as||[]).length<(item.attempt_limit||1)){const b=document.createElement('button');b.type='button';b.textContent='Take test';b.addEventListener('click',async()=>{const x=await client.rpc('start_education_test',{p_test_id:item.id});if(x.error){showStatus(x.error.message,true);return}await openStudentTest(item,x.data)});card.append(b)}
+                testRecords.append(card);
+              }
+            })()},0);
+          }
+          save.addEventListener('click',async()=>{if(busy)return;busy=true;save.disabled=true;const ok=await saveAnswers();busy=false;save.disabled=false;if(ok)submit.disabled=false});
+          submit.addEventListener('click',()=>{if(confirm('Submit this test now? You will not be able to change your answers afterwards.'))void submitTest(false)});
+          if(test.duration_minutes){
+            const deadline=new Date(new Date(attempt.started_at).getTime()+test.duration_minutes*60000);
+            const tick=()=>{
+              const remaining=Math.max(0,deadline.getTime()-Date.now());
+              const seconds=Math.floor(remaining/1000);
+              timer.textContent='Time remaining: '+Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');
+              if(remaining<=0){clearInterval(timerHandle);void submitTest(true)}
+            };
+            tick();timerHandle=window.setInterval(tick,1000);
+          }else timer.textContent='No time limit. Save your answers before submitting.';
+          testWorkspace.scrollIntoView({behavior:'smooth',block:'start'});
+        }
+
         studentRecords.forEach(student => {
           const item = document.createElement('article');
           item.className = 'record';
