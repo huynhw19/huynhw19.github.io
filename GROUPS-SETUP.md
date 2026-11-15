@@ -1,10 +1,10 @@
 # Set up ConfigKit groups
 
-The signed-in groups page is `groups.html`. It lets authenticated users create a group, share a one-time invite code, join by code, view their memberships, and leave groups. Group creators can also rename or permanently delete groups; only the creator is authorized to perform those actions. The group feature stores group names and membership only; it does not share or save mobileconfig profiles. Configure Supabase first with `auth-config.js`. Never put a Supabase service-role key in browser code.
+The signed-in groups page is `groups.html`. It lets authenticated users create a group, share a one-time invite code, join by code, view their memberships, and leave groups. Group creators can also rename or permanently delete groups; only the creator is authorized to perform those actions. The advanced Groups community now also supports members-only mobileconfig uploads, comments, reactions, reports, and owner/moderator tools. See [GROUPS-COMMUNITY.md](GROUPS-COMMUNITY.md) for the feature and security design. The original group create/join/invite/rename/delete/leave workflows remain supported. Configure Supabase first with `auth-config.js`. Never put a Supabase service-role key in browser code.
 
 > **Already set up groups before November 2026?** Creating and joining groups failed with the old functions. Run [`GROUPS-REPAIR.sql`](GROUPS-REPAIR.sql) once to fix them — see [`fixgroup.md`](fixgroup.md).
 
-## Apply the database schema
+## Community features\n\nThe connected Supabase project has the advanced community schema and private Storage bucket applied. New groups support members-only profile uploads, profile discussions, reactions, member reporting, a moderator queue, and owner-managed moderator roles. Do not rerun the original schema below on an already configured database; it is the original bootstrap guide for the base group tables. Use [GROUPS-COMMUNITY.md](GROUPS-COMMUNITY.md) for the applied community schema, Storage rules, and migration names.\n\n## Apply the database schema
 
 Run this SQL once in the Supabase SQL Editor. The invite code is created server-side from a cryptographically random UUID and is not exposed by group list queries. Creation and joining are RPC-only; row-level security limits memberships and group visibility to members.
 
