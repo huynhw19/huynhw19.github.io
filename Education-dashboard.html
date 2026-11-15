@@ -177,6 +177,39 @@
       <h2 id="assignment-list-title">Manage assignments</h2>
       <div id="assignment-list"><p class="muted">Loading assignments…</p></div>
     </section>
+
+    <section class="card" id="tests-panel" aria-labelledby="tests-title">
+      <h2 id="test-form-title">Create a test</h2>
+      <p class="muted">Create a quiz or assessment for one linked student. Multiple-choice questions are marked automatically; short answers can be graded by you after submission. Answer keys are never sent to student browsers.</p>
+      <form id="test-form">
+        <label>Student<select id="test-student" required><option value="">Choose a student</option></select></label>
+        <label>Test title<input id="test-title" maxlength="160" required placeholder="e.g. Fractions check-in"></label>
+        <label>Description<textarea id="test-description" rows="2" maxlength="2000" placeholder="What topics does this test cover?"></textarea></label>
+        <label>Instructions<textarea id="test-instructions" rows="3" maxlength="5000" placeholder="Read each question carefully…"></textarea></label>
+        <div class="two-col">
+          <label>Due date (optional)<input id="test-due-date" type="date"></label>
+          <label>Time limit in minutes (optional)<input id="test-duration" type="number" min="1" max="240" step="1" placeholder="No time limit"></label>
+        </div>
+        <div class="two-col">
+          <label>Attempts allowed<select id="test-attempt-limit"><option value="1">1 attempt</option><option value="2">2 attempts</option><option value="3">3 attempts</option><option value="4">4 attempts</option><option value="5">5 attempts</option></select></label>
+          <label>Visibility<select id="test-status"><option value="draft">Draft — only you can see it</option><option value="published">Published — visible to the student</option><option value="archived">Archived — hidden from the student</option></select></label>
+        </div>
+        <h3>Questions</h3>
+        <p class="muted">Use multiple choice for automatic marking, or short answer for written responses that you will mark yourself. Use 0.25 to 100 points per question.</p>
+        <div id="test-question-editors"></div>
+        <div class="form-actions">
+          <button id="test-add-question" type="button" class="secondary">Add question</button>
+          <button id="test-submit" type="submit">Save test</button>
+          <button id="test-cancel" type="button" class="secondary" hidden>Cancel editing</button>
+        </div>
+      </form>
+      <div id="test-message" class="status" role="status" aria-live="polite"></div>
+      <section aria-labelledby="manage-tests-title">
+        <h2 id="manage-tests-title">Manage tests</h2>
+        <div id="test-list"><p class="muted">Loading tests…</p></div>
+        <div id="test-review-panel" class="assignment-item" hidden></div>
+      </section>
+    </section>
   </main>
 
   <script src="auth-config.js"></script>
@@ -811,6 +844,281 @@
         if (result.error) { setAssignmentMessage(result.error.message || 'Could not save assignment.', true); return; }
         resetAssignmentForm(); setAssignmentMessage('Assignment saved successfully.'); await loadAssignments();
       });
+
+
+      // Tests and assessments
+      const testForm=document.getElementById('test-form');
+      const testStudent=document.getElementById('test-student');
+      const testTitle=document.getElementById('test-title');
+      const testDescription=document.getElementById('test-description');
+      const testInstructions=document.getElementById('test-instructions');
+      const testDueDate=document.getElementById('test-due-date');
+      const testDuration=document.getElementById('test-duration');
+      const testAttemptLimit=document.getElementById('test-attempt-limit');
+      const testStatus=document.getElementById('test-status');
+      const testEditors=document.getElementById('test-question-editors');
+      const testList=document.getElementById('test-list');
+      const testMessage=document.getElementById('test-message');
+      const testSubmit=document.getElementById('test-submit');
+      const testCancel=document.getElementById('test-cancel');
+      const testFormTitle=document.getElementById('test-form-title');
+      const testReviewPanel=document.getElementById('test-review-panel');
+      let editingTestId=null;
+
+      function setTestMessage(message,isError=false){
+        testMessage.textContent=message;
+        testMessage.className='status'+(isError?' error':'');
+      }
+      function resetTestForm(){
+        testForm.reset();editingTestId=null;testEditors.replaceChildren();
+        addTestQuestionEditor();
+        testFormTitle.textContent='Create a test';
+        testSubmit.textContent='Save test';testCancel.hidden=true;
+      }
+      async function loadTestStudents(selectedId=''){
+        const {data,error}=await client.from('education_students')
+          .select('id,student_name,student_email').eq('user_id',currentUserId)
+          .order('student_name',{ascending:true});
+        testStudent.replaceChildren();
+        const placeholder=document.createElement('option');placeholder.value='';
+        placeholder.textContent=data?.length?'Choose a student':'Add a student first';
+        testStudent.append(placeholder);
+        if(error){setTestMessage(error.message||'Could not load students.',true);return}
+        (data||[]).forEach(student=>{
+          const option=document.createElement('option');option.value=student.id;
+          option.textContent=student.student_name+' ('+student.student_email+')';testStudent.append(option);
+        });
+        testStudent.value=selectedId||'';testStudent.disabled=!data?.length;
+      }
+      function addTestQuestionEditor(question={}){
+        if(testEditors.children.length>=100){setTestMessage('A test can contain up to 100 questions.',true);return}
+        const card=document.createElement('article');card.className='assignment-item test-question-editor';
+        const heading=document.createElement('h4');heading.textContent='Question '+(testEditors.children.length+1);
+        const promptLabel=document.createElement('label');promptLabel.textContent='Question';
+        const prompt=document.createElement('textarea');prompt.className='test-question-prompt';prompt.required=true;prompt.maxLength=2000;prompt.rows=3;prompt.value=question.prompt||'';promptLabel.append(prompt);
+        const typeLabel=document.createElement('label');typeLabel.textContent='Question type';
+        const type=document.createElement('select');type.className='test-question-type';
+        type.innerHTML='<option value="multiple_choice">Multiple choice — automatic marking</option><option value="short_answer">Short answer — teacher marked</option>';
+        type.value=question.question_type||'multiple_choice';typeLabel.append(type);
+        const optionsLabel=document.createElement('label');optionsLabel.textContent='Answer choices (one per line; 2–8 choices)';
+        const options=document.createElement('textarea');options.className='test-question-options';options.rows=4;options.maxLength=2000;options.placeholder='First option\nSecond option\nThird option';options.value=Array.isArray(question.options)?question.options.join('\n'):'';
+        optionsLabel.append(options);
+        const answerLabel=document.createElement('label');answerLabel.textContent='Correct answer (must exactly match one choice)';
+        const answer=document.createElement('input');answer.className='test-question-answer';answer.maxLength=2000;answer.value=question.answer_key||'';answer.placeholder='Choose the exact correct option';answerLabel.append(answer);
+        const pointsLabel=document.createElement('label');pointsLabel.textContent='Points';
+        const points=document.createElement('input');points.className='test-question-points';points.type='number';points.min='0.25';points.max='100';points.step='0.25';points.required=true;points.value=question.points??1;pointsLabel.append(points);
+        const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Remove question';
+        remove.addEventListener('click',()=>{
+          if(testEditors.children.length<=1){setTestMessage('Keep at least one question in your test.',true);return}
+          card.remove();Array.from(testEditors.children).forEach((node,index)=>node.querySelector('h4').textContent='Question '+(index+1));
+        });
+        const updateType=()=>{
+          const multiple=type.value==='multiple_choice';optionsLabel.hidden=!multiple;answerLabel.hidden=!multiple;
+          options.required=multiple;answer.required=multiple;
+        };
+        type.addEventListener('change',updateType);updateType();
+        card.append(heading,promptLabel,typeLabel,optionsLabel,answerLabel,pointsLabel,remove);testEditors.append(card);
+      }
+      function collectTestQuestions(){
+        const output=[];
+        for(const [index,card] of Array.from(testEditors.children).entries()){
+          const prompt=card.querySelector('.test-question-prompt').value.trim();
+          const questionType=card.querySelector('.test-question-type').value;
+          const options=questionType==='multiple_choice'
+            ? card.querySelector('.test-question-options').value.split('\n').map(x=>x.trim()).filter(Boolean)
+            : [];
+          const answer=card.querySelector('.test-question-answer').value.trim();
+          const points=Number(card.querySelector('.test-question-points').value);
+          if(!prompt)throw new Error('Enter text for question '+(index+1)+'.');
+          if(!Number.isFinite(points)||points<0.25||points>100)throw new Error('Question '+(index+1)+' must be worth 0.25 to 100 points.');
+          if(questionType==='multiple_choice'){
+            if(options.length<2||options.length>8)throw new Error('Question '+(index+1)+' needs 2 to 8 answer choices.');
+            if(!options.some(option=>option.toLowerCase()===answer.toLowerCase()))throw new Error('The correct answer for question '+(index+1)+' must match one of its choices.');
+          }
+          output.push({sort_order:index+1,question_type:questionType,prompt,options,points,answer_key:questionType==='multiple_choice'?answer:null});
+        }
+        if(!output.length)throw new Error('Add at least one question.');
+        return output;
+      }
+      async function saveTestQuestions(testId,questions){
+        if(editingTestId){
+          const {error:deleteError}=await client.from('education_test_questions').delete().eq('test_id',testId);
+          if(deleteError)throw deleteError;
+        }
+        const {data:inserted,error}=await client.from('education_test_questions').insert(
+          questions.map(q=>({test_id:testId,sort_order:q.sort_order,question_type:q.question_type,prompt:q.prompt,options:q.options,points:q.points}))
+        ).select('id,sort_order');
+        if(error)throw error;
+        const keyRows=(inserted||[]).map(q=>{
+          const source=questions.find(item=>item.sort_order===q.sort_order);
+          return source?.answer_key?{question_id:q.id,answer_key:source.answer_key}:null;
+        }).filter(Boolean);
+        if(keyRows.length){
+          const {error:keyError}=await client.from('education_test_answer_keys').insert(keyRows);
+          if(keyError)throw keyError;
+        }
+      }
+      async function loadTests(){
+        testList.replaceChildren();testReviewPanel.hidden=true;
+        const {data,error}=await client.from('education_tests')
+          .select('id,student_id,title,description,instructions,due_date,duration_minutes,attempt_limit,status,created_at,education_students(student_name)')
+          .eq('user_id',currentUserId).order('created_at',{ascending:false});
+        if(error){const p=document.createElement('p');p.className='error';p.textContent=error.message||'Could not load tests.';testList.append(p);return}
+        if(!data?.length){const p=document.createElement('p');p.className='muted';p.textContent='No tests yet. Create your first test above.';testList.append(p);return}
+        for(const test of data){
+          const {data:attempts,error:attemptError}=await client.from('education_test_attempts')
+            .select('id,status,attempt_number,started_at,submitted_at,auto_score,total_score,points_possible,teacher_feedback')
+            .eq('test_id',test.id).order('attempt_number',{ascending:true});
+          const article=document.createElement('article');article.className='assignment-item';
+          const h=document.createElement('h3');h.textContent=test.title;
+          const meta=document.createElement('p');meta.className='assignment-meta';
+          meta.textContent=(test.education_students?.student_name||'Student')+' · '+test.status+' · '+(attempts||[]).length+' attempt(s) · '+(test.due_date?'Due '+test.due_date:'No due date');
+          article.append(h,meta);
+          if(test.description){const desc=document.createElement('p');desc.textContent=test.description;article.append(desc)}
+          if(attemptError){const p=document.createElement('p');p.className='error';p.textContent='Could not load attempts: '+attemptError.message;article.append(p)}
+          const actions=document.createElement('div');actions.className='assignment-actions';
+          if(!attempts?.length){
+            const edit=document.createElement('button');edit.type='button';edit.className='secondary';edit.textContent='Edit';
+            edit.addEventListener('click',async()=>{
+              const {data:questions,error:qError}=await client.from('education_test_questions')
+                .select('id,sort_order,question_type,prompt,options,points').eq('test_id',test.id).order('sort_order');
+              if(qError){setTestMessage(qError.message,true);return}
+              const {data:keys,error:kError}=await client.from('education_test_answer_keys')
+                .select('question_id,answer_key').in('question_id',(questions||[]).map(q=>q.id));
+              if(kError){setTestMessage(kError.message,true);return}
+              const keyMap=new Map((keys||[]).map(k=>[k.question_id,k.answer_key]));
+              editingTestId=test.id;await loadTestStudents(test.student_id);
+              testTitle.value=test.title;testDescription.value=test.description||'';testInstructions.value=test.instructions||'';
+              testDueDate.value=test.due_date||'';testDuration.value=test.duration_minutes||'';
+              testAttemptLimit.value=String(test.attempt_limit||1);testStatus.value=test.status;
+              testEditors.replaceChildren();
+              (questions||[]).forEach(q=>addTestQuestionEditor({...q,answer_key:keyMap.get(q.id)||''}));
+              if(!questions?.length)addTestQuestionEditor();
+              testFormTitle.textContent='Edit test';testSubmit.textContent='Save test';testCancel.hidden=false;
+              testForm.scrollIntoView({behavior:'smooth',block:'start'});testTitle.focus();
+            });actions.append(edit);
+          }
+          const publish=document.createElement('button');publish.type='button';publish.className='secondary';
+          publish.textContent=test.status==='published'?'Move to draft':'Publish';
+          publish.addEventListener('click',async()=>{
+            const next=test.status==='published'?'draft':'published';
+            const {error:updateError}=await client.from('education_tests').update({status:next}).eq('id',test.id).eq('user_id',currentUserId);
+            if(updateError){setTestMessage(updateError.message,true);return}
+            setTestMessage(next==='published'?'Test published to the selected student.':'Test moved to draft.');await loadTests();
+          });actions.append(publish);
+          if(test.status!=='archived'){
+            const archive=document.createElement('button');archive.type='button';archive.className='secondary';archive.textContent='Archive';
+            archive.addEventListener('click',async()=>{
+              const {error:e}=await client.from('education_tests').update({status:'archived'}).eq('id',test.id).eq('user_id',currentUserId);
+              if(e){setTestMessage(e.message,true);return}setTestMessage('Test archived.');await loadTests();
+            });actions.append(archive);
+          }
+          if(!attempts?.length){
+            const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Delete';
+            remove.addEventListener('click',async()=>{
+              if(!confirm('Delete this test and its questions?'))return;
+              const {error:e}=await client.from('education_tests').delete().eq('id',test.id).eq('user_id',currentUserId);
+              if(e){setTestMessage(e.message,true);return}setTestMessage('Test deleted.');await loadTests();
+            });actions.append(remove);
+          }
+          article.append(actions);
+          (attempts||[]).forEach(attempt=>{
+            const row=document.createElement('div');row.className='comment';
+            const label=document.createElement('p');label.className='assignment-meta';
+            label.textContent='Attempt '+attempt.attempt_number+' · '+attempt.status+' · '+(attempt.total_score===null?'Not graded':attempt.total_score+' / '+(attempt.points_possible??'?'));
+            row.append(label);
+            if(attempt.status==='submitted'||attempt.status==='graded'){
+              const review=document.createElement('button');review.type='button';review.className='secondary';review.textContent=attempt.status==='graded'?'Review / update grade':'Review and grade';
+              review.addEventListener('click',()=>void reviewTestAttempt(test,attempt));
+              row.append(review);
+            }
+            article.append(row);
+          });
+          testList.append(article);
+        }
+      }
+      async function reviewTestAttempt(test,attempt){
+        testReviewPanel.hidden=false;testReviewPanel.replaceChildren();
+        const heading=document.createElement('h3');heading.textContent='Review: '+test.title+' · Attempt '+attempt.attempt_number;testReviewPanel.append(heading);
+        const [qResult,rResult,kResult]=await Promise.all([
+          client.from('education_test_questions').select('id,sort_order,question_type,prompt,options,points').eq('test_id',test.id).order('sort_order'),
+          client.from('education_test_responses').select('id,question_id,answer,auto_points,manual_points,teacher_feedback').eq('attempt_id',attempt.id),
+          client.from('education_test_answer_keys').select('question_id,answer_key').in('question_id',(await client.from('education_test_questions').select('id').eq('test_id',test.id)).data?.map(q=>q.id)||[])
+        ]);
+        if(qResult.error||rResult.error||kResult.error){const p=document.createElement('p');p.className='error';p.textContent=(qResult.error||rResult.error||kResult.error).message;testReviewPanel.append(p);return}
+        const responseMap=new Map((rResult.data||[]).map(x=>[x.question_id,x]));
+        const keyMap=new Map((kResult.data||[]).map(x=>[x.question_id,x.answer_key]));
+        const feedbackLabel=document.createElement('label');feedbackLabel.textContent='Overall feedback';
+        const overallFeedback=document.createElement('textarea');overallFeedback.rows=3;overallFeedback.maxLength=3000;overallFeedback.value=attempt.teacher_feedback||'';feedbackLabel.append(overallFeedback);testReviewPanel.append(feedbackLabel);
+        for(const q of qResult.data||[]){
+          const response=responseMap.get(q.id);
+          const box=document.createElement('div');box.className='comment';
+          const prompt=document.createElement('strong');prompt.textContent=q.sort_order+'. '+q.prompt+' ('+q.points+' points)';
+          const answer=document.createElement('p');answer.textContent='Student answer: '+(response?.answer||'No answer submitted.');
+          box.append(prompt,answer);
+          if(q.question_type==='multiple_choice'){
+            const expected=document.createElement('p');expected.textContent='Correct answer: '+(keyMap.get(q.id)||'Not set')+' · Automatic score: '+(response?.auto_points||0)+' / '+q.points;box.append(expected);
+          }else{
+            const label=document.createElement('label');label.textContent='Manual points (0–'+q.points+')';
+            const mark=document.createElement('input');mark.type='number';mark.min='0';mark.max=String(q.points);mark.step='0.25';mark.value=response?.manual_points??0;
+            const notes=document.createElement('textarea');notes.rows=2;notes.maxLength=2000;notes.placeholder='Feedback for this answer…';notes.value=response?.teacher_feedback||'';
+            label.append(mark);const notesLabel=document.createElement('label');notesLabel.textContent='Question feedback';notesLabel.append(notes);box.append(label,notesLabel);
+            box.dataset.responseId=response?.id||'';box.dataset.mark=mark.value;
+            mark.addEventListener('input',()=>box.dataset.mark=mark.value);
+            notes.dataset.feedbackInput='true';
+          }
+          testReviewPanel.append(box);
+        }
+        const grade=document.createElement('button');grade.type='button';grade.textContent='Save marks and finalize grade';
+        grade.addEventListener('click',async()=>{
+          grade.disabled=true;
+          for(const box of Array.from(testReviewPanel.querySelectorAll('.comment'))){
+            const id=box.dataset.responseId;if(!id)continue;
+            const mark=box.querySelector('input[type=number]');if(!mark)continue;
+            const points=Number(mark.value);
+            if(!Number.isFinite(points)||points<0){grade.disabled=false;setTestMessage('Enter a valid non-negative mark.',true);return}
+            const feedback=box.querySelector('[data-feedback-input=true]')?.value||'';
+            const {error:e}=await client.from('education_test_responses').update({manual_points:points,teacher_feedback:feedback}).eq('id',id);
+            if(e){grade.disabled=false;setTestMessage(e.message,true);return}
+          }
+          const {data:score,error:e}=await client.rpc('grade_education_test_attempt',{p_attempt_id:attempt.id,p_feedback:overallFeedback.value.trim()});
+          grade.disabled=false;
+          if(e){setTestMessage(e.message||'Could not finalize grade.',true);return}
+          setTestMessage('Test graded. Final score: '+score+'.');await loadTests();testReviewPanel.hidden=true;
+        });
+        testReviewPanel.append(grade);
+      }
+      testCancel.addEventListener('click',()=>{resetTestForm();setTestMessage('Test editing cancelled.')});
+      document.getElementById('test-add-question').addEventListener('click',()=>addTestQuestionEditor());
+      testForm.addEventListener('submit',async event=>{
+        event.preventDefault();
+        let questions;
+        try{questions=collectTestQuestions()}catch(error){setTestMessage(error.message,true);return}
+        const studentId=testStudent.value,title=testTitle.value.trim();
+        if(!studentId||!title){setTestMessage('Choose a student and enter a test title.',true);return}
+        const duration=testDuration.value.trim();
+        if(duration&&(!Number.isInteger(Number(duration))||Number(duration)<1||Number(duration)>240)){setTestMessage('Time limit must be between 1 and 240 minutes.',true);return}
+        const record={student_id:studentId,title,description:testDescription.value.trim(),instructions:testInstructions.value.trim(),
+          due_date:testDueDate.value||null,duration_minutes:duration?Number(duration):null,
+          attempt_limit:Number(testAttemptLimit.value),status:testStatus.value};
+        testSubmit.disabled=true;setTestMessage(editingTestId?'Saving test…':'Creating test…');
+        let testId=editingTestId;
+        let result;
+        if(testId){
+          result=await client.from('education_tests').update(record).eq('id',testId).eq('user_id',currentUserId);
+        }else{
+          result=await client.from('education_tests').insert({...record,user_id:currentUserId}).select('id').single();
+          testId=result.data?.id;
+        }
+        if(result.error||!testId){testSubmit.disabled=false;setTestMessage(result.error?.message||'Could not save test.',true);return}
+        try{
+          await saveTestQuestions(testId,questions);
+        }catch(error){
+          testSubmit.disabled=false;setTestMessage('The test details were saved, but its questions could not be saved: '+(error.message||'Unknown error'),true);return;
+        }
+        testSubmit.disabled=false;resetTestForm();setTestMessage(record.status==='published'?'Test published successfully.':'Test saved successfully.');await loadTests();
+      });
+      resetTestForm();
 
       async function init() {
         const { data, error } = await client.auth.getSession();
