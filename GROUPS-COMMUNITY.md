@@ -56,6 +56,7 @@ The following migrations were applied to the connected Supabase project:
 6. `configkit_groups_rpc_execute_restrictions`
 7. `configkit_groups_strict_grants_and_restrictive_gates`
 8. `configkit_groups_verified_session_trigger_guard`
+9. `configkit_groups_rls_policy_performance`
 
 The Storage bucket is private and has a 10 MiB object limit. No service-role key is used in browser code.
 
