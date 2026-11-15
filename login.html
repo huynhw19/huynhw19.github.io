@@ -42,6 +42,20 @@
         <label for="password">Password</label>
         <input id="password" name="password" type="password" autocomplete="current-password" required minlength="6" maxlength="72">
         <button class="text-button" id="resetPassword" type="button">Forgot password?</button>
+        <section id="familySetup" class="education-note" hidden aria-labelledby="family-setup-title">
+          <h2 id="family-setup-title">Family ID</h2>
+          <p class="muted">Create a new family and get a shareable Family ID, or join an existing family with its ID.</p>
+          <label for="familyChoice">Family setup</label>
+          <select id="familyChoice" name="familyChoice">
+            <option value="create">Create a new family</option>
+            <option value="join">Join an existing family</option>
+          </select>
+          <div id="familyIdField" hidden>
+            <label for="familyId">Family ID</label>
+            <input id="familyId" name="familyId" maxlength="12" minlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" pattern="[A-Za-z0-9]{12}" placeholder="Enter the 12-character Family ID">
+          </div>
+          <small class="muted">Only share your Family ID with people you want to add to your family.</small>
+        </section>
         <div class="form-actions"><button class="provider" id="emailSubmit" type="submit">Log in with email</button></div>
       </form>
       <section id="password-recovery" class="education-note" hidden aria-labelledby="recovery-title">
@@ -121,6 +135,10 @@
       const workplaceField = document.getElementById('workplaceField');
       const organizationName = document.getElementById('organizationName');
       const organizationField = document.getElementById('organizationField');
+      const familySetup = document.getElementById('familySetup');
+      const familyChoice = document.getElementById('familyChoice');
+      const familyIdField = document.getElementById('familyIdField');
+      const familyIdInput = document.getElementById('familyId');
       let mode = 'login';
       let redirecting = false;
       let pendingMfaFactorId = '';
@@ -147,6 +165,10 @@
       if (pendingEmail2FALink) callbackUrlObject.searchParams.set('email_2fa_token', pendingEmail2FALink);
       const callbackUrl = callbackUrlObject.href;
       const accountIntentKey = 'configkit_account_oauth_intent';
+      const familySetupMetadata = () => ({
+        configkit_family_action: familyChoice.value,
+        configkit_family_id: familyChoice.value === 'join' ? familyIdInput.value.replace(/\s+/g, '').toUpperCase() : ''
+      });
       const isPasskeySession = userId => window.CONFIGKIT_PASSKEY_SESSION?.has(userId) === true;
       const clearPasskeySession = () => window.CONFIGKIT_PASSKEY_SESSION?.clear();
       function selectedMetadata() {
@@ -183,6 +205,33 @@
         if (data?.error) throw new Error(data.error);
         return data || {};
       }
+      function updateFamilyFields() {
+        const joining = familyChoice.value === 'join';
+        familyIdField.hidden = !joining;
+        familyIdInput.required = mode === 'signup' && joining;
+      }
+      async function completeFamilySetup(user, oauthMetadata=null) {
+        const metadata = oauthMetadata || user?.user_metadata || {};
+        const action = metadata.configkit_family_action;
+        if (!action) return null;
+        let result;
+        if (action === 'create') {
+          result = await client.rpc('create_family_account');
+        } else if (action === 'join') {
+          const code = String(metadata.configkit_family_id || '').replace(/\s+/g, '').toUpperCase();
+          if (!/^[A-Z0-9]{12}$/.test(code)) throw new Error('The saved Family ID is missing or invalid. Sign up again and enter a valid Family ID.');
+          result = await client.rpc('join_family_account', {p_family_id:code});
+        } else {
+          throw new Error('The family setup choice is invalid. Please try signing up again.');
+        }
+        if (result.error) throw result.error;
+        const createdFamilyId = typeof result.data === 'string' ? result.data : result.data?.family_id;
+        if (!createdFamilyId) throw new Error('Family setup completed, but no Family ID was returned. Please contact support.');
+        const {error:clearError} = await client.auth.updateUser({data:{configkit_family_action:null,configkit_family_id:null}});
+        if (clearError) throw clearError;
+        sessionStorage.removeItem(accountIntentKey);
+        return {familyId:createdFamilyId,action};
+      }
       function updateAccountFields() {
         const isEducation = accountType.value === 'education';
         const isWork = accountType.value === 'work';
@@ -202,6 +251,8 @@
         password.autocomplete = signingUp ? 'new-password' : 'current-password';
         emailSubmit.textContent = signingUp ? 'Create account' : 'Log in with email';
         resetPassword.hidden = signingUp;
+        familySetup.hidden = !signingUp;
+        updateFamilyFields();
         setStatus(signingUp ? 'Create an account with your email and a password.' : 'Log in with your email and password.');
       }
       // Auth events and explicit post-login calls can arrive together (especially
@@ -319,16 +370,23 @@
           document.getElementById('mfa-challenge').hidden = true;
           document.getElementById('email-mfa-challenge').hidden = true;
           const pendingIntent = sessionStorage.getItem(accountIntentKey);
+          let oauthMetadata = null;
           if (pendingIntent) {
-            sessionStorage.removeItem(accountIntentKey);
             try {
-              const metadata = JSON.parse(pendingIntent);
-              const {error:metadataError} = await client.auth.updateUser({data:metadata});
+              oauthMetadata = JSON.parse(pendingIntent);
+              const {error:metadataError} = await client.auth.updateUser({data:oauthMetadata});
               if (metadataError) throw metadataError;
             } catch (error) {
               setStatus(`Signed in, but the account profile could not be saved: ${error.message || 'Please try again in account settings.'}`, true);
               return;
             }
+          }
+          let completedFamily = null;
+          try {
+            completedFamily = await completeFamilySetup(data.session.user, oauthMetadata);
+          } catch (error) {
+            setStatus(`Your account is signed in, but family setup could not be completed: ${error.message || 'Please check the Family ID and try again.'}`, true);
+            return;
           }
           // Only attempt the privileged unlock when the account is actually locked.
           // A normal, older persisted session must not be treated as a failed unlock:
@@ -348,7 +406,10 @@
             }
             setStatus('Your account has been unlocked successfully.');
           }
-          if (!redirecting) { redirecting = true; window.location.replace(postLoginDestination); }
+          if (!redirecting) {
+            redirecting = true;
+            window.location.replace(completedFamily ? 'family.html' : postLoginDestination);
+          }
         } else {
           passkeyPrimaryPending = false;
           pendingMfaFactorId = '';
@@ -372,7 +433,8 @@
           if (type === 'education' && !institution.value.trim()) throw new Error('Enter your school or institution name first.');
           if (type === 'work' && !workplace.value.trim()) throw new Error('Enter your company or workplace name first.');
           if (type === 'organization' && !organizationName.value.trim()) throw new Error('Enter your organization name first.');
-          sessionStorage.setItem(accountIntentKey, JSON.stringify(selectedMetadata()));
+          const oauthIntent = {...selectedMetadata(), ...(mode === 'signup' ? familySetupMetadata() : {})};
+          sessionStorage.setItem(accountIntentKey, JSON.stringify(oauthIntent));
           const options = {provider, options:{redirectTo:callbackUrl}};
           if (provider === 'azure') options.options.scopes = 'openid email profile';
           const {error} = await client.auth.signInWithOAuth(options);
@@ -526,17 +588,22 @@
       });
 
       accountType.addEventListener('change', updateAccountFields);
+      familyChoice.addEventListener('change', updateFamilyFields);
+      familyIdInput.addEventListener('input', () => {
+        familyIdInput.value = familyIdInput.value.replace(/\s+/g, '').toUpperCase().slice(0,12);
+      });
       loginTab.addEventListener('click', () => setMode('login'));
       signupTab.addEventListener('click', () => setMode('signup'));
       form.addEventListener('submit', async event => {
         event.preventDefault();
+        if (mode === 'signup') updateFamilyFields();
         if (!form.reportValidity()) return;
         clearPasskeySession();
         setBusy(true);
         setStatus(mode === 'signup' ? 'Creating your account…' : 'Logging in…');
         try {
           const result = mode === 'signup'
-            ? await client.auth.signUp({email:email.value.trim(), password:password.value, options:{emailRedirectTo:callbackUrl, data:selectedMetadata()}})
+            ? await client.auth.signUp({email:email.value.trim(), password:password.value, options:{emailRedirectTo:callbackUrl, data:{...selectedMetadata(), ...familySetupMetadata()}}}})
             : await client.auth.signInWithPassword({email:email.value.trim(), password:password.value});
           if (result.error) throw result.error;
           // Existing users can opt into the self-declared Developer account label at login.
@@ -660,7 +727,7 @@
         sessionStorage.removeItem(accountIntentKey);
         setStatus('The identity provider could not complete sign-in. Check the provider setup and try again.', true);
       }
-      updateAccountFields(); setMode('login'); void renderSession();
+      updateAccountFields(); updateFamilyFields(); setMode('login'); void renderSession();
     })();
   </script>
 </body>
