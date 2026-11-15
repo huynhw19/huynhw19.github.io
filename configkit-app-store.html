@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Discover, download, publish and manage apps for your devices with ConfigKit App Store.">
+<title>ConfigKit App Store</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px rgba(23,35,31,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(100% - 32px,1120px);margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}header nav{display:flex;gap:1rem;flex-wrap:wrap}.brand{font-weight:800;color:var(--ink);text-decoration:none}main{padding:2rem 0 4rem}.hero,.panel,.app-card{background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.hero{padding:clamp(1.3rem,4vw,2.5rem);background:linear-gradient(130deg,#e8f4ed,#fff 70%)}.eyebrow{display:inline-block;background:var(--mint);color:var(--dark);border-radius:99px;padding:.25rem .7rem;font-size:.82rem;font-weight:750}.hero h1{font-size:clamp(2.2rem,6vw,3.7rem);line-height:1.08;margin:.7rem 0}.muted,.meta{color:var(--muted)}.muted{margin:.3rem 0 .8rem}.actions,.filters,.chips,.card-actions{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap}.button,button{font:inherit;font-weight:650;border:1px solid var(--green);border-radius:9px;padding:.65rem .95rem;background:var(--green);color:white;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.button.secondary,button.secondary{background:white;color:var(--dark);border-color:var(--line)}button.danger{background:white;color:var(--red);border-color:#e8caca}button:disabled{opacity:.55;cursor:wait}.panel{padding:1.2rem;margin:1.3rem 0}.panel h2{margin:.1rem 0 .7rem}.status{padding:.8rem 1rem;border:1px solid var(--line);background:white;border-radius:10px;margin:1rem 0}.status.error{color:var(--red);background:#fff4f4}.status:empty{display:none}.filters input,.filters select,.field input,.field textarea,.field select{width:100%;font:inherit;padding:.7rem .8rem;border:1px solid #bdcbc3;border-radius:9px;background:white;color:var(--ink)}.filters input{flex:1;min-width:190px}.filters select{width:auto;min-width:150px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,255px),1fr));gap:1rem;margin:1rem 0}.app-card{padding:1.1rem;display:flex;flex-direction:column;min-height:225px}.app-card h3{margin:.4rem 0}.app-card p{margin:.25rem 0 .8rem;color:var(--muted);white-space:pre-wrap;flex:1}.os-chip{display:inline-block;padding:.16rem .5rem;background:var(--mint);color:var(--dark);border-radius:99px;font-size:.78rem;font-weight:650}.field{margin:.85rem 0}.field label{display:block;font-weight:700;margin-bottom:.35rem}.field small{display:block;color:var(--muted);font-weight:400}.field textarea{min-height:100px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.checks{display:flex;flex-wrap:wrap;gap:.6rem 1rem}.checks label{display:flex;align-items:center;gap:.35rem;font-weight:500}.checks input{width:auto}.empty{padding:1.5rem;border:1px dashed #bdcbc3;border-radius:12px;color:var(--muted);text-align:center}.hidden{display:none!important}.section-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}.warning{border-left:4px solid #d6a441;background:#fff9e9;padding:.8rem 1rem;border-radius:8px;color:#5b4b28}footer{padding:1.5rem 0 2.5rem;color:var(--muted);border-top:1px solid var(--line)}@media(max-width:650px){header{align-items:flex-start;flex-direction:column;padding:1rem 0}header nav{gap:.65rem}.form-grid{grid-template-columns:1fr}.filters select{flex:1}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="dashboard.html">⌘ ConfigKit</a><nav aria-label="Main navigation"><a href="dashboard.html">Dashboard</a><a href="community-store.html">Community Store</a><a href="community-games.html">Community Games</a><a href="index.html">Home</a></nav></header>
+<main>
+<section class="hero"><span class="eyebrow">Discover · Download · Create</span><h1>ConfigKit App Store</h1><p class="muted">Find apps for your device, filter by operating system, or publish an app of your own. Creators can upload a downloadable file or link to an external download page.</p><div class="actions"><a class="button" href="#browse">Browse apps</a><a class="button secondary" href="#creator">Publish an app</a></div></section>
+<p id="status" class="status" role="status" aria-live="polite">Connecting to ConfigKit…</p>
+<section id="browse" class="panel"><div class="section-heading"><div><span class="eyebrow">App catalogue</span><h2>Find apps for your OS</h2></div></div><div class="filters"><input id="search" type="search" placeholder="Search apps…" aria-label="Search apps"><select id="os-filter" aria-label="Filter by operating system"><option value="">All operating systems</option><option value="ios">iOS</option><option value="android">Android</option><option value="windows">Windows</option><option value="macos">macOS</option><option value="linux">Linux</option><option value="web">Web</option></select><select id="category-filter" aria-label="Filter by category"><option value="">All categories</option><option>Productivity</option><option>Utilities</option><option>Education</option><option>Games</option><option>Developer tools</option><option>Security</option><option>Other</option></select></div><div id="apps" class="grid"><p class="muted">Loading apps…</p></div></section>
+<section id="creator" class="panel"><span class="eyebrow">Creator studio</span><h2 id="form-title">Publish a new app</h2><p class="muted">Only upload apps you own or are authorised to distribute. Check executable files before installing them. ConfigKit does not scan or certify uploaded software.</p>
+<form id="app-form"><input id="app-id" type="hidden"><div class="form-grid"><div class="field"><label for="name">App name</label><input id="name" maxlength="100" required placeholder="My useful app"></div><div class="field"><label for="version">Version (optional)</label><input id="version" maxlength="40" placeholder="1.0.0"></div></div><div class="field"><label for="description">Description</label><textarea id="description" maxlength="2000" required placeholder="What does this app do?"></textarea></div><div class="form-grid"><div class="field"><label for="category">Category</label><select id="category"><option>Productivity</option><option>Utilities</option><option>Education</option><option>Games</option><option>Developer tools</option><option>Security</option><option>Other</option></select></div><div class="field"><label for="delivery">How will users get it?</label><select id="delivery"><option value="file">Upload an app file</option><option value="link">Redirect to an external link</option></select></div></div><div class="field"><label>Supported operating systems</label><div class="checks"><label><input type="checkbox" name="os" value="ios"> iOS</label><label><input type="checkbox" name="os" value="android"> Android</label><label><input type="checkbox" name="os" value="windows"> Windows</label><label><input type="checkbox" name="os" value="macos"> macOS</label><label><input type="checkbox" name="os" value="linux"> Linux</label><label><input type="checkbox" name="os" value="web"> Web</label></div></div><div class="field" id="file-field"><label for="app-file">App file</label><input id="app-file" type="file"><small>Maximum upload size: 250 MB. You can keep the current file when editing by leaving this empty.</small></div><div class="field hidden" id="link-field"><label for="redirect-url">External download URL</label><input id="redirect-url" type="url" inputmode="url" placeholder="https://example.com/download"><small>Only HTTPS links are accepted.</small></div><div class="actions"><button id="save-app" type="submit">Save as draft</button><button class="secondary" id="reset-form" type="button">Clear form</button></div></form></section>
+<section id="manage" class="panel"><div class="section-heading"><div><span class="eyebrow">Your apps</span><h2>Manage your listings</h2></div></div><p class="muted">Edit details, publish or unpublish listings, archive apps, or remove apps you no longer maintain.</p><div id="my-apps" class="grid"><p class="muted">Sign in to manage your apps.</p></div></section>
+<p class="warning"><strong>Safety reminder:</strong> ConfigKit App Store is a community catalogue, not an app-signing, malware-scanning, or platform-approval service. Check the publisher, permissions, file type and download source before installing software.</p>
+</main>
+<footer>ConfigKit App Store · <a href="safety.html">Safety &amp; contact</a></footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const status = $('status'), appsEl = $('apps'), myAppsEl = $('my-apps'), form = $('app-form');
+  const cfg = window.CONFIGKIT_AUTH || {};
+  const osNames = {ios:'iOS',android:'Android',windows:'Windows',macos:'macOS',linux:'Linux',web:'Web'};
+  const setStatus = (message, error) => { status.textContent = message; status.classList.toggle('error', !!error); };
+  if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || !window.supabase?.createClient) { setStatus('Authentication is not configured. Please contact the site owner.', true); return; }
+  const client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  let user = null, myApps = [];
+  const escapeText = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const selectedOS = () => Array.from(form.querySelectorAll('input[name="os"]:checked')).map(el => el.value);
+  const setOS = values => form.querySelectorAll('input[name="os"]').forEach(el => { el.checked = values.includes(el.value); });
+  function resetForm() { form.reset(); $('app-id').value=''; $('form-title').textContent='Publish a new app'; $('save-app').textContent='Save as draft'; $('file-field').classList.toggle('hidden', $('delivery').value !== 'file'); $('link-field').classList.toggle('hidden', $('delivery').value !== 'link'); }
+  function appCard(app, ownerMode) {
+    const card = document.createElement('article'); card.className='app-card';
+    const tags = (app.supported_os || []).map(os => '<span class="os-chip">'+escapeText(osNames[os] || os)+'</span>').join(' ');
+    const description = escapeText(app.description).replace(/\n/g,'<br>');
+    card.innerHTML = '<div class="chips">'+tags+'</div><h3>'+escapeText(app.name)+'</h3><div class="meta">'+escapeText(app.category)+' · '+(app.version ? 'v'+escapeText(app.version)+' · ' : '')+(app.delivery_type === 'file' ? 'File download' : 'External link')+'</div><p>'+description+'</p><div class="card-actions">'+(ownerMode ? '<span class="meta">Status: '+escapeText(app.status)+'</span><button type="button" data-action="edit">Edit</button><button type="button" class="secondary" data-action="status">'+(app.status === 'published' ? 'Unpublish' : 'Publish')+'</button><button type="button" class="secondary" data-action="archive">Archive</button><button type="button" class="danger" data-action="delete">Delete</button>' : '<button type="button" data-action="download">Get app</button>')+'</div>';
+    card.querySelectorAll('button').forEach(button => button.addEventListener('click', () => handleCardAction(button.dataset.action, app)));
+    return card;
+  }
+  function renderApps(rows) {
+    const term = $('search').value.trim().toLowerCase(), os = $('os-filter').value, category = $('category-filter').value;
+    const filtered = rows.filter(app => (!term || (app.name+' '+app.description).toLowerCase().includes(term)) && (!os || app.supported_os.includes(os)) && (!category || app.category === category));
+    appsEl.replaceChildren();
+    if (!filtered.length) { appsEl.innerHTML='<div class="empty">No published apps match those filters yet.</div>'; return; }
+    filtered.forEach(app => appsEl.append(appCard(app,false)));
+  }
+  function renderMine() {
+    myAppsEl.replaceChildren();
+    if (!myApps.length) { myAppsEl.innerHTML='<div class="empty">You have not created any apps yet. Use Creator Studio above to publish your first listing.</div>'; return; }
+    myApps.forEach(app => myAppsEl.append(appCard(app,true)));
+  }
+  async function loadApps() {
+    const {data,error} = await client.from('configkit_apps').select('id,owner_id,name,description,category,supported_os,delivery_type,file_path,file_name,redirect_url,version,status,updated_at').eq('status','published').order('updated_at',{ascending:false});
+    if (error) throw error;
+    renderApps(data || []);
+    if (user) {
+      const mine = await client.from('configkit_apps').select('*').eq('owner_id',user.id).order('updated_at',{ascending:false});
+      if (mine.error) throw mine.error;
+      myApps = mine.data || []; renderMine();
+    }
+  }
+  async function handleCardAction(action, app) {
+    try {
+      if (action === 'download') {
+        if (app.delivery_type === 'link') { window.open(app.redirect_url,'_blank','noopener,noreferrer'); return; }
+        const {data,error} = await client.storage.from('configkit-app-files').createSignedUrl(app.file_path,90);
+        if (error) throw error;
+        window.location.assign(data.signedUrl);
+      } else if (action === 'edit') {
+        $('app-id').value=app.id; $('name').value=app.name; $('version').value=app.version || ''; $('description').value=app.description || ''; $('category').value=app.category; $('delivery').value=app.delivery_type; $('redirect-url').value=app.redirect_url || ''; setOS(app.supported_os || []);
+        $('form-title').textContent='Edit '+app.name; $('save-app').textContent='Save changes'; $('file-field').classList.toggle('hidden',app.delivery_type!=='file'); $('link-field').classList.toggle('hidden',app.delivery_type!=='link'); $('creator').scrollIntoView({behavior:'smooth'});
+      } else if (action === 'status') {
+        const next = app.status === 'published' ? 'draft' : 'published';
+        const {error} = await client.from('configkit_apps').update({status:next,updated_at:new Date().toISOString()}).eq('id',app.id).eq('owner_id',user.id);
+        if (error) throw error; await refresh();
+      } else if (action === 'archive') {
+        const {error} = await client.from('configkit_apps').update({status:'archived',updated_at:new Date().toISOString()}).eq('id',app.id).eq('owner_id',user.id);
+        if (error) throw error; await refresh();
+      } else if (action === 'delete' && confirm('Delete this app listing permanently?')) {
+        const {error} = await client.from('configkit_apps').delete().eq('id',app.id).eq('owner_id',user.id);
+        if (error) throw error;
+        if (app.file_path) await client.storage.from('configkit-app-files').remove([app.file_path]);
+        await refresh();
+      }
+    } catch (error) { setStatus(error.message || 'That action could not be completed.',true); }
+  }
+  async function refresh() { await loadApps(); setStatus('App Store updated.'); }
+  $('delivery').addEventListener('change', () => { $('file-field').classList.toggle('hidden',$('delivery').value!=='file'); $('link-field').classList.toggle('hidden',$('delivery').value!=='link'); });
+  $('reset-form').addEventListener('click',resetForm);
+  ['search','os-filter','category-filter'].forEach(id => $(id).addEventListener(id==='search'?'input':'change', () => client.from('configkit_apps').select('id,name,description,category,supported_os,delivery_type,redirect_url,version,status').eq('status','published').order('updated_at',{ascending:false}).then(({data,error}) => { if(error) setStatus(error.message,true); else renderApps(data || []); })));
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const button=$('save-app'); button.disabled=true;
+    let uploadedPath=null, previousPath=null;
+    try {
+      const id=$('app-id').value, existing=myApps.find(item=>item.id===id);
+      const name=$('name').value.trim(), description=$('description').value.trim(), delivery=$('delivery').value, os=selectedOS(), file=$('app-file').files[0] || null;
+      if (!os.length) throw new Error('Choose at least one supported operating system.');
+      if (delivery==='link' && !/^https:\/\//i.test($('redirect-url').value.trim())) throw new Error('Enter a valid HTTPS download link.');
+      if (file && file.size > 262144000) throw new Error('The selected file is larger than 250 MB.');
+      if (delivery==='file' && !file && !(existing && existing.file_path)) throw new Error('Choose an app file to upload.');
+      let filePath=delivery==='file' && existing ? existing.file_path : null, fileName=delivery==='file' && existing ? existing.file_name : null;
+      if (delivery==='file' && file) {
+        const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').slice(-120) || 'app-download';
+        uploadedPath=user.id+'/'+crypto.randomUUID()+'-'+safeName;
+        const {error}=await client.storage.from('configkit-app-files').upload(uploadedPath,file,{upsert:false,contentType:file.type || 'application/octet-stream'});
+        if(error) throw error;
+        filePath=uploadedPath; fileName=file.name;
+      }
+      const payload={owner_id:user.id,name,description,category:$('category').value,supported_os:os,delivery_type:delivery,file_path:delivery==='file'?filePath:null,file_name:delivery==='file'?fileName:null,redirect_url:delivery==='link'?$('redirect-url').value.trim():null,version:$('version').value.trim(),status:existing ? existing.status : 'draft',updated_at:new Date().toISOString()};
+      let result;
+      if(id) result=await client.from('configkit_apps').update(payload).eq('id',id).eq('owner_id',user.id).select('id').single();
+      else result=await client.from('configkit_apps').insert(payload).select('id').single();
+      if(result.error) throw result.error;
+      if(existing?.file_path && existing.file_path!==filePath) await client.storage.from('configkit-app-files').remove([existing.file_path]);
+      resetForm(); await refresh(); setStatus('App saved. Review it in Your Apps, then publish it when ready.');
+    } catch(error) {
+      if(uploadedPath) await client.storage.from('configkit-app-files').remove([uploadedPath]);
+      setStatus(error.message || 'Could not save this app.',true);
+    } finally { button.disabled=false; }
+  });
+  async function init() {
+    try {
+      const {data,error}=await client.auth.getSession(); if(error) throw error;
+      if(!data.session) { setStatus('Sign in to ConfigKit to download files and create or manage app listings.'); $('my-apps').innerHTML='<div class="empty"><a href="login.html?next=configkit-app-store.html">Sign in or create an account</a> to publish apps and access downloads.</div>'; $('app-form').classList.add('hidden'); await loadApps(); return; }
+      user=data.session.user;
+      const passkeySession=window.CONFIGKIT_PASSKEY_SESSION?.has(user.id)===true;
+      const {data:emailStatus,error:emailError}=await client.functions.invoke('email-2fa',{body:{action:'status'}});
+      if(emailError) throw emailError;
+      const {data:assurance,error:assuranceError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+      if(assuranceError) throw assuranceError;
+      if(emailStatus?.enabled && !emailStatus.verified && !passkeySession && assurance.currentLevel!=='aal2') { window.location.replace('login.html?next=configkit-app-store.html'); return; }
+      if(assurance.nextLevel==='aal2' && assurance.currentLevel!=='aal2' && !emailStatus?.verified && !passkeySession) { window.location.replace('login.html?next=configkit-app-store.html'); return; }
+      await loadApps(); setStatus('Signed in. Browse published apps or manage your own listings.');
+    } catch(error) { setStatus(error.message || 'Could not connect to the App Store.',true); }
+  }
+  init();
+})();
+</script>
+</body>
+</html>
