@@ -56,3 +56,10 @@ The storytelling catalogue is generated client-side from reusable, age-banded te
 ## Family Dashboard storytelling progress
 
 Parents can see a private per-child storytelling summary in the Family Dashboard: completed stories, completed creative activities, recently opened or completed items, age bands and favourites. Children can save a story as a favourite and mark a creative activity finished. The progress record stores catalogue item IDs, titles, age bands, completion state, favourite state and the selected ending—not children's free-text story writing. The `family_storytelling_progress` table is protected by row-level security: parents can read only their own children's records, and a child session can save progress only for its linked child profile. Apply `supabase/migrations/20261112143000_family_storytelling_progress.sql` before using cloud-saved storytelling progress.
+
+
+## Kids Photo Editor and Gallery
+
+The Kids Zone Photo Editor is available from `photo-booth.html` (linked as **Photo Editor & Booth**). A child can either turn on the device camera with a parent's permission or upload a local JPG, PNG, WEBP or GIF image (maximum 10 MB). The editor offers rotation, brightness, contrast, colour saturation, decorative frames and stickers. Saving exports a decorated JPEG and adds it to the existing **My Photo Gallery**.
+
+The gallery uses IndexedDB in the same browser and device. Images are not uploaded to Supabase or shared with other users. The gallery supports refresh and individual or bulk deletion. Browser site-data clearing can remove saved pictures, so families should keep their own backups of anything important. Parents should supervise photo use and remind children not to include school, address or other identifying details.
