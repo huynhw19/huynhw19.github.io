@@ -28,6 +28,14 @@
   <option value="organization">Organization account</option>
 </select>
         <div id="institutionField" hidden><label for="institution">School or educational institution</label><input id="institution" name="institution" maxlength="120" autocomplete="organization" placeholder="Name of your school or institution"></div>
+        <div id="studentSignupField" hidden>
+          <label for="studentSignup"><input id="studentSignup" name="studentSignup" type="checkbox" style="width:auto;margin-right:.45rem"> I am a student signing up with a teacher-issued Student ID</label>
+          <div id="studentIdField" hidden>
+            <label for="studentId">Student ID</label>
+            <input id="studentId" name="studentId" maxlength="15" minlength="15" autocomplete="off" autocapitalize="characters" spellcheck="false" pattern="CK-[A-Fa-f0-9]{12}" placeholder="e.g. CK-1A2B3C4D5E6F">
+            <small class="muted">Ask your teacher for the Student ID shown beside your name in their Education Dashboard.</small>
+          </div>
+        </div>
         <div id="workplaceField" hidden><label for="workplace">Company or workplace</label><input id="workplace" name="workplace" maxlength="120" autocomplete="organization" placeholder="Name of your company or workplace"></div>
         <div id="organizationField" hidden><label for="organizationName">Organization name</label><input id="organizationName" name="organizationName" maxlength="120" autocomplete="organization" placeholder="Name of your enterprise"></div>
         <small class="muted">Account types and profile details are self-declared and are not verified. Choosing an account type does not provide organization-managed access or special privileges.</small>
@@ -131,6 +139,10 @@
       const accountType = document.getElementById('accountType');
       const institution = document.getElementById('institution');
       const institutionField = document.getElementById('institutionField');
+      const studentSignupField = document.getElementById('studentSignupField');
+      const studentSignup = document.getElementById('studentSignup');
+      const studentIdField = document.getElementById('studentIdField');
+      const studentIdInput = document.getElementById('studentId');
       const workplace = document.getElementById('workplace');
       const workplaceField = document.getElementById('workplaceField');
       const organizationName = document.getElementById('organizationName');
@@ -175,6 +187,10 @@
         const type = accountType.value;
         const metadata = {account_type:type};
         if (type === 'education' && institution.value.trim()) metadata.institution = institution.value.trim();
+        if (mode === 'signup' && type === 'education' && studentSignup.checked) {
+          metadata.configkit_student_signup = true;
+          metadata.configkit_student_id = studentIdInput.value.replace(/\\s+/g, '').toUpperCase();
+        }
         if (type === 'work' && workplace.value.trim()) metadata.workplace = workplace.value.trim();
         if (type === 'organization' && organizationName.value.trim()) metadata.organization_name = organizationName.value.trim();
         return metadata;
@@ -232,6 +248,13 @@
         sessionStorage.removeItem(accountIntentKey);
         return {familyId:createdFamilyId,action};
       }
+      function updateStudentFields() {
+        const showStudentChoice = mode === 'signup' && accountType.value === 'education';
+        studentSignupField.hidden = !showStudentChoice;
+        const needsStudentId = showStudentChoice && studentSignup.checked;
+        studentIdField.hidden = !needsStudentId;
+        studentIdInput.required = needsStudentId;
+      }
       function updateAccountFields() {
         const isEducation = accountType.value === 'education';
         const isWork = accountType.value === 'work';
@@ -242,6 +265,7 @@
         workplace.required = isWork;
         organizationField.hidden = !isOrganization;
         organizationName.required = isOrganization;
+        updateStudentFields();
       }
       function setMode(nextMode) {
         mode = nextMode;
@@ -253,6 +277,7 @@
         resetPassword.hidden = signingUp;
         familySetup.hidden = !signingUp;
         updateFamilyFields();
+        updateStudentFields();
         setStatus(signingUp ? 'Create an account with your email and a password.' : 'Log in with your email and password.');
       }
       // Auth events and explicit post-login calls can arrive together (especially
@@ -432,6 +457,7 @@
         try {
           const type = accountType.value;
           if (type === 'education' && !institution.value.trim()) throw new Error('Enter your school or institution name first.');
+          if (mode === 'signup' && type === 'education' && studentSignup.checked && !/^CK-[A-F0-9]{12}$/.test(studentIdInput.value.trim().toUpperCase())) throw new Error('Enter the 15-character Student ID provided by your teacher.');
           if (type === 'work' && !workplace.value.trim()) throw new Error('Enter your company or workplace name first.');
           if (type === 'organization' && !organizationName.value.trim()) throw new Error('Enter your organization name first.');
           if (mode === 'signup' && familyChoice.value === 'join' && !/^[A-Za-z0-9]{16}$/.test(familyIdInput.value.replace(/\\s+/g, ''))) throw new Error('Enter a valid 16-character Family ID first.');
@@ -590,6 +616,10 @@
       });
 
       accountType.addEventListener('change', updateAccountFields);
+      studentSignup.addEventListener('change', updateStudentFields);
+      studentIdInput.addEventListener('input', () => {
+        studentIdInput.value = studentIdInput.value.replace(/\\s+/g, '').toUpperCase().slice(0, 15);
+      });
       familyChoice.addEventListener('change', updateFamilyFields);
       familyIdInput.addEventListener('input', () => {
         familyIdInput.value = familyIdInput.value.replace(/\s+/g, '').toUpperCase().slice(0,16);
