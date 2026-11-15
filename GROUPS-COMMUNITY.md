@@ -52,6 +52,8 @@ The following migrations were applied to the connected Supabase project:
 2. `configkit_groups_community_immutable_content`
 3. `configkit_groups_community_rls_recursion_fix`
 4. `configkit_groups_community_report_integrity`
+5. `configkit_groups_community_query_indexes`
+6. `configkit_groups_rpc_execute_restrictions`
 
 The Storage bucket is private and has a 10 MiB object limit. No service-role key is used in browser code.
 
