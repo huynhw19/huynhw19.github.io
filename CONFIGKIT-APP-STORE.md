@@ -4,7 +4,7 @@ The App Store is available at [configkit-app-store.html](https://huynhw19.github
 
 ## Features
 
-- Browse published apps and filter by iOS, Android, Windows, macOS, Linux, or web.
+- Browse published apps and filter by iOS, Android, Windows, macOS, Linux, or web. The page preselects a detected operating system when the browser exposes one.
 - Search by app name and description and filter by category.
 - Publish an app as a file upload or an HTTPS redirect link.
 - Save new listings as drafts, then publish, unpublish, archive, edit, or delete them.
