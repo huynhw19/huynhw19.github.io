@@ -1,2 +1,0 @@
-revoke all on table public.family_accounts, public.family_account_members from public, anon, authenticated;
-grant select on table public.family_accounts, public.family_account_members to authenticated;
