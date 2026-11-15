@@ -465,8 +465,7 @@
                     if (updateError) throw updateError;
                     if (!updated) throw new Error('This application has already changed. Refresh the queue.');
                     setStatus('Application ' + decision.value + '.');
-                    await refreshQueue();
-                    await loadDeveloperApplication();
+                    window.location.reload();
                   } catch (error) {
                     setStatus('Could not review the application: ' + (error.message || 'Please try again.'),true);
                     button.disabled = false;
