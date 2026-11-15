@@ -119,7 +119,38 @@
   document.getElementById('followers-count').textContent=follows.filter(x=>x.following_id===id).length;
   document.getElementById('following-count').textContent=follows.filter(x=>x.follower_id===id).length;
   const actions=document.getElementById('profile-actions');actions.replaceChildren();
-  if(id!==currentUser.id){const b=document.createElement('button');b.textContent=follows.some(x=>x.follower_id===currentUser.id&&x.following_id===id)?'Following · Unfollow':'Follow';b.addEventListener('click',()=>toggleFollow(id,b));actions.append(b);}
+  if(id!==currentUser.id){
+   const b=document.createElement('button');b.textContent=follows.some(x=>x.follower_id===currentUser.id&&x.following_id===id)?'Following · Unfollow':'Follow';b.addEventListener('click',()=>toggleFollow(id,b));actions.append(b);
+   // Only the fixed owner identity receives moderation controls. The Edge
+   // Function independently verifies this identity before using Auth Admin.
+   if(currentUser.id==='dc7d85d3-e40c-4002-87ea-8df7f904a3ed'){
+    const moderationStatus=document.createElement('p');moderationStatus.className='muted';moderationStatus.setAttribute('role','status');moderationStatus.textContent='Checking member account status…';moderationStatus.style.flexBasis='100%';actions.append(moderationStatus);
+    const moderationButton=document.createElement('button');moderationButton.type='button';moderationButton.className='danger';moderationButton.disabled=true;moderationButton.textContent='Loading…';actions.append(moderationButton);
+    const getModerationStatus=async()=>{
+     const {data,error}=await client.functions.invoke('moderate-member',{body:{action:'status',userId:id}});
+     if(error)throw error;if(data?.error)throw new Error(data.error);
+     moderationButton.disabled=false;
+     moderationButton.textContent=data.banned?'Unban member':'Ban member';
+     moderationButton.className=data.banned?'secondary':'danger';
+     moderationStatus.textContent=data.banned?'This member is banned from signing in.':'This member is not currently banned.';
+     return data.banned;
+    };
+    getModerationStatus().catch(error=>{moderationButton.disabled=true;moderationButton.textContent='Moderation unavailable';moderationStatus.textContent=error.message||'Could not check account status.';});
+    moderationButton.addEventListener('click',async()=>{
+     const banning=moderationButton.textContent==='Ban member';
+     const action=banning?'ban':'unban';
+     const prompt=banning?'Ban this member from signing in to ConfigKit? This is a long-term ban (100 years) and can be reversed by the owner.':'Restore this member’s ability to sign in to ConfigKit?';
+     if(!window.confirm(prompt))return;
+     moderationButton.disabled=true;moderationStatus.textContent=banning?'Applying ban…':'Removing ban…';
+     try{
+      const {data,error}=await client.functions.invoke('moderate-member',{body:{action,userId:id}});
+      if(error)throw error;if(data?.error)throw new Error(data.error);
+      const banned=await getModerationStatus();
+      moderationStatus.textContent=banned?'Member banned. They will be blocked from future sign-ins.':'Member unbanned. They can sign in again.';
+     }catch(error){moderationStatus.textContent=error.message||'Could not update this member’s status.';moderationButton.disabled=false;}
+    });
+   }
+  }
   else{const note=document.createElement('span');note.className='muted';note.textContent='This is how other discoverable members see your profile.';actions.append(note);}
  }
  document.getElementById('search').addEventListener('input',()=>{if(!new URLSearchParams(location.search).has('user'))renderRoute();});
