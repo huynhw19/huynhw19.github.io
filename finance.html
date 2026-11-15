@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Private personal money manager for ConfigKit members.">
+<title>Money — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f5f8f5;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--red:#a43c3c;--shadow:0 12px 32px #17231f10}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}button,input,select{font:inherit}button{border:0;border-radius:10px;padding:11px 16px;background:var(--green);color:white;font-weight:700;cursor:pointer}button:disabled{opacity:.55;cursor:wait}.secondary{background:var(--mint);color:var(--dark);border:1px solid #d5e6da}.danger{background:#fff1f1;color:var(--red);border:1px solid #f0d4d4}header,main,footer{width:min(1100px,calc(100% - 32px));margin:auto}header{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}header a{text-decoration:none;font-weight:700}.brand{color:var(--ink);font-size:1.05rem}nav{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}main{padding:28px 0 48px}.eyebrow{display:inline-block;background:var(--mint);color:var(--dark);padding:5px 10px;border-radius:99px;font-size:.8rem;font-weight:700}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:12px 0 8px}h2{font-size:1.1rem;margin:0 0 12px}.muted{color:var(--muted)}.notice{padding:14px 16px;border:1px solid var(--line);background:white;border-radius:12px;margin:14px 0}.notice.error{color:var(--red);border-color:#efcccc}.layout{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-top:20px}.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);min-width:0}.balance{background:linear-gradient(135deg,#174b39,#226b51);color:white}.balance .muted{color:#d8e9df}.amount{font-size:clamp(2rem,5vw,2.8rem);font-weight:800;letter-spacing:-.04em;margin:6px 0}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}.stat{background:#ffffff18;border:1px solid #ffffff2b;border-radius:12px;padding:12px}.stat strong{display:block;font-size:1.15rem}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:24px 0 12px}.accounts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.account{border:1px solid var(--line);border-radius:12px;padding:14px}.account strong{display:block}.account .acct-balance{font-size:1.3rem;font-weight:800;margin:5px 0}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}.field label{font-size:.88rem;font-weight:700}.field input,.field select{width:100%;padding:10px 11px;border:1px solid #cbd6cf;border-radius:9px;background:white;color:var(--ink);min-width:0}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.transactions{width:100%;border-collapse:collapse}.transactions th,.transactions td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line);font-size:.9rem}.transactions th{color:var(--muted);font-weight:700}.transactions td:last-child,.transactions th:last-child{text-align:right;white-space:nowrap}.positive{color:var(--green);font-weight:700}.negative{color:var(--red);font-weight:700}.empty{text-align:center;padding:25px;color:var(--muted)}.barrow{display:grid;grid-template-columns:110px 1fr 90px;gap:10px;align-items:center;margin:10px 0;font-size:.88rem}.track{height:9px;background:#edf1ee;border-radius:99px;overflow:hidden}.fill{height:100%;background:var(--green);border-radius:99px}.small{font-size:.82rem}.section{margin-top:16px}.table-wrap{overflow-x:auto}footer{padding:20px 0 36px;color:var(--muted)}[hidden]{display:none!important}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}header{padding:12px 0;align-items:flex-start;flex-direction:column}nav{gap:.7rem}.transactions th:nth-child(3),.transactions td:nth-child(3){display:none}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="index.html">⌘ ConfigKit</a><nav><a href="dashboard.html">Dashboard</a><a href="account-settings.html">Account settings</a><button id="signout" class="secondary" type="button">Sign out</button></nav></header>
+<main>
+<div id="status" class="notice" role="status" aria-live="polite">Checking your sign-in…</div>
+<div id="app" hidden>
+<span class="eyebrow">Personal finance</span><h1>Your money</h1><p class="muted">Track what you have, what you spend, and move money between your own tracked accounts.</p>
+<div class="layout">
+<section class="card balance"><span class="muted">Total available balance</span><div class="amount" id="total-balance">$0.00</div><span class="muted small" id="balance-caption">Across your tracked accounts</span><div class="stats"><div class="stat"><span class="muted small">Income this month</span><strong id="month-income">$0.00</strong></div><div class="stat"><span class="muted small">Spending this month</span><strong id="month-spend">$0.00</strong></div></div></section>
+<section class="card"><h2>Spending breakdown</h2><p class="muted small">Expenses this month by category</p><div id="spending-chart" class="empty">Add transactions to see your spending.</div></section>
+</div>
+<div class="toolbar"><h2>Your accounts</h2><button id="show-account-form" type="button">＋ Add account</button></div>
+<section class="accounts" id="accounts"></section>
+<div class="layout section">
+<section class="card"><h2 id="entry-title">Add a transaction</h2><form id="transaction-form"><div class="form-grid">
+<div class="field"><label for="tx-kind">Type</label><select id="tx-kind"><option value="expense">Expense</option><option value="income">Income</option></select></div>
+<div class="field"><label for="tx-account">Account</label><select id="tx-account" required></select></div>
+<div class="field"><label for="tx-amount">Amount</label><input id="tx-amount" type="number" min="0.01" max="100000000" step="0.01" required placeholder="0.00"></div>
+<div class="field"><label for="tx-category">Category</label><select id="tx-category"><option>Food & dining</option><option>Transport</option><option>Shopping</option><option>Bills</option><option>Entertainment</option><option>Health</option><option>Income</option><option>Other</option></select></div>
+<div class="field full"><label for="tx-description">Description</label><input id="tx-description" maxlength="160" required placeholder="e.g. Groceries"></div>
+</div><div class="actions"><button type="submit">Save transaction</button></div></form></section>
+<section class="card" id="account-form-card" hidden><h2>Add an account</h2><form id="account-form"><div class="form-grid">
+<div class="field full"><label for="account-name">Account name</label><input id="account-name" maxlength="80" required placeholder="Everyday account"></div>
+<div class="field"><label for="account-type">Type</label><select id="account-type"><option value="everyday">Everyday</option><option value="savings">Savings</option><option value="cash">Cash</option><option value="other">Other</option></select></div>
+<div class="field"><label for="account-currency">Currency</label><select id="account-currency"><option value="AUD">AUD — Australian dollar</option><option value="USD">USD — US dollar</option><option value="NZD">NZD — New Zealand dollar</option><option value="GBP">GBP — Pound sterling</option><option value="EUR">EUR — Euro</option></select></div>
+<div class="field full"><label for="account-opening">Starting balance</label><input id="account-opening" type="number" min="0" max="100000000" step="0.01" value="0" required></div>
+</div><div class="actions"><button type="submit">Create account</button><button class="secondary" id="cancel-account" type="button">Cancel</button></div></form></section>
+</div>
+<section class="card section"><h2>Transfer between your accounts</h2><p class="muted small">This moves entries between accounts you track here. It does not send money through a bank.</p><form id="transfer-form"><div class="form-grid">
+<div class="field"><label for="transfer-from">From</label><select id="transfer-from" required></select></div><div class="field"><label for="transfer-to">To</label><select id="transfer-to" required></select></div>
+<div class="field"><label for="transfer-amount">Amount</label><input id="transfer-amount" type="number" min="0.01" max="100000000" step="0.01" required placeholder="0.00"></div>
+<div class="field"><label for="transfer-description">Description</label><input id="transfer-description" maxlength="160" value="Transfer" required></div>
+</div><div class="actions"><button type="submit">Transfer funds</button></div></form></section>
+<section class="card section"><div class="toolbar"><h2>Recent activity</h2><span class="muted small" id="tx-count"></span></div><div class="table-wrap"><table class="transactions"><thead><tr><th>Details</th><th>Category</th><th>Account</th><th>Amount</th></tr></thead><tbody id="transactions"></tbody></table></div></section>
+<p class="muted small">Privacy: your records are private to your signed-in account. This is a manual budgeting ledger, not a connected bank account or regulated banking service. Never enter bank passwords, card PINs, or full card numbers here.</p>
+</div>
+</main><footer>ConfigKit · Personal money tracker</footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+const config=window.CONFIGKIT_AUTH||{}, status=document.getElementById('status'), app=document.getElementById('app');
+const setStatus=(msg,error=false)=>{status.hidden=false;status.classList.toggle('error',error);status.textContent=msg};
+if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){setStatus('Authentication is not configured.',true);return}
+const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let user=null,accounts=[],transactions=[];
+const $=id=>document.getElementById(id);
+const money=(amount,currency='AUD')=>new Intl.NumberFormat(undefined,{style:'currency',currency}).format(Number(amount)||0);
+const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const accountById=id=>accounts.find(a=>a.id===id);
+const signedAmount=t=>(t.kind==='income'||t.kind==='transfer_in'?1:-1)*Number(t.amount);
+async function load(){
+ const [a,t]=await Promise.all([
+  db.from('money_accounts').select('id,name,account_type,currency,opening_balance,created_at').order('created_at'),
+  db.from('money_transactions').select('id,account_id,kind,amount,description,category,created_at,transfer_group').order('created_at',{ascending:false}).limit(500)
+ ]);
+ if(a.error)throw a.error;if(t.error)throw t.error;accounts=a.data||[];transactions=t.data||[];render();
+}
+function render(){
+ const totalByCurrency={};accounts.forEach(a=>{totalByCurrency[a.currency]=(totalByCurrency[a.currency]||0)+Number(a.opening_balance)});
+ transactions.forEach(t=>{const a=accountById(t.account_id);if(a)totalByCurrency[a.currency]=(totalByCurrency[a.currency]||0)+signedAmount(t)});
+ const currencies=Object.keys(totalByCurrency);
+ $('total-balance').textContent=currencies.length?currencies.map(c=>money(totalByCurrency[c],c)).join(' · '):money(0);
+ $('balance-caption').textContent=accounts.length?accounts.length+' tracked account'+(accounts.length===1?'':'s'):'Create an account to get started';
+ const now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+ const month=transactions.filter(t=>new Date(t.created_at)>=monthStart);
+ const income=month.filter(t=>t.kind==='income').reduce((s,t)=>s+Number(t.amount),0);
+ const spend=month.filter(t=>t.kind==='expense').reduce((s,t)=>s+Number(t.amount),0);
+ const mainCurrency=currencies[0]||'AUD';$('month-income').textContent=money(income,mainCurrency);$('month-spend').textContent=money(spend,mainCurrency);
+ $('accounts').innerHTML=accounts.length?accounts.map(a=>{
+  const balance=Number(a.opening_balance)+transactions.filter(t=>t.account_id===a.id).reduce((s,t)=>s+signedAmount(t),0);
+  return '<article class="account"><strong>'+escapeHtml(a.name)+'</strong><span class="muted small">'+escapeHtml(a.account_type)+' · '+escapeHtml(a.currency)+'</span><div class="acct-balance">'+money(balance,a.currency)+'</div><button class="secondary small edit-account" data-id="'+a.id+'" type="button">Rename</button> <button class="danger small delete-account" data-id="'+a.id+'" type="button">Delete</button></article>'
+ }).join(''):'<div class="card muted">No accounts yet. Add an account to start tracking your money.</div>';
+ const opts=accounts.map(a=>'<option value="'+a.id+'">'+escapeHtml(a.name)+' ('+a.currency+')</option>').join('');
+ ['tx-account','transfer-from','transfer-to'].forEach(id=>$(id).innerHTML=opts);
+ const usable=accounts.length>1;
+ $('transfer-form').querySelector('button').disabled=!usable;
+ $('transactions').innerHTML=transactions.length?transactions.slice(0,100).map(t=>{
+  const a=accountById(t.account_id),plus=t.kind==='income'||t.kind==='transfer_in';
+  const label=t.kind==='transfer_in'?'Transfer received':t.kind==='transfer_out'?'Transfer sent':t.kind==='income'?'Income':'Expense';
+  return '<tr><td><strong>'+escapeHtml(t.description)+'</strong><br><span class="muted small">'+new Date(t.created_at).toLocaleString()+' · '+label+'</span></td><td>'+escapeHtml(t.category)+'</td><td>'+escapeHtml(a?.name||'Account')+'</td><td class="'+(plus?'positive':'negative')+'">'+(plus?'+':'−')+money(t.amount,a?.currency||'AUD')+'</td></tr>'
+ }).join(''):'<tr><td colspan="4" class="empty">No activity yet.</td></tr>';
+ $('tx-count').textContent=transactions.length+' entries';
+ const byCategory={};transactions.filter(t=>t.kind==='expense'&&new Date(t.created_at)>=monthStart).forEach(t=>{byCategory[t.category]=(byCategory[t.category]||0)+Number(t.amount)});
+ const entries=Object.entries(byCategory).sort((x,y)=>y[1]-x[1]),max=entries[0]?.[1]||1;
+ $('spending-chart').innerHTML=entries.length?entries.map(([cat,val])=>'<div class="barrow"><span>'+escapeHtml(cat)+'</span><div class="track"><div class="fill" style="width:'+Math.round(val/max*100)+'%"></div></div><strong>'+money(val,mainCurrency)+'</strong></div>').join(''):'<div class="empty">No expenses recorded this month.</div>';
+}
+async function init(){
+ const {data,error}=await db.auth.getSession();if(error)throw error;
+ if(!data.session){location.replace('login.html?next=finance.html');return}
+ user=data.session.user;
+ const {data:assurance,error:assuranceError}=await db.auth.mfa.getAuthenticatorAssuranceLevel();if(assuranceError)throw assuranceError;
+ const passkey=window.CONFIGKIT_PASSKEY_SESSION?.has(user.id)===true;
+ if(assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'&&!passkey){location.replace('login.html?next=finance.html');return}
+ status.hidden=true;app.hidden=false;await load();
+}
+$('signout').addEventListener('click',async()=>{window.CONFIGKIT_PASSKEY_SESSION?.clear();const {error}=await db.auth.signOut({scope:'local'});if(error)setStatus(error.message,true);else location.replace('login.html')});
+$('show-account-form').addEventListener('click',()=>{$('account-form-card').hidden=false;$('account-name').focus()});
+$('cancel-account').addEventListener('click',()=>{$('account-form-card').hidden=true});
+$('account-form').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:user.id,name:$('account-name').value.trim(),account_type:$('account-type').value,currency:$('account-currency').value,opening_balance:Number($('account-opening').value)};const {error}=await db.from('money_accounts').insert(payload);if(error){setStatus(error.message,true);return}$('account-form').reset();$('account-form-card').hidden=true;await load()});
+$('transaction-form').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:user.id,account_id:$('tx-account').value,kind:$('tx-kind').value,amount:Number($('tx-amount').value),description:$('tx-description').value.trim(),category:$('tx-category').value};const {error}=await db.from('money_transactions').insert(payload);if(error){setStatus(error.message,true);return}$('transaction-form').reset();await load()});
+$('transfer-form').addEventListener('submit',async e=>{e.preventDefault();if($('transfer-from').value===$('transfer-to').value){setStatus('Choose two different accounts.',true);return}const {error}=await db.rpc('transfer_money',{p_from_account:$('transfer-from').value,p_to_account:$('transfer-to').value,p_amount:Number($('transfer-amount').value),p_description:$('transfer-description').value.trim()});if(error){setStatus(error.message,true);return}$('transfer-amount').value='';await load();setStatus('Transfer recorded between your tracked accounts.')});
+$('accounts').addEventListener('click',async e=>{const edit=e.target.closest('.edit-account'),del=e.target.closest('.delete-account');if(edit){const a=accountById(edit.dataset.id),name=prompt('Rename account',a.name);if(name===null)return;if(!name.trim()){setStatus('Account name cannot be empty.',true);return}const {error}=await db.from('money_accounts').update({name:name.trim(),updated_at:new Date().toISOString()}).eq('id',a.id);if(error){setStatus(error.message,true);return}await load()}if(del){const a=accountById(del.dataset.id);if(!confirm('Delete '+a.name+' and all its tracked transactions? This cannot be undone.'))return;const {error}=await db.from('money_accounts').delete().eq('id',a.id);if(error){setStatus(error.message,true);return}await load()}});
+db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)location.replace('login.html')});
+init().catch(e=>setStatus(e.message||'Could not load your money dashboard.',true));
+})();
+</script>
+</body></html>
