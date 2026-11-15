@@ -57,6 +57,12 @@
           <div class="actions"><button id="developer-application-submit" type="submit">Submit application</button><button id="developer-application-withdraw" class="danger" type="button" hidden>Withdraw application</button></div>
         </form>
       </section>
+      <section class="card" id="developer-review-admin" aria-labelledby="developer-review-admin-title" hidden>
+        <h2 id="developer-review-admin-title">Developer Program review — owner</h2>
+        <p class="muted">Review submitted ConfigKit Developer Program applications. Only the ConfigKit owner account can see this queue or change application decisions.</p>
+        <p id="developer-review-admin-status" class="notice" role="status" aria-live="polite">Loading applications…</p>
+        <div id="developer-review-admin-list"></div>
+      </section>
       <section class="card" aria-labelledby="visibility-title">
         <h2 id="visibility-title">Profile visibility</h2>
         <p class="muted">Choose whether your community profile appears in ConfigKit member discovery. Public profiles are visible to signed-in ConfigKit members only; private profiles are hidden from discovery and remain visible to you.</p>
@@ -398,6 +404,88 @@
         el.textContent='Developer Program applications are temporarily unavailable. '+(error.message||'Please try again later.');
         document.getElementById('developer-application-form').querySelectorAll('input,textarea,button').forEach(control=>control.disabled=true);
       }
+      // The reviewer identity is fixed to the ConfigKit owner's Supabase Auth UUID.
+      // Database RLS independently enforces this same identity; this UI check is not the security boundary.
+      async function loadDeveloperReviewAdmin() {
+        const ownerUserId = 'dc7d85d3-e40c-4002-87ea-8df7f904a3ed';
+        if (user.id !== ownerUserId) return;
+        const panel = document.getElementById('developer-review-admin');
+        const statusEl = document.getElementById('developer-review-admin-status');
+        const list = document.getElementById('developer-review-admin-list');
+        panel.hidden = false;
+        async function refreshQueue() {
+          statusEl.textContent = 'Loading applications…';
+          const {data,error} = await client.from('configkit_developer_applications')
+            .select('id,user_id,github_username,portfolio_url,project_summary,status,submitted_at')
+            .order('submitted_at',{ascending:false});
+          if (error) throw error;
+          list.replaceChildren();
+          if (!data?.length) {
+            statusEl.textContent = 'There are no Developer Program applications yet.';
+            return;
+          }
+          const pendingCount = data.filter(item => item.status === 'pending').length;
+          statusEl.textContent = data.length + ' application(s) · ' + pendingCount + ' awaiting review.';
+          for (const item of data) {
+            const card = document.createElement('article');
+            card.style.cssText = 'border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0;background:#fff';
+            const heading = document.createElement('h3');
+            heading.textContent = item.github_username + ' · ' + item.status.toUpperCase();
+            const date = document.createElement('p');
+            date.className = 'muted';
+            date.textContent = 'Submitted ' + new Date(item.submitted_at).toLocaleString();
+            const summary = document.createElement('p');
+            summary.textContent = item.project_summary;
+            card.append(heading,date);
+            if (item.portfolio_url) {
+              const link = document.createElement('a');
+              link.href = item.portfolio_url;
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer';
+              link.textContent = 'Open portfolio / project ↗';
+              card.append(link);
+            }
+            card.append(summary);
+            if (item.status === 'pending') {
+              const actions = document.createElement('div');
+              actions.className = 'actions';
+              actions.style.marginTop = '12px';
+              for (const decision of [{value:'approved',label:'Approve',className:''},{value:'declined',label:'Decline',className:'danger'}]) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.textContent = decision.label;
+                if (decision.className) button.className = decision.className;
+                button.addEventListener('click', async () => {
+                  if (!window.confirm(decision.label + ' the ConfigKit Developer Program application from ' + item.github_username + '?')) return;
+                  button.disabled = true;
+                  try {
+                    const {data:updated,error:updateError} = await client.from('configkit_developer_applications')
+                      .update({status:decision.value,updated_at:new Date().toISOString()})
+                      .eq('id',item.id).eq('status','pending').select('id').maybeSingle();
+                    if (updateError) throw updateError;
+                    if (!updated) throw new Error('This application has already changed. Refresh the queue.');
+                    setStatus('Application ' + decision.value + '.');
+                    await refreshQueue();
+                    await loadDeveloperApplication();
+                  } catch (error) {
+                    setStatus('Could not review the application: ' + (error.message || 'Please try again.'),true);
+                    button.disabled = false;
+                  }
+                });
+                actions.append(button);
+              }
+              card.append(actions);
+            }
+            list.append(card);
+          }
+        }
+        try { await refreshQueue(); }
+        catch (error) {
+          statusEl.textContent = 'The review queue could not be loaded. ' + (error.message || 'Please refresh and try again.');
+        }
+      }
+      await loadDeveloperReviewAdmin();
+
       const email2FAStatusElement = document.getElementById('email-2fa-status');
       const email2FAEnableButton = document.getElementById('email-2fa-enable');
       const email2FADisableButton = document.getElementById('email-2fa-disable');
