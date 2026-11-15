@@ -28,6 +28,15 @@
   const status = $('status'), appsEl = $('apps'), myAppsEl = $('my-apps'), form = $('app-form');
   const cfg = window.CONFIGKIT_AUTH || {};
   const osNames = {ios:'iOS',android:'Android',windows:'Windows',macos:'macOS',linux:'Linux',web:'Web'};
+  function detectOS() {
+    const agent = String(navigator.userAgentData?.platform || navigator.platform || navigator.userAgent || '').toLowerCase();
+    if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) || (agent.includes('mac') && navigator.maxTouchPoints > 1)) return 'ios';
+    if (agent.includes('android')) return 'android';
+    if (agent.includes('win')) return 'windows';
+    if (agent.includes('mac')) return 'macos';
+    if (agent.includes('linux') || agent.includes('x11')) return 'linux';
+    return '';
+  }
   const setStatus = (message, error) => { status.textContent = message; status.classList.toggle('error', !!error); };
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || !window.supabase?.createClient) { setStatus('Authentication is not configured. Please contact the site owner.', true); return; }
   const client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -129,6 +138,7 @@
   });
   async function init() {
     try {
+      const detectedOS=detectOS(); if(detectedOS) $('os-filter').value=detectedOS;
       const {data,error}=await client.auth.getSession(); if(error) throw error;
       if(!data.session) { setStatus('Sign in to ConfigKit to download files and create or manage app listings.'); $('my-apps').innerHTML='<div class="empty"><a href="login.html?next=configkit-app-store.html">Sign in or create an account</a> to publish apps and access downloads.</div>'; $('app-form').classList.add('hidden'); await loadApps(); return; }
       user=data.session.user;
