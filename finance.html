@@ -74,9 +74,9 @@ function render(){
  $('balance-caption').textContent=accounts.length?accounts.length+' tracked account'+(accounts.length===1?'':'s'):'Create an account to get started';
  const now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1);
  const month=transactions.filter(t=>new Date(t.created_at)>=monthStart);
- const income=month.filter(t=>t.kind==='income').reduce((s,t)=>s+Number(t.amount),0);
- const spend=month.filter(t=>t.kind==='expense').reduce((s,t)=>s+Number(t.amount),0);
- const mainCurrency=currencies[0]||'AUD';$('month-income').textContent=money(income,mainCurrency);$('month-spend').textContent=money(spend,mainCurrency);
+ const totals=(kind)=>{const by={};month.filter(t=>t.kind===kind).forEach(t=>{const cur=accountById(t.account_id)?.currency||'AUD';by[cur]=(by[cur]||0)+Number(t.amount)});return Object.entries(by).map(([cur,val])=>money(val,cur)).join(' · ')||money(0,currencies[0]||'AUD')};
+ $('month-income').textContent=totals('income');$('month-spend').textContent=totals('expense');
+ const mainCurrency=currencies[0]||'AUD';
  $('accounts').innerHTML=accounts.length?accounts.map(a=>{
   const balance=Number(a.opening_balance)+transactions.filter(t=>t.account_id===a.id).reduce((s,t)=>s+signedAmount(t),0);
   return '<article class="account"><strong>'+escapeHtml(a.name)+'</strong><span class="muted small">'+escapeHtml(a.account_type)+' · '+escapeHtml(a.currency)+'</span><div class="acct-balance">'+money(balance,a.currency)+'</div><button class="secondary small edit-account" data-id="'+a.id+'" type="button">Rename</button> <button class="danger small delete-account" data-id="'+a.id+'" type="button">Delete</button></article>'
@@ -99,9 +99,13 @@ async function init(){
  const {data,error}=await db.auth.getSession();if(error)throw error;
  if(!data.session){location.replace('login.html?next=finance.html');return}
  user=data.session.user;
- const {data:assurance,error:assuranceError}=await db.auth.mfa.getAuthenticatorAssuranceLevel();if(assuranceError)throw assuranceError;
  const passkey=window.CONFIGKIT_PASSKEY_SESSION?.has(user.id)===true;
- if(assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'&&!passkey){location.replace('login.html?next=finance.html');return}
+ const {data:email2FAStatus,error:email2FAError}=await db.functions.invoke('email-2fa',{body:{action:'status'}});if(email2FAError)throw email2FAError;
+ let recoveryStatus={enabled:false,verified:false};const {data:recoveryData,error:recoveryError}=await db.functions.invoke('recovery-codes',{body:{action:'status'}});if(!recoveryError&&recoveryData)recoveryStatus=recoveryData;
+ const {data:assurance,error:assuranceError}=await db.auth.mfa.getAuthenticatorAssuranceLevel();if(assuranceError)throw assuranceError;
+ if(email2FAStatus?.enabled&&!email2FAStatus.verified&&!recoveryStatus.verified&&!passkey&&assurance.currentLevel!=='aal2'){location.replace('login.html?next=finance.html');return}
+ if(recoveryStatus.enabled&&!recoveryStatus.verified&&!email2FAStatus?.verified&&!passkey&&assurance.currentLevel!=='aal2'){location.replace('login.html?next=finance.html');return}
+ if(!email2FAStatus?.verified&&!recoveryStatus.verified&&!passkey&&assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'){location.replace('login.html?next=finance.html');return}
  status.hidden=true;app.hidden=false;await load();
 }
 $('signout').addEventListener('click',async()=>{window.CONFIGKIT_PASSKEY_SESSION?.clear();const {error}=await db.auth.signOut({scope:'local'});if(error)setStatus(error.message,true);else location.replace('login.html')});
