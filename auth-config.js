@@ -417,3 +417,21 @@ window.CONFIGKIT_AUTH = {
     console.error('Could not initialize the email second-factor redirect guard.', error);
   }
 })();
+
+
+// ConfigKit public maintenance gate. The owner dashboard remains accessible.
+(() => {
+  const path = window.location.pathname;
+  if (path.endsWith('/maintenance.html') || path.endsWith('/owner-control.html')) return;
+  const endpoint = 'https://gwhqnqzzlgslwgijkkpt.supabase.co/functions/v1/owner-site-control';
+  fetch(endpoint, {headers:{apikey:window.CONFIGKIT_AUTH?.supabaseAnonKey || ''},cache:'no-store'})
+    .then(r => { if (!r.ok) throw new Error('status unavailable'); return r.json(); })
+    .then(state => {
+      if (state.maintenance_mode) {
+        const target = new URL('maintenance.html', window.location.href);
+        target.searchParams.set('from', path.split('/').pop() || 'home');
+        window.location.replace(target.toString());
+      }
+    })
+    .catch(() => { /* Fail open: an unavailable control API must not take the public site offline. */ });
+})();
