@@ -125,7 +125,7 @@
 
 <div class="game-search" role="search">
   <label for="game-search">🔎 Find a game</label>
-  <input id="game-search" type="search" placeholder="Search 60,000 games by name or topic…" autocomplete="off">
+  <input id="game-search" type="search" placeholder="Search 110,000 games by name or topic…" autocomplete="off">
   <label for="age-filter">Choose an age group</label>
   <select id="age-filter" aria-label="Filter games by age group">
     <option value="">All age groups</option>
@@ -133,7 +133,7 @@
     <option value="6-8">Ages 6–8</option>
     <option value="9-10">Ages 9–10</option>
   </select>
-  <p id="game-count" class="muted" aria-live="polite">Showing 60,000 games</p>
+  <p id="game-count" class="muted" aria-live="polite">Showing 110,000 games</p>
   <p id="progress-status" class="muted" role="status" aria-live="polite">Open Kids Zone from a child profile to save progress for that child.</p>
 </div>
 <section class="games" aria-label="Games">
@@ -291,7 +291,7 @@ function filterActivities(){const q=document.getElementById('activity-search').v
 document.getElementById('activity-search').addEventListener('input',filterActivities);document.getElementById('activity-age').addEventListener('change',filterActivities);document.getElementById('activity-load-more').addEventListener('click',()=>renderActivities());document.getElementById('activity-new').addEventListener('click',()=>chooseActivity(activityCatalog[Math.floor(Math.random()*activityCatalog.length)]));
 document.getElementById('activity-complete').addEventListener('click',async()=>{if(!activeActivity)return;const button=document.getElementById('activity-complete');button.disabled=true;const saved=await saveStoryRecord('activity',activeActivity,{completed:true});button.disabled=false;if(saved)button.textContent='✓ Activity finished';});document.getElementById('activity-hint').addEventListener('click',()=>{document.getElementById('activity-hint-text').textContent=activeActivity?activeActivity.hint:'Choose an activity first, then ask for a hint.';});filterActivities();chooseActivity(activityCatalog[0]);
 
-// Build a searchable 60,000-game catalog, including 50,000 additional generated games, but render cards in small batches
+// Build a searchable 110,000-game catalog, adding 50,000 generated games to the previous 60,000, but render cards in small batches
 // so mobile browsers do not need to create 10,000 DOM nodes at once.
 const gameTypes=[
   {name:'Number Quest',ageBand:'6-8',desc:'Practise addition, subtraction, multiplication and division',make:n=>{const mode=n%4,a=(n*7)%90+10,b=(n*11)%20+2;if(mode===0)return ['What is '+a+' + '+b+'?',a+b];if(mode===1)return ['What is '+(a+b)+' − '+b+'?',a];if(mode===2)return ['What is '+(n%12+2)+' × '+(n%9+2)+'?',(n%12+2)*(n%9+2)];const divisor=n%9+2,quotient=n%12+2;return ['What is '+(divisor*quotient)+' ÷ '+divisor+'?',quotient];}},
@@ -316,7 +316,7 @@ const gameTypes=[
 const gameGrid=document.querySelector('.games');
 const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
 const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
-const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+const catalog=Array.from({length:109980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
 let shown=0,activeMatches=null;
 async function recordGameProgress(item,isCorrect){
   if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
@@ -331,7 +331,7 @@ function makeCard(item){
   const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
   const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
   const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
-  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 110,000';
   const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
   const challenge=document.createElement('div');challenge.hidden=true;
   const question=document.createElement('p');question.className='mini-question';
@@ -626,7 +626,7 @@ chooseSocialScenario();
 </html>+price+'. How much do '+count+' toys cost?','
 const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
 const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
-const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+const catalog=Array.from({length:109980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
 let shown=0,activeMatches=null;
 async function recordGameProgress(item,isCorrect){
   if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
@@ -641,7 +641,7 @@ function makeCard(item){
   const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
   const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
   const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
-  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 110,000';
   const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
   const challenge=document.createElement('div');challenge.hidden=true;
   const question=document.createElement('p');question.className='mini-question';
@@ -936,7 +936,7 @@ chooseSocialScenario();
 </html>+(price*count),['
 const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
 const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
-const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+const catalog=Array.from({length:109980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
 let shown=0,activeMatches=null;
 async function recordGameProgress(item,isCorrect){
   if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
@@ -951,7 +951,7 @@ function makeCard(item){
   const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
   const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
   const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
-  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 110,000';
   const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
   const challenge=document.createElement('div');challenge.hidden=true;
   const question=document.createElement('p');question.className='mini-question';
@@ -1246,7 +1246,7 @@ chooseSocialScenario();
 </html>+(price*count),'
 const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
 const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
-const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+const catalog=Array.from({length:109980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
 let shown=0,activeMatches=null;
 async function recordGameProgress(item,isCorrect){
   if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
@@ -1261,7 +1261,7 @@ function makeCard(item){
   const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
   const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
   const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
-  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 110,000';
   const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
   const challenge=document.createElement('div');challenge.hidden=true;
   const question=document.createElement('p');question.className='mini-question';
@@ -1556,7 +1556,7 @@ chooseSocialScenario();
 </html>+(price+count),'
 const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
 const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
-const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+const catalog=Array.from({length:109980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
 let shown=0,activeMatches=null;
 async function recordGameProgress(item,isCorrect){
   if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
@@ -1571,7 +1571,7 @@ function makeCard(item){
   const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
   const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
   const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
-  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 110,000';
   const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
   const challenge=document.createElement('div');challenge.hidden=true;
   const question=document.createElement('p');question.className='mini-question';
@@ -1866,7 +1866,7 @@ chooseSocialScenario();
 </html>+(price*count+2),'
 const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
 const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
-const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+const catalog=Array.from({length:109980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
 let shown=0,activeMatches=null;
 async function recordGameProgress(item,isCorrect){
   if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
@@ -1881,7 +1881,7 @@ function makeCard(item){
   const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
   const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
   const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
-  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 110,000';
   const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
   const challenge=document.createElement('div');challenge.hidden=true;
   const question=document.createElement('p');question.className='mini-question';
@@ -2182,7 +2182,7 @@ chooseSocialScenario();
 const gameGrid=document.querySelector('.games');
 const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
 const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
-const catalog=Array.from({length:59980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+const catalog=Array.from({length:109980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
 let shown=0,activeMatches=null;
 async function recordGameProgress(item,isCorrect){
   if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
@@ -2197,7 +2197,7 @@ function makeCard(item){
   const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
   const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
   const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
-  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 60,000';
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 110,000';
   const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
   const challenge=document.createElement('div');challenge.hidden=true;
   const question=document.createElement('p');question.className='mini-question';
