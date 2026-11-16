@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Browse ConfigKit community events and RSVP.">
+<title>Community Events — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 10px 26px rgba(17,35,30,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(100% - 32px,960px);margin:auto}header{padding:18px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}header a{text-decoration:none;font-weight:650}nav{display:flex;gap:14px;flex-wrap:wrap}main{padding:30px 0 55px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.12;margin:.3rem 0}h2{margin:.2rem 0 .6rem}.muted{color:var(--muted)}.eyebrow{color:var(--green);font-weight:750;letter-spacing:.06em;font-size:.8rem}.panel,.event{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}.panel{margin:20px 0}.events{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px;margin:18px 0}.event{display:flex;flex-direction:column;gap:8px}.event h2{font-size:1.25rem}.event p{margin:.1rem 0}.event-meta{color:var(--muted);font-size:.94rem}.event-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:8px}button{font:inherit;font-weight:650;padding:9px 14px;border:0;border-radius:8px;background:var(--green);color:white;cursor:pointer}button.secondary{background:var(--mint);color:var(--dark)}button.danger{background:#a83232}button:disabled{opacity:.55;cursor:wait}input,textarea{font:inherit;padding:10px;border:1px solid #cfd9d4;border-radius:8px;width:100%;background:white;color:var(--ink)}label{display:block;font-weight:650;margin:12px 0 5px}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 14px}.status{padding:12px;border-radius:9px;background:var(--mint);margin:12px 0}.status.error{background:#fff0f0;color:var(--red)}.pill{display:inline-block;padding:2px 9px;border-radius:999px;background:var(--mint);color:var(--dark);font-size:.8rem;font-weight:700}.pill.cancelled{background:#fff0f0;color:var(--red)}footer{padding:18px 0 30px;color:var(--muted)}[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><a href="dashboard.html">← Dashboard</a><nav aria-label="Community navigation"><a href="community.html">Community</a><a href="groups.html">Groups</a><a href="community-games.html">Community Games</a></nav></header>
+<main>
+<p class="eyebrow">CONFIGKIT COMMUNITY</p><h1>Community events</h1>
+<p class="muted">Find out what’s happening and let the community know you’re coming.</p>
+<div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
+<section id="owner-panel" class="panel" hidden>
+<h2 id="form-heading">Create an event</h2>
+<p class="muted">Only Huynhw19 can publish and manage events.</p>
+<form id="event-form">
+<div class="form-grid">
+<div><label for="event-title">Event name</label><input id="event-title" maxlength="120" required placeholder="e.g. ConfigKit community meetup"></div>
+<div><label for="event-location">Location or meeting link</label><input id="event-location" maxlength="240" placeholder="Venue, city, or online"></div>
+<div><label for="event-start">Start date and time</label><input id="event-start" type="datetime-local" required></div>
+<div><label for="event-end">End date and time (optional)</label><input id="event-end" type="datetime-local"></div>
+</div>
+<label for="event-description">Details</label><textarea id="event-description" rows="4" maxlength="5000" placeholder="What should attendees know?"></textarea>
+<div class="event-actions"><button id="save-event" type="submit">Publish event</button><button id="cancel-edit" class="secondary" type="button" hidden>Stop editing</button></div>
+</form>
+</section>
+<section aria-labelledby="events-heading"><h2 id="events-heading">All events</h2><div id="event-list" class="events"></div></section>
+</main>
+<footer>ConfigKit Community Events · Be considerate when sharing event details and meeting locations.</footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+ const OWNER_ID='dc7d85d3-e40c-4002-87ea-8df7f904a3ed';
+ const status=document.getElementById('status'),list=document.getElementById('event-list'),ownerPanel=document.getElementById('owner-panel'),form=document.getElementById('event-form');
+ const config=window.CONFIGKIT_AUTH||{};
+ if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){message('Authentication is not configured.',true);return;}
+ const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ let currentUser=null,events=[],myRsvps=new Set(),editingId=null;
+ function message(value,error=false){status.hidden=false;status.textContent=value;status.classList.toggle('error',error);}
+ function localInputValue(value){const d=new Date(value);const offset=d.getTimezoneOffset();return new Date(d.getTime()-offset*60000).toISOString().slice(0,16);}
+ function dateLabel(value){return new Date(value).toLocaleString(undefined,{dateStyle:'full',timeStyle:'short'});}
+ function resetForm(){editingId=null;form.reset();document.getElementById('form-heading').textContent='Create an event';document.getElementById('save-event').textContent='Publish event';document.getElementById('cancel-edit').hidden=true;}
+ async function load(){
+  const session=await client.auth.getSession();if(!session.data.session){window.location.replace('login.html?next=events.html');return;}
+  currentUser=session.data.session.user;
+  const [recoveryFactor,assuranceResult]=await Promise.all([client.functions.invoke('recovery-codes',{body:{action:'status'}}),client.auth.mfa.getAuthenticatorAssuranceLevel()]);
+  if(recoveryFactor.error)throw recoveryFactor.error;if(assuranceResult.error)throw assuranceResult.error;
+  const recoveryStatus=recoveryFactor.data||{};
+  const factorVerified=recoveryStatus.verified===true||assuranceResult.data?.currentLevel==='aal2';
+  if(recoveryStatus.enabled===true&&!factorVerified){window.location.replace('login.html?next=events.html');return;}
+  ownerPanel.hidden=currentUser.id!==OWNER_ID;
+  await refresh();
+ }
+ async function refresh(){
+  const [eventResult,rsvpResult]=await Promise.all([
+   client.from('community_events').select('*').order('starts_at',{ascending:true}),
+   client.from('community_event_rsvps').select('event_id').eq('user_id',currentUser.id)
+  ]);
+  if(eventResult.error)throw eventResult.error;if(rsvpResult.error)throw rsvpResult.error;
+  events=eventResult.data||[];myRsvps=new Set((rsvpResult.data||[]).map(x=>x.event_id));render();
+  status.hidden=true;
+ }
+ function render(){
+  list.replaceChildren();
+  if(!events.length){const p=document.createElement('p');p.className='muted';p.textContent='No events have been published yet. Check back soon!';list.append(p);return;}
+  for(const event of events){
+   const card=document.createElement('article');card.className='event';
+   const state=document.createElement('span');state.className='pill'+(event.status==='cancelled'?' cancelled':'');state.textContent=event.status==='cancelled'?'Cancelled':(new Date(event.starts_at)<new Date()?'Past event':'Upcoming');card.append(state);
+   const title=document.createElement('h2');title.textContent=event.title;card.append(title);
+   const when=document.createElement('p');when.className='event-meta';when.textContent=dateLabel(event.starts_at)+(event.ends_at?' – '+new Date(event.ends_at).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}):'');card.append(when);
+   if(event.location){const place=document.createElement('p');place.className='event-meta';place.textContent='📍 '+event.location;card.append(place);}
+   if(event.description){const details=document.createElement('p');details.textContent=event.description;card.append(details);}
+   const actions=document.createElement('div');actions.className='event-actions';
+   if(event.status==='published'&&new Date(event.starts_at)>=new Date()){
+    const attending=myRsvps.has(event.id);const rsvp=document.createElement('button');rsvp.className=attending?'secondary':'';rsvp.textContent=attending?'Cancel RSVP':'I’m attending';rsvp.addEventListener('click',()=>toggleRsvp(event.id,rsvp));actions.append(rsvp);
+   }
+   if(currentUser.id===OWNER_ID){
+    const edit=document.createElement('button');edit.className='secondary';edit.textContent='Edit';edit.addEventListener('click',()=>startEdit(event));actions.append(edit);
+    if(event.status==='published'){const cancel=document.createElement('button');cancel.className='danger';cancel.textContent='Cancel event';cancel.addEventListener('click',()=>cancelEvent(event.id,cancel));actions.append(cancel);}
+    const remove=document.createElement('button');remove.className='danger';remove.textContent='Delete';remove.addEventListener('click',()=>deleteEvent(event.id,remove));actions.append(remove);
+   }
+   card.append(actions);list.append(card);
+  }
+ }
+ async function toggleRsvp(id,button){
+  button.disabled=true;
+  const result=myRsvps.has(id)
+   ? await client.from('community_event_rsvps').delete().eq('event_id',id).eq('user_id',currentUser.id)
+   : await client.from('community_event_rsvps').insert({event_id:id,user_id:currentUser.id});
+  button.disabled=false;if(result.error){message(result.error.message,true);return;}
+  await refresh();message(myRsvps.has(id)?'Your RSVP is saved.':'Your RSVP has been cancelled.');
+ }
+ function startEdit(event){
+  editingId=event.id;document.getElementById('event-title').value=event.title;document.getElementById('event-location').value=event.location||'';document.getElementById('event-start').value=localInputValue(event.starts_at);document.getElementById('event-end').value=event.ends_at?localInputValue(event.ends_at):'';document.getElementById('event-description').value=event.description||'';
+  document.getElementById('form-heading').textContent='Edit event';document.getElementById('save-event').textContent='Save changes';document.getElementById('cancel-edit').hidden=false;ownerPanel.scrollIntoView({behavior:'smooth'});
+ }
+ async function cancelEvent(id,button){
+  if(!window.confirm('Cancel this event? Members will see that it has been cancelled.'))return;
+  button.disabled=true;const result=await client.from('community_events').update({status:'cancelled',updated_at:new Date().toISOString()}).eq('id',id);
+  button.disabled=false;if(result.error){message(result.error.message,true);return;}await refresh();message('Event cancelled.');
+ }
+ async function deleteEvent(id,button){
+  if(!window.confirm('Permanently delete this event and its RSVPs?'))return;
+  button.disabled=true;const result=await client.from('community_events').delete().eq('id',id);
+  button.disabled=false;if(result.error){message(result.error.message,true);return;}resetForm();await refresh();message('Event deleted.');
+ }
+ form.addEventListener('submit',async e=>{
+  e.preventDefault();const button=document.getElementById('save-event');button.disabled=true;
+  const starts=document.getElementById('event-start').value,ends=document.getElementById('event-end').value;
+  const record={title:document.getElementById('event-title').value.trim(),location:document.getElementById('event-location').value.trim(),description:document.getElementById('event-description').value.trim(),starts_at:new Date(starts).toISOString(),ends_at:ends?new Date(ends).toISOString():null,updated_at:new Date().toISOString()};
+  if(ends&&new Date(ends)<=new Date(starts)){message('The end time must be after the start time.',true);button.disabled=false;return;}
+  const result=editingId
+   ? await client.from('community_events').update(record).eq('id',editingId)
+   : await client.from('community_events').insert({...record,created_by:currentUser.id});
+  button.disabled=false;if(result.error){message(result.error.message,true);return;}
+  resetForm();await refresh();message(editingId?'Event updated.':'Event published.');
+ });
+ document.getElementById('cancel-edit').addEventListener('click',resetForm);
+ client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session)window.location.replace('login.html');});
+ load().catch(error=>message(error.message||'Could not load events. Please refresh and try again.',true));
+})();
+</script>
+</body></html>
