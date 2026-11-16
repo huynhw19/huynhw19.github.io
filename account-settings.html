@@ -145,10 +145,6 @@
         <p class="muted">Add an authenticator app as a second sign-in step. Compatible apps include Google Authenticator, Microsoft Authenticator, Authy, and 1Password.</p>
         <div id="mfa-factor-list" aria-live="polite"><p class="muted">Loading authenticator settings…</p></div>
         <div class="actions"><button id="mfa-add" type="button">Set up authenticator</button></div>
-        <hr style="border:0;border-top:1px solid var(--line);margin:24px 0">
-        <h3>Passkey as a second factor</h3>
-        <p class="muted">This hosted Supabase project does not currently allow WebAuthn passkeys to be enrolled as MFA factors. A passwordless sign-in passkey cannot replace your AAL2 second factor or appear in the “Trust this device” verification list. Use the authenticator app below for AAL2 verification.</p>
-        <div id="mfa-webauthn-factor-list" aria-live="polite"><p class="muted">WebAuthn MFA is not available for this hosted Supabase project.</p></div>
         <div id="mfa-enrollment" class="notice" hidden>
           <strong>Scan this QR code with your authenticator app</strong>
           <div id="mfa-qr" style="margin:12px 0;max-width:220px"></div>
@@ -179,7 +175,7 @@
       <section class="card" aria-labelledby="passkeys-title">
         <h2 id="passkeys-title">Passwordless sign-in passkeys</h2>
         <p class="muted">Use Face ID, Touch ID, Windows Hello, your device PIN, or a security key to sign in to ConfigKit without a password. Add a passkey while signed in, then use it from the login page.</p>
-        <p class="notice"><strong>Important:</strong> This passkey is for primary sign-in only. It does not appear in the “Trust this device” verification list. For a passkey that can verify “Trust this device”, enroll a separate passkey second factor in <a href="#mfa-settings-title">Two-factor authentication</a>.</p>
+        <p class="muted">Passkeys are for passwordless sign-in only. They are not a second factor for “Trust this device”.</p>
         <div class="actions"><button id="add-passkey" type="button">Add a passkey</button></div>
         <div id="passkey-list" aria-live="polite"><p class="muted">Loading passkeys…</p></div>
         <p class="muted">Passkeys are stored by your device or password manager. You can remove a passkey here if you no longer use that device.</p>
@@ -447,13 +443,7 @@
         }
         const {data,error} = await client.auth.mfa.listFactors();
         if (error) throw error;
-        // Include WebAuthn factors explicitly as well as the combined list. This
-        // keeps verified passkeys visible in the trust-device method picker.
-        const factorMap = new Map();
-        for (const factor of [...(data.all || []), ...(data.webauthn || [])]) {
-          if (factor?.id && factor.status === 'verified') factorMap.set(factor.id, factor);
-        }
-        const verified = [...factorMap.values()];
+        const verified = (data.totp || []).filter(factor => factor?.id && factor.status === 'verified');
         trustVerificationFactors = verified;
         trustMethod.replaceChildren();
         const methodPlaceholder = document.createElement('option');
@@ -465,11 +455,7 @@
         for (const factor of verified) {
           const option = document.createElement('option');
           option.value = factor.id;
-          option.textContent = factor.factor_type === 'totp'
-            ? (factor.friendly_name || 'Authenticator app') + ' · Authenticator code'
-            : factor.factor_type === 'webauthn'
-              ? (factor.friendly_name || 'Passkey') + ' · Passkey (biometric, PIN, or security key)'
-              : factor.factor_type;
+          option.textContent = (factor.friendly_name || 'Authenticator app') + ' · Authenticator code';
           trustMethod.append(option);
         }
         const {data:recovery,error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
@@ -484,7 +470,7 @@
         const hasVerificationMethod = verified.length > 0 ||
           [...trustMethod.options].some(option => option.value === 'recovery-code');
         if (!hasVerificationMethod) {
-          trustVerificationHelp.textContent = 'No verified second factor or unused recovery code is available. Set up an authenticator app or add the separate trusted-device / 2FA passkey in the Two-factor authentication section first. A passwordless sign-in passkey does not count here.';
+          trustVerificationHelp.textContent = 'No verified authenticator app or unused recovery code is available. Set up an authenticator app in the Two-factor authentication section first.';
           trustVerification.hidden = false;
           trustVerifyButton.disabled = true;
           return;
@@ -538,11 +524,6 @@
             if (challengeError) throw challengeError;
             const {error:verifyError} = await client.auth.mfa.verify({factorId:selected.id,challengeId:challenge.id,code:trustCode.value.trim()});
             if (verifyError) throw verifyError;
-          } else if (selected?.factor_type === 'webauthn') {
-            const authenticate = client.auth.mfa.webauthn?.authenticate;
-            if (typeof authenticate !== 'function') throw new Error('Passkey verification is not supported by the loaded Supabase client. Refresh the page and try again.');
-            const {error} = await authenticate.call(client.auth.mfa.webauthn,{factorId:selected.id});
-            if (error) throw error;
           } else {
             throw new Error('Choose a supported verification method.');
           }
@@ -803,7 +784,6 @@
       const mfaFactorList = document.getElementById('mfa-factor-list');
       const mfaEnrollment = document.getElementById('mfa-enrollment');
       const mfaAddButton = document.getElementById('mfa-add');
-      const mfaWebauthnFactorList = document.getElementById('mfa-webauthn-factor-list');
       let pendingEnrollmentFactorId = '';
       async function refreshMfaFactors() {
         mfaFactorList.replaceChildren();
@@ -837,10 +817,6 @@
           });
           row.append(detail,remove); mfaFactorList.append(row);
         }
-        mfaWebauthnFactorList.replaceChildren();
-        const webauthnNote = document.createElement('p'); webauthnNote.className = 'muted';
-        webauthnNote.textContent = 'WebAuthn MFA enrollment is not enabled on this hosted Supabase project. Use the authenticator app for second-factor verification.';
-        mfaWebauthnFactorList.append(webauthnNote);
         const pending = (data.totp || []).filter(factor => factor.status === 'unverified');
         for (const factor of pending) {
           const row = document.createElement('div'); row.className = 'provider';
@@ -992,15 +968,11 @@
 
         const {data:factorData,error:factorError} = await client.auth.mfa.listFactors();
         if (factorError) throw factorError;
-        const factors = [...(factorData.all || []), ...(factorData.webauthn || [])]
-          .filter((factor,index,array) => factor?.id && factor.status === 'verified' &&
-            array.findIndex(item => item.id === factor.id) === index);
-        const totp = factors.find(factor => factor.factor_type === 'totp');
-        const webauthn = factors.find(factor => factor.factor_type === 'webauthn');
+        const totp = (factorData.totp || []).find(factor => factor?.id && factor.status === 'verified');
 
         if (totp) {
           const code = window.prompt('Enter the current six-digit code from your authenticator app to confirm it is you:');
-          if (!code) throw new Error('Passkey management cancelled. Complete second-factor verification first.');
+          if (!code) throw new Error('Passkey management cancelled. Complete authenticator verification first.');
           if (!/^\d{6}$/.test(code.trim())) throw new Error('Enter the six-digit authenticator code.');
           const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:totp.id});
           if (challengeError) throw challengeError;
@@ -1008,11 +980,8 @@
             factorId:totp.id, challengeId:challenge.id, code:code.trim()
           });
           if (verifyError) throw verifyError;
-        } else if (webauthn && typeof client.auth.mfa.webauthn?.authenticate === 'function') {
-          const {error:verifyError} = await client.auth.mfa.webauthn.authenticate({factorId:webauthn.id});
-          if (verifyError) throw verifyError;
         } else {
-          throw new Error('Your account requires a verified second factor before managing sign-in passkeys. Enroll a passkey second factor or authenticator app in the Two-factor authentication section first.');
+          throw new Error('Your account requires a verified second factor before managing sign-in passkeys. Enroll an authenticator app in the Two-factor authentication section first.');
         }
 
         const {data:after,error:afterError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
