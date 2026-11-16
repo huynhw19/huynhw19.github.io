@@ -198,7 +198,17 @@
           <strong>Trusted device access</strong>
           <p id="device-trust-status" role="status" aria-live="polite">Checking whether this device is trusted…</p>
           <div class="actions"><button id="trust-device-button" type="button">Trust this device</button><button id="untrust-device-button" class="secondary" type="button" hidden>Remove device trust</button></div>
-          <p class="muted">Trusting requires a completed two-factor check (AAL2). Only this signed-in session is trusted; signing out or revoking the session ends its trust.</p>
+          <div id="trust-verification" class="notice" hidden>
+            <strong>Verify your account to trust this device</strong>
+            <p class="muted">Complete one of your enrolled security checks. This verification applies only to your current sign-in session.</p>
+            <form id="trust-verification-form">
+              <div class="field"><label for="trust-verification-method">Verification method</label><select id="trust-verification-method" required></select></div>
+              <div class="field" id="trust-code-field"><label for="trust-verification-code">Authenticator code or recovery code</label><input id="trust-verification-code" autocomplete="one-time-code" inputmode="text" maxlength="40" placeholder="Enter your code" required></div>
+              <div class="actions"><button id="trust-verify-button" type="submit">Verify and trust device</button><button id="trust-cancel-button" class="secondary" type="button">Cancel</button></div>
+            </form>
+            <p id="trust-verification-help" class="muted" role="status" aria-live="polite"></p>
+          </div>
+          <p class="muted">Trusting requires a completed two-factor check using an authenticator app, registered passkey, or one-time recovery code. Only this signed-in session is trusted; signing out or revoking the session ends its trust.</p>
         </div>
         <div id="device-session-list" aria-live="polite"><p class="muted">Loading device activity…</p></div>
       </section>
@@ -419,18 +429,113 @@
         trustStatus.textContent = 'Device trust could not be verified. Settings will remain read-only until this can be checked.';
         console.warn('Could not verify current device trust:', error);
       }
+      const trustVerification = document.getElementById('trust-verification');
+      const trustVerificationForm = document.getElementById('trust-verification-form');
+      const trustMethod = document.getElementById('trust-verification-method');
+      const trustCodeField = document.getElementById('trust-code-field');
+      const trustCode = document.getElementById('trust-verification-code');
+      const trustVerifyButton = document.getElementById('trust-verify-button');
+      const trustVerificationHelp = document.getElementById('trust-verification-help');
+      let trustVerificationFactors = [];
+      async function prepareTrustVerification() {
+        const {data:assurance,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (assuranceError) throw assuranceError;
+        if (assurance?.currentLevel === 'aal2') {
+          trustVerification.hidden = true;
+          await finalizeDeviceTrust();
+          return;
+        }
+        const {data,error} = await client.auth.mfa.listFactors();
+        if (error) throw error;
+        const verified = (data.all || []).filter(factor => factor.status === 'verified');
+        trustVerificationFactors = verified;
+        trustMethod.replaceChildren();
+        for (const factor of verified) {
+          const option = document.createElement('option');
+          option.value = factor.id;
+          option.textContent = factor.factor_type === 'totp'
+            ? (factor.friendly_name || 'Authenticator app') + ' · TOTP'
+            : factor.factor_type === 'webauthn'
+              ? (factor.friendly_name || 'Passkey') + ' · Passkey'
+              : factor.factor_type;
+          trustMethod.append(option);
+        }
+        const {data:recovery,error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
+        if (!recoveryError && recovery?.enabled && Number(recovery.remaining) > 0) {
+          const option = document.createElement('option');
+          option.value = 'recovery-code';
+          option.textContent = 'One-time recovery code (' + recovery.remaining + ' remaining)';
+          trustMethod.append(option);
+        }
+        if (!trustMethod.options.length) {
+          trustVerificationHelp.textContent = 'No verified second factor or unused recovery code is available. Sign in again and set up an authenticator app or passkey first.';
+          trustVerification.hidden = false;
+          trustVerifyButton.disabled = true;
+          return;
+        }
+        trustVerifyButton.disabled = false;
+        trustVerificationHelp.textContent = 'Choose a method and complete its verification to continue.';
+        trustVerification.hidden = false;
+        updateTrustCodeField();
+      }
+      function updateTrustCodeField() {
+        const selected = trustVerificationFactors.find(factor => factor.id === trustMethod.value);
+        const needsCode = trustMethod.value === 'recovery-code' || selected?.factor_type === 'totp';
+        trustCodeField.hidden = !needsCode;
+        trustCode.required = needsCode;
+        trustCode.autocomplete = trustMethod.value === 'recovery-code' ? 'off' : 'one-time-code';
+      }
+      async function finalizeDeviceTrust() {
+        const {error} = await client.rpc('trust_current_device');
+        if (error) throw error;
+        await refreshCurrentDeviceTrust();
+        setStatus('This device is now trusted. You can manage account settings here.');
+        applyDeviceAccessMode();
+      }
+      trustMethod.addEventListener('change', updateTrustCodeField);
+      document.getElementById('trust-cancel-button').addEventListener('click', () => {
+        trustVerification.hidden = true;
+        trustCode.value = '';
+        trustButton.disabled = false;
+      });
       trustButton.addEventListener('click', async () => {
         trustButton.disabled = true;
         try {
-          const {error} = await client.rpc('trust_current_device');
-          if (error) throw error;
-          await refreshCurrentDeviceTrust();
-          setStatus('This device is now trusted. You can manage account settings here.');
-          applyDeviceAccessMode();
+          await prepareTrustVerification();
         } catch (error) {
-          setStatus(error.message || 'Could not trust this device. Complete two-factor verification and try again.', true);
-        } finally {
           trustButton.disabled = false;
+          setStatus(error.message || 'Could not prepare account verification.', true);
+        }
+      });
+      trustVerificationForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        trustVerifyButton.disabled = true;
+        trustVerificationHelp.textContent = 'Verifying your security method…';
+        try {
+          const selected = trustVerificationFactors.find(factor => factor.id === trustMethod.value);
+          if (trustMethod.value === 'recovery-code') {
+            const {data,error} = await client.functions.invoke('recovery-codes', {body:{action:'verify',code:trustCode.value.trim()}});
+            if (error) throw new Error(data?.error || error.message || 'Recovery-code verification failed.');
+            if (!data?.verified) throw new Error(data?.error || 'Recovery-code verification failed.');
+          } else if (selected?.factor_type === 'totp') {
+            const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:selected.id});
+            if (challengeError) throw challengeError;
+            const {error:verifyError} = await client.auth.mfa.verify({factorId:selected.id,challengeId:challenge.id,code:trustCode.value.trim()});
+            if (verifyError) throw verifyError;
+          } else if (selected?.factor_type === 'webauthn') {
+            const authenticate = client.auth.mfa.webauthn?.authenticate;
+            if (typeof authenticate !== 'function') throw new Error('Passkey verification is not supported by the loaded Supabase client. Refresh the page and try again.');
+            const {error} = await authenticate.call(client.auth.mfa.webauthn,{factorId:selected.id});
+            if (error) throw error;
+          } else {
+            throw new Error('Choose a supported verification method.');
+          }
+          trustCode.value = '';
+          await finalizeDeviceTrust();
+          trustVerification.hidden = true;
+        } catch (error) {
+          trustVerificationHelp.textContent = error.message || 'Verification failed. Check your code and try again.';
+          trustVerifyButton.disabled = false;
         }
       });
       untrustButton.addEventListener('click', async () => {
