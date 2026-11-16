@@ -38,6 +38,17 @@
         <div id="organization-account-summary" class="notice" hidden><strong>Organization profile type</strong><p>This is a self-declared ConfigKit profile label. It does not create a GitHub organization, represent legal status, or grant special access.</p></div>
         <form id="profile-form">
           <div class="field"><label for="display-name">Display name</label><input id="display-name" name="displayName" maxlength="80" autocomplete="name"></div>
+          <div class="field"><label for="about-you">Tell about you</label><textarea id="about-you" maxlength="1000" rows="4" placeholder="A little about who you are…" style="width:100%;padding:11px 12px;border:1px solid #cbd6d0;border-radius:9px;font:inherit"></textarea><p class="muted">Up to 1,000 characters. Shown on your ConfigKit community profile.</p></div>
+          <div class="field"><label for="current-work">What are you working on?</label><textarea id="current-work" maxlength="1000" rows="4" placeholder="Projects, interests, or what you're building…" style="width:100%;padding:11px 12px;border:1px solid #cbd6d0;border-radius:9px;font:inherit"></textarea></div>
+          <div class="field"><label for="website-url">Main website</label><input id="website-url" type="url" maxlength="2048" placeholder="https://yourwebsite.com"></div>
+          <h3>Social websites</h3>
+          <p class="muted">Add up to six social profile links. Leave any field blank to omit it.</p>
+          <div class="field"><label for="github-url">GitHub</label><input id="github-url" type="url" maxlength="2048" placeholder="https://github.com/username"></div>
+          <div class="field"><label for="linkedin-url">LinkedIn</label><input id="linkedin-url" type="url" maxlength="2048" placeholder="https://linkedin.com/in/username"></div>
+          <div class="field"><label for="x-url">X (Twitter)</label><input id="x-url" type="url" maxlength="2048" placeholder="https://x.com/username"></div>
+          <div class="field"><label for="instagram-url">Instagram</label><input id="instagram-url" type="url" maxlength="2048" placeholder="https://instagram.com/username"></div>
+          <div class="field"><label for="youtube-url">YouTube</label><input id="youtube-url" type="url" maxlength="2048" placeholder="https://youtube.com/@username"></div>
+          <div class="field"><label for="facebook-url">Facebook</label><input id="facebook-url" type="url" maxlength="2048" placeholder="https://facebook.com/username"></div>
           <div class="field"><label for="account-type">Account type</label><select id="account-type" name="accountType"><option value="personal">Personal account</option><option value="developer">Developer account</option><option value="education">Education account</option><option value="work">Work account</option><option value="organization">Organization account</option></select></div>
           <div class="field" id="workplace-field" hidden><label for="workplace">Company or workplace</label><input id="workplace" name="workplace" maxlength="120" autocomplete="organization" placeholder="Name of your company or workplace"></div>
           <div class="field" id="institution-field" hidden><label for="institution">School or educational institution</label><input id="institution" name="institution" maxlength="120" autocomplete="organization" placeholder="Name of your school or institution"></div>
@@ -783,6 +794,30 @@
       const institutionInput = document.getElementById('institution');
       const organizationNameInput = document.getElementById('organization-name');
       displayNameInput.value = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username || '';
+      const profileFields = {
+        bio:document.getElementById('about-you'),
+        current_work:document.getElementById('current-work'),
+        website_url:document.getElementById('website-url'),
+        github_url:document.getElementById('github-url'),
+        linkedin_url:document.getElementById('linkedin-url'),
+        x_url:document.getElementById('x-url'),
+        instagram_url:document.getElementById('instagram-url'),
+        youtube_url:document.getElementById('youtube-url'),
+        facebook_url:document.getElementById('facebook-url')
+      };
+      let savedCommunityProfile = null;
+      try {
+        const {data,error} = await client.from('community_profiles')
+          .select('user_id,display_name,avatar_url,is_discoverable,bio,current_work,website_url,github_url,linkedin_url,x_url,instagram_url,youtube_url,facebook_url')
+          .eq('user_id',user.id).maybeSingle();
+        if (error) throw error;
+        savedCommunityProfile = data;
+        for (const [key,input] of Object.entries(profileFields)) input.value = data?.[key] || '';
+      } catch (error) {
+        for (const input of Object.values(profileFields)) input.disabled = true;
+        document.getElementById('profile-form').insertAdjacentHTML('beforeend','<p class="muted">Profile details could not be loaded. Refresh and try again before editing.</p>');
+        console.warn('Could not load community profile details:',error);
+      }
 
       const avatarFileInput = document.getElementById('avatar-file');
       const avatarPreview = document.getElementById('avatar-preview');
@@ -1073,6 +1108,18 @@
           const {data, error} = await client.auth.updateUser({data:updatedMetadata});
           if (error) throw error;
           user.user_metadata = data.user?.user_metadata || updatedMetadata;
+          const profilePayload = {
+            user_id:user.id,
+            display_name:displayNameInput.value.trim().slice(0,80) || 'ConfigKit member',
+            avatar_url:savedCommunityProfile?.avatar_url || user.user_metadata.avatar_url || metadata.avatar_url || metadata.picture || null,
+            is_discoverable:savedCommunityProfile?.is_discoverable ?? false,
+            updated_at:new Date().toISOString()
+          };
+          for (const [key,input] of Object.entries(profileFields)) profilePayload[key] = input.value.trim() || null;
+          const {data:profileData,error:profileError} = await client.from('community_profiles')
+            .upsert(profilePayload,{onConflict:'user_id'}).select().single();
+          if (profileError) throw profileError;
+          savedCommunityProfile = profileData;
           setStatus('Profile saved.');
           updateProfileFields();
         } catch (error) {
