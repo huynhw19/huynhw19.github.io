@@ -83,8 +83,9 @@
         <button class="provider secondary" id="bitbucket" type="button" disabled>Continue with Bitbucket</button>
         <button class="provider secondary" id="figma" type="button" disabled>Continue with Figma</button>
         <button class="provider secondary" id="microsoft" type="button" disabled aria-describedby="microsoftHelp">Microsoft sign-in unavailable</button>
+        <button class="provider secondary" id="zoom" type="button" disabled>Continue with Zoom</button>
       </div>
-      <p class="muted fine-print" id="microsoftHelp">Microsoft sign-in and sign-up need an Azure app registration (client ID and secret) configured by a Microsoft Entra administrator. This site cannot create or bypass those credentials. Use email/password or GitHub for now. Bitbucket sign-in also requires a Bitbucket OAuth consumer configured in Supabase.</p>
+      <p class="muted fine-print" id="microsoftHelp">Microsoft sign-in and sign-up need an Azure app registration (client ID and secret) configured by a Microsoft Entra administrator. This site cannot create or bypass those credentials. Zoom sign-in also needs a Zoom OAuth app client ID and secret configured in Supabase. Bitbucket sign-in needs a Bitbucket OAuth consumer configured in Supabase.</p>
       <div class="providers"><button class="provider" id="passkeyLogin" type="button">Sign in / unlock with a passkey</button></div>
       <p class="status" id="status" role="status" aria-live="polite">Checking sign-in configuration…</p>
       <section id="mfa-challenge" class="education-note" hidden aria-labelledby="mfa-title">
@@ -119,6 +120,7 @@
       const bitbucket = document.getElementById('bitbucket');
       const figma = document.getElementById('figma');
       const microsoft = document.getElementById('microsoft');
+      const zoom = document.getElementById('zoom');
       const passkeyLogin = document.getElementById('passkeyLogin');
       const form = document.getElementById('emailForm');
       const email = document.getElementById('email');
@@ -201,7 +203,7 @@
         return metadata;
       }
       function setBusy(busy) {
-        emailSubmit.disabled = busy; github.disabled = busy; bitbucket.disabled = busy; figma.disabled = busy; microsoft.disabled = true; passkeyLogin.disabled = busy;
+        emailSubmit.disabled = busy; github.disabled = busy; bitbucket.disabled = busy; figma.disabled = busy; microsoft.disabled = true; zoom.disabled = busy; passkeyLogin.disabled = busy;
         resetPassword.disabled = busy; loginTab.disabled = busy; signupTab.disabled = busy;
       }
       function setStatus(message, isError=false) {
@@ -402,7 +404,7 @@
       }
       async function startOAuth(provider) {
         clearPasskeySession();
-        setStatus(`Connecting to ${{azure:'Microsoft',bitbucket:'Bitbucket',figma:'Figma',github:'GitHub'}[provider] || 'your provider'}…`);
+        setStatus(`Connecting to ${{azure:'Microsoft',bitbucket:'Bitbucket',figma:'Figma',github:'GitHub',zoom:'Zoom'}[provider] || 'your provider'}…`);
         setBusy(true);
         try {
           const type = accountType.value;
@@ -634,6 +636,7 @@
       bitbucket.addEventListener('click', () => startOAuth('bitbucket'));
       figma.addEventListener('click', () => startOAuth('figma'));
       microsoft.addEventListener('click', () => startOAuth('azure'));
+      zoom.addEventListener('click', () => startOAuth('zoom'));
       signout.addEventListener('click', async () => {
         clearPasskeySession();
         signout.disabled = true;
@@ -642,7 +645,7 @@
         if (error) { setStatus('Could not sign out. Please try again.', true); return; }
         setMode('login'); await renderSession();
       });
-      github.disabled = false; bitbucket.disabled = false; figma.disabled = false; microsoft.disabled = true;
+      github.disabled = false; bitbucket.disabled = false; figma.disabled = false; microsoft.disabled = true; zoom.disabled = false;
       client.auth.onAuthStateChange((event, session) => {
         if (event === 'PASSWORD_RECOVERY') {
           queueMicrotask(showPasswordRecovery);
