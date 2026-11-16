@@ -190,22 +190,6 @@
       <section class="card" aria-labelledby="devices-title">
         <h2 id="devices-title">Devices that have accessed your account</h2>
         <p class="muted">Live Supabase sessions across your signed-in devices. Review the browser/device and last activity, then revoke an individual session you no longer recognize. The device you are currently using cannot be revoked here.</p>
-        <div id="device-trust-panel" class="notice">
-          <strong>Trusted device access</strong>
-          <p id="device-trust-status" role="status" aria-live="polite">Checking whether this device is trusted…</p>
-          <div class="actions"><button id="trust-device-button" type="button">Trust this device</button><button id="untrust-device-button" class="secondary" type="button" hidden>Remove device trust</button></div>
-          <div id="trust-verification" class="notice" hidden>
-            <strong>Verify your account to trust this device</strong>
-            <p class="muted">Complete an enrolled second-factor check. Your available methods are listed below. A passwordless sign-in passkey is not a second factor; WebAuthn passkeys will appear here only if WebAuthn MFA enrollment and verification are enabled for this Supabase project. This verification applies only to your current sign-in session.</p>
-            <form id="trust-verification-form">
-              <div class="field"><label for="trust-verification-method">Verification method</label><select id="trust-verification-method" required></select></div>
-              <div class="field" id="trust-code-field"><label for="trust-verification-code">Authenticator code or recovery code</label><input id="trust-verification-code" autocomplete="one-time-code" inputmode="text" maxlength="40" placeholder="Enter your code" required></div>
-              <div class="actions"><button id="trust-verify-button" type="submit">Verify and trust device</button><button id="trust-cancel-button" class="secondary" type="button">Cancel</button></div>
-            </form>
-            <p id="trust-verification-help" class="muted" role="status" aria-live="polite"></p>
-          </div>
-          <p class="muted">Trusting requires a completed second-factor check using an authenticator app or one-time recovery code. A passkey can be offered here only when Supabase WebAuthn MFA is enabled and the passkey has been enrolled as a verified MFA factor. Only this signed-in session is trusted; signing out or revoking the session ends its trust.</p>
-        </div>
         <div id="device-session-list" aria-live="polite"><p class="muted">Loading device activity…</p></div>
       </section>
       <section class="card" aria-labelledby="sessions-title">
@@ -405,173 +389,7 @@
       }
       await loadDeviceActivity();
 
-      let currentDeviceTrusted = false;
-      const trustStatus = document.getElementById('device-trust-status');
-      const trustButton = document.getElementById('trust-device-button');
-      const untrustButton = document.getElementById('untrust-device-button');
-      async function refreshCurrentDeviceTrust() {
-        const {data,error} = await client.rpc('is_current_device_trusted');
-        if (error) throw error;
-        currentDeviceTrusted = data === true;
-        trustStatus.textContent = currentDeviceTrusted
-          ? 'This device is trusted and can edit account settings.'
-          : 'This device is not trusted. Account settings are read-only here.';
-        trustButton.hidden = currentDeviceTrusted;
-        untrustButton.hidden = !currentDeviceTrusted;
-      }
-      try {
-        await refreshCurrentDeviceTrust();
-      } catch (error) {
-        trustStatus.textContent = 'Device trust could not be verified. Settings will remain read-only until this can be checked.';
-        console.warn('Could not verify current device trust:', error);
-      }
-      const trustVerification = document.getElementById('trust-verification');
-      const trustVerificationForm = document.getElementById('trust-verification-form');
-      const trustMethod = document.getElementById('trust-verification-method');
-      const trustCodeField = document.getElementById('trust-code-field');
-      const trustCode = document.getElementById('trust-verification-code');
-      const trustVerifyButton = document.getElementById('trust-verify-button');
-      const trustVerificationHelp = document.getElementById('trust-verification-help');
-      let trustVerificationFactors = [];
-      async function prepareTrustVerification() {
-        const {data:assurance,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
-        if (assuranceError) throw assuranceError;
-        if (assurance?.currentLevel === 'aal2') {
-          trustVerification.hidden = true;
-          await finalizeDeviceTrust();
-          return;
-        }
-        const {data,error} = await client.auth.mfa.listFactors();
-        if (error) throw error;
-        const verified = (data.totp || []).filter(factor => factor?.id && factor.status === 'verified');
-        trustVerificationFactors = verified;
-        trustMethod.replaceChildren();
-        const methodPlaceholder = document.createElement('option');
-        methodPlaceholder.value = '';
-        methodPlaceholder.textContent = 'Select a verification method';
-        methodPlaceholder.disabled = true;
-        methodPlaceholder.selected = true;
-        trustMethod.append(methodPlaceholder);
-        for (const factor of verified) {
-          const option = document.createElement('option');
-          option.value = factor.id;
-          option.textContent = (factor.friendly_name || 'Authenticator app') + ' · Authenticator code';
-          trustMethod.append(option);
-        }
-        const {data:recovery,error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
-        if (!recoveryError && recovery?.enabled && Number(recovery.remaining) > 0) {
-          const option = document.createElement('option');
-          option.value = 'recovery-code';
-          option.textContent = 'One-time recovery code (' + recovery.remaining + ' remaining)';
-          trustMethod.append(option);
-        }
-        // The placeholder option is always present, so checking options.length
-        // alone would incorrectly treat an empty method list as usable.
-        const hasVerificationMethod = verified.length > 0 ||
-          [...trustMethod.options].some(option => option.value === 'recovery-code');
-        if (!hasVerificationMethod) {
-          trustVerificationHelp.textContent = 'No verified authenticator app or unused recovery code is available. Set up an authenticator app in the Two-factor authentication section first.';
-          trustVerification.hidden = false;
-          trustVerifyButton.disabled = true;
-          return;
-        }
-        trustVerifyButton.disabled = false;
-        trustVerificationHelp.textContent = 'Choose a method and complete its verification to continue.';
-        trustVerification.hidden = false;
-        updateTrustCodeField();
-      }
-      function updateTrustCodeField() {
-        const selected = trustVerificationFactors.find(factor => factor.id === trustMethod.value);
-        const needsCode = trustMethod.value === 'recovery-code' || selected?.factor_type === 'totp';
-        trustCodeField.hidden = !needsCode;
-        trustCode.required = needsCode;
-        trustCode.autocomplete = trustMethod.value === 'recovery-code' ? 'off' : 'one-time-code';
-      }
-      async function finalizeDeviceTrust() {
-        const {error} = await client.rpc('trust_current_device');
-        if (error) throw error;
-        await refreshCurrentDeviceTrust();
-        setStatus('This device is now trusted. You can manage account settings here.');
-        applyDeviceAccessMode();
-      }
-      trustMethod.addEventListener('change', updateTrustCodeField);
-      document.getElementById('trust-cancel-button').addEventListener('click', () => {
-        trustVerification.hidden = true;
-        trustCode.value = '';
-        trustButton.disabled = false;
-      });
-      trustButton.addEventListener('click', async () => {
-        trustButton.disabled = true;
-        try {
-          await prepareTrustVerification();
-        } catch (error) {
-          trustButton.disabled = false;
-          setStatus(error.message || 'Could not prepare account verification.', true);
-        }
-      });
-      trustVerificationForm.addEventListener('submit', async event => {
-        event.preventDefault();
-        trustVerifyButton.disabled = true;
-        trustVerificationHelp.textContent = 'Verifying your security method…';
-        try {
-          const selected = trustVerificationFactors.find(factor => factor.id === trustMethod.value);
-          if (trustMethod.value === 'recovery-code') {
-            const {data,error} = await client.functions.invoke('recovery-codes', {body:{action:'verify',code:trustCode.value.trim()}});
-            if (error) throw new Error(data?.error || error.message || 'Recovery-code verification failed.');
-            if (!data?.verified) throw new Error(data?.error || 'Recovery-code verification failed.');
-          } else if (selected?.factor_type === 'totp') {
-            const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:selected.id});
-            if (challengeError) throw challengeError;
-            const {error:verifyError} = await client.auth.mfa.verify({factorId:selected.id,challengeId:challenge.id,code:trustCode.value.trim()});
-            if (verifyError) throw verifyError;
-          } else {
-            throw new Error('Choose a supported verification method.');
-          }
-          trustCode.value = '';
-          await finalizeDeviceTrust();
-          trustVerification.hidden = true;
-        } catch (error) {
-          trustVerificationHelp.textContent = error.message || 'Verification failed. Check your code and try again.';
-          trustVerifyButton.disabled = false;
-        }
-      });
-      untrustButton.addEventListener('click', async () => {
-        if (!window.confirm('Remove trusted status from this device? Account settings will become read-only here.')) return;
-        untrustButton.disabled = true;
-        try {
-          const {error} = await client.rpc('untrust_current_device');
-          if (error) throw error;
-          await refreshCurrentDeviceTrust();
-          setStatus('Trusted status removed. This device is now read-only for account settings.');
-          applyDeviceAccessMode();
-        } catch (error) {
-          setStatus(error.message || 'Could not remove device trust.', true);
-        } finally {
-          untrustButton.disabled = false;
-        }
-      });
 
-      function applyDeviceAccessMode() {
-        const editable = currentDeviceTrusted;
-        const allowedButtons = new Set(['trust-device-button','untrust-device-button','signout-current','mfa-add','add-passkey']);
-        document.querySelectorAll('#settings input, #settings textarea, #settings select, #settings form button, #settings > section button').forEach(control => {
-          if (allowedButtons.has(control.id)) return;
-          if (control.closest('#device-session-list, #trust-verification')) return;
-          control.disabled = !editable;
-        });
-        document.querySelectorAll('#settings form').forEach(form => {
-          form.querySelectorAll('input,textarea,select,button').forEach(control => {
-            if (!allowedButtons.has(control.id) && !control.closest('#trust-verification')) control.disabled = !editable;
-          });
-        });
-        document.querySelectorAll('#device-session-list button').forEach(control => {
-          control.disabled = !editable;
-        });
-        document.getElementById('signout-all').disabled = !editable;
-        document.querySelectorAll('#settings form').forEach(form => {
-          form.setAttribute('aria-readonly', editable ? 'false' : 'true');
-        });
-      }
 
       // Developer applications are private to the applicant; only the site review
       // workflow can change an application to approved or declined.
@@ -1464,7 +1282,6 @@
         }
       });
 
-      applyDeviceAccessMode();
     })().catch(error => {
       const status = document.getElementById('status');
       status.hidden = false;
