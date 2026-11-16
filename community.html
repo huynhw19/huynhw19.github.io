@@ -53,21 +53,16 @@
  async function load(){
   const session=await client.auth.getSession();if(!session.data.session){window.location.replace('login.html?next=community.html');return;}
   currentUser=session.data.session.user;
-  // Match the database email_2fa_session_gate before issuing any community
-  // queries. The auth-state redirect runs asynchronously and can otherwise
-  // race this page's initial user_follows read/insert.
-  const [emailFactor,recoveryFactor,assuranceResult]=await Promise.all([
-   client.functions.invoke('email-2fa',{body:{action:'status'}}),
+  // Check recovery-code session status before issuing community queries.
+  const [recoveryFactor,assuranceResult]=await Promise.all([
    client.functions.invoke('recovery-codes',{body:{action:'status'}}),
    client.auth.mfa.getAuthenticatorAssuranceLevel()
   ]);
-  if(emailFactor.error)throw emailFactor.error;
   if(recoveryFactor.error)throw recoveryFactor.error;
   if(assuranceResult.error)throw assuranceResult.error;
-  const emailStatus=emailFactor.data||{},recoveryStatus=recoveryFactor.data||{};
-  const factorEnabled=emailStatus.enabled===true||recoveryStatus.enabled===true;
-  const factorVerified=emailStatus.verified===true||recoveryStatus.verified===true||assuranceResult.data?.currentLevel==='aal2';
-  if(factorEnabled&&!factorVerified){
+  const recoveryStatus=recoveryFactor.data||{};
+  const factorVerified=recoveryStatus.verified===true||assuranceResult.data?.currentLevel==='aal2';
+  if(recoveryStatus.enabled===true&&!factorVerified){
    window.location.replace('login.html?next=community.html');
    return;
   }
