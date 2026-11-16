@@ -193,7 +193,7 @@
 
       <section class="card" aria-labelledby="devices-title">
         <h2 id="devices-title">Devices that have accessed your account</h2>
-        <p class="muted">ConfigKit records a browser/device when you open Account Settings. This is an activity history, not a live inventory of every Supabase session. Older sessions that have not visited this page are not shown. Use “Sign out all devices” below to invalidate all refreshable sessions.</p>
+        <p class="muted">Live Supabase sessions across your signed-in devices. Review the browser/device and last activity, then revoke an individual session you no longer recognize. The device you are currently using cannot be revoked here.</p>
         <div id="device-session-list" aria-live="polite"><p class="muted">Loading device activity…</p></div>
       </section>
       <section class="card" aria-labelledby="sessions-title">
@@ -269,67 +269,126 @@
       }
       const user = userData.user;
 
-      // Record this authenticated browser against Supabase's signed session_id claim.
-      // This is an account-settings activity history, not a server-side session revocation API.
+      // Record the current browser label, then load the authoritative active
+      // sessions from auth.sessions through an ownership-checked RPC.
+      function describeDevice(ua) {
+        const value = ua || '';
+        let browser = 'Browser';
+        if (/Edg\\//.test(value)) browser = 'Microsoft Edge';
+        else if (/Firefox\\//.test(value)) browser = 'Firefox';
+        else if (/Chrome\\//.test(value)) browser = 'Chrome';
+        else if (/Safari\\//.test(value) && !/Chrome\\//.test(value)) browser = 'Safari';
+        let device = /iPhone/i.test(value) ? 'iPhone' : /iPad/i.test(value) ? 'iPad'
+          : /Android/i.test(value) ? 'Android device' : /Macintosh|Mac OS/i.test(value) ? 'Mac'
+          : /Windows/i.test(value) ? 'Windows PC' : /Linux/i.test(value) ? 'Linux device' : 'Unknown device';
+        return (device + ' · ' + browser).slice(0,120);
+      }
+
       async function loadDeviceActivity() {
         const list = document.getElementById('device-session-list');
+        list.replaceChildren();
+        const loading = document.createElement('p');
+        loading.className = 'muted';
+        loading.textContent = 'Loading active sessions…';
+        list.append(loading);
         try {
           const accessToken = sessionData.session.access_token;
           const payloadPart = accessToken.split('.')[1];
           if (!payloadPart) throw new Error('The current sign-in session could not be identified.');
           const payload = JSON.parse(atob(payloadPart.replace(/-/g,'+').replace(/_/g,'/')));
-          const sessionId = payload.session_id;
-          if (!sessionId || !/^[0-9a-f-]{36}$/i.test(sessionId)) throw new Error('The current sign-in session does not include a valid session ID.');
-          const ua = navigator.userAgent || '';
-          const platform = navigator.userAgentData?.platform || navigator.platform || 'Unknown platform';
-          let browser = 'Browser';
-          if (/Edg\//.test(ua)) browser = 'Microsoft Edge';
-          else if (/Firefox\//.test(ua)) browser = 'Firefox';
-          else if (/Chrome\//.test(ua) && !/Edg\//.test(ua)) browser = 'Chrome';
-          else if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) browser = 'Safari';
-          let device = /iPhone/i.test(ua) ? 'iPhone' : /iPad/i.test(ua) ? 'iPad' : /Android/i.test(ua) ? 'Android device' : /Mac/i.test(platform) ? 'Mac' : /Win/i.test(platform) ? 'Windows PC' : /Linux/i.test(platform) ? 'Linux device' : platform;
-          const deviceName = (device + ' · ' + browser).slice(0,120);
-          const {data:existing,error:lookupError} = await client.from('configkit_device_sessions')
-            .select('session_id,first_seen_at').eq('session_id',sessionId).maybeSingle();
-          if (lookupError) throw lookupError;
-          const now = new Date().toISOString();
-          if (existing) {
-            const {error:updateError} = await client.from('configkit_device_sessions')
-              .update({device_name:deviceName,user_agent:ua.slice(0,1000),last_seen_at:now})
-              .eq('session_id',sessionId);
-            if (updateError) throw updateError;
-          } else {
-            const {error:insertError} = await client.from('configkit_device_sessions').insert({
-              session_id:sessionId,user_id:user.id,device_name:deviceName,user_agent:ua.slice(0,1000),last_seen_at:now
-            });
-            if (insertError) throw insertError;
+          const currentSessionId = payload.session_id;
+          if (!currentSessionId || !/^[0-9a-f-]{36}$/i.test(currentSessionId)) {
+            throw new Error('The current sign-in session does not include a valid session ID.');
           }
-          const {data:rows,error:listError} = await client.from('configkit_device_sessions')
-            .select('session_id,device_name,first_seen_at,last_seen_at')
-            .eq('user_id',user.id).order('last_seen_at',{ascending:false}).limit(30);
+
+          const ua = navigator.userAgent || '';
+          const deviceName = describeDevice(ua);
+          const {error:trackError} = await client.from('configkit_device_sessions').upsert({
+            session_id:currentSessionId,
+            user_id:user.id,
+            device_name:deviceName,
+            user_agent:ua.slice(0,1000),
+            last_seen_at:new Date().toISOString()
+          },{onConflict:'session_id'});
+          if (trackError) console.warn('Could not update this device label:',trackError);
+
+          const {data:rows,error:listError} = await client.rpc('list_my_auth_sessions');
           if (listError) throw listError;
           list.replaceChildren();
           if (!rows?.length) {
-            const empty = document.createElement('p'); empty.className='muted'; empty.textContent='No device activity has been recorded yet.'; list.append(empty); return;
+            const empty = document.createElement('p');
+            empty.className='muted';
+            empty.textContent='No active sessions were returned for this account.';
+            list.append(empty);
+            return;
           }
+
           for (const item of rows) {
-            const row = document.createElement('div'); row.className='provider';
-            const detail = document.createElement('div');
-            const name = document.createElement('strong'); name.textContent=item.device_name || 'Unknown device';
-            const dates = document.createElement('div'); dates.className='muted';
-            dates.textContent='First seen ' + new Date(item.first_seen_at).toLocaleString() + ' · Last active ' + new Date(item.last_seen_at).toLocaleString();
+            const row=document.createElement('div');
+            row.className='provider';
+            const detail=document.createElement('div');
+            detail.style.minWidth='0';
+            const name=document.createElement('strong');
+            name.textContent=item.device_name && !item.device_name.includes('Mozilla/')
+              ? item.device_name : describeDevice(item.user_agent);
+            const dates=document.createElement('div');
+            dates.className='muted';
+            const lastActive=item.refreshed_at || item.created_at;
+            dates.textContent='Signed in ' + new Date(item.created_at).toLocaleString()
+              + ' · Last active ' + (lastActive ? new Date(lastActive).toLocaleString() : 'Unknown');
             detail.append(name,dates);
-            if (item.session_id === sessionId) {
-              const current = document.createElement('span'); current.className='muted'; current.textContent='Current device'; detail.append(current);
+            if (item.is_current || item.session_id===currentSessionId) {
+              const current=document.createElement('div');
+              current.className='muted';
+              current.textContent='Current device';
+              detail.append(current);
             }
-            row.append(detail); list.append(row);
+            row.append(detail);
+
+            if (!item.is_current && item.session_id!==currentSessionId) {
+              const revoke=document.createElement('button');
+              revoke.type='button';
+              revoke.className='danger';
+              revoke.textContent='Revoke';
+              revoke.setAttribute('aria-label','Revoke session for '+name.textContent);
+              revoke.addEventListener('click',async()=>{
+                if(!window.confirm('Revoke this device session? It will need to sign in again.')) return;
+                revoke.disabled=true;
+                revoke.textContent='Revoking…';
+                try {
+                  const {data,error}=await client.rpc('revoke_my_auth_session',{p_session_id:item.session_id});
+                  if(error) throw error;
+                  if(!data) throw new Error('That session is no longer active.');
+                  row.remove();
+                  setStatus('Device session revoked. Its refresh token can no longer be used; an already-issued access token may remain valid until it expires.');
+                  if(!list.querySelector('.provider')) {
+                    const empty=document.createElement('p');
+                    empty.className='muted';
+                    empty.textContent='No other active devices.';
+                    list.append(empty);
+                  }
+                } catch(error) {
+                  revoke.disabled=false;
+                  revoke.textContent='Revoke';
+                  setStatus(error.message||'Could not revoke this device session.',true);
+                }
+              });
+              row.append(revoke);
+            } else {
+              const currentLabel=document.createElement('span');
+              currentLabel.className='muted';
+              currentLabel.textContent='In use';
+              row.append(currentLabel);
+            }
+            list.append(row);
           }
-        } catch (error) {
+        } catch(error) {
           list.replaceChildren();
-          const note = document.createElement('p'); note.className='notice';
-          note.textContent='Device activity could not be loaded. ' + (error.message || 'Please refresh and try again.');
+          const note=document.createElement('p');
+          note.className='notice';
+          note.textContent='Active sessions could not be loaded. '+(error.message||'Please refresh and try again.');
           list.append(note);
-          console.warn('Could not load ConfigKit device activity:',error);
+          console.warn('Could not load active Supabase sessions:',error);
         }
       }
       await loadDeviceActivity();
