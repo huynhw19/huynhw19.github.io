@@ -194,6 +194,12 @@
       <section class="card" aria-labelledby="devices-title">
         <h2 id="devices-title">Devices that have accessed your account</h2>
         <p class="muted">Live Supabase sessions across your signed-in devices. Review the browser/device and last activity, then revoke an individual session you no longer recognize. The device you are currently using cannot be revoked here.</p>
+        <div id="device-trust-panel" class="notice">
+          <strong>Trusted device access</strong>
+          <p id="device-trust-status" role="status" aria-live="polite">Checking whether this device is trusted…</p>
+          <div class="actions"><button id="trust-device-button" type="button">Trust this device</button><button id="untrust-device-button" class="secondary" type="button" hidden>Remove device trust</button></div>
+          <p class="muted">Trusting requires a completed two-factor check (AAL2). Only this signed-in session is trusted; signing out or revoking the session ends its trust.</p>
+        </div>
         <div id="device-session-list" aria-live="polite"><p class="muted">Loading device activity…</p></div>
       </section>
       <section class="card" aria-labelledby="sessions-title">
@@ -392,6 +398,75 @@
         }
       }
       await loadDeviceActivity();
+
+      let currentDeviceTrusted = false;
+      const trustStatus = document.getElementById('device-trust-status');
+      const trustButton = document.getElementById('trust-device-button');
+      const untrustButton = document.getElementById('untrust-device-button');
+      async function refreshCurrentDeviceTrust() {
+        const {data,error} = await client.rpc('is_current_device_trusted');
+        if (error) throw error;
+        currentDeviceTrusted = data === true;
+        trustStatus.textContent = currentDeviceTrusted
+          ? 'This device is trusted and can edit account settings.'
+          : 'This device is not trusted. Account settings are read-only here.';
+        trustButton.hidden = currentDeviceTrusted;
+        untrustButton.hidden = !currentDeviceTrusted;
+      }
+      try {
+        await refreshCurrentDeviceTrust();
+      } catch (error) {
+        trustStatus.textContent = 'Device trust could not be verified. Settings will remain read-only until this can be checked.';
+        console.warn('Could not verify current device trust:', error);
+      }
+      trustButton.addEventListener('click', async () => {
+        trustButton.disabled = true;
+        try {
+          const {error} = await client.rpc('trust_current_device');
+          if (error) throw error;
+          await refreshCurrentDeviceTrust();
+          setStatus('This device is now trusted. You can manage account settings here.');
+          applyDeviceAccessMode();
+        } catch (error) {
+          setStatus(error.message || 'Could not trust this device. Complete two-factor verification and try again.', true);
+        } finally {
+          trustButton.disabled = false;
+        }
+      });
+      untrustButton.addEventListener('click', async () => {
+        if (!window.confirm('Remove trusted status from this device? Account settings will become read-only here.')) return;
+        untrustButton.disabled = true;
+        try {
+          const {error} = await client.rpc('untrust_current_device');
+          if (error) throw error;
+          await refreshCurrentDeviceTrust();
+          setStatus('Trusted status removed. This device is now read-only for account settings.');
+          applyDeviceAccessMode();
+        } catch (error) {
+          setStatus(error.message || 'Could not remove device trust.', true);
+        } finally {
+          untrustButton.disabled = false;
+        }
+      });
+
+      function applyDeviceAccessMode() {
+        const editable = currentDeviceTrusted;
+        const allowedButtons = new Set(['trust-device-button','untrust-device-button','signout-current']);
+        document.querySelectorAll('#settings input, #settings textarea, #settings select, #settings form button, #settings > section button').forEach(control => {
+          if (allowedButtons.has(control.id)) return;
+          if (control.closest('#device-session-list')) return;
+          control.disabled = !editable;
+        });
+        document.querySelectorAll('#settings form').forEach(form => {
+          form.querySelectorAll('input,textarea,select,button').forEach(control => {
+            if (!allowedButtons.has(control.id)) control.disabled = !editable;
+          });
+        });
+        document.getElementById('signout-all').disabled = !editable;
+        document.querySelectorAll('#settings form').forEach(form => {
+          form.setAttribute('aria-readonly', editable ? 'false' : 'true');
+        });
+      }
 
       // Developer applications are private to the applicant; only the site review
       // workflow can change an application to approved or declined.
@@ -1300,6 +1375,8 @@
           setStatus(`Could not delete your account: ${error.message || 'Please try again.'}`, true);
         }
       });
+
+      applyDeviceAccessMode();
     })().catch(error => {
       const status = document.getElementById('status');
       status.hidden = false;
