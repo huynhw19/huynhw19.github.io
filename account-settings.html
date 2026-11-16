@@ -559,12 +559,12 @@
         const allowedButtons = new Set(['trust-device-button','untrust-device-button','signout-current']);
         document.querySelectorAll('#settings input, #settings textarea, #settings select, #settings form button, #settings > section button').forEach(control => {
           if (allowedButtons.has(control.id)) return;
-          if (control.closest('#device-session-list')) return;
+          if (control.closest('#device-session-list, #trust-verification')) return;
           control.disabled = !editable;
         });
         document.querySelectorAll('#settings form').forEach(form => {
           form.querySelectorAll('input,textarea,select,button').forEach(control => {
-            if (!allowedButtons.has(control.id)) control.disabled = !editable;
+            if (!allowedButtons.has(control.id) && !control.closest('#trust-verification')) control.disabled = !editable;
           });
         });
         document.querySelectorAll('#device-session-list button').forEach(control => {
