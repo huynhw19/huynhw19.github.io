@@ -449,16 +449,28 @@
         }
         const {data,error} = await client.auth.mfa.listFactors();
         if (error) throw error;
-        const verified = (data.all || []).filter(factor => factor.status === 'verified');
+        // Include WebAuthn factors explicitly as well as the combined list. This
+        // keeps verified passkeys visible in the trust-device method picker.
+        const factorMap = new Map();
+        for (const factor of [...(data.all || []), ...(data.webauthn || [])]) {
+          if (factor?.id && factor.status === 'verified') factorMap.set(factor.id, factor);
+        }
+        const verified = [...factorMap.values()];
         trustVerificationFactors = verified;
         trustMethod.replaceChildren();
+        const methodPlaceholder = document.createElement('option');
+        methodPlaceholder.value = '';
+        methodPlaceholder.textContent = 'Select a verification method';
+        methodPlaceholder.disabled = true;
+        methodPlaceholder.selected = true;
+        trustMethod.append(methodPlaceholder);
         for (const factor of verified) {
           const option = document.createElement('option');
           option.value = factor.id;
           option.textContent = factor.factor_type === 'totp'
-            ? (factor.friendly_name || 'Authenticator app') + ' · TOTP'
+            ? (factor.friendly_name || 'Authenticator app') + ' · Authenticator code'
             : factor.factor_type === 'webauthn'
-              ? (factor.friendly_name || 'Passkey') + ' · Passkey'
+              ? (factor.friendly_name || 'Passkey') + ' · Passkey (biometric, PIN, or security key)'
               : factor.factor_type;
           trustMethod.append(option);
         }
