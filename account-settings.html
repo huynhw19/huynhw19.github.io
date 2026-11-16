@@ -572,7 +572,7 @@
 
       function applyDeviceAccessMode() {
         const editable = currentDeviceTrusted;
-        const allowedButtons = new Set(['trust-device-button','untrust-device-button','signout-current','mfa-add','mfa-add-passkey-factor','add-passkey']);
+        const allowedButtons = new Set(['trust-device-button','untrust-device-button','signout-current','mfa-add','add-passkey']);
         document.querySelectorAll('#settings input, #settings textarea, #settings select, #settings form button, #settings > section button').forEach(control => {
           if (allowedButtons.has(control.id)) return;
           if (control.closest('#device-session-list, #trust-verification')) return;
@@ -1001,7 +1001,7 @@
         if (totp) {
           const code = window.prompt('Enter the current six-digit code from your authenticator app to confirm it is you:');
           if (!code) throw new Error('Passkey management cancelled. Complete second-factor verification first.');
-          if (!/^\\d{6}$/.test(code.trim())) throw new Error('Enter the six-digit authenticator code.');
+          if (!/^\d{6}$/.test(code.trim())) throw new Error('Enter the six-digit authenticator code.');
           const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:totp.id});
           if (challengeError) throw challengeError;
           const {error:verifyError} = await client.auth.mfa.verify({
