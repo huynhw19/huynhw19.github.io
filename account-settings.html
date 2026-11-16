@@ -243,8 +243,6 @@
         window.location.replace('login.html?next=account-settings.html');
         return;
       }
-      const nativeMfaVerified = assuranceData.currentLevel === 'aal2';
-
       const user = userData.user;
 
       // Record this authenticated browser against Supabase's signed session_id claim.
