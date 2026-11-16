@@ -235,22 +235,10 @@
       let recoveryCodeStatusData = {enabled:false,remaining:0,verified:false};
       try { recoveryCodeStatusData = await invokeRecoveryCodes({action:'status'}); }
       catch (error) { console.warn('Recovery-code status unavailable; native authenticator checks remain active.', error); }
-      let email2FAStatus;
-      try {
-        email2FAStatus = await invokeEmail2FA({action:'status'});
-      } catch (error) {
-        setStatus(error.message || 'Could not check email two-factor status.', true);
-        return;
-      }
       const {data:assuranceData,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
       if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
-      if (email2FAStatus.enabled && !email2FAStatus.verified && !recoveryCodeStatusData.verified && assuranceData.currentLevel !== 'aal2') {
-        setStatus('Please verify your email or authenticator second factor before managing account security. Redirecting to sign in…');
-        window.location.replace('login.html?next=account-settings.html');
-        return;
-      }
-      if ((recoveryCodeStatusData.enabled && !recoveryCodeStatusData.verified && !email2FAStatus.verified && !passkeySession && assuranceData.currentLevel !== 'aal2') ||
-          (!email2FAStatus.verified && !recoveryCodeStatusData.verified && !passkeySession && assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2')) {
+      if ((recoveryCodeStatusData.enabled && !recoveryCodeStatusData.verified && !passkeySession && assuranceData.currentLevel !== 'aal2') ||
+          (!recoveryCodeStatusData.verified && !passkeySession && assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2')) {
         setStatus('Please complete two-factor authentication before managing account security. Redirecting to sign in…');
         window.location.replace('login.html?next=account-settings.html');
         return;
