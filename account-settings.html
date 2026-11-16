@@ -481,7 +481,11 @@
           option.textContent = 'One-time recovery code (' + recovery.remaining + ' remaining)';
           trustMethod.append(option);
         }
-        if (!trustMethod.options.length) {
+        // The placeholder option is always present, so checking options.length
+        // alone would incorrectly treat an empty method list as usable.
+        const hasVerificationMethod = verified.length > 0 ||
+          [...trustMethod.options].some(option => option.value === 'recovery-code');
+        if (!hasVerificationMethod) {
           trustVerificationHelp.textContent = 'No verified second factor or unused recovery code is available. Set up an authenticator app or add the separate trusted-device / 2FA passkey in the Two-factor authentication section first. A passwordless sign-in passkey does not count here.';
           trustVerification.hidden = false;
           trustVerifyButton.disabled = true;
