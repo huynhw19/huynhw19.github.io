@@ -30,13 +30,24 @@ If you do not have Entra access or an administrator who can provide the credenti
 2. Add the Supabase provider callback URL shown under **Authentication → Providers → Azure** as a Web redirect URI in Entra. Create a client secret there and enter the application client ID and secret in Supabase's Azure provider settings. Keep the secret only in Supabase.
 3. Enable the Azure provider. The login page requests `openid email profile` scopes.
 
-## 5. Phone authentication is not available on the website
+
+## 5. Enable Figma OAuth
+
+1. Open the [Figma developer settings](https://www.figma.com/developers/apps) and create a new OAuth app.
+2. Configure its OAuth redirect/callback URL as the Supabase project's provider callback URL: `https://gwhqnqzzlgslwgijkkpt.supabase.co/auth/v1/callback`. If the Figma app setup asks for scopes, request only the scopes your app actually needs.
+3. Copy the Figma OAuth client ID and client secret into **Supabase Dashboard → Authentication → Sign In / Providers → Figma**, then enable Figma. Keep the client secret in Supabase only; never add it to this repository.
+4. Confirm `https://huynhw19.github.io/login.html` is included in Supabase's allowed redirect URLs. The login page calls Supabase Auth using the `figma` provider and returns users to the same post-login destination as the other providers.
+5. Test the flow in a private browser window after saving the provider settings.
+
+The Figma button is displayed by the site, but provider authentication will not succeed until the Figma app credentials are configured and Figma is enabled in Supabase.
+
+## 6. Phone authentication is not available on the website
 
 Phone-number sign-in and phone-based multi-factor authentication (SMS MFA) have been removed from the ConfigKit website. The login and Account settings pages use email/password, configured identity providers, authenticator-app TOTP and passkeys instead.
 
 This is a website-interface change only. It does not delete or modify phone numbers or phone MFA factors already stored in Supabase Auth. Those existing records remain in Supabase and may still be subject to the project's Auth configuration and database policies. The website does not provide controls to inspect, enroll, remove, or use those phone factors. Do not assume an existing phone factor can be used to complete sign-in through this website.
 
-## 6. Configure one-time authenticator recovery codes
+## 7. Configure one-time authenticator recovery codes
 
 ConfigKit provides a separate recovery-code backup for users who have enabled authenticator-app TOTP. It generates 10 random 128-bit codes. Each code can be redeemed once after the user completes their primary email/password or provider sign-in; it is not a password and cannot create a primary session by itself.
 
@@ -53,7 +64,7 @@ Security properties:
 - Restrictive RLS policies accept a native AAL2 session or a server-issued recovery-code session while recovery codes are enabled.
 - Recovery codes are a backup second factor only. They do not bypass the primary sign-in step. Users should keep a fresh TOTP factor enrolled and replace codes if they may have been exposed.
 
-## 7. Test
+## 8. Test
 
 Deploy the site, open `login.html`, and test each provider in a private browser window. Test recovery codes by enabling TOTP, generating a set in Account settings, saving the codes, signing out, and using one code after the primary sign-in step. Confirm that the remaining count decreases, that a used code is rejected on replay, and that protected Data API requests remain blocked for an unverified session. Also test normal TOTP sign-in after recovery codes have been enabled. The Supabase project must allow the exact callback URL. First successful provider sign-in creates an account; subsequent sign-ins use the same identity. Review provider/Supabase account-linking and email-confirmation settings before launch.
 
