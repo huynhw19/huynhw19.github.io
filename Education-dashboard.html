@@ -181,6 +181,25 @@
     <section class="card" id="tests-panel" aria-labelledby="tests-title">
       <h2 id="test-form-title">Create a test</h2>
       <p class="muted">Create a quiz or assessment for one linked student. Multiple-choice questions are marked automatically; short answers can be graded by you after submission. Answer keys are never sent to student browsers.</p>
+      <div class="assignment-item" id="naplan-builder">
+        <h3>NAPLAN practice test builder</h3>
+        <p class="muted">Create an original practice set for Australian NAPLAN-style skills. These are practice questions, not official NAPLAN materials. Choose a year level and learning area, then load the questions into the test form below.</p>
+        <div class="two-col">
+          <label>Year level
+            <select id="naplan-year"><option value="3">Year 3</option><option value="5">Year 5</option><option value="7">Year 7</option><option value="9">Year 9</option></select>
+          </label>
+          <label>Learning area
+            <select id="naplan-area">
+              <option value="reading">Reading</option>
+              <option value="writing">Writing</option>
+              <option value="language">Language conventions</option>
+              <option value="numeracy">Numeracy</option>
+            </select>
+          </label>
+        </div>
+        <button id="naplan-load" type="button">Load NAPLAN practice questions</button>
+        <p class="muted" id="naplan-builder-note" role="status" aria-live="polite"></p>
+      </div>
       <form id="test-form">
         <label>Student<select id="test-student" required><option value="">Choose a student</option></select></label>
         <label>Test title<input id="test-title" maxlength="160" required placeholder="e.g. Fractions check-in"></label>
@@ -864,6 +883,57 @@
       const testFormTitle=document.getElementById('test-form-title');
       const testReviewPanel=document.getElementById('test-review-panel');
       let editingTestId=null;
+
+      const naplanYear=document.getElementById('naplan-year');
+      const naplanArea=document.getElementById('naplan-area');
+      const naplanNote=document.getElementById('naplan-builder-note');
+      const naplanBanks={
+        reading:[
+          {prompt:'Read this sentence: “Mia packed a hat, a water bottle and a map before leaving.” Why did Mia most likely pack these items?',options:['She was preparing to go outdoors','She was getting ready for bed','She was cleaning her room'],answer_key:'She was preparing to go outdoors'},
+          {prompt:'A text says, “The narrow path wound between tall trees.” What does “wound” mean in this sentence?',options:['Twisted or curved','Was repaired','Made a loud sound'],answer_key:'Twisted or curved'},
+          {prompt:'Which detail would best support the idea that a character is careful?',options:['They check their work before handing it in','They run outside quickly','They forget their bag'],answer_key:'They check their work before handing it in'},
+          {prompt:'What is the main purpose of a set of numbered instructions?',options:['To explain how to do something in order','To persuade readers to buy something','To describe a fictional character'],answer_key:'To explain how to do something in order'}
+        ],
+        writing:[
+          {question_type:'short_answer',prompt:'Write the opening of a persuasive text arguing that every school should have a garden. State your opinion and give at least two reasons.'},
+          {question_type:'short_answer',prompt:'Write a short narrative about a time a plan changed unexpectedly. Include a clear setting, a problem and a resolution.'},
+          {question_type:'short_answer',prompt:'Rewrite this sentence to make it more descriptive: “The dog ran across the yard.”'},
+          {question_type:'short_answer',prompt:'Write a concluding paragraph for a text about why looking after local parks matters. Restate your main point and leave the reader with a final thought.'}
+        ],
+        language:[
+          {prompt:'Which sentence uses the apostrophe correctly?',options:['The birds nest was in the tree.','The bird’s nest was in the tree.','The birds’ nest was in the tree.'],answer_key:'The bird’s nest was in the tree.'},
+          {prompt:'Choose the correct word: “Neither of the players ___ late.”',options:['were','was','are'],answer_key:'was'},
+          {prompt:'Which word is an adverb in this sentence: “The cyclist rode carefully down the hill”?',options:['cyclist','carefully','hill'],answer_key:'carefully'},
+          {prompt:'Which sentence is punctuated correctly?',options:['After lunch we, went outside.','After lunch, we went outside.','After, lunch we went outside.'],answer_key:'After lunch, we went outside.'}
+        ],
+        numeracy:[
+          {prompt:'A class has 4 groups with 6 students in each group. How many students are there altogether?',options:['10','20','24','26'],answer_key:'24'},
+          {prompt:'A book costs $8.50. You pay with $10.00. How much change should you receive?',options:['$1.00','$1.50','$2.00','$2.50'],answer_key:'$1.50'},
+          {prompt:'A rectangle is 7 cm long and 4 cm wide. What is its perimeter?',options:['11 cm','22 cm','28 cm','44 cm'],answer_key:'22 cm'},
+          {prompt:'A class survey has 20 responses. One quarter chose cycling. How many students chose cycling?',options:['4','5','10','15'],answer_key:'5'}
+        ]
+      };
+      document.getElementById('naplan-load').addEventListener('click',()=>{
+        if(editingTestId){setTestMessage('Cancel test editing before loading a new practice set.',true);return}
+        const year=naplanYear.value;
+        const area=naplanArea.value;
+        const labels={reading:'Reading',writing:'Writing',language:'Language conventions',numeracy:'Numeracy'};
+        const questions=naplanBanks[area].map((q,index)=>({...q,points:1,sort_order:index+1,options:q.options||[],answer_key:q.answer_key||null}));
+        testEditors.replaceChildren();
+        questions.forEach(q=>addTestQuestionEditor(q));
+        testTitle.value='NAPLAN-style '+labels[area]+' practice — Year '+year;
+        testDescription.value='Original '+labels[area].toLowerCase()+' practice questions for Year '+year+'.';
+        testInstructions.value='Answer every question. For multiple-choice questions, select one answer. For writing questions, write a complete response and check your work before submitting.';
+        testDuration.value=area==='writing'?'30':'20';
+        testAttemptLimit.value='3';
+        testStatus.value='draft';
+        testFormTitle.textContent='Create a NAPLAN-style practice test';
+        testSubmit.textContent='Save practice test';
+        testCancel.hidden=false;
+        naplanNote.textContent='Loaded '+questions.length+' '+labels[area].toLowerCase()+' questions for Year '+year+'. Choose a student below, review the questions and save the test.';
+        testForm.scrollIntoView({behavior:'smooth',block:'start'});
+        testStudent.focus();
+      });
 
       function setTestMessage(message,isError=false){
         testMessage.textContent=message;
