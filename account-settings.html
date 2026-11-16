@@ -197,6 +197,13 @@
         <p class="muted">Sign out on this browser, or end all ConfigKit sessions on your devices.</p>
         <div class="actions"><button class="secondary" id="signout-current" type="button">Sign out here</button><button class="danger" id="signout-all" type="button">Sign out all devices</button></div>
       </section>
+      <section class="card" aria-labelledby="export-data-title">
+        <h2 id="export-data-title">Export your data</h2>
+        <p class="muted">Download a copy of your ConfigKit account information and personal records available to your account as a JSON file. The export is generated in your browser using your signed-in session.</p>
+        <p class="muted">Passwords, passkey private keys, MFA secrets, recovery codes, verification hashes, active session tokens, and third-party bank connection credentials are excluded. Uploaded files are represented by their database metadata; download the files separately from the feature where they were uploaded.</p>
+        <div class="actions"><button id="export-account-data" type="button">Download my data</button></div>
+        <p id="export-data-status" class="muted" role="status" aria-live="polite"></p>
+      </section>
       <section class="card" aria-labelledby="delete-account-title">
         <h2 id="delete-account-title">Delete account</h2>
         <div class="notice">
@@ -1280,6 +1287,136 @@
           deleteButton.disabled = deleteConfirmation.value !== 'DELETE';
           setStatus(`Could not delete your account: ${error.message || 'Please try again.'}`, true);
         }
+      });
+
+      // Export only records visible to this signed-in user through Supabase RLS.
+      const exportButton = document.getElementById('export-account-data');
+      const exportStatus = document.getElementById('export-data-status');
+      exportButton.addEventListener('click', async () => {
+        exportButton.disabled = true;
+        exportStatus.classList.remove('error');
+        exportStatus.textContent = 'Preparing your data export…';
+        try {
+          const exportedAt = new Date().toISOString();
+          const archive = {
+            format:'ConfigKit account data export', version:1, exported_at:exportedAt,
+            account:{id:user.id,email:user.email || null,phone:user.phone || null,
+              created_at:user.created_at || null,updated_at:user.updated_at || null,
+              user_metadata:user.user_metadata || {}},
+            data:{},
+            excluded:['Passwords and passkey private keys','MFA secrets, recovery codes and verification challenge hashes',
+              'Active authentication sessions and access/refresh tokens',
+              'Third-party bank connection credentials and provider tokens',
+              'Binary uploads (database metadata may be included)']
+          };
+          const mergeRows = (table, rows) => {
+            if (!rows?.length) return;
+            const current = archive.data[table] || [];
+            const seen = new Set(current.map(row => row.id || JSON.stringify(row)));
+            for (const row of rows) {
+              const key = row.id || JSON.stringify(row);
+              if (!seen.has(key)) { current.push(row); seen.add(key); }
+            }
+            archive.data[table] = current;
+          };
+          const addRows = async (table,column,value=user.id) => {
+            if (value == null || (Array.isArray(value) && !value.length)) return [];
+            const rows = [];
+            for (let offset=0;;offset+=1000) {
+              let query = client.from(table).select('*');
+              query = Array.isArray(value) ? query.in(column,value) : query.eq(column,value);
+              const {data,error} = await query.range(offset,offset+999);
+              if (error) throw new Error('Could not export '+table+': '+error.message);
+              rows.push(...(data || []));
+              if (!data || data.length<1000) break;
+            }
+            mergeRows(table,rows);
+            return rows;
+          };
+          const addOrRows = async (table,expression) => {
+            const rows = [];
+            for (let offset=0;;offset+=1000) {
+              const {data,error} = await client.from(table).select('*').or(expression).range(offset,offset+999);
+              if (error) throw new Error('Could not export '+table+': '+error.message);
+              rows.push(...(data || []));
+              if (!data || data.length<1000) break;
+            }
+            mergeRows(table,rows);
+            return rows;
+          };
+          const directTables = [
+            ['community_profiles','user_id'],['builder_discussions','user_id'],
+            ['builder_discussion_comments','user_id'],['mobileconfig_posts','user_id'],
+            ['enterprise_jobs','user_id'],['saved_profiles','user_id'],['email_2fa_settings','user_id'],
+            ['education_students','user_id'],['education_assignments','user_id'],
+            ['education_slideshows','user_id'],['education_documents','user_id'],
+            ['education_books','user_id'],['education_tests','user_id'],
+            ['user_achievements','user_id'],['work_hours_settings','user_id'],
+            ['mail_mailboxes','user_id'],['mail_folders','user_id'],['mail_drafts','user_id'],
+            ['configkit_developer_applications','user_id'],['configkit_tools','owner_id'],
+            ['configkit_oauth_apps','owner_id'],['configkit_apps','owner_id'],
+            ['money_accounts','user_id'],['money_transactions','user_id'],
+            ['community_games','created_by'],['community_store_items','seller_id'],
+            ['community_store_seller_payments','seller_id'],['community_event_rsvps','user_id'],
+            ['configkit_group_members','user_id'],['configkit_group_profiles','user_id'],
+            ['configkit_group_comments','user_id'],['configkit_group_reactions','user_id'],
+            ['configkit_group_reports','reporter_id'],['family_children','parent_id'],
+            ['family_kids_resources','parent_id'],['family_account_members','user_id'],
+            ['family_accounts','created_by'],['kids_approved_videos','parent_id'],
+            ['configkit_device_sessions','user_id']
+          ];
+          for (const [table,column] of directTables) await addRows(table,column);
+          await addOrRows('user_follows','follower_id.eq.'+user.id+',following_id.eq.'+user.id);
+          await addOrRows('mail_messages','sender_user_id.eq.'+user.id+',recipient_user_id.eq.'+user.id);
+          await addOrRows('community_store_orders','buyer_id.eq.'+user.id+',seller_id.eq.'+user.id);
+          const studentIds = (archive.data.education_students || []).map(row=>row.id).filter(Boolean);
+          if (studentIds.length) {
+            await addRows('education_assignments','student_id',studentIds);
+            await addRows('education_documents','student_id',studentIds);
+            await addRows('education_books','student_id',studentIds);
+            const tests = await addRows('education_tests','student_id',studentIds);
+            const attempts = await addRows('education_test_attempts','student_id',studentIds);
+            const testIds = tests.map(row=>row.id).filter(Boolean);
+            if (testIds.length) {
+              const questions = await addRows('education_test_questions','test_id',testIds);
+              const questionIds = questions.map(row=>row.id).filter(Boolean);
+              if (questionIds.length) await addRows('education_test_answer_keys','question_id',questionIds);
+            }
+            const attemptIds = attempts.map(row=>row.id).filter(Boolean);
+            if (attemptIds.length) await addRows('education_test_responses','attempt_id',attemptIds);
+          }
+          const childIds = (archive.data.family_children || []).map(row=>row.id).filter(Boolean);
+          if (childIds.length) {
+            for (const [table,column] of [
+              ['kids_approved_videos','child_id'],['family_educational_game_progress','child_id'],
+              ['family_storytelling_progress','child_id'],['family_screen_time_usage','child_id']
+            ]) await addRows(table,column,childIds);
+          }
+          const groupIds = (archive.data.configkit_group_members || []).map(row=>row.group_id).filter(Boolean);
+          if (groupIds.length) {
+            await addRows('configkit_groups','id',groupIds);
+            await addRows('configkit_group_profiles','group_id',groupIds);
+            await addRows('configkit_group_comments','group_id',groupIds);
+            await addRows('configkit_group_reactions','group_id',groupIds);
+          }
+          const eventIds = (archive.data.community_events || []).map(row=>row.id).filter(Boolean);
+          if (eventIds.length) await addRows('community_event_rsvps','event_id',eventIds);
+          const json = JSON.stringify(archive,null,2);
+          const blob = new Blob([json],{type:'application/json;charset=utf-8'});
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'configkit-data-export-'+exportedAt.slice(0,10)+'.json';
+          document.body.append(link); link.click(); link.remove();
+          URL.revokeObjectURL(url);
+          const tableCount = Object.keys(archive.data).length;
+          const rowCount = Object.values(archive.data).reduce((sum,rows)=>sum+rows.length,0);
+          exportStatus.textContent = 'Export downloaded: '+rowCount+' records across '+tableCount+' data sets.';
+        } catch (error) {
+          console.warn('Account data export failed:',error);
+          exportStatus.textContent = error.message || 'Could not prepare your data export. Please try again.';
+          exportStatus.classList.add('error');
+        } finally { exportButton.disabled = false; }
       });
 
     })().catch(error => {
