@@ -834,12 +834,8 @@
           if (uploadError) throw uploadError;
           const {data:publicData} = client.storage.from('community-avatars').getPublicUrl(uploadedPath);
           if (!publicData?.publicUrl) throw new Error('Could not create the profile photo URL.');
-          const updatedMetadata = {...user.user_metadata,avatar_url:publicData.publicUrl,avatar_path:uploadedPath};
-          const {data:userData,error:userUpdateError} = await client.auth.updateUser({data:updatedMetadata});
-          if (userUpdateError) throw userUpdateError;
-          user.user_metadata = userData.user?.user_metadata || updatedMetadata;
           const {data:existingProfile,error:profileReadError} = await client.from('community_profiles')
-            .select('is_discoverable,display_name').eq('user_id',user.id).maybeSingle();
+            .select('is_discoverable,display_name,avatar_url').eq('user_id',user.id).maybeSingle();
           if (profileReadError) throw profileReadError;
           const profileName = existingProfile?.display_name || displayNameInput.value.trim() || metadata.display_name || metadata.full_name || metadata.name || 'ConfigKit member';
           const {error:profileUpdateError} = await client.from('community_profiles').upsert({
@@ -850,6 +846,13 @@
             updated_at:new Date().toISOString()
           },{onConflict:'user_id'});
           if (profileUpdateError) throw profileUpdateError;
+          const updatedMetadata = {...user.user_metadata,avatar_url:publicData.publicUrl,avatar_path:uploadedPath};
+          const {data:userData,error:userUpdateError} = await client.auth.updateUser({data:updatedMetadata});
+          if (userUpdateError) {
+            await client.from('community_profiles').update({avatar_url:existingProfile?.avatar_url || null,updated_at:new Date().toISOString()}).eq('user_id',user.id);
+            throw userUpdateError;
+          }
+          user.user_metadata = userData.user?.user_metadata || updatedMetadata;
           const oldPath = previousAvatarPath;
           previousAvatarPath = uploadedPath;
           showAvatar(publicData.publicUrl);
