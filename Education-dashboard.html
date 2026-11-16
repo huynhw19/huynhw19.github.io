@@ -39,6 +39,13 @@
     #site-qr { display: inline-block; padding: 12px; background: white; }
     #site-qr img, #site-qr canvas { display: block; max-width: 100%; height: auto; }
     .qr-url { overflow-wrap: anywhere; }
+    .learning-session-list { list-style:none; padding:0; }
+    .learning-session-item { border:1px solid #e2ebe6; border-radius:10px; padding:14px; margin:10px 0; background:#fff; }
+    .learning-session-files { margin:10px 0 0; padding-left:20px; }
+    .learning-session-file { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; padding:7px 0; }
+    .learning-session-file button { width:auto; padding:7px 11px; }
+    .learning-session-meta { color:#56645e; font-size:.92rem; }
+    .learning-session-status { margin-top:10px; }
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -112,6 +119,13 @@
       <h2>Students</h2>
       <p class="muted">Students create their own account using the registered email and the Student ID shown on their record. Share the <a href="student-login.html">student sign-in page</a> and their ID with them. See the <a href="STUDENT-LOGIN-SETUP.md">student login guide</a> for instructions.</p>
       <ul id="student-list" class="student-list"></ul>
+    </section>
+
+    <section class="card" id="learning-sessions-panel">
+      <h2>Student learning sessions and files</h2>
+      <p class="muted">Review learning activities completed by your linked students and download the files they saved to each session. Student files remain private; only the teacher linked to that student can access them here.</p>
+      <p id="learning-sessions-status" class="status" role="status" aria-live="polite">Loading learning sessions…</p>
+      <ul id="learning-session-list" class="learning-session-list"></ul>
     </section>
 
 
@@ -568,6 +582,7 @@
         resetStudentForm();
         setStatus(wasEditing ? 'Student updated successfully.' : 'Student added successfully. Share the student sign-in page and have them register using this email address.');
         await loadStudents();
+        await loadLearningSessions();
         await loadAssignmentStudents();
       });
 
@@ -1335,6 +1350,121 @@
             <article class="resource-source"><h3>NASA STEM</h3><p>Space and Earth science classroom resources.</p><a href="https://www.nasa.gov/learning-resources/" target="_blank" rel="noopener noreferrer">Explore NASA learning ↗</a></article>`;
         }, 0);
       });
+
+      const learningSessionList = document.getElementById('learning-session-list');
+      const learningSessionsStatus = document.getElementById('learning-sessions-status');
+
+      async function loadLearningSessions() {
+        learningSessionList.replaceChildren();
+        learningSessionsStatus.textContent = 'Loading learning sessions…';
+        const {data: linkedStudents, error: studentsError} = await client
+          .from('education_students')
+          .select('student_user_id,student_name')
+          .eq('user_id', currentUserId);
+        if (studentsError) {
+          learningSessionsStatus.textContent = 'Could not load your linked students.';
+          return;
+        }
+        const studentNames = new Map((linkedStudents || [])
+          .filter(student => student.student_user_id)
+          .map(student => [student.student_user_id, student.student_name || 'Student']));
+        const studentUserIds = [...studentNames.keys()];
+        if (!studentUserIds.length) {
+          learningSessionsStatus.textContent = 'No linked student accounts yet. Learning sessions will appear here after a student signs in and starts a mission.';
+          return;
+        }
+        const {data: sessions, error: sessionsError} = await client
+          .from('education_learning_sessions')
+          .select('id,student_user_id,game_id,started_at,completed_at,education_learning_games(title,subject)')
+          .in('student_user_id', studentUserIds)
+          .order('started_at', {ascending:false})
+          .limit(100);
+        if (sessionsError) {
+          learningSessionsStatus.textContent = 'Could not load learning sessions. ' + (sessionsError.message || '');
+          return;
+        }
+        if (!sessions?.length) {
+          learningSessionsStatus.textContent = 'No learning sessions have been recorded for your linked students yet.';
+          return;
+        }
+        const sessionIds = sessions.map(session => session.id);
+        const {data: files, error: filesError} = await client
+          .from('education_learning_session_files')
+          .select('id,session_id,filename,storage_path,mime_type,file_size,created_at')
+          .in('session_id', sessionIds)
+          .order('created_at', {ascending:false});
+        if (filesError) {
+          learningSessionsStatus.textContent = 'Sessions loaded, but file records could not be loaded. ' + (filesError.message || '');
+          return;
+        }
+        const filesBySession = new Map();
+        (files || []).forEach(file => {
+          if (!filesBySession.has(file.session_id)) filesBySession.set(file.session_id, []);
+          filesBySession.get(file.session_id).push(file);
+        });
+        sessions.forEach(session => {
+          const item = document.createElement('li');
+          item.className = 'learning-session-item';
+          const heading = document.createElement('h3');
+          heading.textContent = studentNames.get(session.student_user_id) || 'Linked student';
+          const activity = document.createElement('p');
+          activity.textContent = session.education_learning_games?.title || ('Learning activity #' + session.game_id);
+          const meta = document.createElement('p');
+          meta.className = 'learning-session-meta';
+          meta.textContent = (session.education_learning_games?.subject || 'Learning activity') + ' · Started ' +
+            new Date(session.started_at).toLocaleString() +
+            (session.completed_at ? ' · Completed ' + new Date(session.completed_at).toLocaleString() : ' · In progress');
+          item.append(heading, activity, meta);
+          const sessionFiles = filesBySession.get(session.id) || [];
+          const filesHeading = document.createElement('strong');
+          filesHeading.textContent = 'Session files (' + sessionFiles.length + ')';
+          item.append(filesHeading);
+          if (sessionFiles.length) {
+            const fileList = document.createElement('ul');
+            fileList.className = 'learning-session-files';
+            sessionFiles.forEach(file => {
+              const fileRow = document.createElement('li');
+              fileRow.className = 'learning-session-file';
+              const fileName = document.createElement('span');
+              fileName.textContent = file.filename + ' · ' + (file.file_size / 1024).toFixed(1) + ' KB';
+              const download = document.createElement('button');
+              download.type = 'button';
+              download.className = 'secondary';
+              download.textContent = 'Download';
+              download.addEventListener('click', async () => {
+                download.disabled = true;
+                download.textContent = 'Preparing…';
+                const {data: blob, error} = await client.storage.from('learning-session-files').download(file.storage_path);
+                download.disabled = false;
+                download.textContent = 'Download';
+                if (error || !blob) {
+                  learningSessionsStatus.textContent = 'Could not download ' + file.filename + '. Check your access and try again.';
+                  return;
+                }
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = file.filename;
+                document.body.append(link);
+                link.click();
+                link.remove();
+                window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+                learningSessionsStatus.textContent = 'Download started: ' + file.filename;
+              });
+              fileRow.append(fileName, download);
+              fileList.append(fileRow);
+            });
+            item.append(fileList);
+          } else {
+            const noFiles = document.createElement('p');
+            noFiles.className = 'learning-session-meta';
+            noFiles.textContent = 'No files uploaded for this session.';
+            item.append(noFiles);
+          }
+          learningSessionList.append(item);
+        });
+        learningSessionsStatus.textContent = 'Showing ' + sessions.length + ' recent learning sessions across your linked students.';
+      }
 
       async function init() {
         const { data, error } = await client.auth.getSession();
