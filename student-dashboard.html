@@ -27,6 +27,12 @@
     .learning-pagination { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:12px 0; }
     .learning-pagination button:disabled { opacity:.45; cursor:not-allowed; }
     .learning-meta { color:#56645e; font-size:.92rem; }
+    .learning-files { margin:16px 0; padding:14px; border:1px solid #dfe9e5; border-radius:10px; background:#fff; }
+    .learning-file-list { list-style:none; padding:0; margin:10px 0 0; }
+    .learning-file-item { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; padding:9px 0; border-top:1px solid #e5ece8; }
+    .learning-file-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .learning-file-actions button { padding:7px 10px; }
+    .learning-file-status { min-height:1.4em; color:#174b39; }
     button, .button { display: inline-block; padding: 10px 14px; border: 0; border-radius: 8px; background: #226b51; color: white; text-decoration: none; cursor: pointer; }
   </style>
 </head>
@@ -189,14 +195,29 @@
           });
         }
 
-        function openGame(game) {
+        async function openGame(game) {
           playground.hidden = false;
+          playground.replaceChildren();
+          const loading = document.createElement('p');
+          loading.textContent = 'Starting your learning session…';
+          playground.append(loading);
+          const {data: session, error: sessionError} = await client.from('education_learning_sessions')
+            .insert({student_user_id: studentUserId, game_id: game.id})
+            .select('id,started_at').single();
+          if (sessionError || !session) {
+            playground.replaceChildren();
+            const error = document.createElement('p');
+            error.className = 'error';
+            error.textContent = 'Your learning session could not be started. Please refresh or ask your teacher for help.';
+            playground.append(error);
+            return;
+          }
           playground.replaceChildren();
           const heading = document.createElement('h3');
           heading.textContent = game.title;
           const meta = document.createElement('p');
           meta.className = 'learning-meta';
-          meta.textContent = 'Grade ' + game.grade_level + ' · ' + game.difficulty;
+          meta.textContent = 'Grade ' + game.grade_level + ' · ' + game.difficulty + ' · Session started ' + new Date(session.started_at).toLocaleString();
           const prompt = document.createElement('p');
           prompt.style.cssText = 'font-size:1.5rem;font-weight:700;margin:18px 0';
           prompt.textContent = game.prompt;
@@ -220,6 +241,124 @@
           const feedback = document.createElement('div');
           feedback.className = 'learning-feedback';
           feedback.hidden = true;
+          const filesPanel = document.createElement('section');
+          filesPanel.className = 'learning-files';
+          const filesTitle = document.createElement('h4');
+          filesTitle.textContent = 'Files for this learning session';
+          const filesHelp = document.createElement('p');
+          filesHelp.className = 'learning-meta';
+          filesHelp.textContent = 'Upload notes, worksheets or your completed work. Files are private to your student account. Maximum 10 MB per file.';
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = '.pdf,.jpg,.jpeg,.png,.webp,.txt,.csv,.doc,.docx,.ppt,.pptx,.xls,.xlsx';
+          fileInput.setAttribute('aria-label', 'Choose a file for this learning session');
+          const upload = document.createElement('button');
+          upload.type = 'button';
+          upload.textContent = 'Upload and save file';
+          const fileStatus = document.createElement('p');
+          fileStatus.className = 'learning-file-status';
+          fileStatus.setAttribute('role', 'status');
+          fileStatus.setAttribute('aria-live', 'polite');
+          const fileList = document.createElement('ul');
+          fileList.className = 'learning-file-list';
+          const mimeByExtension = {
+            pdf:'application/pdf', jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp',
+            txt:'text/plain', csv:'text/csv', doc:'application/msword',
+            docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            ppt:'application/vnd.ms-powerpoint',
+            pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            xls:'application/vnd.ms-excel',
+            xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          };
+          async function loadSessionFiles() {
+            fileList.replaceChildren();
+            const {data, error} = await client.from('education_learning_session_files')
+              .select('id,filename,storage_path,mime_type,file_size,created_at')
+              .eq('session_id', session.id).eq('student_user_id', studentUserId)
+              .order('created_at', {ascending:false});
+            if (error) { fileStatus.textContent = 'Could not load saved files.'; return; }
+            if (!data?.length) {
+              const empty = document.createElement('li');
+              empty.className = 'learning-meta';
+              empty.textContent = 'No files saved to this session yet.';
+              fileList.append(empty);
+              return;
+            }
+            data.forEach(item => {
+              const row = document.createElement('li');
+              row.className = 'learning-file-item';
+              const detail = document.createElement('span');
+              detail.textContent = item.filename + ' · ' + (item.file_size / 1024).toFixed(1) + ' KB';
+              const actions = document.createElement('div');
+              actions.className = 'learning-file-actions';
+              const download = document.createElement('button');
+              download.type = 'button';
+              download.textContent = 'Download';
+              download.addEventListener('click', async () => {
+                download.disabled = true;
+                const {data: blob, error: downloadError} = await client.storage.from('learning-session-files').download(item.storage_path);
+                download.disabled = false;
+                if (downloadError || !blob) { fileStatus.textContent = 'Could not download this file.'; return; }
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url; link.download = item.filename; link.click();
+                window.URL.revokeObjectURL(url);
+                fileStatus.textContent = 'Download started.';
+              });
+              const remove = document.createElement('button');
+              remove.type = 'button';
+              remove.className = 'secondary';
+              remove.textContent = 'Delete';
+              remove.addEventListener('click', async () => {
+                if (!window.confirm('Delete "' + item.filename + '" from this learning session?')) return;
+                remove.disabled = true;
+                const {error: storageError} = await client.storage.from('learning-session-files').remove([item.storage_path]);
+                if (storageError) { remove.disabled = false; fileStatus.textContent = 'Could not delete the stored file.'; return; }
+                const {error: rowError} = await client.from('education_learning_session_files')
+                  .delete().eq('id', item.id).eq('student_user_id', studentUserId);
+                if (rowError) { fileStatus.textContent = 'The file was removed, but its record could not be cleared. Refresh the session.'; return; }
+                fileStatus.textContent = 'File deleted.';
+                await loadSessionFiles();
+              });
+              actions.append(download, remove);
+              row.append(detail, actions);
+              fileList.append(row);
+            });
+          }
+          upload.addEventListener('click', async () => {
+            const file = fileInput.files?.[0];
+            if (!file) { fileStatus.textContent = 'Choose a file first.'; return; }
+            const extension = (file.name.split('.').pop() || '').toLowerCase();
+            const mimeType = mimeByExtension[extension];
+            if (!mimeType) { fileStatus.textContent = 'This file type is not supported. Choose PDF, an image, text/CSV, Word, PowerPoint or Excel.'; return; }
+            if (file.size < 1 || file.size > 10 * 1024 * 1024) { fileStatus.textContent = 'Files must be between 1 byte and 10 MB.'; return; }
+            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-120) || ('learning-file.' + extension);
+            const path = studentUserId + '/' + session.id + '/' + window.crypto.randomUUID() + '-' + safeName;
+            upload.disabled = true;
+            fileStatus.textContent = 'Uploading file…';
+            const {error: uploadError} = await client.storage.from('learning-session-files')
+              .upload(path, file, {contentType:mimeType, upsert:false});
+            if (uploadError) {
+              upload.disabled = false;
+              fileStatus.textContent = uploadError.message || 'The file could not be uploaded.';
+              return;
+            }
+            const {error: recordError} = await client.from('education_learning_session_files').insert({
+              session_id:session.id, student_user_id:studentUserId, filename:file.name.slice(0,255),
+              storage_path:path, mime_type:mimeType, file_size:file.size
+            });
+            if (recordError) {
+              await client.storage.from('learning-session-files').remove([path]);
+              upload.disabled = false;
+              fileStatus.textContent = 'The file upload could not be saved to this session.';
+              return;
+            }
+            fileInput.value = '';
+            upload.disabled = false;
+            fileStatus.textContent = 'File uploaded and saved to this learning session.';
+            await loadSessionFiles();
+          });
+          filesPanel.append(filesTitle, filesHelp, fileInput, upload, fileStatus, fileList);
           const close = document.createElement('button');
           close.type = 'button';
           close.className = 'secondary';
@@ -241,6 +380,8 @@
               check.disabled = false;
               return;
             }
+            await client.from('education_learning_sessions').update({completed_at:new Date().toISOString()})
+              .eq('id', session.id).eq('student_user_id', studentUserId);
             feedback.hidden = false;
             feedback.textContent = (data?.correct ? '🌟 Great work — that is correct! ' : '💡 Good try — keep practising. ') +
               (data?.explanation || '');
@@ -248,10 +389,10 @@
             check.textContent = 'Answer saved';
             await refreshProgress();
           });
-          playground.append(heading, meta, prompt, form, feedback, close);
+          playground.append(heading, meta, prompt, form, feedback, filesPanel, close);
+          await loadSessionFiles();
           playground.scrollIntoView({behavior:'smooth', block:'nearest'});
         }
-
         search.addEventListener('input', () => {
           window.clearTimeout(searchDelay);
           searchDelay = window.setTimeout(() => loadGames(true), 250);
