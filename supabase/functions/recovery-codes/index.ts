@@ -85,12 +85,7 @@ Deno.serve(async (req: Request) => {
     const recoveryStatus = statusRow ?? { enabled: false, remaining: 0, verified: false };
 
     const isTrustedSession = async (): Promise<boolean> => {
-      if (claims.aal === "aal2" || recoveryStatus.verified === true) return true;
-      const { data, error } = await admin.from("email_2fa_verified_sessions")
-        .select("session_id").eq("session_id", sessionId).eq("user_id", user.id)
-        .gt("expires_at", new Date().toISOString()).maybeSingle();
-      if (error) throw error;
-      return !!data;
+      return claims.aal === "aal2" || recoveryStatus.verified === true;
     };
     const hasVerifiedTotp = async (): Promise<boolean> => {
       const { data, error } = await authClient.auth.mfa.listFactors();
@@ -106,7 +101,7 @@ Deno.serve(async (req: Request) => {
       });
     }
     if (action === "generate") {
-      if (!(await isTrustedSession())) return json({ error: "Complete your authenticator or email second-factor check before generating recovery codes." }, 403);
+      if (!(await isTrustedSession())) return json({ error: "Complete your authenticator second-factor check before generating recovery codes." }, 403);
       if (!(await hasVerifiedTotp())) return json({ error: "Enroll and verify an authenticator app before generating TOTP recovery codes." }, 409);
       const rawCodes = Array.from({ length: 10 }, () => hex(randomBytes(16)).toUpperCase());
       const hashes = await Promise.all(rawCodes.map(code => sha256(code)));
