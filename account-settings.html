@@ -462,6 +462,9 @@
             if (!allowedButtons.has(control.id)) control.disabled = !editable;
           });
         });
+        document.querySelectorAll('#device-session-list button').forEach(control => {
+          control.disabled = !editable;
+        });
         document.getElementById('signout-all').disabled = !editable;
         document.querySelectorAll('#settings form').forEach(form => {
           form.setAttribute('aria-readonly', editable ? 'false' : 'true');
