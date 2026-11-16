@@ -230,16 +230,17 @@
           }
           const name = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username;
           const type = metadata.account_type || 'personal';
+          const isOwnerTester = user.id === 'dc7d85d3-e40c-4002-87ea-8df7f904a3ed';
           document.getElementById('welcome-title').textContent = name ? `Welcome, ${name}` : 'Welcome to ConfigKit';
           document.getElementById('account-label').textContent = user.email ? `Signed in as ${user.email}` : 'You are signed in to your ConfigKit account.';
           const badge = document.getElementById('account-type-badge');
-          badge.textContent = type === 'developer' ? 'Developer account' : type === 'work' ? 'Work account' : type === 'education' ? 'Education account' : (type === 'organization' || type === 'enterprise') ? 'Enterprise account' : 'Personal account';
+          badge.textContent = isOwnerTester ? 'Owner testing access' : type === 'developer' ? 'Developer account' : type === 'work' ? 'Work account' : type === 'education' ? 'Education account' : (type === 'organization' || type === 'enterprise') ? 'Enterprise account' : 'Personal account';
           badge.hidden = false;
-          const isWork = type === 'work';
+          const isWork = type === 'work' || isOwnerTester;
           const isPersonal = type === 'personal';
           document.getElementById('family-nav-link').hidden = !isPersonal;
           document.getElementById('family-dashboard-card').hidden = !isPersonal;
-          const isEnterprise = type === 'enterprise' || type === 'organization';
+          const isEnterprise = type === 'enterprise' || type === 'organization' || isOwnerTester;
           document.getElementById('workspace-details').hidden = !isWork;
           document.getElementById('workplace-label').textContent = metadata.workplace ? `Company or workplace: ${metadata.workplace}` : 'No company or workplace name has been added.';
           document.getElementById('work-collaboration-card').hidden = !isWork;
