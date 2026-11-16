@@ -111,12 +111,10 @@ async function init(){
  if(!data.session){location.replace('login.html?next=finance.html');return}
  user=data.session.user;
  const passkey=window.CONFIGKIT_PASSKEY_SESSION?.has(user.id)===true;
- const {data:email2FAStatus,error:email2FAError}=await db.functions.invoke('email-2fa',{body:{action:'status'}});if(email2FAError)throw email2FAError;
- let recoveryStatus={enabled:false,verified:false};const {data:recoveryData,error:recoveryError}=await db.functions.invoke('recovery-codes',{body:{action:'status'}});if(!recoveryError&&recoveryData)recoveryStatus=recoveryData;
+let recoveryStatus={enabled:false,verified:false};const {data:recoveryData,error:recoveryError}=await db.functions.invoke('recovery-codes',{body:{action:'status'}});if(!recoveryError&&recoveryData)recoveryStatus=recoveryData;
  const {data:assurance,error:assuranceError}=await db.auth.mfa.getAuthenticatorAssuranceLevel();if(assuranceError)throw assuranceError;
- if(email2FAStatus?.enabled&&!email2FAStatus.verified&&!recoveryStatus.verified&&!passkey&&assurance.currentLevel!=='aal2'){location.replace('login.html?next=finance.html');return}
- if(recoveryStatus.enabled&&!recoveryStatus.verified&&!email2FAStatus?.verified&&!passkey&&assurance.currentLevel!=='aal2'){location.replace('login.html?next=finance.html');return}
- if(!email2FAStatus?.verified&&!recoveryStatus.verified&&!passkey&&assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'){location.replace('login.html?next=finance.html');return}
+ if(recoveryStatus.enabled&&!recoveryStatus.verified&&!passkey&&assurance.currentLevel!=='aal2'){location.replace('login.html?next=finance.html');return}
+ if(!recoveryStatus.verified&&!passkey&&assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'){location.replace('login.html?next=finance.html');return}
  status.hidden=true;app.hidden=false;await load();
 }
 $('signout').addEventListener('click',async()=>{window.CONFIGKIT_PASSKEY_SESSION?.clear();const {error}=await db.auth.signOut({scope:'local'});if(error)setStatus(error.message,true);else location.replace('login.html')});
