@@ -35,7 +35,7 @@ The private community is available at [groups.html](groups.html). It extends the
 
 ## Authorization
 
-Every new public table has RLS enabled and explicit grants/policies. Policies scope reads and writes to current group membership, constrain authorship, and reserve report queues, moderation logs, and moderator actions for owners/moderators. Existing email-2FA session-gate and OAuth-client restrictions are carried forward as restrictive policies (ANDed with membership rules), with trigger guards on group/member mutations and restricted RPC execution. Anonymous table grants are revoked. Helper functions used to avoid recursive membership-table RLS checks live in the non-exposed `private` schema and are executable only by authenticated users.
+Every new public table has RLS enabled and explicit grants/policies. Policies scope reads and writes to current group membership, constrain authorship, and reserve report queues, moderation logs, and moderator actions for owners/moderators. Existing second-factor session-gate and OAuth-client restrictions are carried forward as restrictive policies (ANDed with membership rules), with trigger guards on group/member mutations and restricted RPC execution. Anonymous table grants are revoked. Helper functions used to avoid recursive membership-table RLS checks live in the non-exposed `private` schema and are executable only by authenticated users.
 
 Storage RLS allows:
 - SELECT only for current group members.
