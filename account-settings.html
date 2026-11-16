@@ -1358,6 +1358,7 @@
             ['money_accounts','user_id'],['money_transactions','user_id'],
             ['community_games','created_by'],['community_store_items','seller_id'],
             ['community_store_seller_payments','seller_id'],['community_event_rsvps','user_id'],
+            ['configkit_groups','created_by'],['community_events','created_by'],
             ['configkit_group_members','user_id'],['configkit_group_profiles','user_id'],
             ['configkit_group_comments','user_id'],['configkit_group_reactions','user_id'],
             ['configkit_group_reports','reporter_id'],['family_children','parent_id'],
@@ -1369,6 +1370,8 @@
           await addOrRows('user_follows','follower_id.eq.'+user.id+',following_id.eq.'+user.id);
           await addOrRows('mail_messages','sender_user_id.eq.'+user.id+',recipient_user_id.eq.'+user.id);
           await addOrRows('community_store_orders','buyer_id.eq.'+user.id+',seller_id.eq.'+user.id);
+          await addOrRows('education_students','user_id.eq.'+user.id+',student_user_id.eq.'+user.id);
+          await addRows('family_children','child_user_id',user.id);
           const studentIds = (archive.data.education_students || []).map(row=>row.id).filter(Boolean);
           if (studentIds.length) {
             await addRows('education_assignments','student_id',studentIds);
@@ -1392,15 +1395,6 @@
               ['family_storytelling_progress','child_id'],['family_screen_time_usage','child_id']
             ]) await addRows(table,column,childIds);
           }
-          const groupIds = (archive.data.configkit_group_members || []).map(row=>row.group_id).filter(Boolean);
-          if (groupIds.length) {
-            await addRows('configkit_groups','id',groupIds);
-            await addRows('configkit_group_profiles','group_id',groupIds);
-            await addRows('configkit_group_comments','group_id',groupIds);
-            await addRows('configkit_group_reactions','group_id',groupIds);
-          }
-          const eventIds = (archive.data.community_events || []).map(row=>row.id).filter(Boolean);
-          if (eventIds.length) await addRows('community_event_rsvps','event_id',eventIds);
           const json = JSON.stringify(archive,null,2);
           const blob = new Blob([json],{type:'application/json;charset=utf-8'});
           const url = URL.createObjectURL(blob);
