@@ -361,7 +361,7 @@ window.CONFIGKIT_AUTH = {
 })();
 
 
-// Route sessions with an enabled but unverified email second factor through
+// Route sessions with enabled recovery codes and no verified second factor through
 // login.html. Database RLS remains the enforcement boundary; this is the
 // user-facing redirect that lets the user complete the email challenge.
 (() => {
@@ -369,11 +369,11 @@ window.CONFIGKIT_AUTH = {
   if (isLoginPage()) return;
 
   const installGuard = sdk => {
-    if (!sdk?.createClient || sdk.createClient.__configKitEmail2FA) return;
+    if (!sdk?.createClient || sdk.createClient.__configKitRecoveryGuard) return;
     const originalCreateClient = sdk.createClient.bind(sdk);
     const wrappedCreateClient = (...args) => {
       const client = originalCreateClient(...args);
-      if (client?.auth?.onAuthStateChange && !client.auth.__configKitEmail2FAGuard) {
+      if (client?.auth?.onAuthStateChange && !client.auth.__configKitRecoveryGuardInstalled) {
         client.auth.__configKitEmail2FAGuard = true;
         client.auth.onAuthStateChange((event, session) => {
           if (!session) { if (event === 'SIGNED_OUT') window.CONFIGKIT_PASSKEY_SESSION?.clear(); return; }
@@ -387,14 +387,13 @@ window.CONFIGKIT_AUTH = {
                 }
                 return;
               }
-              const {data, error} = await client.functions.invoke('email-2fa', {body:{action:'status'}});
               const {data: recovery, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
               const recoveryVerified = !recoveryError && recovery?.verified;
               const emailVerified = !error && data?.enabled && data.verified;
               const emailNeedsVerification = !error && data?.enabled && !data.verified && !recoveryVerified;
               const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(session.user.id) === true;
-              const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recoveryVerified && !emailVerified && !passkeySession;
-              if (!emailNeedsVerification && !recoveryNeedsVerification) return;
+              const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recoveryVerified && !passkeySession;
+              if (!recoveryNeedsVerification) return;
               const {data: assurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
               if (assurance?.currentLevel === 'aal2') return;
               const currentPage = window.location.pathname.split('/').pop();
