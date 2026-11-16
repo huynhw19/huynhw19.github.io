@@ -274,10 +274,10 @@
       function describeDevice(ua) {
         const value = ua || '';
         let browser = 'Browser';
-        if (/Edg\\//.test(value)) browser = 'Microsoft Edge';
-        else if (/Firefox\\//.test(value)) browser = 'Firefox';
-        else if (/Chrome\\//.test(value)) browser = 'Chrome';
-        else if (/Safari\\//.test(value) && !/Chrome\\//.test(value)) browser = 'Safari';
+        if (/Edg\//.test(value)) browser = 'Microsoft Edge';
+        else if (/Firefox\//.test(value)) browser = 'Firefox';
+        else if (/Chrome\//.test(value)) browser = 'Chrome';
+        else if (/Safari\//.test(value) && !/Chrome\//.test(value)) browser = 'Safari';
         let device = /iPhone/i.test(value) ? 'iPhone' : /iPad/i.test(value) ? 'iPad'
           : /Android/i.test(value) ? 'Android device' : /Macintosh|Mac OS/i.test(value) ? 'Mac'
           : /Windows/i.test(value) ? 'Windows PC' : /Linux/i.test(value) ? 'Linux device' : 'Unknown device';
