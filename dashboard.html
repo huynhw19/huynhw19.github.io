@@ -46,7 +46,7 @@
       <section class="card" id="achievements" aria-labelledby="achievements-title" style="padding:1.2rem;margin:1rem 0 1.5rem">
         <div class="achievements-summary">
           <div><span class="eyebrow">Your progress</span><h2 id="achievements-title">Achievements</h2><p class="muted">Earn badges as you explore ConfigKit and protect your account.</p></div>
-          <div class="achievement-count" id="achievement-count" aria-live="polite">0 / 10</div>
+          <div class="achievement-count" id="achievement-count" aria-live="polite">0 / 20</div>
         </div>
         <div class="achievement-grid" id="achievement-grid" aria-label="Your achievements">
           <p class="muted">Loading achievements…</p>
@@ -201,7 +201,17 @@
             ['first_shared_profile','📤','Sharing is caring','Share your first mobileconfig profile.'],
             ['community_member','🤝','Community explorer','Follow another ConfigKit member.'],
             ['conversation_starter','💬','Conversation starter','Start your first builder discussion.'],
-            ['team_player','👥','Team player','Join your first ConfigKit group.']
+            ['team_player','👥','Team player','Join your first ConfigKit group.'],
+            ['first_comment','🗨️','Helpful voice','Post your first reply in a builder discussion.'],
+            ['first_message','✉️','Inbox explorer','Send your first ConfigKit message.'],
+            ['event_attendee','📅','Community attendee','RSVP to your first ConfigKit event.'],
+            ['learning_learner','🧠','Curious learner','Answer 10 learning-game questions correctly.'],
+            ['tool_publisher','🧰','Tool maker','Publish your first ConfigKit tool.'],
+            ['app_publisher','📱','App publisher','Publish your first app in the ConfigKit directory.'],
+            ['game_creator','🎮','Game creator','Publish your first community game.'],
+            ['marketplace_creator','🛍️','Marketplace maker','Publish your first marketplace listing.'],
+            ['first_purchase','🧾','First purchase','Complete your first ConfigKit marketplace purchase.'],
+            ['prolific_creator','🏆','Prolific creator','Publish three ConfigKit tools.']
           ];
           try {
             const {data: earnedRows, error: achievementsError} = await client
