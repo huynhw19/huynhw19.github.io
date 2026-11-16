@@ -313,29 +313,7 @@
           catch (error) { console.warn('Recovery-code status unavailable; authenticator sign-in remains available.', error); }
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
-          if (emailMfa.enabled && !emailMfa.verified && assurance.currentLevel !== 'aal2' && !emailMfaUseTotp && !recoveryCodes.verified && !passkeySession) {
-            const {data: availableFactors} = await client.auth.mfa.listFactors();
-            document.getElementById('email-mfa-use-totp').hidden = !(availableFactors?.totp || []).some(factor => factor.status === 'verified');
-            document.getElementById('email-mfa-use-recovery').hidden = !recoveryCodes.enabled;
-            form.hidden = true;
-            document.querySelector('.tabs').hidden = true;
-            document.querySelector('.divider').hidden = true;
-            document.querySelectorAll('.providers').forEach(node => node.hidden = true);
-            document.getElementById('mfa-challenge').hidden = true;
-            document.getElementById('email-mfa-challenge').hidden = false;
-            if (!emailChallengeSent) {
-              emailChallengeSent = true;
-              try {
-                const sent = await invokeEmail2FA({action:'send'});
-                setStatus('A verification code and one-time link were sent to ' + (sent.destination || 'your verified email address') + '.');
-              } catch (error) {
-                setStatus(error.message || 'Could not send your email verification. You can try again.', true);
-              }
-            }
-            document.getElementById('email-mfa-code').focus();
-            return;
-          }
-          if (!recoveryCodes.verified && !passkeySession &&/
+          if (!recoveryCodes.verified && !passkeySession &&
               assurance.currentLevel !== 'aal2' &&
               (assurance.nextLevel === 'aal2' || recoveryCodes.enabled)) {
             const {data: factorData, error: factorError} = await client.auth.mfa.listFactors();
