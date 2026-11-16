@@ -558,7 +558,7 @@
 
       function applyDeviceAccessMode() {
         const editable = currentDeviceTrusted;
-        const allowedButtons = new Set(['trust-device-button','untrust-device-button','signout-current']);
+        // Allow users on an untrusted device to enrol a second factor or a sign-in passkey.\n        // These are the recovery paths needed to earn AAL2 and then trust this session.\n        const allowedButtons = new Set(['trust-device-button','untrust-device-button','signout-current','mfa-add','mfa-add-passkey-factor','add-passkey']);
         document.querySelectorAll('#settings input, #settings textarea, #settings select, #settings form button, #settings > section button').forEach(control => {
           if (allowedButtons.has(control.id)) return;
           if (control.closest('#device-session-list, #trust-verification')) return;
