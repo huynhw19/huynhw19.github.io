@@ -423,7 +423,7 @@ window.CONFIGKIT_AUTH = {
     });
     installGuard(sdkRef);
   } catch (error) {
-    console.error('Could not initialize the email second-factor redirect guard.', error);
+    console.error('Could not initialize the recovery-code redirect guard.', error);
   }
 })();
 
