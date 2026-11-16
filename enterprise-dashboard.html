@@ -75,7 +75,8 @@
           }
           const user = data.session.user;
           const metadata = user.user_metadata || {};
-          if (metadata.account_type !== 'organization' && metadata.account_type !== 'enterprise') {
+          const isOwnerTester = user.id === 'dc7d85d3-e40c-4002-87ea-8df7f904a3ed';
+          if (metadata.account_type !== 'organization' && metadata.account_type !== 'enterprise' && !isOwnerTester) {
             setStatus('This page is available only to accounts marked as enterprise accounts. Account types are self-declared.');
             const link = document.createElement('a');
             link.href = 'dashboard.html';
@@ -85,7 +86,7 @@
           }
           const name = metadata.display_name || metadata.full_name || metadata.name;
           document.getElementById('welcome-title').textContent = name ? `Welcome, ${name}` : 'Welcome to your ConfigKit workspace';
-          document.getElementById('enterprise-label').textContent = metadata.organization_name
+          document.getElementById('enterprise-label').textContent = isOwnerTester ? 'Owner testing access · Huynhw19' : metadata.organization_name
             ? `Enterprise: ${metadata.organization_name}`
             : (user.email ? `Signed in as ${user.email}` : 'Enterprise account signed in.');
           status.hidden = true;
