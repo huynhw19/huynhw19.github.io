@@ -146,10 +146,11 @@
         <div id="mfa-factor-list" aria-live="polite"><p class="muted">Loading authenticator settings…</p></div>
         <div class="actions"><button id="mfa-add" type="button">Set up authenticator</button></div>
         <hr style="border:0;border-top:1px solid var(--line);margin:24px 0">
-        <h3>Passkey as a second factor</h3>
-        <p class="muted">Register a WebAuthn passkey specifically for two-factor authentication. After setup, passkey sign-ins can use this verified factor instead of asking for a six-digit TOTP code. GitHub and email/password sign-ins will still require their second step.</p>
+        <h3>Passkey for two-factor verification and trusted devices</h3>
+        <p class="muted">This is a separate passkey enrollment from the passwordless sign-in passkey below. Register it here to use a WebAuthn security check as your second factor. Once it is verified, it will appear in the “Trust this device” verification list when your current session needs a second-factor check. It can also be used for supported two-factor sign-in flows.</p>
         <div id="mfa-webauthn-factor-list" aria-live="polite"><p class="muted">Loading passkey second-factor settings…</p></div>
-        <div class="actions"><button id="mfa-add-passkey-factor" type="button">Add passkey as second factor</button></div>
+        <div class="actions"><button id="mfa-add-passkey-factor" type="button">Add trusted-device / 2FA passkey</button></div>
+        <p class="muted">Choose this option if your goal is to verify a device as trusted. Complete the browser or device security prompt; the new factor must show as verified before it can be used.</p>
         <div id="mfa-enrollment" class="notice" hidden>
           <strong>Scan this QR code with your authenticator app</strong>
           <div id="mfa-qr" style="margin:12px 0;max-width:220px"></div>
@@ -178,8 +179,9 @@
         </div>
       </section>
       <section class="card" aria-labelledby="passkeys-title">
-        <h2 id="passkeys-title">Passkeys</h2>
-        <p class="muted">Use Face ID, Touch ID, Windows Hello, your device PIN, or a security key to sign in without a password. Add a passkey while signed in, then use it from the login page.</p>
+        <h2 id="passkeys-title">Passwordless sign-in passkeys</h2>
+        <p class="muted">Use Face ID, Touch ID, Windows Hello, your device PIN, or a security key to sign in to ConfigKit without a password. Add a passkey while signed in, then use it from the login page.</p>
+        <p class="notice"><strong>Important:</strong> This passkey is for primary sign-in only. It does not appear in the “Trust this device” verification list. To verify trusted-device access, also register the separate passkey in <a href="#mfa-settings-title">Two-factor authentication</a> above.</p>
         <div class="actions"><button id="add-passkey" type="button">Add a passkey</button></div>
         <div id="passkey-list" aria-live="polite"><p class="muted">Loading passkeys…</p></div>
         <p class="muted">Passkeys are stored by your device or password manager. You can remove a passkey here if you no longer use that device.</p>
@@ -200,7 +202,7 @@
           <div class="actions"><button id="trust-device-button" type="button">Trust this device</button><button id="untrust-device-button" class="secondary" type="button" hidden>Remove device trust</button></div>
           <div id="trust-verification" class="notice" hidden>
             <strong>Verify your account to trust this device</strong>
-            <p class="muted">Complete one of your enrolled security checks. This verification applies only to your current sign-in session.</p>
+            <p class="muted">Complete an enrolled second-factor check. To use a passkey here, first register the separate “trusted-device / 2FA passkey” in the Two-factor authentication section. A passwordless sign-in passkey by itself is not a second factor for this step. This verification applies only to your current sign-in session.</p>
             <form id="trust-verification-form">
               <div class="field"><label for="trust-verification-method">Verification method</label><select id="trust-verification-method" required></select></div>
               <div class="field" id="trust-code-field"><label for="trust-verification-code">Authenticator code or recovery code</label><input id="trust-verification-code" autocomplete="one-time-code" inputmode="text" maxlength="40" placeholder="Enter your code" required></div>
@@ -468,7 +470,7 @@
           trustMethod.append(option);
         }
         if (!trustMethod.options.length) {
-          trustVerificationHelp.textContent = 'No verified second factor or unused recovery code is available. Sign in again and set up an authenticator app or passkey first.';
+          trustVerificationHelp.textContent = 'No verified second factor or unused recovery code is available. Set up an authenticator app or add the separate trusted-device / 2FA passkey in the Two-factor authentication section first. A passwordless sign-in passkey does not count here.';
           trustVerification.hidden = false;
           trustVerifyButton.disabled = true;
           return;
