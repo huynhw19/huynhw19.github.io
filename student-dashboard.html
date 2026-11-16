@@ -14,6 +14,19 @@
     .assignment { padding:14px 0; border-top:1px solid #e5ece8; }
     .assignment-meta { color:#56645e; font-size:.95rem; }
     .document-content { white-space:pre-wrap; overflow-wrap:anywhere; }
+
+    .learning-zone { border: 1px solid #cbded4; background: linear-gradient(135deg,#f2fbf6,#f3f8ff); }
+    .learning-controls { display:flex; flex-wrap:wrap; gap:10px; margin:14px 0; }
+    .learning-controls input,.learning-controls select { flex:1 1 180px; min-width:0; padding:11px; border:1px solid #cbd8d1; border-radius:8px; font:inherit; background:#fff; }
+    .learning-game-card { padding:14px; margin:10px 0; border:1px solid #e0e9e4; border-radius:10px; background:#fff; }
+    .learning-game-card h3 { margin:0 0 4px; font-size:1.05rem; text-transform:capitalize; }
+    .learning-game-card p { margin:4px 0 10px; color:#56645e; }
+    .learning-choice { display:block; padding:10px; margin:8px 0; border:1px solid #dfe9e5; border-radius:8px; background:#fff; cursor:pointer; }
+    .learning-choice input { margin-right:8px; }
+    .learning-feedback { padding:12px; margin:12px 0; border-radius:8px; background:#edf7f0; }
+    .learning-pagination { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:12px 0; }
+    .learning-pagination button:disabled { opacity:.45; cursor:not-allowed; }
+    .learning-meta { color:#56645e; font-size:.92rem; }
     button, .button { display: inline-block; padding: 10px 14px; border: 0; border-radius: 8px; background: #226b51; color: white; text-decoration: none; cursor: pointer; }
   </style>
 </head>
@@ -32,6 +45,31 @@
       <section id="student-documents" aria-labelledby="student-documents-title" hidden>
         <h2 id="student-documents-title">My documents</h2>
         <div id="student-document-records"></div>
+      </section>
+
+      <section id="learning-zone" class="card learning-zone" aria-labelledby="learning-zone-title" hidden>
+        <h2 id="learning-zone-title">🎮 Learning Zone</h2>
+        <p>Explore 50,000 quick maths missions. Search by operation or question, choose your grade and difficulty, and build your skills one challenge at a time.</p>
+        <p id="learning-progress" class="learning-meta" role="status">Loading your progress…</p>
+        <div class="learning-controls">
+          <input id="learning-search" type="search" maxlength="80" placeholder="Search addition, multiplication, or a number…" aria-label="Search learning games">
+          <select id="learning-grade" aria-label="Filter by grade">
+            <option value="">All grades</option>
+            <option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option>
+            <option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option>
+          </select>
+          <select id="learning-difficulty" aria-label="Filter by difficulty">
+            <option value="">All difficulties</option><option value="Starter">Starter</option><option value="Growing">Growing</option><option value="Challenge">Challenge</option>
+          </select>
+        </div>
+        <p id="learning-results-summary" class="learning-meta" aria-live="polite">Loading games…</p>
+        <div id="learning-results"></div>
+        <div class="learning-pagination">
+          <button id="learning-previous" type="button" class="secondary" disabled>Previous</button>
+          <span id="learning-page-label" class="learning-meta">Page 1</span>
+          <button id="learning-next" type="button" class="secondary" disabled>Next</button>
+        </div>
+        <div id="learning-playground" class="assignment" hidden></div>
       </section>
       <section id="assignments" aria-labelledby="assignments-title" hidden>
         <h2 id="assignments-title">My homework &amp; assignments</h2>
@@ -73,6 +111,158 @@
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
       });
+
+      async function initLearningZone(studentUserId) {
+        const panel = document.getElementById('learning-zone');
+        const search = document.getElementById('learning-search');
+        const grade = document.getElementById('learning-grade');
+        const difficulty = document.getElementById('learning-difficulty');
+        const results = document.getElementById('learning-results');
+        const summary = document.getElementById('learning-results-summary');
+        const progress = document.getElementById('learning-progress');
+        const previous = document.getElementById('learning-previous');
+        const next = document.getElementById('learning-next');
+        const pageLabel = document.getElementById('learning-page-label');
+        const playground = document.getElementById('learning-playground');
+        const pageSize = 20;
+        let page = 0;
+        let total = 0;
+        let searchDelay = null;
+        panel.hidden = false;
+
+        async function refreshProgress() {
+          const [all, correct] = await Promise.all([
+            client.from('education_learning_progress').select('id', {count:'exact', head:true}).eq('student_user_id', studentUserId),
+            client.from('education_learning_progress').select('id', {count:'exact', head:true}).eq('student_user_id', studentUserId).eq('is_correct', true)
+          ]);
+          if (all.error || correct.error) {
+            progress.textContent = 'Your game progress will appear here once it can be loaded.';
+            return;
+          }
+          progress.textContent = 'Your progress: ' + (all.count || 0) + ' attempts completed · ' + (correct.count || 0) + ' correct answers.';
+        }
+
+        async function loadGames(resetPage = false) {
+          if (resetPage) page = 0;
+          results.replaceChildren();
+          summary.textContent = 'Searching the learning library…';
+          let query = client.from('education_learning_games')
+            .select('id,title,subject,grade_level,difficulty,game_type,prompt,choices', {count:'exact'})
+            .order('id', {ascending:true})
+            .range(page * pageSize, page * pageSize + pageSize - 1);
+          const term = search.value.trim().replace(/[%,_()\\]/g, ' ').replace(/\s+/g, ' ').slice(0, 80);
+          if (term) query = query.or('title.ilike.%' + term + '%,prompt.ilike.%' + term + '%');
+          if (grade.value) query = query.eq('grade_level', Number(grade.value));
+          if (difficulty.value) query = query.eq('difficulty', difficulty.value);
+          const {data, error, count} = await query;
+          if (error) {
+            summary.textContent = 'The learning games could not be loaded. Please refresh the page or ask your teacher for help.';
+            return;
+          }
+          total = count || 0;
+          summary.textContent = total.toLocaleString() + ' learning missions found · Showing ' +
+            (total ? page * pageSize + 1 : 0) + '–' + Math.min((page + 1) * pageSize, total) + '.';
+          pageLabel.textContent = 'Page ' + (page + 1) + ' of ' + Math.max(1, Math.ceil(total / pageSize));
+          previous.disabled = page === 0;
+          next.disabled = (page + 1) * pageSize >= total;
+          if (!data?.length) {
+            const empty = document.createElement('p');
+            empty.textContent = 'No missions match those filters. Try another search or choose a different grade.';
+            results.append(empty);
+            return;
+          }
+          data.forEach(game => {
+            const card = document.createElement('article');
+            card.className = 'learning-game-card';
+            const heading = document.createElement('h3');
+            heading.textContent = game.title;
+            const meta = document.createElement('p');
+            meta.textContent = 'Grade ' + game.grade_level + ' · ' + game.difficulty + ' · ' + game.game_type;
+            const prompt = document.createElement('p');
+            prompt.textContent = 'Question preview: ' + game.prompt;
+            const play = document.createElement('button');
+            play.type = 'button';
+            play.textContent = 'Play this mission';
+            play.addEventListener('click', () => openGame(game));
+            card.append(heading, meta, prompt, play);
+            results.append(card);
+          });
+        }
+
+        function openGame(game) {
+          playground.hidden = false;
+          playground.replaceChildren();
+          const heading = document.createElement('h3');
+          heading.textContent = game.title;
+          const meta = document.createElement('p');
+          meta.className = 'learning-meta';
+          meta.textContent = 'Grade ' + game.grade_level + ' · ' + game.difficulty;
+          const prompt = document.createElement('p');
+          prompt.style.cssText = 'font-size:1.5rem;font-weight:700;margin:18px 0';
+          prompt.textContent = game.prompt;
+          const form = document.createElement('form');
+          const choices = [...(game.choices || [])].sort(() => Math.random() - 0.5);
+          choices.forEach((choice, index) => {
+            const label = document.createElement('label');
+            label.className = 'learning-choice';
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = 'learning-answer';
+            radio.value = String(choice);
+            radio.required = true;
+            if (index === 0) radio.checked = true;
+            label.append(radio, document.createTextNode(String(choice)));
+            form.append(label);
+          });
+          const check = document.createElement('button');
+          check.type = 'submit';
+          check.textContent = 'Check my answer';
+          const feedback = document.createElement('div');
+          feedback.className = 'learning-feedback';
+          feedback.hidden = true;
+          const close = document.createElement('button');
+          close.type = 'button';
+          close.className = 'secondary';
+          close.textContent = 'Back to games';
+          close.addEventListener('click', () => { playground.hidden = true; });
+          form.append(check);
+          form.addEventListener('submit', async event => {
+            event.preventDefault();
+            const selected = form.querySelector('input[name="learning-answer"]:checked');
+            if (!selected || check.disabled) return;
+            check.disabled = true;
+            const {data, error} = await client.rpc('submit_education_learning_answer', {
+              p_game_id: game.id,
+              p_answer: selected.value
+            });
+            if (error) {
+              feedback.hidden = false;
+              feedback.textContent = error.message || 'Your answer could not be saved. Please try again.';
+              check.disabled = false;
+              return;
+            }
+            feedback.hidden = false;
+            feedback.textContent = (data?.correct ? '🌟 Great work — that is correct! ' : '💡 Good try — keep practising. ') +
+              (data?.explanation || '');
+            form.querySelectorAll('input').forEach(input => { input.disabled = true; });
+            check.textContent = 'Answer saved';
+            await refreshProgress();
+          });
+          playground.append(heading, meta, prompt, form, feedback, close);
+          playground.scrollIntoView({behavior:'smooth', block:'nearest'});
+        }
+
+        search.addEventListener('input', () => {
+          window.clearTimeout(searchDelay);
+          searchDelay = window.setTimeout(() => loadGames(true), 250);
+        });
+        grade.addEventListener('change', () => loadGames(true));
+        difficulty.addEventListener('change', () => loadGames(true));
+        previous.addEventListener('click', () => { if (page > 0) { page--; void loadGames(); } });
+        next.addEventListener('click', () => { if ((page + 1) * pageSize < total) { page++; void loadGames(); } });
+        await Promise.all([refreshProgress(), loadGames(true)]);
+      }
+
       async function render() {
         const { data, error } = await client.auth.getSession();
         if (error || !data.session) {
@@ -94,6 +284,7 @@
           return;
         }
         showStatus(`Signed in as ${data.session.user.email || 'student'}.`);
+        await initLearningZone(data.session.user.id);
 
         const teacherIds = [...new Set(studentRecords.map(student => student.user_id))];
         const {data: publishedSlideshows, error: slideshowError} = await client.from('education_slideshows')
