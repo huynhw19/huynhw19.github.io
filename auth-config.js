@@ -405,7 +405,7 @@ window.CONFIGKIT_AUTH = {
       }
       return client;
     };
-    wrappedCreateClient.__configKitEmail2FA = true;
+    wrappedCreateClient.__configKitRecoveryGuard = true;
     sdk.createClient = wrappedCreateClient;
   };
 
