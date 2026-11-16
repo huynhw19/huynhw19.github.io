@@ -21,6 +21,19 @@
       <section class="card" aria-labelledby="profile-title">
         <h2 id="profile-title">Profile</h2>
         <p id="email" class="muted"></p>
+        <div class="field" id="avatar-settings">
+          <label for="avatar-file">Profile photo</label>
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+            <img id="avatar-preview" alt="Your profile photo preview" width="88" height="88" hidden style="width:88px;height:88px;object-fit:cover;border-radius:50%;border:1px solid var(--line)">
+            <div id="avatar-placeholder" aria-hidden="true" style="width:88px;height:88px;border-radius:50%;display:grid;place-items:center;background:var(--mint);color:var(--green-dark);font-size:1.8rem;font-weight:750">?</div>
+            <div style="flex:1;min-width:220px">
+              <input id="avatar-file" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="avatar-help">
+              <p id="avatar-help" class="muted">Choose a PNG, JPG or WEBP image up to 2 MB. Your photo is used as your ConfigKit avatar and community profile picture.</p>
+              <button type="button" id="upload-avatar" disabled>Upload photo</button>
+            </div>
+          </div>
+          <p id="avatar-status" class="muted" role="status" aria-live="polite">Loading your profile photo…</p>
+        </div>
         <div id="work-account-summary" class="notice" hidden><strong>Local work account</strong><p>Your workplace information is self-declared. It is not employer-managed authentication and does not verify employment.</p></div>
         <div id="organization-account-summary" class="notice" hidden><strong>Organization profile type</strong><p>This is a self-declared ConfigKit profile label. It does not create a GitHub organization, represent legal status, or grant special access.</p></div>
         <form id="profile-form">
@@ -770,6 +783,97 @@
       const institutionInput = document.getElementById('institution');
       const organizationNameInput = document.getElementById('organization-name');
       displayNameInput.value = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username || '';
+
+      const avatarFileInput = document.getElementById('avatar-file');
+      const avatarPreview = document.getElementById('avatar-preview');
+      const avatarPlaceholder = document.getElementById('avatar-placeholder');
+      const avatarUploadButton = document.getElementById('upload-avatar');
+      const avatarStatus = document.getElementById('avatar-status');
+      const avatarMimeExtensions = {'image/jpeg':'jpg','image/png':'png','image/webp':'webp'};
+      let selectedAvatarFile = null;
+      let previousAvatarPath = metadata.avatar_path || '';
+      function showAvatar(url) {
+        if (url) {
+          avatarPreview.src = url;
+          avatarPreview.hidden = false;
+          avatarPlaceholder.hidden = true;
+        } else {
+          avatarPreview.removeAttribute('src');
+          avatarPreview.hidden = true;
+          avatarPlaceholder.hidden = false;
+          avatarPlaceholder.textContent = (displayNameInput.value.trim() || user.email || '?').slice(0,1).toUpperCase();
+        }
+      }
+      showAvatar(metadata.avatar_url || metadata.picture || '');
+      avatarFileInput.addEventListener('change', () => {
+        const file = avatarFileInput.files?.[0] || null;
+        selectedAvatarFile = file;
+        avatarUploadButton.disabled = !file;
+        if (!file) return;
+        if (!Object.prototype.hasOwnProperty.call(avatarMimeExtensions,file.type) || file.size > 2 * 1024 * 1024) {
+          selectedAvatarFile = null;
+          avatarFileInput.value = '';
+          avatarUploadButton.disabled = true;
+          avatarStatus.textContent = 'Choose a PNG, JPG or WEBP image no larger than 2 MB.';
+          return;
+        }
+        const previewUrl = URL.createObjectURL(file);
+        showAvatar(previewUrl);
+        avatarStatus.textContent = 'Ready to upload ' + file.name + '.';
+      });
+      avatarUploadButton.addEventListener('click', async () => {
+        if (!selectedAvatarFile) return;
+        avatarUploadButton.disabled = true;
+        avatarStatus.textContent = 'Uploading your profile photo…';
+        let uploadedPath = '';
+        try {
+          const extension = avatarMimeExtensions[selectedAvatarFile.type];
+          uploadedPath = user.id + '/' + crypto.randomUUID() + '.' + extension;
+          const {error:uploadError} = await client.storage.from('community-avatars')
+            .upload(uploadedPath, selectedAvatarFile, {contentType:selectedAvatarFile.type,cacheControl:'3600',upsert:false});
+          if (uploadError) throw uploadError;
+          const {data:publicData} = client.storage.from('community-avatars').getPublicUrl(uploadedPath);
+          if (!publicData?.publicUrl) throw new Error('Could not create the profile photo URL.');
+          const updatedMetadata = {...user.user_metadata,avatar_url:publicData.publicUrl,avatar_path:uploadedPath};
+          const {data:userData,error:userUpdateError} = await client.auth.updateUser({data:updatedMetadata});
+          if (userUpdateError) throw userUpdateError;
+          user.user_metadata = userData.user?.user_metadata || updatedMetadata;
+          const {data:existingProfile,error:profileReadError} = await client.from('community_profiles')
+            .select('is_discoverable,display_name').eq('user_id',user.id).maybeSingle();
+          if (profileReadError) throw profileReadError;
+          const profileName = existingProfile?.display_name || displayNameInput.value.trim() || metadata.display_name || metadata.full_name || metadata.name || 'ConfigKit member';
+          const {error:profileUpdateError} = await client.from('community_profiles').upsert({
+            user_id:user.id,
+            display_name:profileName.slice(0,80),
+            avatar_url:publicData.publicUrl,
+            is_discoverable:existingProfile?.is_discoverable ?? false,
+            updated_at:new Date().toISOString()
+          },{onConflict:'user_id'});
+          if (profileUpdateError) throw profileUpdateError;
+          const oldPath = previousAvatarPath;
+          previousAvatarPath = uploadedPath;
+          showAvatar(publicData.publicUrl);
+          avatarStatus.textContent = 'Your profile photo has been uploaded and saved.';
+          selectedAvatarFile = null;
+          avatarFileInput.value = '';
+          if (oldPath && oldPath !== uploadedPath && oldPath.startsWith(user.id + '/')) {
+            const {error:removeError} = await client.storage.from('community-avatars').remove([oldPath]);
+            if (removeError) console.warn('Previous avatar cleanup was unsuccessful:',removeError);
+          }
+          setStatus('Profile photo updated.');
+        } catch (error) {
+          if (uploadedPath) {
+            const {error:cleanupError} = await client.storage.from('community-avatars').remove([uploadedPath]);
+            if (cleanupError) console.warn('Could not clean up the incomplete avatar upload:',cleanupError);
+          }
+          avatarStatus.textContent = 'Could not save your profile photo. ' + (error.message || 'Please try again.');
+          showAvatar(user.user_metadata?.avatar_url || metadata.avatar_url || metadata.picture || '');
+          selectedAvatarFile = null;
+          avatarFileInput.value = '';
+        } finally {
+          avatarUploadButton.disabled = true;
+        }
+      });
       const validAccountTypes = ['personal', 'developer', 'education', 'work', 'organization'];
       accountTypeInput.value = validAccountTypes.includes(metadata.account_type) ? metadata.account_type : 'personal';
       workplaceInput.value = metadata.workplace || '';
