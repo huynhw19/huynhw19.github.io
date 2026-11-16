@@ -143,12 +143,9 @@
       if(!data.session) { setStatus('Sign in to ConfigKit to download files and create or manage app listings.'); $('my-apps').innerHTML='<div class="empty"><a href="login.html?next=configkit-app-store.html">Sign in or create an account</a> to publish apps and access downloads.</div>'; $('app-form').classList.add('hidden'); await loadApps(); return; }
       user=data.session.user;
       const passkeySession=window.CONFIGKIT_PASSKEY_SESSION?.has(user.id)===true;
-      const {data:emailStatus,error:emailError}=await client.functions.invoke('email-2fa',{body:{action:'status'}});
-      if(emailError) throw emailError;
       const {data:assurance,error:assuranceError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
       if(assuranceError) throw assuranceError;
-      if(emailStatus?.enabled && !emailStatus.verified && !passkeySession && assurance.currentLevel!=='aal2') { window.location.replace('login.html?next=configkit-app-store.html'); return; }
-      if(assurance.nextLevel==='aal2' && assurance.currentLevel!=='aal2' && !emailStatus?.verified && !passkeySession) { window.location.replace('login.html?next=configkit-app-store.html'); return; }
+      if(assurance.nextLevel==='aal2' && assurance.currentLevel!=='aal2' && !passkeySession) { window.location.replace('login.html?next=configkit-app-store.html'); return; }
       await loadApps(); setStatus('Signed in. Browse published apps or manage your own listings.');
     } catch(error) { setStatus(error.message || 'Could not connect to the App Store.',true); }
   }
