@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Education Dashboard — ConfigKit</title>
   <style>
+    .resource-library-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:16px; }
+    .resource-source { border:1px solid #dfe9e5; border-radius:10px; padding:14px; background:#fbfdfc; }
+    .resource-source h3 { margin:0 0 6px; font-size:1.05rem; }
+    .resource-source p { color:#56645e; margin:0 0 12px; font-size:.94rem; }
+    .resource-source a { display:inline-block; text-decoration:none; font-weight:600; }
+    .resource-filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin:14px 0; }
+    .resource-filters label { display:grid; gap:5px; font-weight:600; }
+    .resource-note { border-left:4px solid #76b89a; padding:10px 12px; background:#f2f8f5; border-radius:0 8px 8px 0; }
+    .resource-results { margin-top:14px; }
+
     body { font-family: sans-serif; margin: 24px; background: #f5f7f6; color: #17231f; }
     .card { background: white; border: 1px solid #dfe9e5; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
     form { display: grid; gap: 10px; max-width: 540px; }
@@ -102,6 +112,82 @@
       <h2>Students</h2>
       <p class="muted">Students create their own account using the registered email and the Student ID shown on their record. Share the <a href="student-login.html">student sign-in page</a> and their ID with them. See the <a href="STUDENT-LOGIN-SETUP.md">student login guide</a> for instructions.</p>
       <ul id="student-list" class="student-list"></ul>
+    </section>
+
+
+    <section class="card" id="teaching-resources" aria-labelledby="teaching-resources-title">
+      <h2 id="teaching-resources-title">Teaching resource library</h2>
+      <p class="muted">Search across trusted teaching-resource catalogues from one place. Choose a year level, subject and resource type, then open the matching provider search. Resources remain hosted by their original publishers.</p>
+      <form id="resource-search-form">
+        <label for="resource-keywords">What are you teaching?</label>
+        <input id="resource-keywords" type="search" maxlength="160" placeholder="e.g. fractions, persuasive writing, ecosystems">
+        <div class="resource-filters">
+          <label>Year level
+            <select id="resource-year">
+              <option value="">Any year level</option><option>Early Years</option><option>Foundation</option>
+              <option>Year 1</option><option>Year 2</option><option>Year 3</option><option>Year 4</option>
+              <option>Year 5</option><option>Year 6</option><option>Year 7</option><option>Year 8</option>
+              <option>Year 9</option><option>Year 10</option><option>Year 11</option><option>Year 12</option>
+            </select>
+          </label>
+          <label>Subject
+            <select id="resource-subject">
+              <option value="">All subjects</option><option>English</option><option>Mathematics</option>
+              <option>Science</option><option>Humanities and Social Sciences</option><option>History</option>
+              <option>Geography</option><option>Digital Technologies</option><option>Health and Physical Education</option>
+              <option>The Arts</option><option>Languages</option><option>Cross-curricular</option>
+            </select>
+          </label>
+          <label>Resource type
+            <select id="resource-type">
+              <option value="">Any resource type</option><option>Lesson plan</option><option>Worksheet</option>
+              <option>Assessment</option><option>Interactive</option><option>Video</option><option>Reading</option>
+              <option>Unit of work</option><option>Dataset</option>
+            </select>
+          </label>
+          <label>Curriculum
+            <select id="resource-curriculum">
+              <option value="">Any curriculum</option><option>Australian Curriculum</option>
+              <option>Australian Curriculum Version 9</option><option>General capabilities</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-actions">
+          <button type="submit">Search resource catalogues</button>
+          <button type="reset" class="secondary">Clear filters</button>
+        </div>
+      </form>
+      <div id="resource-search-status" class="status" role="status" aria-live="polite"></div>
+      <div class="resource-note">
+        <strong>About the 50,000-resource goal:</strong> this first release connects teachers to established catalogues rather than copying or inventing records. The number of matching resources is determined by each provider's live catalogue; this page does not yet claim that 50,000 records have been imported into ConfigKit.
+      </div>
+      <div class="resource-library-grid resource-results" id="resource-source-results">
+        <article class="resource-source">
+          <h3>Scootle</h3><p>Australian teaching resources searchable by curriculum, learning area, year level and resource type. An education email is required for teacher access.</p>
+          <a href="https://www.scootle.edu.au/ec/search" target="_blank" rel="noopener noreferrer">Open Scootle search ↗</a>
+        </article>
+        <article class="resource-source">
+          <h3>OER Commons</h3><p>Open educational materials across subjects and education levels, including lesson materials, modules, textbooks and videos. Check each item's reuse licence.</p>
+          <a href="https://www.oercommons.org/search" target="_blank" rel="noopener noreferrer">Browse OER Commons ↗</a>
+        </article>
+        <article class="resource-source">
+          <h3>CSIRO Education</h3><p>Australian science, technology and data-literacy activities, including teacher guides for Years 3–10.</p>
+          <a href="https://www.csiro.au/en/education" target="_blank" rel="noopener noreferrer">Explore CSIRO resources ↗</a>
+        </article>
+        <article class="resource-source">
+          <h3>PhET Interactive Simulations</h3><p>Interactive science and mathematics simulations for classroom exploration.</p>
+          <a href="https://phet.colorado.edu/en/" target="_blank" rel="noopener noreferrer">Browse simulations ↗</a>
+        </article>
+        <article class="resource-source">
+          <h3>ABC Education</h3><p>Australian educational videos, interactives and classroom resources.</p>
+          <a href="https://education.abc.net.au/" target="_blank" rel="noopener noreferrer">Browse ABC Education ↗</a>
+        </article>
+        <article class="resource-source">
+          <h3>NASA STEM</h3><p>Space and Earth science learning resources, activities and classroom projects.</p>
+          <a href="https://www.nasa.gov/learning-resources/" target="_blank" rel="noopener noreferrer">Explore NASA learning ↗</a>
+        </article>
+      </div>
+      <p class="muted">Tip: search each catalogue for the same topic to compare resources. Always check age suitability, accessibility, attribution and licence terms before sharing or adapting a resource.</p>
     </section>
 
     <section class="card" id="slideshows-panel" aria-labelledby="slideshows-title">
@@ -1192,6 +1278,63 @@
         testSubmit.disabled=false;resetTestForm();setTestMessage(record.status==='published'?'Test published successfully.':'Test saved successfully.');await loadTests();
       });
       resetTestForm();
+
+
+      const resourceSearchForm = document.getElementById('resource-search-form');
+      const resourceSearchStatus = document.getElementById('resource-search-status');
+      resourceSearchForm.addEventListener('submit', event => {
+        event.preventDefault();
+        const keywords = document.getElementById('resource-keywords').value.trim();
+        const year = document.getElementById('resource-year').value;
+        const subject = document.getElementById('resource-subject').value;
+        const type = document.getElementById('resource-type').value;
+        const curriculum = document.getElementById('resource-curriculum').value;
+        const terms = [keywords, year, subject, type, curriculum].filter(Boolean).join(' ');
+        if (!terms) {
+          resourceSearchStatus.textContent = 'Add a keyword or choose at least one filter.';
+          return;
+        }
+        const q = encodeURIComponent(terms);
+        const destinations = [
+          { name: 'OER Commons', url: 'https://www.oercommons.org/search?f.search=' + q },
+          { name: 'Scootle', url: 'https://www.scootle.edu.au/ec/search' },
+          { name: 'CSIRO Education', url: 'https://www.google.com/search?q=' + encodeURIComponent('site:csiro.au/en/education ' + terms) },
+          { name: 'ABC Education', url: 'https://www.google.com/search?q=' + encodeURIComponent('site:education.abc.net.au ' + terms) },
+          { name: 'PhET', url: 'https://www.google.com/search?q=' + encodeURIComponent('site:phet.colorado.edu ' + terms) },
+          { name: 'NASA STEM', url: 'https://www.google.com/search?q=' + encodeURIComponent('site:nasa.gov/learning-resources ' + terms) }
+        ];
+        const resultGrid = document.getElementById('resource-source-results');
+        resultGrid.replaceChildren();
+        for (const destination of destinations) {
+          const article = document.createElement('article');
+          article.className = 'resource-source';
+          const heading = document.createElement('h3');
+          heading.textContent = destination.name;
+          const description = document.createElement('p');
+          description.textContent = 'Open this provider with your selected search terms: ' + terms;
+          const link = document.createElement('a');
+          link.href = destination.url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = 'Open matching search ↗';
+          article.append(heading, description, link);
+          resultGrid.append(article);
+        }
+        resourceSearchStatus.textContent = 'Prepared searches for ' + destinations.length + ' resource catalogues. Open each provider to view its current results.';
+      });
+      resourceSearchForm.addEventListener('reset', () => {
+        window.setTimeout(() => {
+          resourceSearchStatus.textContent = 'Filters cleared. Browse a catalogue or start a new search.';
+          const resultGrid = document.getElementById('resource-source-results');
+          resultGrid.innerHTML = `
+            <article class="resource-source"><h3>Scootle</h3><p>Australian teaching resources searchable by curriculum, learning area, year level and resource type. An education email is required for teacher access.</p><a href="https://www.scootle.edu.au/ec/search" target="_blank" rel="noopener noreferrer">Open Scootle search ↗</a></article>
+            <article class="resource-source"><h3>OER Commons</h3><p>Open educational materials across subjects and education levels. Check each item's reuse licence.</p><a href="https://www.oercommons.org/search" target="_blank" rel="noopener noreferrer">Browse OER Commons ↗</a></article>
+            <article class="resource-source"><h3>CSIRO Education</h3><p>Australian science, technology and data-literacy activities.</p><a href="https://www.csiro.au/en/education" target="_blank" rel="noopener noreferrer">Explore CSIRO resources ↗</a></article>
+            <article class="resource-source"><h3>PhET Interactive Simulations</h3><p>Interactive science and mathematics simulations.</p><a href="https://phet.colorado.edu/en/" target="_blank" rel="noopener noreferrer">Browse simulations ↗</a></article>
+            <article class="resource-source"><h3>ABC Education</h3><p>Australian educational videos, interactives and classroom resources.</p><a href="https://education.abc.net.au/" target="_blank" rel="noopener noreferrer">Browse ABC Education ↗</a></article>
+            <article class="resource-source"><h3>NASA STEM</h3><p>Space and Earth science classroom resources.</p><a href="https://www.nasa.gov/learning-resources/" target="_blank" rel="noopener noreferrer">Explore NASA learning ↗</a></article>`;
+        }, 0);
+      });
 
       async function init() {
         const { data, error } = await client.auth.getSession();
