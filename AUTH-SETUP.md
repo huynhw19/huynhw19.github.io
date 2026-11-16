@@ -13,7 +13,14 @@ The site is static GitHub Pages, so it must not contain OAuth client secrets or 
 1. Create a GitHub OAuth app in GitHub Developer Settings. Set its authorization callback URL to the Supabase project's provider callback URL shown in **Authentication → Providers → GitHub** (usually `https://<project-ref>.supabase.co/auth/v1/callback`).
 2. Copy the GitHub client ID and client secret into the Supabase GitHub provider configuration and enable the provider.
 
-## 3. Enable Microsoft OAuth
+## 3. Enable Bitbucket OAuth
+
+1. In Bitbucket, open your workspace settings and create an **OAuth consumer** under **Apps and Features → OAuth consumers**.
+2. Set its callback URL to the Supabase project's provider callback URL shown under **Authentication → Providers → Bitbucket** (usually `https://<project-ref>.supabase.co/auth/v1/callback`). Grant the minimum permissions required; email and read access are generally sufficient.
+3. Copy the consumer key and secret into the Supabase Bitbucket provider settings, then enable the provider. Keep the consumer secret only in Supabase; never add it to this repository.
+4. The login page calls Supabase Auth with the `bitbucket` provider. Add `https://huynhw19.github.io/login.html` to the Supabase allowed redirect URLs if it is not already present.
+
+## 4. Enable Microsoft OAuth
 
 **Important:** Microsoft sign-in cannot be enabled from frontend code alone. Supabase requires an Azure/Microsoft Entra application registration with a client ID and client secret. Someone with permission to register applications in the relevant Entra tenant must create/provide these credentials and configure the Supabase Azure provider. Do not put the client secret in this GitHub repository.
 
@@ -23,13 +30,13 @@ If you do not have Entra access or an administrator who can provide the credenti
 2. Add the Supabase provider callback URL shown under **Authentication → Providers → Azure** as a Web redirect URI in Entra. Create a client secret there and enter the application client ID and secret in Supabase's Azure provider settings. Keep the secret only in Supabase.
 3. Enable the Azure provider. The login page requests `openid email profile` scopes.
 
-## 4. Phone authentication is not available on the website
+## 5. Phone authentication is not available on the website
 
 Phone-number sign-in and phone-based multi-factor authentication (SMS MFA) have been removed from the ConfigKit website. The login and Account settings pages use email/password, configured identity providers, authenticator-app TOTP and passkeys instead.
 
 This is a website-interface change only. It does not delete or modify phone numbers or phone MFA factors already stored in Supabase Auth. Those existing records remain in Supabase and may still be subject to the project's Auth configuration and database policies. The website does not provide controls to inspect, enroll, remove, or use those phone factors. Do not assume an existing phone factor can be used to complete sign-in through this website.
 
-## 5. Configure one-time authenticator recovery codes
+## 6. Configure one-time authenticator recovery codes
 
 ConfigKit provides a separate recovery-code backup for users who have enabled authenticator-app TOTP. It generates 10 random 128-bit codes. Each code can be redeemed once after the user completes their primary email/password or provider sign-in; it is not a password and cannot create a primary session by itself.
 
@@ -46,7 +53,7 @@ Security properties:
 - Restrictive RLS policies accept a native AAL2 session or a server-issued recovery-code session while recovery codes are enabled.
 - Recovery codes are a backup second factor only. They do not bypass the primary sign-in step. Users should keep a fresh TOTP factor enrolled and replace codes if they may have been exposed.
 
-## 6. Test
+## 7. Test
 
 Deploy the site, open `login.html`, and test each provider in a private browser window. Test recovery codes by enabling TOTP, generating a set in Account settings, saving the codes, signing out, and using one code after the primary sign-in step. Confirm that the remaining count decreases, that a used code is rejected on replay, and that protected Data API requests remain blocked for an unverified session. Also test normal TOTP sign-in after recovery codes have been enabled. The Supabase project must allow the exact callback URL. First successful provider sign-in creates an account; subsequent sign-ins use the same identity. Review provider/Supabase account-linking and email-confirmation settings before launch.
 
