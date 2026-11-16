@@ -374,7 +374,7 @@ window.CONFIGKIT_AUTH = {
     const wrappedCreateClient = (...args) => {
       const client = originalCreateClient(...args);
       if (client?.auth?.onAuthStateChange && !client.auth.__configKitRecoveryGuardInstalled) {
-        client.auth.__configKitEmail2FAGuard = true;
+        client.auth.__configKitRecoveryGuardInstalled = true;
         client.auth.onAuthStateChange((event, session) => {
           if (!session) { if (event === 'SIGNED_OUT') window.CONFIGKIT_PASSKEY_SESSION?.clear(); return; }
           setTimeout(async () => {
@@ -389,8 +389,6 @@ window.CONFIGKIT_AUTH = {
               }
               const {data: recovery, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
               const recoveryVerified = !recoveryError && recovery?.verified;
-              const emailVerified = !error && data?.enabled && data.verified;
-              const emailNeedsVerification = !error && data?.enabled && !data.verified && !recoveryVerified;
               const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(session.user.id) === true;
               const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recoveryVerified && !passkeySession;
               if (!recoveryNeedsVerification) return;
