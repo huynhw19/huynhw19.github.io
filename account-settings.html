@@ -147,10 +147,10 @@
         <div class="actions"><button id="mfa-add" type="button">Set up authenticator</button></div>
         <hr style="border:0;border-top:1px solid var(--line);margin:24px 0">
         <h3>Passkey sign-in</h3>
-        <p class="muted">Register a passkey for passwordless sign-in. Supabase treats this as a primary sign-in credential, not an MFA factor, so it does not appear in the “Trust this device” second-factor list. That list only accepts factors Supabase verifies at AAL2, such as your authenticator app.</p>
+        <p class="muted">Enroll a WebAuthn passkey as a true second factor. Unlike the passwordless sign-in passkey above, this factor is verified by Supabase MFA and can appear in the “Trust this device” verification list.</p>
         <div id="mfa-webauthn-factor-list" aria-live="polite"><p class="muted">Loading registered passkeys…</p></div>
-        <div class="actions"><button id="mfa-add-passkey-factor" type="button">Add sign-in passkey</button></div>
-        <p class="muted">If MFA is enabled, confirm an existing second factor first. Supabase requires an AAL2 session before passkeys can be managed.</p>
+        <div class="actions"><button id="mfa-add-passkey-factor" type="button">Add passkey second factor</button></div>
+        <p class="muted">This enrolls a separate MFA credential. Supabase must have WebAuthn MFA enrollment enabled for the project; the passkey is verified before it is listed as a second factor.</p>
         <div id="mfa-enrollment" class="notice" hidden>
           <strong>Scan this QR code with your authenticator app</strong>
           <div id="mfa-qr" style="margin:12px 0;max-width:220px"></div>
@@ -181,7 +181,7 @@
       <section class="card" aria-labelledby="passkeys-title">
         <h2 id="passkeys-title">Passwordless sign-in passkeys</h2>
         <p class="muted">Use Face ID, Touch ID, Windows Hello, your device PIN, or a security key to sign in to ConfigKit without a password. Add a passkey while signed in, then use it from the login page.</p>
-        <p class="notice"><strong>Important:</strong> This passkey is for primary sign-in only. It does not appear in the “Trust this device” verification list. To verify trusted-device access, also register the separate passkey in <a href="#mfa-settings-title">Two-factor authentication</a> above.</p>
+        <p class="notice"><strong>Important:</strong> This passkey is for primary sign-in only. It does not appear in the “Trust this device” verification list. For a passkey that can verify “Trust this device”, enroll a separate passkey second factor in <a href="#mfa-settings-title">Two-factor authentication</a>.</p>
         <div class="actions"><button id="add-passkey" type="button">Add a passkey</button></div>
         <div id="passkey-list" aria-live="polite"><p class="muted">Loading passkeys…</p></div>
         <p class="muted">Passkeys are stored by your device or password manager. You can remove a passkey here if you no longer use that device.</p>
@@ -892,52 +892,22 @@
       }
       mfaAddPasskeyFactorButton.addEventListener('click', async () => {
         if (!window.isSecureContext || !navigator.credentials) {
-          setStatus('Passkey registration requires a supported browser on HTTPS.', true);
+          setStatus('Passkey second factors require a supported browser on HTTPS.', true);
           return;
         }
         mfaAddPasskeyFactorButton.disabled = true;
+        setStatus('Follow your device prompt to enroll a passkey as a second factor…');
         try {
-          // Supabase requires AAL2 to manage passkeys whenever the account has
-          // verified MFA factors. A primary passkey sign-in marker is not AAL2.
-          const {data:initialAssurance,error:initialAssuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
-          if (initialAssuranceError) throw initialAssuranceError;
-          if (initialAssurance?.currentLevel !== 'aal2' && initialAssurance?.nextLevel === 'aal2') {
-            const {data:factorData,error:factorError} = await client.auth.mfa.listFactors();
-            if (factorError) throw factorError;
-            const factors = [...(factorData.all || []), ...(factorData.webauthn || [])]
-              .filter((factor,index,array) => factor?.id && factor.status === 'verified' &&
-                array.findIndex(item => item.id === factor.id) === index);
-            const totpFactor = factors.find(factor => factor.factor_type === 'totp');
-            const webauthnFactor = factors.find(factor => factor.factor_type === 'webauthn');
-            if (totpFactor) {
-              const code = window.prompt('Enter the current six-digit code from your authenticator app to continue adding a passkey:');
-              if (!code) throw new Error('Passkey setup cancelled. Complete second-factor verification first.');
-              if (!/^\\d{6}$/.test(code.trim())) throw new Error('Enter the six-digit authenticator code.');
-              const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:totpFactor.id});
-              if (challengeError) throw challengeError;
-              const {error:verifyError} = await client.auth.mfa.verify({
-                factorId:totpFactor.id, challengeId:challenge.id, code:code.trim()
-              });
-              if (verifyError) throw verifyError;
-            } else if (webauthnFactor && typeof client.auth.mfa.webauthn?.authenticate === 'function') {
-              const {error:verifyError} = await client.auth.mfa.webauthn.authenticate({factorId:webauthnFactor.id});
-              if (verifyError) throw verifyError;
-            } else {
-              throw new Error('Supabase requires AAL2 to manage passkeys. Verify an existing authenticator factor first; a passwordless sign-in passkey or ConfigKit recovery code does not upgrade the Supabase session to AAL2.');
-            }
-          }
-          const {data:verifiedAssurance,error:verifiedAssuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
-          if (verifiedAssuranceError) throw verifiedAssuranceError;
-          if (verifiedAssurance?.currentLevel !== 'aal2' && verifiedAssurance?.nextLevel === 'aal2') {
-            throw new Error('Second-factor verification did not upgrade this session to AAL2. Sign in again and complete MFA before managing passkeys.');
-          }
-          setStatus('Follow your device prompt to register a passkey for passwordless sign-in…');
-          const {data,error} = await client.auth.mfa.webauthn.register({friendlyName:'ConfigKit sign-in passkey'});
+          // This is the Supabase MFA WebAuthn factor flow, not primary passkey sign-in.
+          // It enrolls and verifies a factor that can elevate the session to AAL2.
+          const {data,error} = await client.auth.mfa.webauthn.register({
+            friendlyName:'ConfigKit passkey second factor'
+          });
           if (error) throw error;
-          setStatus('Passkey registered for sign-in. It is a primary sign-in credential, not an MFA factor, so it will not appear in the Trust this device second-factor picker.');
+          setStatus('Passkey second factor enrolled and verified. It can now be used for Trust this device verification.');
           await refreshMfaFactors();
         } catch (error) {
-          setStatus(`Could not register passkey: ${error.message || 'Please try again.'}`,true);
+          setStatus(`Could not enroll passkey second factor: ${error.message || 'Please try again.'}`,true);
         } finally {
           mfaAddPasskeyFactorButton.disabled = false;
         }
@@ -1065,16 +1035,55 @@
           passkeyList.append(row);
         }
       }
+      async function ensureAAL2ForPasskeyManagement() {
+        const {data:assurance,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (assuranceError) throw assuranceError;
+        if (assurance?.currentLevel === 'aal2' || assurance?.nextLevel !== 'aal2') return;
+
+        const {data:factorData,error:factorError} = await client.auth.mfa.listFactors();
+        if (factorError) throw factorError;
+        const factors = [...(factorData.all || []), ...(factorData.webauthn || [])]
+          .filter((factor,index,array) => factor?.id && factor.status === 'verified' &&
+            array.findIndex(item => item.id === factor.id) === index);
+        const totp = factors.find(factor => factor.factor_type === 'totp');
+        const webauthn = factors.find(factor => factor.factor_type === 'webauthn');
+
+        if (totp) {
+          const code = window.prompt('Enter the current six-digit code from your authenticator app to confirm it is you:');
+          if (!code) throw new Error('Passkey management cancelled. Complete second-factor verification first.');
+          if (!/^\\d{6}$/.test(code.trim())) throw new Error('Enter the six-digit authenticator code.');
+          const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:totp.id});
+          if (challengeError) throw challengeError;
+          const {error:verifyError} = await client.auth.mfa.verify({
+            factorId:totp.id, challengeId:challenge.id, code:code.trim()
+          });
+          if (verifyError) throw verifyError;
+        } else if (webauthn && typeof client.auth.mfa.webauthn?.authenticate === 'function') {
+          const {error:verifyError} = await client.auth.mfa.webauthn.authenticate({factorId:webauthn.id});
+          if (verifyError) throw verifyError;
+        } else {
+          throw new Error('Your account requires a verified second factor before managing sign-in passkeys. Enroll a passkey second factor or authenticator app in the Two-factor authentication section first.');
+        }
+
+        const {data:after,error:afterError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (afterError) throw afterError;
+        if (after?.currentLevel !== 'aal2') {
+          throw new Error('Second-factor verification did not upgrade this session to AAL2. Sign in again and complete MFA before managing sign-in passkeys.');
+        }
+      }
+
       addPasskeyButton.addEventListener('click', async () => {
         if (!window.isSecureContext || !navigator.credentials) { setStatus('Passkeys require a supported browser on HTTPS.', true); return; }
-        addPasskeyButton.disabled = true; setStatus('Follow your device prompt to create a passkey…');
+        addPasskeyButton.disabled = true;
         try {
+          await ensureAAL2ForPasskeyManagement();
+          setStatus('Follow your device prompt to create a passwordless sign-in passkey…');
           const {data, error} = await client.auth.registerPasskey();
           if (error) throw error;
-          setStatus(`Passkey added${data?.friendly_name ? `: ${data.friendly_name}` : ''}.`);
+          setStatus(`Passkey added${data?.friendly_name ? `: ${data.friendly_name}` : ''} for passwordless sign-in.`);
           await refreshPasskeys();
         } catch (error) {
-          setStatus(error.message || 'Could not register a passkey. Make sure passkey authentication is enabled in Supabase.', true);
+          setStatus(`Could not register sign-in passkey: ${error.message || 'Please try again.'}`, true);
         } finally { addPasskeyButton.disabled = false; }
       });
       await refreshPasskeys();
