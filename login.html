@@ -456,8 +456,6 @@
         document.getElementById('mfa-recovery-form').hidden = true;
         document.getElementById('mfa-form').hidden = false;
         pendingMfaFactorId = '';
-        emailChallengeSent = false;
-        emailMfaUseTotp = false;
         await renderSession();
       });
       document.getElementById('mfa-form').addEventListener('submit', async event => {
@@ -590,7 +588,6 @@
         document.querySelector('.divider').hidden = true;
         document.querySelectorAll('.providers').forEach(node => node.hidden = true);
         document.getElementById('mfa-challenge').hidden = true;
-        document.getElementById('email-mfa-challenge').hidden = true;
         account.hidden = true;
         signout.hidden = true;
         document.getElementById('new-password').focus();
