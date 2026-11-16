@@ -99,15 +99,6 @@
           <div class="form-actions"><button id="mfa-recovery-submit" type="submit">Use recovery code</button><button id="mfa-recovery-back" class="secondary" type="button">Use authenticator instead</button><button id="mfa-recovery-cancel" class="secondary" type="button">Sign out</button></div>
         </form>
       </section>
-      <section id="email-mfa-challenge" class="education-note" hidden aria-labelledby="email-mfa-title">
-        <h2 id="email-mfa-title">Verify your email</h2>
-        <p class="muted">Enter the eight-digit code sent to your verified email address, or open the one-time link in that email. This is an alternative to your authenticator code.</p>
-        <form id="email-mfa-form">
-          <label for="email-mfa-code">Email verification code</label>
-          <input id="email-mfa-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{8}" minlength="8" maxlength="8" required>
-          <div class="form-actions"><button id="email-mfa-submit" type="submit">Verify and continue</button><button id="email-mfa-resend" class="secondary" type="button">Resend code and link</button><button id="email-mfa-use-totp" class="secondary" type="button" hidden>Use authenticator instead</button><button id="email-mfa-use-recovery" class="secondary" type="button" hidden>Use a recovery code instead</button><button id="email-mfa-cancel" class="secondary" type="button">Sign out</button></div>
-        </form>
-      </section>
       <div class="account" id="account" hidden></div>
       <button class="provider secondary" id="signout" type="button" hidden>Sign out</button>
       <p class="muted fine-print">Authentication is handled by Supabase and your selected identity provider. Work and enterprise account selections save self-declared profile labels; they do not enable employer-managed sign-in or verify employment or organizational affiliation. Never share your password, access tokens, or recovery codes. See our <a href="privacy.html">privacy policy</a>.</p>
@@ -156,8 +147,6 @@
       let pendingMfaFactorId = '';
       let pendingMfaChallengeId = '';
       let passkeyPrimaryPending = false;
-      let emailChallengeSent = false;
-      let emailMfaUseTotp = false;
 
       const config = window.CONFIGKIT_AUTH || {};
       if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
@@ -187,8 +176,6 @@
       } else if (postLoginDestination !== 'dashboard.html') {
         callbackUrlObject.searchParams.set('next', postLoginDestination);
       }
-      const pendingEmail2FALink = new URLSearchParams(window.location.search).get('email_2fa_token');
-      if (pendingEmail2FALink) callbackUrlObject.searchParams.set('email_2fa_token', pendingEmail2FALink);
       const callbackUrl = callbackUrlObject.href;
       const accountIntentKey = 'configkit_account_oauth_intent';
       const familySetupMetadata = () => ({
@@ -216,12 +203,6 @@
       function setStatus(message, isError=false) {
         status.className = isError ? 'status error' : 'status';
         status.textContent = message;
-      }
-      async function invokeEmail2FA(body) {
-        const {data, error} = await client.functions.invoke('email-2fa', {body});
-        if (error) throw new Error(data?.error || error.message || 'Email verification could not be completed.');
-        if (data?.error) throw new Error(data.error);
-        return data || {};
       }
       async function invokeRecoveryCodes(body) {
         const {data, error} = await client.functions.invoke('recovery-codes', {body});
@@ -327,27 +308,6 @@
             passkeyPrimaryPending = false;
           }
           const passkeySession = isPasskeySession(data.session.user.id);
-          const tokenParams = new URLSearchParams(window.location.search);
-          const emailLinkToken = tokenParams.get('email_2fa_token');
-          if (emailLinkToken) {
-            try {
-              await invokeEmail2FA({action:'verify', token:emailLinkToken});
-              tokenParams.delete('email_2fa_token');
-              const cleaned = window.location.pathname + (tokenParams.toString() ? '?' + tokenParams.toString() : '') + window.location.hash;
-              window.history.replaceState({}, document.title, cleaned);
-              await client.auth.refreshSession();
-              setStatus('Email verification successful. Finishing sign-in…');
-            } catch (error) {
-              setStatus(error.message || 'This email verification link is invalid or expired. Request a new email.', true);
-            }
-          }
-          let emailMfa;
-          try {
-            emailMfa = await invokeEmail2FA({action:'status'});
-          } catch (error) {
-            setStatus(error.message || 'Could not check email verification status.', true);
-            return;
-          }
           let recoveryCodes = {enabled:false,verified:false,remaining:0};
           try { recoveryCodes = await invokeRecoveryCodes({action:'status'}); }
           catch (error) { console.warn('Recovery-code status unavailable; authenticator sign-in remains available.', error); }
@@ -375,9 +335,7 @@
             document.getElementById('email-mfa-code').focus();
             return;
           }
-          emailChallengeSent = false;
-          document.getElementById('email-mfa-challenge').hidden = true;
-          if (!emailMfa.verified && !recoveryCodes.verified && !passkeySession &&
+          if (!recoveryCodes.verified && !passkeySession &&/
               assurance.currentLevel !== 'aal2' &&
               (assurance.nextLevel === 'aal2' || recoveryCodes.enabled)) {
             const {data: factorData, error: factorError} = await client.auth.mfa.listFactors();
@@ -407,7 +365,6 @@
             return;
           }
           document.getElementById('mfa-challenge').hidden = true;
-          document.getElementById('email-mfa-challenge').hidden = true;
           const pendingIntent = sessionStorage.getItem(accountIntentKey);
           let oauthMetadata = null;
           if (pendingIntent) {
@@ -454,9 +411,6 @@
           passkeyPrimaryPending = false;
           pendingMfaFactorId = '';
           document.getElementById('mfa-challenge').hidden = true;
-          document.getElementById('email-mfa-challenge').hidden = true;
-          emailChallengeSent = false;
-          emailMfaUseTotp = false;
           document.getElementById('mfa-code').value = '';
           account.hidden = true; signout.hidden = true; form.hidden = false;
           document.querySelector('.tabs').hidden = false;
@@ -565,59 +519,6 @@
           setStatus(error.message || 'That authenticator code could not be verified. Check the code and try again.', true);
           input.select();
         } finally { button.disabled = false; }
-      });
-      document.getElementById('email-mfa-form').addEventListener('submit', async event => {
-        event.preventDefault();
-        const input = document.getElementById('email-mfa-code');
-        const button = document.getElementById('email-mfa-submit');
-        if (!input.reportValidity()) return;
-        button.disabled = true;
-        try {
-          await invokeEmail2FA({action:'verify', code:input.value.trim()});
-          input.value = '';
-          emailChallengeSent = false;
-          setStatus('Email second-factor verification successful. Signing you in…');
-          await renderSession();
-        } catch (error) {
-          setStatus(error.message || 'That email code could not be verified. Try again or request a new one.', true);
-          input.select();
-        } finally { button.disabled = false; }
-      });
-      document.getElementById('email-mfa-resend').addEventListener('click', async event => {
-        const button = event.currentTarget;
-        button.disabled = true;
-        try {
-          const sent = await invokeEmail2FA({action:'send'});
-          emailChallengeSent = true;
-          setStatus('A new verification code and link were sent to ' + (sent.destination || 'your verified email address') + '.');
-        } catch (error) {
-          setStatus(error.message || 'Could not resend the verification email.', true);
-        } finally { button.disabled = false; }
-      });
-      document.getElementById('email-mfa-use-totp').addEventListener('click', async () => {
-        emailMfaUseTotp = true;
-        document.getElementById('email-mfa-challenge').hidden = true;
-        setStatus('Use your registered authenticator code to finish signing in.');
-        await renderSession();
-      });
-      document.getElementById('email-mfa-use-recovery').addEventListener('click', async () => {
-        emailMfaUseTotp = true;
-        document.getElementById('email-mfa-challenge').hidden = true;
-        setStatus('Enter one of your unused recovery codes to finish signing in.');
-        await renderSession();
-        document.getElementById('mfa-form').hidden = true;
-        document.getElementById('mfa-recovery-form').hidden = false;
-        document.getElementById('mfa-recovery-code').focus();
-      });
-      document.getElementById('email-mfa-cancel').addEventListener('click', async () => {
-        clearPasskeySession();
-        const {error} = await client.auth.signOut({scope:'local'});
-        if (error) { setStatus('Could not cancel sign-in. Please try again.', true); return; }
-        emailChallengeSent = false;
-        emailMfaUseTotp = false;
-        document.getElementById('email-mfa-challenge').hidden = true;
-        setMode('login');
-        await renderSession();
       });
       document.getElementById('mfa-cancel').addEventListener('click', async () => {
         clearPasskeySession();
