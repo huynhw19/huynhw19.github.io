@@ -1132,11 +1132,12 @@
 
         const metadata = data.session.user.user_metadata || {};
         const accountType = metadata.account_type || 'personal';
-        accountLabel.textContent = accountType === 'education'
+        const isOwnerTester = data.session.user.id === 'dc7d85d3-e40c-4002-87ea-8df7f904a3ed';
+        accountLabel.textContent = isOwnerTester ? 'Owner testing access · Education tools' : accountType === 'education'
           ? 'Education account active'
           : 'This page is for education accounts only.';
 
-        if (accountType !== 'education') {
+        if (accountType !== 'education' && !isOwnerTester) {
           setStatus('This dashboard is only available for education accounts.', true);
           return;
         }
