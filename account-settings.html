@@ -200,7 +200,7 @@
           <div class="actions"><button id="trust-device-button" type="button">Trust this device</button><button id="untrust-device-button" class="secondary" type="button" hidden>Remove device trust</button></div>
           <div id="trust-verification" class="notice" hidden>
             <strong>Verify your account to trust this device</strong>
-            <p class="muted">Complete an enrolled second-factor check. To use a passkey here, first register the separate “trusted-device / 2FA passkey” in the Two-factor authentication section. A passwordless sign-in passkey by itself is not a second factor for this step. This verification applies only to your current sign-in session.</p>
+            <p class="muted">Complete an enrolled second-factor check. Your available methods are listed below. A passwordless sign-in passkey is not a second factor; WebAuthn passkeys will appear here only if WebAuthn MFA enrollment and verification are enabled for this Supabase project. This verification applies only to your current sign-in session.</p>
             <form id="trust-verification-form">
               <div class="field"><label for="trust-verification-method">Verification method</label><select id="trust-verification-method" required></select></div>
               <div class="field" id="trust-code-field"><label for="trust-verification-code">Authenticator code or recovery code</label><input id="trust-verification-code" autocomplete="one-time-code" inputmode="text" maxlength="40" placeholder="Enter your code" required></div>
@@ -208,7 +208,7 @@
             </form>
             <p id="trust-verification-help" class="muted" role="status" aria-live="polite"></p>
           </div>
-          <p class="muted">Trusting requires a completed two-factor check using an authenticator app, registered passkey, or one-time recovery code. Only this signed-in session is trusted; signing out or revoking the session ends its trust.</p>
+          <p class="muted">Trusting requires a completed second-factor check using an authenticator app or one-time recovery code. A passkey can be offered here only when Supabase WebAuthn MFA is enabled and the passkey has been enrolled as a verified MFA factor. Only this signed-in session is trusted; signing out or revoking the session ends its trust.</p>
         </div>
         <div id="device-session-list" aria-live="polite"><p class="muted">Loading device activity…</p></div>
       </section>
