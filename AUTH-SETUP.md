@@ -69,3 +69,13 @@ Security properties:
 Deploy the site, open `login.html`, and test each provider in a private browser window. Test recovery codes by enabling TOTP, generating a set in Account settings, saving the codes, signing out, and using one code after the primary sign-in step. Confirm that the remaining count decreases, that a used code is rejected on replay, and that protected Data API requests remain blocked for an unverified session. Also test normal TOTP sign-in after recovery codes have been enabled. The Supabase project must allow the exact callback URL. First successful provider sign-in creates an account; subsequent sign-ins use the same identity. Review provider/Supabase account-linking and email-confirmation settings before launch.
 
 Supabase and the identity providers process authentication data under their own privacy terms. Other ConfigKit features may also store account-related data in Supabase. Update the site's privacy policy accordingly before inviting users.
+
+## 9. Enable Zoom OAuth
+
+1. Open the [Zoom App Marketplace](https://marketplace.zoom.us/) and create an **OAuth** app. Configure the app's redirect URL / OAuth redirect URL to the Supabase provider callback: `https://gwhqnqzzlgslwgijkkpt.supabase.co/auth/v1/callback`.
+2. In the Zoom app's OAuth settings, add the same callback URL to the allow list if Zoom presents a separate allow-list field. Configure the app's scopes to request only the identity/profile information needed for sign-in.
+3. Copy the Zoom OAuth **Client ID** and **Client Secret** into **Supabase Dashboard → Authentication → Sign In / Providers → Zoom**, then enable Zoom. Keep the secret in Supabase only; never add it to this repository or browser code.
+4. Confirm `https://huynhw19.github.io/login.html` is included in Supabase's allowed redirect URLs. The login page calls Supabase Auth using the `zoom` provider.
+5. Test sign-in and first-time account creation in a private browser window.
+
+The Zoom button is now available on the login/sign-up page, but authentication will only succeed after the Zoom app credentials are configured and the Zoom provider is enabled in Supabase.
