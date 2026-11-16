@@ -115,11 +115,12 @@
   const starts=document.getElementById('event-start').value,ends=document.getElementById('event-end').value;
   const record={title:document.getElementById('event-title').value.trim(),location:document.getElementById('event-location').value.trim(),description:document.getElementById('event-description').value.trim(),starts_at:new Date(starts).toISOString(),ends_at:ends?new Date(ends).toISOString():null,updated_at:new Date().toISOString()};
   if(ends&&new Date(ends)<=new Date(starts)){message('The end time must be after the start time.',true);button.disabled=false;return;}
-  const result=editingId
+  const wasEditing=!!editingId;
+  const result=wasEditing
    ? await client.from('community_events').update(record).eq('id',editingId)
    : await client.from('community_events').insert({...record,created_by:currentUser.id});
   button.disabled=false;if(result.error){message(result.error.message,true);return;}
-  resetForm();await refresh();message(editingId?'Event updated.':'Event published.');
+  resetForm();await refresh();message(wasEditing?'Event updated.':'Event published.');
  });
  document.getElementById('cancel-edit').addEventListener('click',resetForm);
  client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session)window.location.replace('login.html');});
