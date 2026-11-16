@@ -350,6 +350,34 @@
       .lang-switch { margin-left: 0; }
       .footer { justify-content: center; }
     }
+  
+    :root { --ink:#14251e; --muted:#586b61; --line:#dce7df; --paper:#f4f8f5; --green:#176344; --green-dark:#104b33; --mint:#e4f3e9; --shadow:0 16px 38px rgba(18,54,37,.075); }
+    body { line-height:1.65; }
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible { outline:3px solid #83c9a0; outline-offset:3px; }
+    .topbar { background:rgba(244,248,245,.94); backdrop-filter:blur(14px); }
+    .topbar .wrap { min-height:76px; }
+    nav { gap:.55rem .95rem; }
+    nav a { padding:.35rem .1rem; font-weight:600; }
+    .hero { position:relative; isolation:isolate; overflow:hidden; padding:clamp(2.6rem,7vw,5.4rem) 0 2.2rem; }
+    .hero::after { content:""; position:absolute; z-index:-1; width:340px; height:340px; right:-120px; top:8px; border-radius:50%; background:radial-gradient(circle,rgba(116,190,145,.2),rgba(116,190,145,0) 70%); pointer-events:none; }
+    .hero h1 { max-width:800px; letter-spacing:-.045em; }
+    .hero p { max-width:720px; line-height:1.75; }
+    .button { min-height:48px; border-radius:.85rem; transition:transform .18s ease,box-shadow .18s ease; }
+    .button:hover { transform:translateY(-2px); box-shadow:0 10px 22px rgba(17,75,51,.12); text-decoration:none; }
+    .video-panel,.panel,.card { border-color:var(--line); border-radius:1.2rem; box-shadow:var(--shadow); }
+    .card { transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease; }
+    .card:hover { transform:translateY(-3px); border-color:#b8d5c2; box-shadow:0 18px 38px rgba(18,54,37,.1); }
+    .panel { padding:clamp(1.1rem,3vw,1.8rem); }
+    #password-wrap[hidden] { display:none; }
+    .quick-paths { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin:1.2rem 0 2.2rem; }
+    .quick-path { padding:1.15rem 1.2rem; border:1px solid var(--line); border-radius:1rem; background:white; box-shadow:var(--shadow); }
+    .quick-path strong { display:block; margin-bottom:.25rem; }
+    .quick-path p { margin:0 0 .55rem; color:var(--muted); font-size:.94rem; }
+    .quick-path a { font-weight:700; }
+    .section-kicker { color:var(--green-dark); font-size:.78rem; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
+    @media(max-width:760px) { .quick-paths{grid-template-columns:1fr} .topbar .wrap{justify-content:space-between} nav{width:100%;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding:.35rem 0 .6rem;scrollbar-width:thin} nav a{white-space:nowrap} }
+    @media(prefers-reduced-motion:reduce) { html{scroll-behavior:auto} *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important} }
+
   </style>
 </head>
 <body>
@@ -389,9 +417,14 @@
       <p data-i18n="heroText">Create a basic Wi‑Fi profile right here, or open a dedicated builder for DNS, web clips, and other scenarios. Start with the beginner guide if you're new to profiles or skip straight to the local generator.</p>
       <div class="cta-row">
         <a class="button primary" href="#wifi-builder" data-i18n="openWifi">Open Wi‑Fi builder</a>
-        <a class="button" href="mobileconfig-guide.html" data-i18n="beginnerGuideButton">Beginner guide</a>
-        <a class="button" href="wiki.html">Explore the Wiki &amp; Troubleshooting</a>
+        <a class="button" href="mobileconfig-guide.html" data-i18n="beginnerGuideButton">Start with the guide</a>
+        <a class="button" href="wiki.html">Browse help &amp; troubleshooting</a>
       </div>
+    </section>
+    <section class="quick-paths" aria-label="Choose your next step">
+      <article class="quick-path"><strong>I'm new to profiles</strong><p>Learn what a configuration profile can change before installing one.</p><a href="mobileconfig-guide.html">Read the beginner guide →</a></article>
+      <article class="quick-path"><strong>I know what I need</strong><p>Jump straight to Wi‑Fi, encrypted DNS, web clips, or profile inspection.</p><a href="#builders">Explore the tools →</a></article>
+      <article class="quick-path"><strong>I need help</strong><p>Find account guidance, backend setup notes, and answers to common errors.</p><a href="wiki.html">Search the help centre →</a></article>
     </section>
 
     <section class="video-panel" id="install-tutorial" aria-labelledby="install-tutorial-title">
@@ -502,7 +535,7 @@
 
           <div class="field" id="password-wrap">
             <label for="password" data-i18n="password">Password</label>
-            <input id="password" type="password" value="ExamplePassword" maxlength="200">
+            <input id="password" type="password" value="" maxlength="200" autocomplete="new-password" placeholder="Enter your network password">
           </div>
 
           <div class="field">
@@ -749,7 +782,8 @@
         const name = document.getElementById('profile-name').value.trim();
         const ssid = document.getElementById('ssid').value.trim();
         const type = security.value;
-        const passwordValue = password.value.trim();
+        const passwordValue = password.value;
+        const autoJoin = document.getElementById('auto-join').value === 'true';
         const locale = document.documentElement.lang || 'en';
         const messages = {
           en: {
