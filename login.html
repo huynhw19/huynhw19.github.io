@@ -81,6 +81,7 @@
       <div class="providers">
         <button class="provider secondary" id="github" type="button" disabled>Continue with GitHub</button>
         <button class="provider secondary" id="bitbucket" type="button" disabled>Continue with Bitbucket</button>
+        <button class="provider secondary" id="figma" type="button" disabled>Continue with Figma</button>
         <button class="provider secondary" id="microsoft" type="button" disabled aria-describedby="microsoftHelp">Microsoft sign-in unavailable</button>
       </div>
       <p class="muted fine-print" id="microsoftHelp">Microsoft sign-in and sign-up need an Azure app registration (client ID and secret) configured by a Microsoft Entra administrator. This site cannot create or bypass those credentials. Use email/password or GitHub for now. Bitbucket sign-in also requires a Bitbucket OAuth consumer configured in Supabase.</p>
@@ -116,6 +117,7 @@
       const signout = document.getElementById('signout');
       const github = document.getElementById('github');
       const bitbucket = document.getElementById('bitbucket');
+      const figma = document.getElementById('figma');
       const microsoft = document.getElementById('microsoft');
       const passkeyLogin = document.getElementById('passkeyLogin');
       const form = document.getElementById('emailForm');
@@ -199,7 +201,7 @@
         return metadata;
       }
       function setBusy(busy) {
-        emailSubmit.disabled = busy; github.disabled = busy; bitbucket.disabled = busy; microsoft.disabled = true; passkeyLogin.disabled = busy;
+        emailSubmit.disabled = busy; github.disabled = busy; bitbucket.disabled = busy; figma.disabled = busy; microsoft.disabled = true; passkeyLogin.disabled = busy;
         resetPassword.disabled = busy; loginTab.disabled = busy; signupTab.disabled = busy;
       }
       function setStatus(message, isError=false) {
@@ -400,7 +402,7 @@
       }
       async function startOAuth(provider) {
         clearPasskeySession();
-        setStatus(`Connecting to ${{azure:'Microsoft',bitbucket:'Bitbucket',github:'GitHub'}[provider] || 'your provider'}…`);
+        setStatus(`Connecting to ${{azure:'Microsoft',bitbucket:'Bitbucket',figma:'Figma',github:'GitHub'}[provider] || 'your provider'}…`);
         setBusy(true);
         try {
           const type = accountType.value;
@@ -630,6 +632,7 @@
       });
       github.addEventListener('click', () => startOAuth('github'));
       bitbucket.addEventListener('click', () => startOAuth('bitbucket'));
+      figma.addEventListener('click', () => startOAuth('figma'));
       microsoft.addEventListener('click', () => startOAuth('azure'));
       signout.addEventListener('click', async () => {
         clearPasskeySession();
@@ -639,7 +642,7 @@
         if (error) { setStatus('Could not sign out. Please try again.', true); return; }
         setMode('login'); await renderSession();
       });
-      github.disabled = false; bitbucket.disabled = false; microsoft.disabled = true;
+      github.disabled = false; bitbucket.disabled = false; figma.disabled = false; microsoft.disabled = true;
       client.auth.onAuthStateChange((event, session) => {
         if (event === 'PASSWORD_RECOVERY') {
           queueMicrotask(showPasswordRecovery);
