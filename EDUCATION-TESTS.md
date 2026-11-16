@@ -47,7 +47,7 @@ The following migrations were applied to the connected Supabase project:
 2. `education_test_timer_and_integrity_guards`
 3. `education_private_grants_and_verified_session_gates`
 
-All Education tables have explicit `authenticated` grants and no `anon` or `PUBLIC` table grants. RLS is enabled across the Education schema; restrictive email-2FA session and OAuth-client gates apply alongside owner/student access policies. No service-role key is used in browser code.
+All Education tables have explicit `authenticated` grants and no `anon` or `PUBLIC` table grants. RLS is enabled across the Education schema; restrictive second-factor session and OAuth-client gates apply alongside owner/student access policies. No service-role key is used in browser code.
 
 ## Test checklist
 
