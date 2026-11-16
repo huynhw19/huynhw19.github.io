@@ -23,34 +23,13 @@ If you do not have Entra access or an administrator who can provide the credenti
 2. Add the Supabase provider callback URL shown under **Authentication → Providers → Azure** as a Web redirect URI in Entra. Create a client secret there and enter the application client ID and secret in Supabase's Azure provider settings. Keep the secret only in Supabase.
 3. Enable the Azure provider. The login page requests `openid email profile` scopes.
 
-## 4. Configure email two-factor delivery
+## 4. Phone authentication is not available on the website
 
-The site includes a custom email second-factor flow backed by a Supabase Edge Function and database access policies. It sends an eight-digit, single-use code and a single-use verification link. Challenges expire after five minutes, are rate-limited, and are bound to an authenticated account/session. Successful verification authorizes that session for up to eight hours.
-
-Email delivery uses [Resend](https://resend.com/). Before enabling the feature:
-
-1. Create a Resend account and verify a sending domain you control.
-2. Create a Resend API key with permission to send email.
-3. Open the Supabase project **Edge Functions → Secrets** page.
-4. Add these secrets there (never in this repository):
-   - `RESEND_API_KEY`: your Resend API key.
-   - `EMAIL_FROM`: a sender using your verified domain, for example `ConfigKit Security <security@YOUR-VERIFIED-DOMAIN>`.
-5. Confirm that the deployed `email-2fa` Edge Function is active.
-
-The migration creates private challenge/session tables and adds restrictive RLS policies to the current public tables (and Storage objects, if present). The browser cannot mark a session verified: the Edge Function validates the code/link and writes the short-lived verification record that RLS checks against the signed-in Supabase session ID.
-
-Users enable the email factor from **Account settings → Email verification as an alternative 2FA method**. Existing verified TOTP users must complete their current authenticator challenge before enrolling email as an alternative. After enrollment, email verification can replace the TOTP prompt for a session. Users can still choose their existing authenticator code instead, and a native Supabase AAL2 session is accepted as the fallback. The existing TOTP/passkey enrollment remains intact.
-
-A one-time email link requires the user to be signed in to the same ConfigKit account in the browser where the link is opened. The link can verify another active session for that account, but it cannot create a signed-in session by itself.
-
-
-## 5. Phone authentication is not available on the website
-
-Phone-number sign-in and phone-based multi-factor authentication (SMS MFA) have been removed from the ConfigKit website. The login and Account settings pages use email/password, configured identity providers, authenticator-app TOTP, email verification, and passkeys instead.
+Phone-number sign-in and phone-based multi-factor authentication (SMS MFA) have been removed from the ConfigKit website. The login and Account settings pages use email/password, configured identity providers, authenticator-app TOTP and passkeys instead.
 
 This is a website-interface change only. It does not delete or modify phone numbers or phone MFA factors already stored in Supabase Auth. Those existing records remain in Supabase and may still be subject to the project's Auth configuration and database policies. The website does not provide controls to inspect, enroll, remove, or use those phone factors. Do not assume an existing phone factor can be used to complete sign-in through this website.
 
-## 6. Configure one-time authenticator recovery codes
+## 5. Configure one-time authenticator recovery codes
 
 ConfigKit provides a separate recovery-code backup for users who have enabled authenticator-app TOTP. It generates 10 random 128-bit codes. Each code can be redeemed once after the user completes their primary email/password or provider sign-in; it is not a password and cannot create a primary session by itself.
 
@@ -64,11 +43,11 @@ Security properties:
 - Each code contains 128 bits of cryptographically secure randomness. Only SHA-256 hashes are stored; raw codes are returned once at generation and are never logged.
 - Redemption is performed server-side and atomically marks a code as used. Replays fail. Attempts are limited to 10 per session per 15-minute window.
 - Recovery-code records and verification sessions live in the private database schema, with service-role-only RPC access. The browser cannot insert hashes or mark itself verified.
-- Restrictive RLS policies accept a native AAL2 session, a verified email-2FA session, or a server-issued recovery-code session while recovery codes are enabled.
+- Restrictive RLS policies accept a native AAL2 session or a server-issued recovery-code session while recovery codes are enabled.
 - Recovery codes are a backup second factor only. They do not bypass the primary sign-in step. Users should keep a fresh TOTP factor enrolled and replace codes if they may have been exposed.
 
-## 7. Test
+## 6. Test
 
-Deploy the site, open `login.html`, and test each provider in a private browser window. Test email 2FA by enabling it in account settings, signing out, signing in again, and verifying both the emailed code and one-time link. Test recovery codes by enabling TOTP, generating a set in Account settings, saving the codes, signing out, and using one code after the primary sign-in step. Confirm that the remaining count decreases, that a used code is rejected on replay, and that protected Data API requests remain blocked for an unverified session. Also test normal TOTP sign-in after recovery codes have been enabled. The Supabase project must allow the exact callback URL. First successful provider sign-in creates an account; subsequent sign-ins use the same identity. Review provider/Supabase account-linking and email-confirmation settings before launch.
+Deploy the site, open `login.html`, and test each provider in a private browser window. Test recovery codes by enabling TOTP, generating a set in Account settings, saving the codes, signing out, and using one code after the primary sign-in step. Confirm that the remaining count decreases, that a used code is rejected on replay, and that protected Data API requests remain blocked for an unverified session. Also test normal TOTP sign-in after recovery codes have been enabled. The Supabase project must allow the exact callback URL. First successful provider sign-in creates an account; subsequent sign-ins use the same identity. Review provider/Supabase account-linking and email-confirmation settings before launch.
 
 Supabase and the identity providers process authentication data under their own privacy terms. Other ConfigKit features may also store account-related data in Supabase. Update the site's privacy policy accordingly before inviting users.
