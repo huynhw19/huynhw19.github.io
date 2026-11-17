@@ -11,7 +11,7 @@
   </style>
 </head>
 <body>
-  <header><a href="dashboard.html">← ConfigKit dashboard</a><nav aria-label="Family navigation"><a href="#kids-requests">Parent Inbox <span id="inbox-nav-count" class="inbox-count">…</span></a><a href="family-planner.html">Family Planner</a><a href="index.html">Home</a><a href="account-settings.html">Account settings</a></nav></header>
+  <header><a href="dashboard.html">← ConfigKit dashboard</a><nav aria-label="Family navigation"><a href="#manage-children">Manage children</a><a href="#kids-requests">Parent Inbox <span id="inbox-nav-count" class="inbox-count">…</span></a><a href="family-planner.html">Family Planner</a><a href="index.html">Home</a><a href="account-settings.html">Account settings</a></nav></header>
   <main>
     <section class="card">
       <span class="eyebrow">Personal account</span>
@@ -69,10 +69,10 @@
       </form>
       <p id="status" class="status" role="status" aria-live="polite"></p>
     </section>
-    <section class="card" id="children-panel" hidden>
-      <h2>Your children</h2>
-      <p class="muted">Only your signed-in account can view and manage these records.</p>
-      <button id="refresh-children" type="button" class="secondary">Refresh activity</button>
+    <section class="card" id="children-panel" hidden aria-labelledby="manage-children-title">
+      <h2 id="manage-children-title">Manage children</h2>
+      <p class="muted">View and update your child profiles, PINs, permissions and activity. Only your signed-in account can manage these records.</p>
+      <div class="actions"><button id="add-child-shortcut" type="button">Add a child</button><button id="refresh-children" type="button" class="secondary">Refresh activity</button></div>
       <div id="children-list"></div>
     </section>
     <section class="card" id="kids-videos" hidden aria-labelledby="kids-videos-title">
@@ -228,6 +228,7 @@
         await loadKidsApprovals();
       }
       document.getElementById('refresh-children')?.addEventListener('click',()=>loadChildren());
+      document.getElementById('add-child-shortcut')?.addEventListener('click',()=>{creator.scrollIntoView({behavior:'smooth',block:'start'});field('child-name').focus();});
       async function loadKidsApprovals(){
         requestsPanel.hidden=false;requestsList.replaceChildren();reportsList.replaceChildren();
         let approvalCount=0;
