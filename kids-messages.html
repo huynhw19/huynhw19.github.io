@@ -47,7 +47,7 @@
  if(!childId||!/^[0-9a-f-]{36}$/i.test(childId)){say('Open this page from your Family Dashboard so the correct child profile is selected.',true);return;}
  const parent=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
  const child=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{storageKey:'configkit-kid-'+childId,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
- let profile=null,selected=null,friends=[],callChannel=null,peer=null,localStream=null,remoteStream=null,queuedIce=[];
+ let profile=null,selected=null,friends=[],callChannel=null,callChannelReady=false,peer=null,localStream=null,remoteStream=null,queuedIce=[];
  async function childStatus(){
    const {data,error}=await child.functions.invoke('kids-messaging',{body:{action:'child_status'}});
    if(error||data?.error)throw new Error(data?.error||error?.message||'Could not verify child profile.');
@@ -91,6 +91,7 @@
    });
  }
  async function openChat(friend){
+   if(selected&&selected.friendship_id!==friend.friendship_id){await endCall(true);if(callChannel){await child.removeChannel(callChannel);callChannel=null;callChannelReady=false;}}
    selected=friend;document.getElementById('chat-title').textContent=friend.friend_name;document.getElementById('chat-hint').textContent='Only you and this approved friend can see this conversation.';
    document.getElementById('message-form').hidden=false;await loadFriends();await loadMessages();await prepareCallControls();
  }
@@ -106,12 +107,18 @@
    const voice=document.getElementById('voice-call-button'),video=document.getElementById('video-call-button');
    voice.hidden=video.hidden=true;
    if(!selected)return;
-   const {data,error}=await child.functions.invoke('kids-messaging',{body:{action:'call_permission',friendship_id:selected.friendship_id}});
-   if(!error&&data?.allowed){voice.hidden=video.hidden=false;}
-   await joinCallChannel();
+   try{
+     const {data,error}=await child.functions.invoke('kids-messaging',{body:{action:'call_permission',friendship_id:selected.friendship_id}});
+     if(error||!data?.allowed){callStatus('Calls are turned off or not approved by both families.');return;}
+     await joinCallChannel();
+     voice.hidden=video.hidden=false;
+   }catch(error){callStatus(error?.message||'Could not connect to the private calling service. Please refresh and try again.');}
  }
  async function joinCallChannel(){
-   if(callChannel)await child.removeChannel(callChannel);
+   if(!selected)throw new Error('Choose an approved friend first.');
+   if(callChannel){await child.removeChannel(callChannel);callChannel=null;}
+   callChannelReady=false;
+   await child.realtime.setAuth();
    callChannel=child.channel('kids-call:'+selected.friendship_id,{config:{private:true}});
    callChannel.on('broadcast',{event:'signal'},async({payload})=>{
      if(!payload||payload.from===profile.child_id)return;
@@ -131,10 +138,22 @@
        else if(payload.type==='hangup'||payload.type==='decline'){await endCall(false);callStatus(payload.type==='decline'?'The friend declined the call.':'The call ended.');}
      }catch(err){callStatus('Call could not connect. Check microphone/camera permissions and try again.');await endCall(false);}
    });
-   callChannel.subscribe(status=>{if(status==='SUBSCRIBED')callStatus('Ready for a private call.');else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')callStatus('Calling is unavailable. Both families must enable calls.');});
+   await new Promise((resolve,reject)=>{
+     let settled=false;
+     const timer=setTimeout(()=>{if(!settled){settled=true;callChannelReady=false;reject(new Error('The private calling channel timed out. Check your connection and try again.'));}},15000);
+     callChannel.subscribe((status,error)=>{
+       if(status==='SUBSCRIBED'&&!settled){settled=true;clearTimeout(timer);callChannelReady=true;callStatus('Ready for a private call.');resolve(true);}
+       else if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status)&&!settled){settled=true;clearTimeout(timer);callChannelReady=false;reject(error||new Error('The private calling channel could not connect.'))}
+     });
+   });
  }
  const callStatus=message=>{document.getElementById('call-status').textContent=message;};
- async function sendSignal(payload){if(callChannel)await callChannel.send({type:'broadcast',event:'signal',payload:{...payload,from:profile.child_id}});}
+ async function sendSignal(payload){
+   if(!callChannel||!callChannelReady)throw new Error('The private calling channel is not connected. Please wait and try again.');
+   const result=await callChannel.send({type:'broadcast',event:'signal',payload:{...payload,from:profile.child_id}});
+   if(result!=='ok')throw new Error('The call signal could not be delivered ('+String(result)+'). Please try again.');
+   return true;
+ }
  async function startMedia(withVideo){
    if(!navigator.mediaDevices?.getUserMedia)throw new Error('Calls need a secure browser connection and media permissions.');
    localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:!!withVideo});
@@ -147,12 +166,13 @@
  async function createPeer(){
    peer=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]});
    localStream.getTracks().forEach(track=>peer.addTrack(track,localStream));
-   peer.ontrack=event=>event.streams[0]?.getTracks().forEach(track=>remoteStream.addTrack(track));
-   peer.onicecandidate=event=>{if(event.candidate)void sendSignal({type:'ice',candidate:event.candidate});};
+   peer.ontrack=event=>{if(event.track&&!remoteStream.getTracks().some(track=>track.id===event.track.id))remoteStream.addTrack(event.track);const remoteVideo=document.getElementById('remote-video');if(remoteVideo.srcObject!==remoteStream)remoteVideo.srcObject=remoteStream;void remoteVideo.play().catch(()=>{});};
+   peer.onicecandidate=event=>{if(event.candidate)void sendSignal({type:'ice',candidate:event.candidate}).catch(error=>callStatus(error.message));};
    peer.onconnectionstatechange=()=>{if(peer&&['failed','disconnected'].includes(peer.connectionState))callStatus('Connection interrupted. You can end the call and try again.');};
  }
  async function beginCall(withVideo){
    try{
+     if(!selected||!callChannelReady)throw new Error('The private calling channel is not ready. Please wait a moment and try again.');
      const {data,error}=await child.functions.invoke('kids-messaging',{body:{action:'call_permission',friendship_id:selected.friendship_id}});
      if(error||!data?.allowed){callStatus('Both families must enable calls before you can call.');return;}
      await startMedia(withVideo);await createPeer();
@@ -162,7 +182,7 @@
    }catch(err){callStatus(err.message||'Could not start call. Check microphone/camera permissions.');await endCall(false);}
  }
  async function endCall(notify=true){
-   if(notify)await sendSignal({type:'hangup'});
+   if(notify&&peer){try{await sendSignal({type:'hangup'});}catch(error){callStatus('Ending call locally. The other device may take a moment to notice.');}}
    if(peer){peer.ontrack=null;peer.onicecandidate=null;peer.close();peer=null;}
    if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null;}
    remoteStream=null;queuedIce=[];
