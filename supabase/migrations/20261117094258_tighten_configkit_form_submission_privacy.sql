@@ -1,0 +1,12 @@
+drop policy "Form owners view their submissions" on public.configkit_form_submissions;
+drop policy "Respondents submit to published forms" on public.configkit_form_submissions;
+drop policy "Form owners delete their submissions" on public.configkit_form_submissions;
+alter table public.configkit_form_submissions drop constraint configkit_form_submissions_form_owner_fkey;
+drop index if exists public.configkit_form_submissions_owner_time_idx;
+alter table public.configkit_form_submissions drop column form_owner_id;
+alter table public.configkit_form_submissions add constraint configkit_form_submissions_form_id_fkey foreign key (form_id) references public.configkit_forms(id) on delete cascade;
+create index configkit_form_submissions_owner_time_idx on public.configkit_form_submissions(form_id,submitted_at desc);
+create policy "Form owners view their submissions" on public.configkit_form_submissions for select to authenticated using (exists (select 1 from public.configkit_forms f where f.id=form_id and f.user_id=(select auth.uid())));
+create policy "Respondents submit to published forms" on public.configkit_form_submissions for insert to anon,authenticated with check (exists (select 1 from public.configkit_forms f where f.id=form_id and f.status='published' and f.accepting_responses=true));
+create policy "Form owners delete their submissions" on public.configkit_form_submissions for delete to authenticated using (exists (select 1 from public.configkit_forms f where f.id=form_id and f.user_id=(select auth.uid())));
+comment on table public.configkit_form_submissions is 'Private form response records. Respondents can insert answers only into currently published forms; only the form owner can read or delete responses.';
