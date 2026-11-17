@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Store, organize, version and review your ConfigKit mobile configuration profiles in a private library.">
+<title>Profile Library — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#17251f;--muted:#66766d;--line:#dce7df;--paper:#f4f8f5;--green:#176344;--green2:#e4f3e9;--red:#9b3030;--amber:#81520b;--amberbg:#fff6e5;--white:#fff;--shadow:0 12px 32px rgba(18,54,37,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}button,input,textarea,select{font:inherit}button,.button{border:1px solid var(--line);border-radius:10px;padding:.62rem .9rem;background:#fff;color:var(--ink);font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:.4rem}button:hover,.button:hover{border-color:#a9cbb6}button:disabled{opacity:.55;cursor:wait}.primary{background:var(--green);border-color:var(--green);color:#fff}.danger{color:var(--red)}header{background:#fff;border-bottom:1px solid var(--line)}.head{width:min(1240px,calc(100% - 32px));margin:auto;min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}.brand{font-weight:850;color:var(--ink);text-decoration:none;font-size:1.05rem}nav{display:flex;gap:1rem;flex-wrap:wrap}main{width:min(1240px,calc(100% - 32px));margin:2rem auto 4rem}.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;margin-bottom:1.3rem}.eyebrow{display:inline-block;border-radius:99px;background:var(--green2);color:var(--green);padding:.22rem .65rem;font-size:.78rem;font-weight:800}h1{font-size:clamp(2rem,4vw,2.8rem);line-height:1.12;margin:.55rem 0}.muted{color:var(--muted)}.hero p{max-width:720px;margin:.3rem 0}.layout{display:grid;grid-template-columns:235px minmax(0,1fr);gap:1rem;align-items:start}.panel,.card,.empty,.notice{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.sidebar{padding:1rem;position:sticky;top:1rem}.side-title{font-size:.78rem;font-weight:850;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:.3rem 0 .55rem}.side-list{display:grid;gap:.25rem;margin-bottom:1.1rem}.side-list button{justify-content:flex-start;border:0;background:transparent;padding:.45rem .55rem;font-weight:600}.side-list button.active{background:var(--green2);color:var(--green)}.side-list button span{margin-left:auto;color:var(--muted);font-size:.82rem}.content{min-width:0}.toolbar{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:.8rem}.toolbar input{flex:1;min-width:180px}.field, input[type=text],input[type=search],textarea,select{border:1px solid var(--line);border-radius:9px;padding:.65rem .75rem;background:#fff;color:var(--ink);width:100%;min-width:0}.toolbar select{width:auto;min-width:130px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}.form-grid .wide{grid-column:1/-1}label{display:block;font-weight:700;font-size:.88rem;margin-bottom:.3rem}.hint{font-size:.82rem;color:var(--muted);margin:.25rem 0 0}.create{padding:1rem;margin-bottom:1rem}.create h2{font-size:1.1rem;margin:0 0 .75rem}.create form{display:grid;gap:.7rem}.create-actions{display:flex;justify-content:space-between;align-items:center;gap:.7rem;flex-wrap:wrap}.file-label{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}.file-label input{max-width:100%}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,370px),1fr));gap:.85rem}.card{padding:1rem;min-width:0}.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem}.card h3{margin:.1rem 0 .25rem;font-size:1.08rem;overflow-wrap:anywhere}.card p{margin:.3rem 0;color:var(--muted);overflow-wrap:anywhere}.tag{display:inline-flex;background:var(--green2);color:var(--green);border-radius:99px;padding:.14rem .5rem;font-size:.75rem;font-weight:800;margin:.15rem .15rem .15rem 0}.meta{font-size:.82rem;color:var(--muted)}.actions{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.75rem}.actions button{font-size:.84rem;padding:.48rem .65rem}.version-box{border-top:1px solid var(--line);margin-top:.8rem;padding-top:.7rem}.version-head{display:flex;justify-content:space-between;align-items:center;gap:.6rem}.version{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.45rem 0;border-top:1px solid #edf2ee}.version:first-of-type{border-top:0}.version small{display:block;color:var(--muted)}.version-actions{display:flex;gap:.35rem;flex-wrap:wrap}.version-actions button{font-size:.78rem;padding:.35rem .5rem}.safety{border-radius:9px;background:var(--amberbg);color:var(--amber);padding:.5rem .65rem;font-size:.82rem;margin-top:.55rem}.safety.ok{background:var(--green2);color:var(--green)}.notice{padding:.8rem 1rem;margin-bottom:1rem;color:var(--muted);font-size:.88rem;box-shadow:none}.notice strong{color:var(--ink)}.status{min-height:1.5rem;color:var(--green);font-size:.9rem;margin:.5rem 0}.status.error{color:var(--red)}.empty{padding:2.5rem 1rem;text-align:center;box-shadow:none;grid-column:1/-1}.empty h3{margin:.2rem 0}.hidden{display:none!important}.modal{position:fixed;inset:0;background:#0d1c14a6;display:grid;place-items:center;padding:1rem;z-index:10}.dialog{width:min(760px,100%);max-height:min(85vh,850px);overflow:auto;background:white;border-radius:16px;padding:1.2rem;box-shadow:0 20px 70px #0004}.dialog-head{display:flex;justify-content:space-between;align-items:center;gap:1rem}.dialog h2{margin:0;font-size:1.25rem}.diff{white-space:pre-wrap;overflow:auto;max-height:45vh;background:#14231b;color:#edf6ef;border-radius:10px;padding:1rem;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.diff .add{color:#a6f0b9}.diff .del{color:#ffb1a9}.report-list{padding-left:1.2rem}.report-list li{margin:.25rem 0}.auth-card{max-width:620px;margin:3rem auto;padding:2rem;text-align:center}.auth-card h2{margin:.2rem 0}.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}footer{width:min(1240px,calc(100% - 32px));margin:auto;padding:1.5rem 0 2rem;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.sidebar{position:static}.side-list{display:flex;flex-wrap:wrap}.side-list button{border:1px solid var(--line)}.sidebar{padding:.8rem}.side-title{margin-top:.7rem}}@media(max-width:520px){.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.head{padding:.8rem 0}.version{align-items:flex-start;flex-direction:column}.version-actions{width:100%}}
+</style>
+</head>
+<body>
+<header><div class="head"><a class="brand" href="dashboard.html">⌘ ConfigKit · Profile Library</a><nav><a href="dashboard.html">Dashboard</a><a href="universal-search.html">Universal Search</a><a href="mobileconfig-builder.html">Profile Builder</a></nav></div></header>
+<main>
+<section class="hero"><div><span class="eyebrow">Private profile workspace</span><h1>Your Profile Library</h1><p class="muted">Keep configuration profiles organized, review safety signals, and track every saved version. Files are private to your account.</p></div><button class="primary" id="export-library" type="button">Export library index ↓</button></section>
+<div id="notice" class="notice"><strong>Privacy by design:</strong> profile files are stored in a private bucket. Only your signed-in account can list, download, or delete them. Safety checks are local indicators, not a guarantee that a profile is safe.</div>
+<section id="auth-required" class="panel auth-card hidden"><h2>Sign in to open your Profile Library</h2><p class="muted">Your library is private and connected to your ConfigKit account.</p><a class="button primary" href="login.html?returnTo=profile-library.html">Sign in to ConfigKit</a></section>
+<section id="library" class="hidden">
+<div class="layout">
+<aside class="panel sidebar">
+<div class="side-title">Library</div><div class="side-list" id="main-filters">
+<button class="active" data-view="all">All profiles <span id="all-count">0</span></button>
+<button data-view="favorites">★ Favourites <span id="favorite-count">0</span></button>
+<button data-view="recent">Recently updated</button>
+</div>
+<div class="side-title">Folders</div><div class="side-list" id="folder-list"></div>
+<div class="side-title">Tags</div><div class="side-list" id="tag-list"></div>
+</aside>
+<div class="content">
+<section class="panel create">
+<h2>Add a profile to your library</h2>
+<form id="create-form">
+<div class="form-grid">
+<div><label for="profile-name">Profile name</label><input id="profile-name" type="text" maxlength="120" required placeholder="e.g. Office Wi-Fi and DNS"></div>
+<div><label for="profile-folder">Folder</label><input id="profile-folder" type="text" maxlength="80" value="My Profiles" list="folder-suggestions" required><datalist id="folder-suggestions"></datalist></div>
+<div class="wide"><label for="profile-description">Description</label><textarea id="profile-description" rows="2" maxlength="2000" placeholder="What is this profile for? Avoid including passwords or private details."></textarea></div>
+<div class="wide"><label for="profile-tags">Tags</label><input id="profile-tags" type="text" maxlength="300" placeholder="wifi, dns, work (comma separated)"><p class="hint">Use tags to find related profiles quickly.</p></div>
+<div class="wide"><label for="profile-file">Profile file (.mobileconfig or XML, max 2 MB)</label><input id="profile-file" type="file" accept=".mobileconfig,.xml,application/x-apple-aspen-config,application/xml,text/xml" required><p class="hint">The original file is stored as a private, immutable version. Uploading a changed file later creates a new version.</p></div>
+<div class="wide"><label for="profile-notes">Version notes (optional)</label><input id="profile-notes" type="text" maxlength="1000" placeholder="Initial version, updated DNS resolver, etc."></div>
+</div>
+<div class="create-actions"><span class="hint">Legacy download history contains metadata only. Re-upload a local file here to preserve its actual contents.</span><button class="primary" id="create-button" type="submit">＋ Add to library</button></div>
+</form><p class="status" id="create-status" role="status" aria-live="polite"></p>
+</section>
+<div class="toolbar"><input id="search" type="search" placeholder="Search names, descriptions, folders and tags…" aria-label="Search profiles"><select id="sort"><option value="updated">Recently updated</option><option value="name">Name A–Z</option><option value="created">Oldest first</option></select><button id="clear-filters" type="button">Clear filters</button></div>
+<div class="status" id="status" role="status" aria-live="polite"></div>
+<div id="profiles" class="cards"></div>
+</div>
+</div>
+</section>
+</main>
+<footer>ConfigKit Profile Library · Files are stored privately in Supabase Storage. Profile parsing happens in your browser; only profile metadata and a concise safety report are stored in the database. Never install a profile unless you trust its source and understand its settings.</footer>
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="dialog"><div class="dialog-head"><h2 id="modal-title">Profile details</h2><button id="modal-close" type="button">Close</button></div><div id="modal-body"></div></div></div>
+<input id="version-file" class="hidden" type="file" accept=".mobileconfig,.xml,application/x-apple-aspen-config,application/xml,text/xml">
+<script src="auth-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id), BUCKET='configkit-profile-library', MAX=2*1024*1024;
+const cfg=window.CONFIGKIT_AUTH||{};
+const db=cfg.supabaseUrl&&cfg.supabaseAnonKey&&window.supabase?.createClient?window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
+let user=null,profiles=[],versions=[],activeView='all',activeFolder='',activeTag='',versionTarget=null,loading=false;
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function setStatus(message,error=false,target='status'){const el=$(target);el.textContent=message||'';el.classList.toggle('error',!!error);}
+function showModal(title,html){$('modal-title').textContent=title;$('modal-body').innerHTML=html;$('modal').classList.remove('hidden');}
+function closeModal(){$('modal').classList.add('hidden');$('modal-body').replaceChildren();}
+$('modal-close').addEventListener('click',closeModal);
+$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal()});
+function parseSafety(file,text){
+ const warnings=[],types=[],notes=[];
+ const doc=new DOMParser().parseFromString(text,'application/xml');
+ if(doc.querySelector('parsererror'))throw new Error('This file is not valid XML. Export an XML-format .mobileconfig file and try again.');
+ const plist=doc.documentElement;
+ if(plist?.tagName!=='plist'||!plist.querySelector(':scope > dict'))throw new Error('The XML does not contain a valid Apple plist profile.');
+ const keys=[...doc.querySelectorAll('key')];
+ const getAfter=key=>{const k=keys.find(x=>x.textContent.trim()===key);return k?.nextElementSibling?.textContent?.trim()||''};
+ if(getAfter('PayloadType')!=='Configuration')throw new Error('This does not appear to be an Apple configuration profile (PayloadType must be Configuration).');
+ for(const key of keys){if(key.textContent.trim()==='PayloadType'){const value=key.nextElementSibling?.textContent?.trim();if(value&&value!=='Configuration'&&!types.includes(value))types.push(value)}}
+ const lower=types.join(' ').toLowerCase();
+ if(lower.includes('.mdm'))warnings.push('Mobile Device Management payload: may enrol this device in remote management.');
+ if(lower.includes('.vpn.')||lower.includes('globalhttp'))warnings.push('VPN or proxy payload: may route or inspect network traffic.');
+ if(lower.includes('pkcs12')||lower.includes('root')||lower.includes('.scep')||lower.includes('certificate'))warnings.push('Certificate or identity payload: can establish trust or install credentials.');
+ if(lower.includes('webcontent-filter'))warnings.push('Web content filter: may filter or monitor web traffic.');
+ if(lower.includes('wifi.managed'))warnings.push('Wi-Fi payload: may configure networks; check for embedded credentials.');
+ if(lower.includes('dnssettings'))warnings.push('DNS payload: changes DNS resolution for the configured scope.');
+ if(lower.includes('restrictions'))warnings.push('Restrictions payload: may limit device features or settings.');
+ if(lower.includes('mail.managed')||lower.includes('exchange')||lower.includes('caldav')||lower.includes('carddav'))warnings.push('Account payload: may configure mail, calendar or contacts accounts.');
+ const removal=getAfter('PayloadRemovalDisallowed').toLowerCase();
+ if(removal==='true')warnings.push('Profile removal is restricted by a payload setting.');
+ if(keys.some(k=>k.textContent.trim()==='Password'))warnings.push('Contains a Password key. Secret values are not displayed or copied into the library report.');
+ if(!warnings.length)notes.push('No high-impact payload patterns were detected by the basic local checks.');
+ notes.push('Automated checks are limited and cannot establish whether the issuer or profile is trustworthy.');
+ return {validXml:true,payloadTypes:types,warnings,notes,reviewedAt:new Date().toISOString(),profileIdentifier:getAfter('PayloadIdentifier'),organization:getAfter('PayloadOrganization'),payloadCount:types.length};
+}
+function tagsFrom(value){return [...new Set(String(value||'').split(',').map(x=>x.trim().toLowerCase().replace(/^#/,'')).filter(Boolean).map(x=>x.slice(0,32)))].slice(0,20);}
+async function checksum(file){if(!crypto?.subtle)return null;const hash=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+async function inspectFile(file){
+ if(!file)throw new Error('Choose a profile file first.');
+ if(!/\.(mobileconfig|xml)$/i.test(file.name))throw new Error('Choose a .mobileconfig or .xml file.');
+ if(file.size<1||file.size>MAX)throw new Error('Profile files must be between 1 byte and 2 MB.');
+ const text=await file.text();
+ const report=parseSafety(file,text);
+ return {report,checksum:await checksum(file),text};
+}
+async function refresh(){
+ if(!user)return;
+ const {data:p,error:pe}=await db.from('configkit_profiles').select('id,user_id,name,description,folder,tags,is_favorite,created_at,updated_at').order('updated_at',{ascending:false});
+ if(pe)throw pe;profiles=p||[];
+ if(profiles.length){const {data:v,error:ve}=await db.from('configkit_profile_versions').select('id,profile_id,user_id,version_number,filename,storage_path,mime_type,file_size,checksum,notes,safety_report,created_at').in('profile_id',profiles.map(x=>x.id)).order('version_number',{ascending:false});if(ve)throw ve;versions=v||[];}else versions=[];
+ render();
+}
+function latestFor(id){return versions.filter(v=>v.profile_id===id).sort((a,b)=>b.version_number-a.version_number)[0]}
+function renderSidebar(){
+ const folders=[...new Set(profiles.map(p=>p.folder).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+ $('folder-list').innerHTML=folders.length?folders.map(f=>'<button data-folder="'+esc(f)+'" class="'+(activeFolder===f?'active':'')+'">'+esc(f)+' <span>'+profiles.filter(p=>p.folder===f).length+'</span></button>').join(''):'<span class="hint">No folders yet</span>';
+ const tags=[...new Set(profiles.flatMap(p=>p.tags||[]))].sort();
+ $('tag-list').innerHTML=tags.length?tags.map(t=>'<button data-tag="'+esc(t)+'" class="'+(activeTag===t?'active':'')+'"># '+esc(t)+' <span>'+profiles.filter(p=>(p.tags||[]).includes(t)).length+'</span></button>').join(''):'<span class="hint">No tags yet</span>';
+ $('all-count').textContent=profiles.length;$('favorite-count').textContent=profiles.filter(p=>p.is_favorite).length;
+ $('folder-suggestions').innerHTML=folders.map(f=>'<option value="'+esc(f)+'"></option>').join('');
+ document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===activeView&&!activeFolder&&!activeTag));
+}
+function render(){
+ renderSidebar();
+ const q=$('search').value.trim().toLowerCase();
+ let rows=profiles.filter(p=>{
+  if(activeView==='favorites'&&!p.is_favorite)return false;
+  if(activeView==='recent'&&Date.now()-new Date(p.updated_at).getTime()>30*86400000)return false;
+  if(activeFolder&&p.folder!==activeFolder)return false;
+  if(activeTag&&!(p.tags||[]).includes(activeTag))return false;
+  const hay=[p.name,p.description,p.folder,...(p.tags||[])].join(' ').toLowerCase();
+  return !q||q.split(/\s+/).every(t=>hay.includes(t));
+ });
+ const sort=$('sort').value;
+ rows.sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='created'?new Date(a.created_at)-new Date(b.created_at):new Date(b.updated_at)-new Date(a.updated_at));
+ const el=$('profiles');
+ if(!rows.length){el.innerHTML='<div class="empty"><h3>No profiles here yet</h3><p class="muted">Add a .mobileconfig file above, or clear your filters.</p></div>';return;}
+ el.innerHTML=rows.map(p=>{
+  const vs=versions.filter(v=>v.profile_id===p.id).sort((a,b)=>b.version_number-a.version_number);
+  const latest=vs[0],report=latest?.safety_report||{},warnings=report.warnings||[];
+  return '<article class="card" data-profile="'+esc(p.id)+'"><div class="card-top"><div><h3>'+esc(p.name)+'</h3><div class="meta">'+esc(p.folder)+' · '+vs.length+' version'+(vs.length===1?'':'s')+' · Updated '+esc(new Date(p.updated_at).toLocaleDateString())+'</div></div><button type="button" data-fav="'+esc(p.id)+'" aria-label="'+(p.is_favorite?'Remove favourite':'Add favourite')+'">'+(p.is_favorite?'★':'☆')+'</button></div><p>'+esc(p.description||'No description added.')+'</p><div>'+(p.tags||[]).map(t=>'<span class="tag"># '+esc(t)+'</span>').join('')+'</div>'+(latest?'<div class="safety '+(warnings.length?'':'ok')+'">'+(warnings.length?'⚠ '+warnings.length+' safety flag(s) in latest version':'✓ Basic profile checks passed; still review the source')+'</div>':'')+'<div class="actions"><button type="button" data-add-version="'+esc(p.id)+'">＋ New version</button><button type="button" data-edit="'+esc(p.id)+'">Edit details</button><button type="button" data-review="'+esc(p.id)+'">Safety review</button><button type="button" data-delete="'+esc(p.id)+'" class="danger">Delete</button></div><div class="version-box"><div class="version-head"><strong>Version history</strong><span class="meta">'+vs.length+' saved</span></div>'+(vs.length?vs.map(v=>'<div class="version"><div><strong>v'+v.version_number+' · '+esc(v.filename)+'</strong><small>'+esc(new Date(v.created_at).toLocaleString())+' · '+(v.file_size/1024).toFixed(1)+' KB'+(v.notes?' · '+esc(v.notes):'')+'</small></div><div class="version-actions"><button type="button" data-download="'+esc(v.id)+'">Download</button><button type="button" data-review-version="'+esc(v.id)+'">Review</button></div></div>').join(''):'<p class="hint">No saved versions yet.</p>')+'</div><div class="version-box"><label>Compare versions</label><div class="form-grid"><select data-compare-a="'+esc(p.id)+'">'+vs.map(v=>'<option value="'+esc(v.id)+'">v'+v.version_number+' · '+esc(v.filename)+'</option>').join('')+'</select><select data-compare-b="'+esc(p.id)+'">'+vs.map((v,i)=>'<option value="'+esc(v.id)+'" '+(i===1?'selected':'')+'>v'+v.version_number+' · '+esc(v.filename)+'</option>').join('')+'</select></div><div class="actions"><button type="button" data-compare="'+esc(p.id)+'" '+(vs.length<2?'disabled':'')+'>Compare selected versions</button></div></div></article>';
+ }).join('');
+}
+async function saveVersion(profileId,file,notes){
+ const btn=$('create-button');const info=await inspectFile(file);const {data:{user:current},error:ae}=await db.auth.getUser();if(ae)throw ae;if(!current)throw new Error('Your session expired. Sign in again.');
+ const existing=versions.filter(v=>v.profile_id===profileId);const number=Math.max(0,...existing.map(v=>v.version_number))+1;
+ const versionId=crypto.randomUUID();const ext=/\.xml$/i.test(file.name)?'xml':'mobileconfig';const path=current.id+'/'+profileId+'/'+versionId+'.'+ext;
+ const {error:up}=await db.storage.from(BUCKET).upload(path,file,{contentType:'application/x-apple-aspen-config',upsert:false,cacheControl:'3600'});if(up)throw up;
+ const {error:ins}=await db.from('configkit_profile_versions').insert({id:versionId,profile_id:profileId,user_id:current.id,version_number:number,filename:file.name.slice(0,255),storage_path:path,mime_type:'application/x-apple-aspen-config',file_size:file.size,checksum:info.checksum,notes:String(notes||'').slice(0,1000),safety_report:info.report});
+ if(ins){await db.storage.from(BUCKET).remove([path]);throw ins;}
+ const {error:upProfile}=await db.from('configkit_profiles').update({updated_at:new Date().toISOString()}).eq('id',profileId);if(upProfile)console.warn('Version saved, profile timestamp not updated',upProfile);
+ return info.report;
+}
+$('create-form').addEventListener('submit',async e=>{
+ e.preventDefault();if(loading)return;loading=true;const b=$('create-button');b.disabled=true;setStatus('Checking your profile and uploading a private copy…',false,'create-status');
+ let profileId=null;
+ try{
+  const name=$('profile-name').value.trim(),folder=$('profile-folder').value.trim()||'My Profiles',file=$('profile-file').files[0];
+  const check=await inspectFile(file);
+  const {data:{user:current},error:ae}=await db.auth.getUser();if(ae)throw ae;if(!current)throw new Error('Your session expired. Sign in again.');
+  const {data:p,error:pe}=await db.from('configkit_profiles').insert({user_id:current.id,name,description:$('profile-description').value.trim(),folder,tags:tagsFrom($('profile-tags').value)}).select('id').single();if(pe)throw pe;profileId=p.id;
+  await saveVersion(profileId,file,$('profile-notes').value);
+  e.target.reset();$('profile-folder').value=folder;$('profile-file').value='';setStatus('Profile saved with its first version. '+(check.report.warnings.length?check.report.warnings.length+' safety flag(s) found.':'Basic checks completed.'),false,'create-status');
+  await refresh();
+ }catch(err){if(profileId){await db.from('configkit_profiles').delete().eq('id',profileId)}setStatus(err.message||'Could not save this profile.',true,'create-status');}
+ finally{loading=false;b.disabled=false;}
+});
+$('profiles').addEventListener('click',async e=>{
+ const b=e.target.closest('button');if(!b)return;
+ try{
+  if(b.dataset.fav){const p=profiles.find(x=>x.id===b.dataset.fav);const {error}=await db.from('configkit_profiles').update({is_favorite:!p.is_favorite,updated_at:new Date().toISOString()}).eq('id',p.id);if(error)throw error;await refresh();return;}
+  if(b.dataset.addVersion){versionTarget=b.dataset.addVersion;$('version-file').click();return;}
+  if(b.dataset.edit){const p=profiles.find(x=>x.id===b.dataset.edit);showModal('Edit profile details','<form id="edit-form" class="create"><label for="edit-name">Name</label><input id="edit-name" maxlength="120" required value="'+esc(p.name)+'"><label for="edit-description">Description</label><textarea id="edit-description" maxlength="2000" rows="3">'+esc(p.description)+'</textarea><label for="edit-folder">Folder</label><input id="edit-folder" maxlength="80" required value="'+esc(p.folder)+'" list="folder-suggestions"><label for="edit-tags">Tags (comma separated)</label><input id="edit-tags" maxlength="300" value="'+esc((p.tags||[]).join(', '))+'"><div class="actions"><button class="primary" type="submit">Save changes</button></div></form>');$('edit-form').addEventListener('submit',async ev=>{ev.preventDefault();const {error}=await db.from('configkit_profiles').update({name:$('edit-name').value.trim(),description:$('edit-description').value.trim(),folder:$('edit-folder').value.trim(),tags:tagsFrom($('edit-tags').value),updated_at:new Date().toISOString()}).eq('id',p.id);if(error){setStatus(error.message,true);return}closeModal();await refresh();});return;}
+  if(b.dataset.review){const p=profiles.find(x=>x.id===b.dataset.review),v=latestFor(p.id);if(!v){setStatus('No profile version has been uploaded yet.');return}showSafety(p.name,v);return;}
+  if(b.dataset.reviewVersion){const v=versions.find(x=>x.id===b.dataset.reviewVersion),p=profiles.find(x=>x.id===v.profile_id);showSafety(p?.name||'Profile',v);return;}
+  if(b.dataset.download){b.disabled=true;const v=versions.find(x=>x.id===b.dataset.download);const {data,error}=await db.storage.from(BUCKET).download(v.storage_path);b.disabled=false;if(error)throw error;const url=URL.createObjectURL(data),a=document.createElement('a');a.href=url;a.download=v.filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);return;}
+  if(b.dataset.compare){const pId=b.dataset.compare,a=$('profiles').querySelector('[data-compare-a="'+pId+'"]').value,bId=$('profiles').querySelector('[data-compare-b="'+pId+'"]').value;if(!a||!bId||a===bId){setStatus('Choose two different versions to compare.');return}await compareVersions(a,bId);return;}
+  if(b.dataset.delete){const p=profiles.find(x=>x.id===b.dataset.delete);const vs=versions.filter(v=>v.profile_id===p.id);if(!confirm('Permanently delete "'+p.name+'" and all '+vs.length+' stored version(s)? This cannot be undone.'))return;const {error:rm}=await db.storage.from(BUCKET).remove(vs.map(v=>v.storage_path));if(rm)throw rm;const {error:del}=await db.from('configkit_profiles').delete().eq('id',p.id);if(del)throw del;await refresh();setStatus('Profile and its stored versions deleted.');}
+ }catch(err){setStatus(err.message||'That action failed.',true);}
+});
+$('version-file').addEventListener('change',async e=>{
+ const file=e.target.files?.[0],id=versionTarget;e.target.value='';if(!file||!id)return;
+ const notes=prompt('Optional notes for this new version:','Updated profile');try{setStatus('Checking and saving new version…');const report=await saveVersion(id,file,notes||'');await refresh();setStatus('New version saved. '+report.warnings.length+' safety flag(s) found.');}catch(err){setStatus(err.message||'Could not save this version.',true);}
+});
+function showSafety(name,v){
+ const r=v.safety_report||{},warnings=r.warnings||[],types=r.payloadTypes||[];
+ showModal('Safety review · '+name,'<p class="muted">Version '+v.version_number+' · '+esc(v.filename)+' · Reviewed locally '+(r.reviewedAt?esc(new Date(r.reviewedAt).toLocaleString()):'')+'</p><h3>'+(warnings.length?'Potentially sensitive settings detected':'No high-impact patterns detected')+'</h3>'+(warnings.length?'<ul class="report-list">'+warnings.map(w=>'<li>'+esc(w)+'</li>').join('')+'</ul>':'<p class="safety ok">Basic checks did not detect known high-impact payload types. This is not a safety certification.</p>')+'<h3>Payload types</h3><p>'+(types.length?types.map(t=>'<span class="tag">'+esc(t)+'</span>').join(' '):'No payload type list stored.')+'</p><p class="hint">The scanner does not verify signatures, issuer identity, server destinations, certificate trust chains, or the intent of every setting. Inspect the profile and trust its source before installing.</p>');
+}
+async function compareVersions(aId,bId){
+ const a=versions.find(v=>v.id===aId),b=versions.find(v=>v.id===bId);if(!a||!b)throw new Error('Version not found.');
+ setStatus('Downloading selected versions for local comparison…');
+ const [ra,rb]=await Promise.all([db.storage.from(BUCKET).download(a.storage_path),db.storage.from(BUCKET).download(b.storage_path)]);
+ if(ra.error)throw ra.error;if(rb.error)throw rb.error;
+ const [ta,tb]=await Promise.all([ra.data.text(),rb.data.text()]);
+ const la=ta.split(/\r?\n/),lb=tb.split(/\r?\n/),sa=new Set(la),sb=new Set(lb);
+ const removed=la.filter(x=>!sb.has(x)),added=lb.filter(x=>!sa.has(x));
+ const lines=[...removed.slice(0,100).map(x=>'- '+x),...added.slice(0,100).map(x=>'+ '+x)];
+ showModal('Compare profile versions','<p class="muted">v'+a.version_number+' ('+esc(a.filename)+') → v'+b.version_number+' ('+esc(b.filename)+')</p><p><strong>'+removed.length+'</strong> removed unique lines · <strong>'+added.length+'</strong> added unique lines</p><pre class="diff">'+(lines.length?lines.map(x=>'<span class="'+(x.startsWith('+')?'add':'del')+'">'+esc(x)+'</span>').join('\n'):'No line-level differences found.')+'</pre><p class="hint">This lightweight comparison shows unique added and removed lines; repeated-line positions and XML semantics are not fully reconciled. Review the complete versions before using either profile.</p>');
+ setStatus('');
+}
+$('export-library').addEventListener('click',()=>{
+ const data={exportedAt:new Date().toISOString(),format:'ConfigKit Profile Library index v1',profiles:profiles.map(p=>({...p,versions:versions.filter(v=>v.profile_id===p.id).map(({storage_path,...v})=>v)}))};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='configkit-profile-library-index.json';a.click();URL.revokeObjectURL(url);
+});
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{activeView=b.dataset.view;activeFolder='';activeTag='';render()}));
+$('folder-list').addEventListener('click',e=>{const b=e.target.closest('[data-folder]');if(!b)return;activeFolder=activeFolder===b.dataset.folder?'':b.dataset.folder;activeTag='';activeView='all';render()});
+$('tag-list').addEventListener('click',e=>{const b=e.target.closest('[data-tag]');if(!b)return;activeTag=activeTag===b.dataset.tag?'':b.dataset.tag;activeFolder='';activeView='all';render()});
+$('search').addEventListener('input',render);$('sort').addEventListener('change',render);
+$('clear-filters').addEventListener('click',()=>{activeView='all';activeFolder='';activeTag='';$('search').value='';render()});
+async function init(){
+ if(!db){$('auth-required').classList.remove('hidden');$('auth-required').querySelector('p').textContent='Supabase public configuration is missing. Ask the site owner to configure sign-in.';return}
+ try{const {data,error}=await db.auth.getUser();if(error)throw error;user=data.user;if(!user){$('auth-required').classList.remove('hidden');return}
+ $('library').classList.remove('hidden');await refresh();
+ }catch(err){$('auth-required').classList.remove('hidden');$('auth-required').querySelector('p').textContent=err.message||'Could not load your ConfigKit account.'}
+ db.auth.onAuthStateChange((event,session)=>{user=session?.user||null;if(!user){profiles=[];versions=[];$('library').classList.add('hidden');$('auth-required').classList.remove('hidden')}else if(event==='SIGNED_IN'){$('auth-required').classList.add('hidden');$('library').classList.remove('hidden');refresh().catch(err=>setStatus(err.message,true))}});
+}
+init();
+})();
+</script>
+</body>
+</html>
