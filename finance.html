@@ -131,8 +131,16 @@ function parseCsv(text){
  const first=lines[0].map(v=>v.trim().replace(/^\uFEFF/,''));
  const dateLike=/^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$/.test(first[0]||'')||/^\d{1,2}\s+[A-Za-z]{3}\s+\d{2,4}$/.test(first[0]||''),amountLike=/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(String(first[1]||'').replace(/[$,\s]/g,''));
  if(dateLike&&amountLike&&first.length>=3){
-  // NAB legacy exports can include ID and Type between Amount and Transaction details.
-  if(first.length>=5)return lines.map(v=>({date:v[0],amount:v[1],id:v[2]||'',type:v[3]||'',description:v[4]||'',balance:v[5]||''}));
+  // Headerless NAB exports vary by generation. Older files may include an ID;
+  // newer exports may append balance, category and merchant fields.
+  if(first.length>=7)return lines.map(v=>({date:v[0],amount:v[1],id:v[2]||'',type:v[3]||'',description:v[4]||'',balance:v[5]||'',category:v[6]||'Other',merchant:v[7]||''}));
+  if(first.length===6)return lines.map(v=>({date:v[0],amount:v[1],id:v[2]||'',type:v[3]||'',description:v[4]||'',balance:v[5]||''}));
+  if(first.length===5){
+   const fifth=String(first[4]||'').replace(/[$,\\s]/g,'');
+   // If column five is numeric it is probably Balance and the optional ID is absent.
+   if(/^[+-]?(?:\\d+\\.?\\d*|\\.\\d+)$/.test(fifth))return lines.map(v=>({date:v[0],amount:v[1],type:v[2]||'',description:v[3]||'',balance:v[4]||''}));
+   return lines.map(v=>({date:v[0],amount:v[1],id:v[2]||'',type:v[3]||'',description:v[4]||''}));
+  }
   // CommBank and ANZ personal exports use Date, Amount, Description (and sometimes Balance).
   return lines.map(v=>({date:v[0],amount:v[1],description:v[2],balance:v[3]||''}));
  }
