@@ -50,6 +50,7 @@
 <div class="field"><label for="transfer-amount">Amount</label><input id="transfer-amount" type="number" min="0.01" max="100000000" step="0.01" required placeholder="0.00"></div>
 <div class="field"><label for="transfer-description">Description</label><input id="transfer-description" maxlength="160" value="Transfer" required></div>
 </div><div class="actions"><button type="submit">Record transfer</button></div></form></section>
+<section class="card section" aria-labelledby="bills-title"><div class="toolbar"><h2 id="bills-title">Bills & BPAY</h2><span class="eyebrow">BILL TRACKER</span></div><p class="muted small">Save bill details and due dates here. To actually pay a bill, use your bank’s app or website first, then mark it paid below. This tracker does not send BPAY payments.</p><form id="bill-form"><div class="form-grid"><div class="field"><label for="bill-biller">Biller / company</label><input id="bill-biller" maxlength="120" required placeholder="e.g. Electricity provider"></div><div class="field"><label for="bill-amount">Amount (AUD)</label><input id="bill-amount" type="number" min="0.01" max="100000000" step="0.01" required placeholder="0.00"></div><div class="field"><label for="bill-bpay-code">BPAY biller code (optional)</label><input id="bill-bpay-code" inputmode="numeric" maxlength="20" placeholder="Biller code"></div><div class="field"><label for="bill-bpay-ref">BPAY reference (optional)</label><input id="bill-bpay-ref" inputmode="numeric" maxlength="30" placeholder="Customer reference"></div><div class="field"><label for="bill-due">Due date</label><input id="bill-due" type="date" required></div><div class="field"><label for="bill-notes">Notes (optional)</label><input id="bill-notes" maxlength="300" placeholder="Invoice number or reminder"></div></div><div class="actions"><button type="submit">Save bill</button></div></form><div id="bills-list" class="accounts section"><div class="empty">No bills saved yet.</div></div></section>
 <section class="card section"><div class="toolbar"><h2>Payees & merchants</h2><span class="muted small">People, businesses and billers in your payment history</span></div><div id="shops-list" class="accounts"><div class="empty">Add a shop name to an expense to build your list.</div></div></section>
 <section class="card section"><div class="toolbar"><h2>Recent activity</h2><span class="muted small" id="tx-count"></span></div><div class="table-wrap"><table class="transactions"><thead><tr><th>Details</th><th>Category</th><th>Account</th><th>Amount</th></tr></thead><tbody id="transactions"></tbody></table></div></section>
 <p class="muted small">Privacy: your records are private to your signed-in account. This is a manual budgeting ledger, not a connected bank account or regulated banking service. Never enter bank passwords, card PINs, or full card numbers here.</p>
@@ -62,18 +63,19 @@ const config=window.CONFIGKIT_AUTH||{}, status=document.getElementById('status')
 const setStatus=(msg,error=false)=>{status.hidden=false;status.classList.toggle('error',error);status.textContent=msg};
 if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){setStatus('Authentication is not configured.',true);return}
 const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-let user=null,accounts=[],transactions=[];
+let user=null,accounts=[],transactions=[],bills=[];
 const $=id=>document.getElementById(id);
 const money=(amount,currency='AUD')=>new Intl.NumberFormat('en-AU',{style:'currency',currency}).format(Number(amount)||0);
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const accountById=id=>accounts.find(a=>a.id===id);
 const signedAmount=t=>(t.kind==='income'||t.kind==='transfer_in'?1:-1)*Number(t.amount);
 async function load(){
- const [a,t]=await Promise.all([
+ const [a,t,b]=await Promise.all([
   db.from('money_accounts').select('id,name,account_type,currency,opening_balance,created_at').order('created_at'),
-  db.from('money_transactions').select('id,account_id,kind,amount,description,category,merchant,created_at,transfer_group').order('created_at',{ascending:false}).limit(500)
+  db.from('money_transactions').select('id,account_id,kind,amount,description,category,merchant,created_at,transfer_group').order('created_at',{ascending:false}).limit(500),
+  db.from('money_bills').select('id,biller_name,bpay_biller_code,bpay_reference,amount,due_date,status,account_id,notes,created_at,paid_at').order('due_date')
  ]);
- if(a.error)throw a.error;if(t.error)throw t.error;accounts=a.data||[];transactions=t.data||[];render();
+ if(a.error)throw a.error;if(t.error)throw t.error;if(b.error)throw b.error;accounts=a.data||[];transactions=t.data||[];bills=b.data||[];render();
 }
 function render(){
  const totalByCurrency={};accounts.forEach(a=>{totalByCurrency[a.currency]=(totalByCurrency[a.currency]||0)+Number(a.opening_balance)});
@@ -104,10 +106,22 @@ function render(){
   return '<tr><td><strong>'+escapeHtml(t.description)+'</strong>'+(t.merchant?'<br><span class="muted small">'+escapeHtml(t.merchant)+'</span>':'')+'<br><span class="muted small">'+new Date(t.created_at).toLocaleString('en-AU')+' · '+label+'</span></td><td>'+escapeHtml(t.category)+'</td><td>'+escapeHtml(a?.name||'Account')+'</td><td class="'+(plus?'positive':'negative')+'">'+(plus?'+':'−')+money(t.amount,a?.currency||'AUD')+'</td></tr>'
  }).join(''):'<tr><td colspan="4" class="empty">No activity yet.</td></tr>';
  $('tx-count').textContent=transactions.length+' entries';
+ renderBills();
  const byCategory={};transactions.filter(t=>t.kind==='expense'&&new Date(t.created_at)>=monthStart).forEach(t=>{byCategory[t.category]=(byCategory[t.category]||0)+Number(t.amount)});
  const entries=Object.entries(byCategory).sort((x,y)=>y[1]-x[1]),max=entries[0]?.[1]||1;
  $('spending-chart').innerHTML=entries.length?entries.map(([cat,val])=>'<div class="barrow"><span>'+escapeHtml(cat)+'</span><div class="track"><div class="fill" style="width:'+Math.round(val/max*100)+'%"></div></div><strong>'+money(val,mainCurrency)+'</strong></div>').join(''):'<div class="empty">No expenses recorded this month.</div>';
 }
+
+function renderBills(){
+ const today=new Date();today.setHours(0,0,0,0);
+ const sorted=[...bills].sort((a,b)=>a.status===b.status?a.due_date.localeCompare(b.due_date):(a.status==='unpaid'?-1:1));
+ $('bills-list').innerHTML=sorted.length?sorted.map(b=>{
+  const due=new Date(b.due_date+'T12:00:00'),overdue=b.status==='unpaid'&&due<today;
+  const accountOptions=accounts.filter(a=>a.currency==='AUD').map(a=>'<option value="'+a.id+'" '+(a.id===b.account_id?'selected':'')+'>'+escapeHtml(a.name)+'</option>').join('');
+  return '<article class="account"><div class="toolbar"><strong>'+escapeHtml(b.biller_name)+'</strong><span class="'+(b.status==='paid'?'positive':overdue?'negative':'muted')+' small">'+(b.status==='paid'?'Paid':overdue?'Overdue':'Due '+due.toLocaleDateString('en-AU'))+'</span></div><div class="acct-balance">'+money(b.amount,'AUD')+'</div>'+(b.bpay_biller_code?'<div class="small muted">BPAY code: '+escapeHtml(b.bpay_biller_code)+' · Reference: '+escapeHtml(b.bpay_reference)+'</div>':'')+(b.notes?'<div class="small muted">'+escapeHtml(b.notes)+'</div>':'')+(b.status==='unpaid'?'<div class="field section"><label for="bill-account-'+b.id+'">Record payment from</label><select id="bill-account-'+b.id+'" '+(!accountOptions?'disabled':'')+'>'+accountOptions+'</select></div><div class="actions"><button type="button" data-pay-bill="'+b.id+'" '+(!accountOptions?'disabled':'')+'>Mark paid</button><button class="danger" type="button" data-delete-bill="'+b.id+'">Delete</button></div>':'<div class="small muted">Recorded paid '+(b.paid_at?new Date(b.paid_at).toLocaleDateString('en-AU'):'')+'</div>')+'</article>';
+ }).join(''):'<div class="empty">No bills saved yet. Add your first bill above.</div>';
+}
+
 let importRows=[];
 function parseCsv(text){
  const lines=[];let row=[],field='',q=false;
@@ -176,6 +190,35 @@ $('cancel-account').addEventListener('click',()=>{$('account-form-card').hidden=
 $('account-form').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:user.id,name:$('account-name').value.trim(),account_type:$('account-type').value,currency:$('account-currency').value,opening_balance:Number($('account-opening').value)};const {error}=await db.from('money_accounts').insert(payload);if(error){setStatus(error.message,true);return}$('account-form').reset();$('account-form-card').hidden=true;await load()});
 $('transaction-form').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:user.id,account_id:$('tx-account').value,kind:$('tx-kind').value,amount:Number($('tx-amount').value),description:$('tx-description').value.trim(),category:$('tx-category').value,merchant:$('tx-merchant').value.trim()||null};const {error}=await db.from('money_transactions').insert(payload);if(error){setStatus(error.message,true);return}$('transaction-form').reset();await load()});
 $('transfer-form').addEventListener('submit',async e=>{e.preventDefault();if($('transfer-from').value===$('transfer-to').value){setStatus('Choose two different accounts.',true);return}const {error}=await db.rpc('transfer_money',{p_from_account:$('transfer-from').value,p_to_account:$('transfer-to').value,p_amount:Number($('transfer-amount').value),p_description:$('transfer-description').value.trim()});if(error){setStatus(error.message,true);return}$('transfer-amount').value='';await load();setStatus('Transfer recorded between your tracked accounts.')});
+
+$('bill-form').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const code=$('bill-bpay-code').value.trim(),ref=$('bill-bpay-ref').value.trim();
+ if(Boolean(code)!==Boolean(ref)){setStatus('Enter both the BPAY biller code and reference, or leave both blank.',true);return}
+ const payload={user_id:user.id,biller_name:$('bill-biller').value.trim(),bpay_biller_code:code||null,bpay_reference:ref||null,amount:Number($('bill-amount').value),due_date:$('bill-due').value,notes:$('bill-notes').value.trim()||null};
+ const {error}=await db.from('money_bills').insert(payload);
+ if(error){setStatus('Could not save bill: '+error.message,true);return}
+ $('bill-form').reset();await load();setStatus('Bill saved to your tracker. Remember to pay it through your bank.');
+});
+$('bills-list').addEventListener('click',async e=>{
+ const pay=e.target.closest('[data-pay-bill]'),del=e.target.closest('[data-delete-bill]');
+ if(pay){
+  const id=pay.dataset.payBill,accountId=$('bill-account-'+id)?.value;
+  if(!accountId)return;
+  if(!confirm('Have you already paid this bill in your banking app? This will record the payment in your tracker only.'))return;
+  pay.disabled=true;
+  const {error}=await db.rpc('mark_bill_paid',{p_bill_id:id,p_account_id:accountId});
+  if(error){setStatus('Could not mark bill paid: '+error.message,true);pay.disabled=false;return}
+  await load();setStatus('Bill marked paid and expense recorded in your tracker.');
+ }
+ if(del){
+  const id=del.dataset.deleteBill;
+  if(!confirm('Delete this unpaid bill from your tracker?'))return;
+  const {error}=await db.from('money_bills').delete().eq('id',id);
+  if(error){setStatus(error.message,true);return}
+  await load();setStatus('Bill removed.');
+ }
+});
 $('accounts').addEventListener('click',async e=>{const edit=e.target.closest('.edit-account'),del=e.target.closest('.delete-account');if(edit){const a=accountById(edit.dataset.id),name=prompt('Rename account',a.name);if(name===null)return;if(!name.trim()){setStatus('Account name cannot be empty.',true);return}const {error}=await db.from('money_accounts').update({name:name.trim(),updated_at:new Date().toISOString()}).eq('id',a.id);if(error){setStatus(error.message,true);return}await load()}if(del){const a=accountById(del.dataset.id);if(!confirm('Delete '+a.name+' and all its tracked transactions? This cannot be undone.'))return;const {error}=await db.from('money_accounts').delete().eq('id',a.id);if(error){setStatus(error.message,true);return}await load()}});
 db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)location.replace('login.html')});
 init().catch(e=>setStatus(e.message||'Could not load your money dashboard.',true));
