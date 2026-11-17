@@ -152,7 +152,7 @@ async function init(){
  if(db){
    try{const {data,error}=await db.auth.getSession();if(error)throw error;user=data.session?.user||null;}
    catch(error){setStatus('Could not verify your sign-in. '+(error.message||''),true);}
-   db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session){user=null;dbRows=[];runSearch(queryInput.value);}});
+   db.auth.onAuthStateChange((event,session)=>{user=session?.user||null;if(!user)dbRows=[];runSearch(queryInput.value);});
  }
  await runSearch(initial);
 }
