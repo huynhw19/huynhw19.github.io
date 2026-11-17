@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Your private ConfigKit notifications inbox and notification preferences.">
+<title>Notifications — ConfigKit</title>
+<script src="auth-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#627168;--line:#dce6df;--paper:#f4f8f5;--white:#fff;--green:#176344;--dark:#104b33;--mint:#e8f4ed;--red:#9b3030}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}button,input{font:inherit}header,main,footer{width:min(100% - 32px,1000px);margin:auto}header{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line)}nav{display:flex;gap:14px;align-items:center;flex-wrap:wrap}nav a{font-weight:650;text-decoration:none}.brand{font-weight:850;color:var(--ink);text-decoration:none}main{padding:28px 0 56px}.hero{display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:20px}.eyebrow{color:var(--green);font-weight:800;font-size:.76rem;letter-spacing:.1em;text-transform:uppercase}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.12;letter-spacing:-.04em;margin:.35rem 0}.muted{color:var(--muted)}.panel{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:18px;margin:14px 0}.toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.filters{display:flex;gap:7px;flex-wrap:wrap}.filters button,.action{border:1px solid var(--line);background:white;color:var(--ink);padding:8px 12px;border-radius:9px;cursor:pointer;font-weight:650}.filters button[aria-pressed=true],.primary{background:var(--green);color:white;border-color:var(--green)}button:disabled{opacity:.55;cursor:wait}.notice{padding:12px 14px;background:var(--mint);border-radius:10px;color:var(--dark);margin:12px 0}.error{background:#fff0f0;color:var(--red)}.notification{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:12px;align-items:start;padding:15px 0;border-bottom:1px solid var(--line)}.notification:last-child{border-bottom:0}.dot{width:9px;height:9px;border-radius:50%;background:var(--green);margin-top:8px}.dot.read{background:#c6d0ca}.notification h3{font-size:1rem;margin:0}.notification p{margin:3px 0;color:var(--muted);overflow-wrap:anywhere}.meta{font-size:.82rem;color:var(--muted)}.item-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.item-actions button{font-size:.84rem;padding:6px 9px}.empty{text-align:center;padding:35px 12px;color:var(--muted)}.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.setting{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px}.setting input{accent-color:var(--green);width:18px;height:18px}.setting span{display:block}.setting small{display:block;color:var(--muted)}.status{padding:12px;border:1px solid var(--line);border-radius:10px;background:white}.status.error{color:var(--red)}footer{padding:18px 0 32px;color:var(--muted);border-top:1px solid var(--line)}[hidden]{display:none!important}@media(max-width:560px){header{padding:12px 0}nav{gap:10px}.notification{grid-template-columns:10px minmax(0,1fr)}.item-actions{grid-column:2;justify-content:flex-start}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="dashboard.html">⌘ ConfigKit</a><nav aria-label="Main navigation"><a href="dashboard.html">Dashboard</a><a href="community.html">Community</a><a href="mail.html">Messages</a><a href="account-settings.html">Account</a><button id="signout" class="action" type="button">Sign out</button></nav></header>
+<main>
+<div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
+<div id="app" hidden>
+<section class="hero"><div><div class="eyebrow">Your activity</div><h1>Notifications</h1><p class="muted">A private inbox for important activity across ConfigKit.</p></div><div><strong id="unread-count">0 unread</strong></div></section>
+<section class="panel"><div class="toolbar"><div class="filters" role="group" aria-label="Filter notifications"><button type="button" data-filter="all" aria-pressed="true">All</button><button type="button" data-filter="unread" aria-pressed="false">Unread</button></div><div class="filters"><button class="action" id="mark-all" type="button">Mark all read</button><button class="action" id="refresh" type="button">Refresh</button></div></div><div id="notice" class="notice" hidden></div><div id="items" aria-live="polite"></div></section>
+<section class="panel"><h2>Notification preferences</h2><p class="muted">Choose which in-app notifications you want to receive. These settings do not change account security alerts or messages stored in your ConfigKit inbox.</p>
+<div class="settings-grid">
+<label class="setting"><input id="in_app_enabled" type="checkbox"><span><strong>In-app notifications</strong><small>Master notification switch</small></span></label>
+<label class="setting"><input id="social_enabled" type="checkbox"><span><strong>Social activity</strong><small>New followers</small></span></label>
+<label class="setting"><input id="discussions_enabled" type="checkbox"><span><strong>Discussions</strong><small>Replies to your discussions</small></span></label>
+<label class="setting"><input id="messages_enabled" type="checkbox"><span><strong>Messages</strong><small>New ConfigKit messages</small></span></label>
+<label class="setting"><input id="family_enabled" type="checkbox"><span><strong>Family activity</strong><small>Items assigned to you</small></span></label>
+<label class="setting"><input id="support_enabled" type="checkbox"><span><strong>Support updates</strong><small>Replies and status changes</small></span></label>
+</div><p id="pref-status" class="meta" role="status">Preferences are saved to your account.</p>
+<p class="meta">Email and push delivery are not enabled. Notifications are currently in-app only.</p></section>
+</div>
+</main>
+<footer>ConfigKit Notifications · <a href="privacy.html">Privacy</a> · <a href="wiki.html">Help Centre</a></footer>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),status=$('status'),items=$('items'),notice=$('notice');
+const config=window.CONFIGKIT_AUTH;
+if(!config?.supabaseUrl||!config?.supabaseAnonKey||!window.supabase?.createClient){status.textContent='Sign-in is not configured.';status.classList.add('error');return}
+const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let user=null,rows=[],filter='all',channel=null,prefsSaving=false;
+const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const when=s=>{const d=new Date(s);return Number.isNaN(d.getTime())?'':d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})};
+function message(text,error=false){notice.hidden=false;notice.textContent=text;notice.classList.toggle('error',error)}
+function render(){
+ const unread=rows.filter(r=>!r.read_at&&!r.dismissed_at).length;$('unread-count').textContent=unread+' unread';$('mark-all').disabled=!unread;
+ const visible=rows.filter(r=>!r.dismissed_at&&(filter==='all'||!r.read_at));
+ if(!visible.length){items.innerHTML='<div class="empty">'+(filter==='unread'?'You are all caught up.':'No notifications yet. New activity will appear here.')+'</div>';return}
+ items.innerHTML=visible.map(r=>'<article class="notification" data-id="'+escapeHtml(r.id)+'"><span class="dot '+(r.read_at?'read':'')+'"></span><div><h3>'+escapeHtml(r.title)+'</h3><p>'+escapeHtml(r.body)+'</p><div class="meta">'+escapeHtml(r.category)+' · '+escapeHtml(when(r.created_at))+'</div></div><div class="item-actions">'+(!r.read_at?'<button class="action" data-action="read" type="button">Mark read</button>':'')+'<button class="action" data-action="dismiss" type="button">Dismiss</button><a class="action" href="'+escapeHtml(r.action_url)+'">Open</a></div></article>').join('');
+}
+async function load(){const {data,error}=await db.from('configkit_notifications').select('id,category,title,body,action_url,created_at,read_at,dismissed_at').is('dismissed_at',null).order('created_at',{ascending:false}).limit(100);if(error)throw error;rows=data||[];render()}
+async function loadPrefs(){let {data,error}=await db.from('configkit_notification_preferences').select('*').eq('user_id',user.id).maybeSingle();if(error)throw error;if(!data){const {data:created,error:createError}=await db.from('configkit_notification_preferences').insert({user_id:user.id}).select('*').single();if(createError)throw createError;data=created}for(const key of ['in_app_enabled','social_enabled','discussions_enabled','messages_enabled','family_enabled','support_enabled'])$(key).checked=data[key]!==false}
+async function savePrefs(){if(prefsSaving)return;prefsSaving=true;$('pref-status').textContent='Saving…';const payload={};for(const key of ['in_app_enabled','social_enabled','discussions_enabled','messages_enabled','family_enabled','support_enabled'])payload[key]=$(key).checked;const {error}=await db.from('configkit_notification_preferences').upsert({user_id:user.id,...payload},{onConflict:'user_id'});prefsSaving=false;$('pref-status').textContent=error?'Could not save preferences: '+error.message:'Preferences saved.';if(error)$('pref-status').classList.add('error');else $('pref-status').classList.remove('error')}
+items.addEventListener('click',async e=>{const btn=e.target.closest('button[data-action]');if(!btn)return;const article=btn.closest('[data-id]'),id=article?.dataset.id;if(!id)return;btn.disabled=true;const patch=btn.dataset.action==='read'?{read_at:new Date().toISOString()}:{dismissed_at:new Date().toISOString()};const {error}=await db.from('configkit_notifications').update(patch).eq('id',id);if(error){message('Could not update notification: '+error.message,true);btn.disabled=false;return}rows=rows.map(r=>r.id===id?{...r,...patch}:r);render()});
+document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));render()}));
+$('mark-all').addEventListener('click',async()=>{const {error}=await db.from('configkit_notifications').update({read_at:new Date().toISOString()}).is('read_at',null).is('dismissed_at',null);if(error){message('Could not mark notifications as read: '+error.message,true);return}rows=rows.map(r=>r.read_at?r:{...r,read_at:new Date().toISOString()});render()});
+$('refresh').addEventListener('click',()=>load().catch(e=>message(e.message,true)));
+for(const key of ['in_app_enabled','social_enabled','discussions_enabled','messages_enabled','family_enabled','support_enabled'])$(key).addEventListener('change',()=>savePrefs().catch(e=>$('pref-status').textContent=e.message));
+$('signout').addEventListener('click',async()=>{await db.auth.signOut({scope:'local'});location.replace('login.html')});
+async function init(){const {data,error}=await db.auth.getSession();if(error)throw error;if(!data.session){location.replace('login.html?next=notifications.html');return}user=data.session.user;await Promise.all([load(),loadPrefs()]);$('app').hidden=false;status.hidden=true;await db.realtime.setAuth();channel=db.channel('configkit-notifications-'+user.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'configkit_notifications',filter:'user_id=eq.'+user.id},payload=>{if(payload.new){rows=[payload.new,...rows.filter(r=>r.id!==payload.new.id)].slice(0,100);render()}}).subscribe()}
+init().catch(e=>{status.textContent=e.message||'Could not load notifications. Check sign-in and verified-session requirements.';status.classList.add('error')});
+window.addEventListener('beforeunload',()=>{if(channel)db.removeChannel(channel)});
+})();
+</script>
+</body></html>
