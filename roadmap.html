@@ -26,7 +26,8 @@ const $=id=>document.getElementById(id),config=window.CONFIGKIT_AUTH;
 const notice=(text,error=false)=>{$('notice').hidden=false;$('notice').textContent=text;$('notice').classList.toggle('error',error)};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const labels={exploring:'Exploring',planned:'Planned',building:'Building',shipped:'Shipped'};
-const cats={product:'Product tools',safety:'Safety',community:'Community',education:'Education',workspace:'Workspace',accessibility:'Accessibility'};\nconst SITE_OWNER_ID='dc7d85d3-e40c-4002-87ea-8df7f904a3ed';
+const cats={product:'Product tools',safety:'Safety',community:'Community',education:'Education',workspace:'Workspace',accessibility:'Accessibility'};
+const SITE_OWNER_ID='dc7d85d3-e40c-4002-87ea-8df7f904a3ed';
 if(!config?.supabaseUrl||!config?.supabaseAnonKey||!window.supabase?.createClient){notice('ConfigKit data services are not configured on this page.',true);return}
 const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let user=null,isOwner=false,items=[],votes=new Set(),filter='all',channel=null,busy=new Set();
