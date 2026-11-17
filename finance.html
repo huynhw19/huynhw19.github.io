@@ -51,20 +51,6 @@
 <div class="field"><label for="transfer-description">Description</label><input id="transfer-description" maxlength="160" value="Transfer" required></div>
 </div><div class="actions"><button type="submit">Record transfer</button></div></form></section>
 <section class="card section" aria-labelledby="bills-title"><div class="toolbar"><h2 id="bills-title">Bills & BPAY</h2><span class="eyebrow">BILL TRACKER</span></div><p class="muted small">Save bill details and due dates here. To actually pay a bill, use your bank’s app or website first, then mark it paid below. This tracker does not send BPAY payments.</p><form id="bill-form"><div class="form-grid"><div class="field"><label for="bill-biller">Biller / company</label><input id="bill-biller" maxlength="120" required placeholder="e.g. Electricity provider"></div><div class="field"><label for="bill-amount">Amount (AUD)</label><input id="bill-amount" type="number" min="0.01" max="100000000" step="0.01" required placeholder="0.00"></div><div class="field"><label for="bill-bpay-code">BPAY biller code (optional)</label><input id="bill-bpay-code" inputmode="numeric" maxlength="20" placeholder="Biller code"></div><div class="field"><label for="bill-bpay-ref">BPAY reference (optional)</label><input id="bill-bpay-ref" inputmode="numeric" maxlength="30" placeholder="Customer reference"></div><div class="field"><label for="bill-due">Due date</label><input id="bill-due" type="date" required></div><div class="field"><label for="bill-notes">Notes (optional)</label><input id="bill-notes" maxlength="300" placeholder="Invoice number or reminder"></div></div><div class="actions"><button type="submit">Save bill</button></div></form><div id="bills-list" class="accounts section"><div class="empty">No bills saved yet.</div></div></section>
-<section class="card section" aria-labelledby="bills-title">
- <div class="toolbar"><h2 id="bills-title">Bills & BPAY</h2><span class="eyebrow">BILL TRACKER</span></div>
- <p class="muted small">Save billers, due dates and optional BPAY details. To actually pay a bill, use your bank's app or NetBank; come back and mark it paid here after payment is complete.</p>
- <form id="bill-form"><div class="form-grid">
- <div class="field"><label for="bill-biller">Biller / company</label><input id="bill-biller" maxlength="120" required placeholder="e.g. Electricity provider"></div>
- <div class="field"><label for="bill-amount">Amount (AUD)</label><input id="bill-amount" type="number" min="0.01" max="100000000" step="0.01" required placeholder="0.00"></div>
- <div class="field"><label for="bill-due">Due date</label><input id="bill-due" type="date" required></div>
- <div class="field"><label for="bill-account">Pay from account</label><select id="bill-account" required></select></div>
- <div class="field"><label for="bill-code">BPAY Biller Code (optional)</label><input id="bill-code" inputmode="numeric" maxlength="30" placeholder="Biller code"></div>
- <div class="field"><label for="bill-reference">Customer Reference Number (optional)</label><input id="bill-reference" maxlength="40" placeholder="CRN"></div>
- <div class="field full"><label for="bill-notes">Notes (optional)</label><input id="bill-notes" maxlength="500" placeholder="Account nickname or reminder"></div>
- </div><div class="actions"><button type="submit">Add bill</button></div></form>
- <div id="bills-list" class="section"><div class="empty">No bills saved yet.</div></div>
- </section>
 <section class="card section"><div class="toolbar"><h2>Payees & merchants</h2><span class="muted small">People, businesses and billers in your payment history</span></div><div id="shops-list" class="accounts"><div class="empty">Add a shop name to an expense to build your list.</div></div></section>
 <section class="card section"><div class="toolbar"><h2>Recent activity</h2><span class="muted small" id="tx-count"></span></div><div class="table-wrap"><table class="transactions"><thead><tr><th>Details</th><th>Category</th><th>Account</th><th>Amount</th></tr></thead><tbody id="transactions"></tbody></table></div></section>
 <p class="muted small">Privacy: your records are private to your signed-in account. This is a manual budgeting ledger, not a connected bank account or regulated banking service. Never enter bank passwords, card PINs, or full card numbers here.</p>
@@ -107,7 +93,7 @@ function render(){
   return '<article class="account"><strong>'+escapeHtml(a.name)+'</strong><span class="muted small">'+escapeHtml(a.account_type)+' · '+escapeHtml(a.currency)+'</span><div class="acct-balance">'+money(balance,a.currency)+'</div><button class="secondary small edit-account" data-id="'+a.id+'" type="button">Rename</button> <button class="danger small delete-account" data-id="'+a.id+'" type="button">Delete</button></article>'
  }).join(''):'<div class="card muted">No accounts yet. Add an account to start tracking your money.</div>';
  const opts=accounts.map(a=>'<option value="'+a.id+'">'+escapeHtml(a.name)+' ('+a.currency+')</option>').join('');
- ['tx-account','transfer-from','transfer-to','import-account','bill-account'].forEach(id=>$(id).innerHTML=opts);
+ ['tx-account','transfer-from','transfer-to','import-account'].forEach(id=>$(id).innerHTML=opts);
  const usable=accounts.length>1;
  $('transfer-form').querySelector('button').disabled=!usable;
  const knownPayees=[...new Map(transactions.filter(t=>t.merchant&&t.merchant.trim()).map(t=>[t.merchant.trim().toLocaleLowerCase(),t.merchant.trim()])).values()].sort((a,b)=>a.localeCompare(b));$('payee-suggestions').innerHTML=knownPayees.map(n=>'<option value="'+escapeHtml(n)+'">').join('');
@@ -120,13 +106,6 @@ function render(){
   return '<tr><td><strong>'+escapeHtml(t.description)+'</strong>'+(t.merchant?'<br><span class="muted small">'+escapeHtml(t.merchant)+'</span>':'')+'<br><span class="muted small">'+new Date(t.created_at).toLocaleString('en-AU')+' · '+label+'</span></td><td>'+escapeHtml(t.category)+'</td><td>'+escapeHtml(a?.name||'Account')+'</td><td class="'+(plus?'positive':'negative')+'">'+(plus?'+':'−')+money(t.amount,a?.currency||'AUD')+'</td></tr>'
  }).join(''):'<tr><td colspan="4" class="empty">No activity yet.</td></tr>';
 
- const today=new Date();today.setHours(0,0,0,0);
- $('bills-list').innerHTML=bills.length?'<div class="table-wrap"><table class="transactions"><thead><tr><th>Bill</th><th>Due</th><th>Account</th><th>Amount</th><th>Status / action</th></tr></thead><tbody>'+bills.map(b=>{
-  const acct=accountById(b.account_id),due=new Date(b.due_date+'T12:00:00'),overdue=b.status==='unpaid'&&due<today,days=Math.ceil((due-today)/86400000);
-  const status=b.status==='paid'?'<span class="positive">Paid</span>':overdue?'<span class="negative">Overdue</span>':days<=7?'<strong>Due soon</strong>':'<span class="muted">Upcoming</span>';
-  const refs=[b.biller_code?'BPAY '+b.biller_code:'',b.customer_reference?'Ref '+b.customer_reference:''].filter(Boolean).join(' · ');
-  return '<tr><td><strong>'+escapeHtml(b.biller)+'</strong>'+(refs?'<br><span class="muted small">'+escapeHtml(refs)+'</span>':'')+(b.notes?'<br><span class="muted small">'+escapeHtml(b.notes)+'</span>':'')+'</td><td>'+due.toLocaleDateString('en-AU')+'</td><td>'+escapeHtml(acct?.name||'Account')+'</td><td>'+money(b.amount,acct?.currency||'AUD')+'</td><td>'+status+(b.status==='unpaid'?' <div class="actions"><button class="small bill-paid" data-id="'+b.id+'" type="button">Mark paid</button><button class="small danger bill-delete" data-id="'+b.id+'" type="button">Delete</button></div>':'<div class="muted small">Recorded '+(b.paid_at?new Date(b.paid_at).toLocaleDateString('en-AU'):'')+'</div><div class="actions"><button class="small danger bill-delete" data-id="'+b.id+'" type="button">Delete</button></div>')+'</td></tr>';
- }).join('')+'</tbody></table></div>':'<div class="empty">No bills saved yet. Add your next bill above.</div>';
  $('tx-count').textContent=transactions.length+' entries';
  renderBills();
  const byCategory={};transactions.filter(t=>t.kind==='expense'&&new Date(t.created_at)>=monthStart).forEach(t=>{byCategory[t.category]=(byCategory[t.category]||0)+Number(t.amount)});
@@ -239,31 +218,6 @@ $('bills-list').addEventListener('click',async e=>{
   const {error}=await db.from('money_bills').delete().eq('id',id);
   if(error){setStatus(error.message,true);return}
   await load();setStatus('Bill removed.');
- }
-});
-$('bill-form').addEventListener('submit',async e=>{
- e.preventDefault();
- const payload={user_id:user.id,account_id:$('bill-account').value,biller:$('bill-biller').value.trim(),amount:Number($('bill-amount').value),due_date:$('bill-due').value,biller_code:$('bill-code').value.trim()||null,customer_reference:$('bill-reference').value.trim()||null,notes:$('bill-notes').value.trim()||null};
- if(!payload.account_id||!payload.biller||!payload.due_date||!Number.isFinite(payload.amount)||payload.amount<=0){setStatus('Complete the bill name, amount, due date and payment account.',true);return}
- const {error}=await db.from('money_bills').insert(payload);
- if(error){setStatus('Could not save bill: '+error.message,true);return}
- $('bill-form').reset();await load();setStatus('Bill saved to your tracker. Use your bank to pay it.');
-});
-$('bills-list').addEventListener('click',async e=>{
- const paid=e.target.closest('.bill-paid'),del=e.target.closest('.bill-delete');
- if(paid){
-  if(!confirm('Only continue if you have already paid this bill through your bank. Mark it paid and record the expense?'))return;
-  paid.disabled=true;
-  const {error}=await db.rpc('mark_bill_paid',{p_bill_id:paid.dataset.id});
-  if(error){setStatus('Could not mark bill paid: '+error.message,true);paid.disabled=false;return}
-  await load();setStatus('Bill marked paid and recorded as an expense.');
- }
- if(del){
-  const bill=bills.find(x=>x.id===del.dataset.id);if(!bill)return;
-  if(!confirm('Delete the saved bill for '+bill.biller+'? This will not change any bank payment.'))return;
-  const {error}=await db.from('money_bills').delete().eq('id',bill.id);
-  if(error){setStatus('Could not delete bill: '+error.message,true);return}
-  await load();setStatus('Bill removed from your tracker.');
  }
 });
 $('accounts').addEventListener('click',async e=>{const edit=e.target.closest('.edit-account'),del=e.target.closest('.delete-account');if(edit){const a=accountById(edit.dataset.id),name=prompt('Rename account',a.name);if(name===null)return;if(!name.trim()){setStatus('Account name cannot be empty.',true);return}const {error}=await db.from('money_accounts').update({name:name.trim(),updated_at:new Date().toISOString()}).eq('id',a.id);if(error){setStatus(error.message,true);return}await load()}if(del){const a=accountById(del.dataset.id);if(!confirm('Delete '+a.name+' and all its tracked transactions? This cannot be undone.'))return;const {error}=await db.from('money_accounts').delete().eq('id',a.id);if(error){setStatus(error.message,true);return}await load()}});
