@@ -426,7 +426,7 @@
       }
       async function startOAuth(provider) {
         clearPasskeySession();
-        setStatus(`Connecting to ${{azure:'Microsoft',bitbucket:'Bitbucket',figma:'Figma',github:'GitHub',zoom:'Zoom'}[provider] || 'your provider'}…`);
+        setStatus(`Connecting to ${{bitbucket:'Bitbucket',figma:'Figma',github:'GitHub'}[provider] || 'your provider'}…`);
         setBusy(true);
         try {
           const type = accountType.value;
