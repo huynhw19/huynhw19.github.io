@@ -14,7 +14,7 @@
 <section class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h2>Your requests</h2><button id="refresh" class="secondary" type="button">Refresh</button></div><p class="muted">Only you can view the requests submitted from your account. A response or status update will appear here when support has reviewed it.</p><div id="tickets"><div class="empty">Loading your requests…</div></div></section></div></section>
 </main><footer>ConfigKit Support · <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms</a></footer>
 <script>
-(()=>{'use strict';const $=id=>document.getElementById(id),status=$('status'),tickets=$('tickets'),formStatus=$('form-status');
+(()=>{'use strict';const $=id=>document.getElementById(id),status=$('status'),tickets=$('tickets'),form=$('support-form'),formStatus=$('form-status');
 const config=window.CONFIGKIT_AUTH;if(!config?.supabaseUrl||!config?.supabaseAnonKey||!window.supabase?.createClient){status.textContent='ConfigKit sign-in is not configured.';status.classList.add('error');return}
 const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let user=null,rows=[];
