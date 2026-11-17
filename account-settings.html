@@ -396,6 +396,7 @@
                     if(!data) throw new Error('That session is no longer active.');
                     sessionRow.remove();
                     const remaining=groupRow.querySelectorAll('[data-device-session]');
+                    count.textContent=remaining.length + (remaining.length===1 ? ' session' : ' sessions');
                     if (!remaining.length) groupRow.remove();
                     setStatus('Device session revoked. Its refresh token can no longer be used; an already-issued access token may remain valid until it expires.');
                     if(!list.querySelector('.device-group')) {
