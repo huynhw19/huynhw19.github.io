@@ -59,7 +59,7 @@ $('sources').innerHTML=Object.keys(sourceState).map(k=>{const x=sourceState[k];r
 function barRows(rows,formatter){
 if(!rows.length)return '<div class="empty">No records in this period yet.</div>';
 const max=Math.max(1,...rows.map(x=>Number(x.value)||0));
-return '<div class="bars">'+rows.map(x=>'<div class="barrow"><span>'+esc(x.label)+'</span><div class="track"><div class="fill" style="width:'+Math.max(0,Math.min(100,(Number(x.value)||0)/max*100))+'%"></div></div><strong>'+esc(formatter(x.value))+'</strong></div>').join('')+'</div>';
+return '<div class="bars">'+rows.map(x=>'<div class="barrow"><span>'+esc(x.label)+'</span><div class="track"><div class="fill" style="width:'+Math.max(0,Math.min(100,(Number(x.value)||0)/max*100))+'%"></div></div><strong>'+esc(formatter(x.value,x))+'</strong></div>').join('')+'</div>';
 }
 function render(){
 const start=periodStart(),tx=(lastData.money_transactions||[]).filter(x=>inPeriod(x.created_at,start)),accounts=lastData.money_accounts||[],bills=lastData.money_bills||[];
