@@ -92,7 +92,7 @@ function render(){
  const matches=allResults().filter(r=>{
    const inFilter=activeFilter==='all'||r.filter===activeFilter;
    const hay=[r.title,r.description,r.keywords,r.kind].join(' ').toLocaleLowerCase();
-   return inFilter&&(!q||hay.includes(q)||r.source==='database');
+   return inFilter&&(!q||r.source==='database'||q.split(/\\s+/).every(term=>hay.includes(term)));
  }).filter(r=>{
    if(r.source==='database'&&q)return true;
    if(!q)return true;
