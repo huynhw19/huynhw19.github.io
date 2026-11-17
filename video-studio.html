@@ -80,7 +80,7 @@
    } else {
      let url=source;
      if(source instanceof File) { previewObjectUrl=URL.createObjectURL(source); url=previewObjectUrl; }
-     const video=document.createElement('video'); video.src=url; video.controls=true; video.preload='metadata'; video.playsInline=true; video.addEventListener('loadedmetadata',()=>{ $('preview-meta').textContent='Duration: '+video.duration.toFixed(1)+' seconds'; if(!$('trim-end').value) $('trim-end').placeholder=video.duration.toFixed(1); }); host.append(video);
+     const video=document.createElement('video'); video.src=url; video.controls=true; video.preload='metadata'; video.playsInline=true; video.addEventListener('loadedmetadata',()=>{ $('preview-meta').textContent='Duration: '+video.duration.toFixed(1)+' seconds'; if(!$('trim-end').value) $('trim-end').placeholder=video.duration.toFixed(1); }); video.addEventListener('timeupdate',()=>{ const end=Number($('trim-end').value); if(end>0 && video.currentTime>=end){video.pause();video.currentTime=Math.max(0,Number($('trim-start').value)||0);} }); host.append(video);
    }
  };
  const currentSource = () => $('source-type').value==='youtube' ? $('youtube-url').value.trim() : $('video-file').files[0];
@@ -97,11 +97,6 @@
    if(!video){setStatus('For YouTube, use the player controls. Uploaded videos support trim-start playback.',true);return;}
    const start=Math.max(0,Number($('trim-start').value)||0);
    try { if(video.readyState<1) await new Promise((resolve,reject)=>{video.addEventListener('loadedmetadata',resolve,{once:true});video.addEventListener('error',reject,{once:true});}); video.currentTime=start; await video.play(); } catch(e){setStatus('Could not start preview: '+e.message,true);}
- });
- $('preview').addEventListener('timeupdate',()=>{
-   const video=$('preview').querySelector('video'); if(!video) return;
-   const end=Number($('trim-end').value);
-   if(end>0 && video.currentTime>=end){video.pause();video.currentTime=Math.max(0,Number($('trim-start').value)||0);}
  });
  const resetForm=()=>{
    $('video-form').reset(); $('video-id').value=''; $('trim-start').value='0'; $('trim-end').value='';
