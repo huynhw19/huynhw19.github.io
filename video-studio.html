@@ -14,6 +14,7 @@
 <main>
 <section><span class="eyebrow">Create · Edit · Share</span><h1>ConfigKit Video Studio</h1><p class="muted">Bring in a video file or a YouTube link, preview it, make a non-destructive trim, and publish it to the ConfigKit community.</p><div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div></section>
 <div id="app" class="hidden">
+<section class="panel" aria-label="Search videos"><div class="field" style="margin:0"><label for="video-search">Search videos</label><input id="video-search" type="search" placeholder="Search titles, descriptions or video sources…" autocomplete="off"></div><p class="muted small" id="search-count">Showing all videos.</p></section>
 <div class="layout">
 <section class="panel" aria-labelledby="create-title">
 <h2 id="create-title">Create or edit a video</h2>
@@ -41,6 +42,12 @@
 (() => {
  const $ = id => document.getElementById(id);
  const status = $('status'), app = $('app');
+ const applyVideoSearch = () => {
+   const term=$('video-search').value.trim().toLocaleLowerCase(); let visible=0, total=0;
+   ['my-videos','community-videos'].forEach(id=>{const host=$(id); if(!host)return; const cards=[...host.querySelectorAll('.video-card')]; total+=cards.length; cards.forEach(card=>{const match=!term||(card.dataset.search||'').includes(term);card.classList.toggle('hidden',!match);if(match)visible++;}); let empty=host.querySelector('[data-search-empty]'); if(!empty){empty=document.createElement('p');empty.dataset.searchEmpty='true';empty.className='muted';host.append(empty);} empty.textContent=term&&cards.length&&!cards.some(card=>!card.classList.contains('hidden'))?'No videos match your search.':''; empty.classList.toggle('hidden',!empty.textContent);
+   });
+   $('search-count').textContent=term?`Showing ${visible} of ${total} videos matching “${$('video-search').value.trim()}”.`:`Showing all ${total} videos.`;
+ };
  const config = window.CONFIGKIT_AUTH || {};
  const setStatus = (message, error=false) => { status.textContent=message; status.classList.toggle('error',error); };
  if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { setStatus('Supabase authentication is not configured.',true); return; }
@@ -115,7 +122,7 @@
    if(!data?.length){target.innerHTML='<p class="muted">'+(own?'You have not created any videos yet.':'No community videos have been published yet.')+'</p>';return;}
    target.replaceChildren();
    for(const row of data){
-     const card=document.createElement('article');card.className='video-card';
+     const card=document.createElement('article');card.className='video-card';card.dataset.search=[row.title,row.description,row.source_type,row.visibility].filter(Boolean).join(' ').toLocaleLowerCase();
      const heading=document.createElement('h3');heading.textContent=row.title;
      const badge=document.createElement('span');badge.className='pill';badge.textContent=row.visibility==='public'?'Community':'Draft';
      const desc=document.createElement('p');desc.textContent=row.description||'No description provided.';
@@ -140,6 +147,7 @@
      }
      target.append(card);
    }
+   applyVideoSearch();
  };
  const refresh=async()=>{try{await Promise.all([loadVideos($('my-videos'),true),loadVideos($('community-videos'),false)]);}catch(e){setStatus('Could not load videos: '+e.message,true);}};
  const editVideo=async row=>{
@@ -199,6 +207,7 @@
    }catch(e){setStatus(e.message||'Could not save this video.',true);}
    finally{button.disabled=false;}
  });
+ $('video-search').addEventListener('input',applyVideoSearch);
  $('refresh-mine').addEventListener('click',()=>loadVideos($('my-videos'),true).catch(e=>setStatus(e.message,true)));
  $('refresh-community').addEventListener('click',()=>loadVideos($('community-videos'),false).catch(e=>setStatus(e.message,true)));
  const init=async()=>{
