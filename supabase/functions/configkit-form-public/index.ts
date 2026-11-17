@@ -67,6 +67,8 @@ Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin");
   if (origin && origin !== SITE_ORIGIN) return reply({ error: "Origin not allowed." }, 403);
   if (req.method !== "POST") return reply({ error: "Method not allowed." }, 405);
+  const contentLength = Number(req.headers.get("content-length") || 0);
+  if (contentLength > 65536) return reply({ error: "The request is too large." }, 413);
   let body: any;
   try { body = await req.json(); } catch { return reply({ error: "Invalid JSON request." }, 400); }
   if (!body || typeof body !== "object" || typeof body.action !== "string") return reply({ error: "Invalid request." }, 400);
