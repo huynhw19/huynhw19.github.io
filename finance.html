@@ -16,12 +16,7 @@
 <div id="status" class="notice" role="status" aria-live="polite">Checking your sign-in…</div>
 <div id="app" hidden>
 <span class="eyebrow">AUSTRALIAN MONEY DASHBOARD · AUD</span><h1>Your money, at a glance.</h1><p class="muted">Everyday spending, savings, bills and transfers — organised in one simple place.</p><div class="notice small"><strong>Demo banking dashboard.</strong> This is a personal money tracker, not an Australian bank account. Payments and transfers are recorded here only; no money moves through the banking system.</div>
-<section class="card section" aria-labelledby="bank-connect-title">
- <div class="toolbar"><h2 id="bank-connect-title">Connect an Australian bank</h2><span class="eyebrow">SANDBOX SETUP</span></div>
- <p class="muted small">Prepare a read-only connection through Basiq. Your bank sign-in happens on Basiq's secure consent page — never enter bank credentials here.</p>
- <div class="actions"><button id="connect-bank" type="button">Connect bank (sandbox)</button></div>
- <p id="bank-connect-status" class="notice small" role="status" aria-live="polite" hidden></p>
-</section>
+
 <section class="card section" aria-labelledby="import-title">
  <div class="toolbar"><h2 id="import-title">Import bank transactions</h2><span class="eyebrow">CSV IMPORT</span></div>
  <p class="muted small">Import a CSV statement downloaded from your Australian bank. The file is read in this browser and is not uploaded to a third-party service. Review transactions before saving them.</p>
@@ -125,63 +120,6 @@ let recoveryStatus={enabled:false,verified:false};const {data:recoveryData,error
  status.hidden=true;app.hidden=false;await load();
 }
 $('signout').addEventListener('click',async()=>{window.CONFIGKIT_PASSKEY_SESSION?.clear();const {error}=await db.auth.signOut({scope:'local'});if(error)setStatus(error.message,true);else location.replace('login.html')});
-$('connect-bank').addEventListener('click',async()=>{
- const button=$('connect-bank'),message=$('bank-connect-status');
- button.disabled=true;button.textContent='Preparing secure connection…';
- message.hidden=false;message.classList.remove('error');message.textContent='Contacting the secure Basiq sandbox service…';
- try{
-  const {data,error}=await db.functions.invoke('basiq-connect',{body:{action:'connect'}});
-  if(error){
-   let detail=error.message||'Could not start the bank connection.';
-   if(error.context&&typeof error.context.json==='function'){
-    try{const payload=await error.context.json();if(payload.message)detail=payload.message}catch(_){}
-   }
-   throw new Error(detail);
-  }
-  if(!data?.consent_url)throw new Error(data?.message||'Basiq did not return a consent link.');
-  message.textContent='Opening Basiq’s secure consent page…';
-  location.assign(data.consent_url);
- }catch(err){
-  message.classList.add('error');
-  message.textContent=err.message||'Could not start the bank connection.';
-  button.disabled=false;button.textContent='Connect bank (sandbox)';
- }
-});
-
-let importRows=[];
-function parseCsv(text){
- const rows=[];let row=[],field='',quoted=false;
- for(let i=0;i<text.length;i++){const c=text[i],next=text[i+1];if(quoted){if(c==='"'&&next==='"'){field+='"';i++}else if(c==='"')quoted=false;else field+=c}else if(c==='"')quoted=true;else if(c===','){row.push(field);field=''}else if(c==='\n'){row.push(field);if(row.some(v=>v.trim()))rows.push(row);row=[];field=''}else if(c!=='\r')field+=c}
- row.push(field);if(row.some(v=>v.trim()))rows.push(row);if(quoted)throw new Error('The CSV contains an unfinished quoted field.');if(!rows.length)throw new Error('The CSV file is empty.');
- const headers=rows.shift().map(v=>v.trim().replace(/^\uFEFF/,'').toLowerCase());return rows.map(values=>Object.fromEntries(headers.map((h,i)=>[h,(values[i]||'').trim()])));
-}
-function csvDate(value){const v=String(value||'').trim();let m;if((m=v.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/))){let y=Number(m[3]);if(y<100)y+=y<70?2000:1900;const d=new Date(y,Number(m[2])-1,Number(m[1]),12);return d.getFullYear()===y&&d.getMonth()===Number(m[2])-1&&d.getDate()===Number(m[1])?d:null}const d=new Date(v);return Number.isNaN(d.getTime())?null:d}
-const pickHeader=(headers,tests)=>headers.find(h=>tests.some(t=>t.test(h)))||'';
-function normaliseCsvRow(row,headers){
- const dk=pickHeader(headers,[/^date$/, /transaction.*date/, /processed.*date/, /posting.*date/]),desc=pickHeader(headers,[/^description$/, /^details$/, /transaction.*description/, /^narrative$/, /^particulars$/, /^merchant$/]),debit=pickHeader(headers,[/^debit$/, /withdrawal/, /money out/, /^dr$/]),credit=pickHeader(headers,[/^credit$/, /deposit/, /money in/, /^cr$/]),amountCol=pickHeader(headers,[/^amount$/, /transaction amount/, /^value$/]),type=pickHeader(headers,[/^type$/, /transaction type/]),merchant=pickHeader(headers,[/^merchant$/, /^payee$/, /^counterparty$/]),category=pickHeader(headers,[/^category$/]);
- const date=csvDate(row[dk]),description=(row[desc]||'').trim(),num=v=>{const n=Number(String(v||'').replace(/[$,\s]/g,'').replace(/[()]/g,''));return Number.isFinite(n)?n:0};let amount=0,kind='expense';
- if(debit||credit){const d=Math.abs(num(row[debit])),c=Math.abs(num(row[credit]));if(c>0){amount=c;kind='income'}else amount=d}
- else if(amountCol){const raw=String(row[amountCol]||'').trim();amount=Math.abs(num(raw));kind=/^\(.*\)$/.test(raw)||/^-/.test(raw)?'expense':'income';if(type&&/debit|withdraw|purchase|payment/i.test(row[type]))kind='expense';if(type&&/credit|deposit|refund|salary/i.test(row[type]))kind='income'}
- return {date,description,amount,kind,merchant:merchant?row[merchant]||null:null,category:category?row[category]||'Other':'Other'};
-}
-function importKey(x){return [new Date(x.created_at||x.date).toISOString().slice(0,10),Number(x.amount).toFixed(2),String(x.description||'').trim().toLowerCase()].join('|')}
-function showImportPreview(){
- const file=$('statement-file').files[0],msg=$('import-status'),panel=$('import-preview');importRows=[];panel.hidden=true;$('confirm-import').disabled=true;
- if(!file){msg.hidden=false;msg.classList.add('error');msg.textContent='Choose a CSV file first.';return}
- if(file.size>5*1024*1024){msg.hidden=false;msg.classList.add('error');msg.textContent='Please choose a CSV file smaller than 5 MB.';return}
- const reader=new FileReader();reader.onload=()=>{try{
-  const records=parseCsv(String(reader.result||''));if(records.length>1000)throw new Error('Please import no more than 1,000 rows at a time.');
-  const headers=Object.keys(records[0]||{}),dateCol=pickHeader(headers,[/^date$/, /transaction.*date/, /processed.*date/, /posting.*date/]),descCol=pickHeader(headers,[/^description$/, /^details$/, /transaction.*description/, /^narrative$/, /^particulars$/, /^merchant$/]),amountCol=pickHeader(headers,[/^amount$/, /transaction amount/, /^value$/]),debitCol=pickHeader(headers,[/^debit$/, /withdrawal/, /money out/, /^dr$/]),creditCol=pickHeader(headers,[/^credit$/, /deposit/, /money in/, /^cr$/]);
-  if(!dateCol||!descCol||(!amountCol&&!debitCol&&!creditCol))throw new Error('Could not identify required columns. CSV needs a date, description and amount (or debit/credit columns).');
-  const existing=new Set(transactions.filter(t=>t.account_id===$('import-account').value).map(importKey)),seen=new Set();
-  importRows=records.map((r,i)=>({...normaliseCsvRow(r,headers),sourceRow:i+2})).filter(x=>x.date&&x.description&&x.amount>0).map(x=>{x.key=importKey(x);x.duplicate=existing.has(x.key)||seen.has(x.key);seen.add(x.key);x.selected=!x.duplicate;return x});
-  if(!importRows.length)throw new Error('No usable transactions found. Check the date, description and amount columns.');
-  const skipped=records.length-importRows.length,dupes=importRows.filter(x=>x.duplicate).length;
-  panel.innerHTML='<table><thead><tr><th>Import</th><th>Date</th><th>Description</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody>'+importRows.map((x,i)=>'<tr><td><input type="checkbox" data-import-index="'+i+'" '+(x.selected?'checked':'')+' '+(x.duplicate?'disabled':'')+' aria-label="Select transaction"></td><td>'+escapeHtml(x.date.toLocaleDateString('en-AU'))+'</td><td>'+escapeHtml(x.description)+'</td><td>'+x.kind+'</td><td>'+money(x.amount)+'</td><td>'+(x.duplicate?'Possible duplicate':'Ready')+'</td></tr>').join('')+'</tbody></table>';
-  panel.hidden=false;msg.hidden=false;msg.classList.remove('error');msg.textContent=importRows.length+' valid transactions · '+dupes+' possible duplicates skipped · '+skipped+' invalid or blank rows ignored.';$('confirm-import').disabled=!importRows.some(x=>x.selected);
- }catch(err){msg.hidden=false;msg.classList.add('error');msg.textContent=err.message||'Could not read this CSV.'}};
- reader.onerror=()=>{msg.hidden=false;msg.classList.add('error');msg.textContent='Could not read the selected file.'};reader.readAsText(file);
-}
 $('preview-import').addEventListener('click',showImportPreview);
 $('statement-file').addEventListener('change',()=>{$('import-preview').hidden=true;$('import-status').hidden=true;$('confirm-import').disabled=true;importRows=[]});
 $('import-account').addEventListener('change',()=>{if(importRows.length)showImportPreview()});
