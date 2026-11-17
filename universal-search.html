@@ -50,7 +50,7 @@ const pages=[
  {title:'Pro Map',description:'Explore places, categories, favourites and routes.',href:'pro-map.html',kind:'Tools & guides',filter:'tools',keywords:'map places directions navigation'},
  {title:'ConfigKit AI',description:'Get help with ConfigKit, planning, learning and technology questions.',href:'configkit-ai.html',kind:'Tools & guides',filter:'tools',keywords:'ai assistant chatbot'},
  {title:'ConfigKit Drive',description:'Manage your private files and folders.',href:'drive.html',kind:'Files',filter:'files',keywords:'drive storage upload documents files folders'},
- {title:'Saved Profiles',description:'Review saved configuration profiles.',href:'profile-viewer.html',kind:'Files',filter:'files',keywords:'saved profile downloads mobileconfig'},
+ {title:'Saved Profiles',description:'Review saved configuration profiles.',href:'dashboard.html#saved-profiles',kind:'Files',filter:'files',keywords:'saved profile downloads mobileconfig'},
  {title:'Video Studio',description:'Upload or link videos, preview, trim, manage drafts and publish to the community.',href:'video-studio.html',kind:'Videos',filter:'videos',keywords:'video youtube upload edit trim creator'},
  {title:'Community',description:'Discover ConfigKit members and shared community content.',href:'community.html',kind:'Community',filter:'community',keywords:'social members posts'},
  {title:'Groups',description:'Create or join groups and collaborate with members.',href:'groups.html',kind:'Community',filter:'community',keywords:'groups collaboration'},
@@ -78,7 +78,7 @@ const cfg=window.CONFIGKIT_AUTH||{};
 const db=cfg.supabaseUrl&&cfg.supabaseAnonKey&&window.supabase?.createClient
  ? window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})
  : null;
-let user=null,dbRows=[],activeFilter='all',timer=null,lastQuery='';
+let user=null,dbRows=[],activeFilter='all',timer=null,lastQuery='',requestId=0;
 const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const setStatus=(message,error=false)=>{statusEl.textContent=message||'';statusEl.classList.toggle('error',!!error);};
 const typeName=value=>({'app':'App','tool':'Community tool','profile':'Member','discussion':'Discussion','profile-post':'Shared profile','video':'Video','group':'Group','event':'Event','game':'Community game','book':'Book','document':'Document','slideshow':'Slideshow','file':'Drive file','saved-profile':'Saved profile'}[value]||value);
@@ -107,13 +107,13 @@ function render(){
    resultsEl.innerHTML='<div class="empty"><h3>No results found</h3><p class="muted">Try a different phrase or select another category.</p></div>';return;
  }
  resultsEl.innerHTML=ordered.map(r=>{
-   const href=/^[a-zA-Z0-9_./#?=&%-]+$/.test(r.href||'')&&!r.href.startsWith('//')?r.href:'#';
+   const destination=r.category==='saved-profile'?'dashboard.html#saved-profiles':r.href;\n   const href=/^[a-zA-Z0-9_./#?=&%-]+$/.test(destination||'')&&!destination.startsWith('//')?destination:'#';
    const date=r.updated_at?new Date(r.updated_at).toLocaleDateString():'';
    return '<article class="result-card"><div class="result-top"><span class="tag">'+escapeHTML(r.kind)+'</span>'+(date?'<time class="date">'+escapeHTML(date)+'</time>':'')+'</div><h3>'+escapeHTML(r.title)+'</h3><p>'+escapeHTML(r.description||'Open this ConfigKit section to explore more.')+'</p><a href="'+escapeHTML(href)+'">Open result →</a></article>';
  }).join('');
 }
 async function runSearch(value){
- const q=String(value||'').trim().slice(0,120);lastQuery=q;
+ const q=String(value||'').trim().slice(0,120);lastQuery=q;const request=++requestId;
  const url=new URL(location.href);if(q)url.searchParams.set('q',q);else url.searchParams.delete('q');history.replaceState({},'',url);
  dbRows=[];
  if(q.length>=2&&db&&user){
