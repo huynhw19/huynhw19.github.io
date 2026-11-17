@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Create, preview, edit and share videos with the ConfigKit community.">
+<title>ConfigKit Video Studio</title>
+<style>
+:root{color-scheme:light;--ink:#17251f;--muted:#607168;--line:#dce7df;--paper:#f4f8f5;--green:#176344;--mint:#e4f3e9;--red:#9b3030;--shadow:0 14px 34px rgba(18,54,37,.08}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(1120px,calc(100% - 32px));margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:1rem 0;border-bottom:1px solid var(--line)}.brand{font-weight:800;text-decoration:none;color:var(--ink)}nav{display:flex;gap:1rem;flex-wrap:wrap}main{padding:2rem 0 3rem}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.5rem 0}h2{margin:.1rem 0 .7rem}.muted{color:var(--muted)}.eyebrow{display:inline-block;padding:.25rem .7rem;border-radius:99px;background:var(--mint);color:var(--green);font-weight:750;font-size:.82rem}.panel,.card{background:white;border:1px solid var(--line);border-radius:1rem;padding:1.2rem;box-shadow:var(--shadow);margin:1rem 0}.layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:1rem}.field{display:flex;flex-direction:column;gap:.35rem;margin:.75rem 0}.field label{font-weight:700}.field input,.field textarea,.field select{font:inherit;padding:.7rem .8rem;border:1px solid var(--line);border-radius:.65rem;width:100%;background:#fff;color:var(--ink)}textarea{min-height:90px;resize:vertical}.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}button,.button{font:inherit;font-weight:700;border:1px solid var(--line);border-radius:.7rem;padding:.65rem .95rem;background:white;color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}button.primary,.button.primary{background:var(--green);border-color:var(--green);color:white}button.danger{color:var(--red)}button:disabled{opacity:.55;cursor:wait}.video-frame{background:#101713;aspect-ratio:16/9;border-radius:.8rem;overflow:hidden;display:grid;place-items:center}.video-frame video,.video-frame iframe{width:100%;height:100%;border:0;object-fit:contain}.video-frame .placeholder{color:white;text-align:center;padding:1rem}.status{padding:.8rem 1rem;background:var(--mint);border-radius:.7rem;margin:1rem 0}.status.error{background:#fff0f0;color:var(--red)}.status:empty{display:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}.video-card{border:1px solid var(--line);border-radius:.9rem;padding:.9rem;min-width:0}.video-card h3{margin:.3rem 0}.video-card p{color:var(--muted);margin:.25rem 0 .7rem;overflow-wrap:anywhere}.video-card .video-frame{margin-bottom:.6rem}.pill{font-size:.78rem;border-radius:99px;padding:.2rem .55rem;background:var(--mint);color:var(--green);font-weight:700}.small{font-size:.9rem}.hidden{display:none!important}.inline{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap}.range-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}.notice{border-left:4px solid var(--green);padding:.6rem .8rem;background:#f5faf6;color:var(--muted);font-size:.92rem}@media(max-width:760px){.layout{grid-template-columns:1fr}header{align-items:flex-start}nav{gap:.6rem}.range-row{grid-template-columns:1fr}}footer{padding:1.5rem 0 2.5rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><a class="brand" href="dashboard.html">⌘ ConfigKit · Video Studio</a><nav><a href="dashboard.html">Dashboard</a><a href="community.html">Community</a><a href="community-games.html">Community Games</a></nav></header>
+<main>
+<section><span class="eyebrow">Create · Edit · Share</span><h1>ConfigKit Video Studio</h1><p class="muted">Bring in a video file or a YouTube link, preview it, make a non-destructive trim, and publish it to the ConfigKit community.</p><div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div></section>
+<div id="app" class="hidden">
+<div class="layout">
+<section class="panel" aria-labelledby="create-title">
+<h2 id="create-title">Create or edit a video</h2>
+<form id="video-form">
+<input id="video-id" type="hidden">
+<div class="field"><label for="video-title">Video title</label><input id="video-title" maxlength="120" required placeholder="Give your video a title"></div>
+<div class="field"><label for="video-description">Description</label><textarea id="video-description" maxlength="2000" placeholder="What is this video about?"></textarea></div>
+<div class="field"><label for="source-type">Video source</label><select id="source-type"><option value="upload">Upload a video file</option><option value="youtube">YouTube URL</option></select></div>
+<div id="upload-fields"><div class="field"><label for="video-file">Choose video (MP4, WebM or MOV · up to 100 MB)</label><input id="video-file" type="file" accept="video/mp4,video/webm,video/quicktime"></div><p class="muted small" id="file-note">Uploaded files are stored privately. Drafts are visible only to you.</p></div>
+<div id="youtube-fields" class="hidden"><div class="field"><label for="youtube-url">YouTube video URL</label><input id="youtube-url" type="url" placeholder="https://www.youtube.com/watch?v=…"></div></div>
+<div class="range-row"><div class="field"><label for="trim-start">Trim start (seconds)</label><input id="trim-start" type="number" min="0" step=".1" value="0"></div><div class="field"><label for="trim-end">Trim end (seconds, optional)</label><input id="trim-end" type="number" min="0" step=".1" placeholder="End of video"></div></div>
+<div class="notice">Editor: set in/out points and preview the selected section. This is non-destructive editing; the original uploaded file stays unchanged and the trim points are saved with the video. YouTube playback controls are subject to YouTube's player restrictions.</div>
+<div class="actions"><button class="primary" id="save-button" type="submit">Save video draft</button><button type="button" id="reset-button">Clear form</button></div>
+</form>
+</section>
+<section class="panel" aria-labelledby="preview-title"><h2 id="preview-title">Video preview &amp; editor</h2><div class="video-frame" id="preview"><div class="placeholder">Choose a video file or paste a YouTube URL to preview it.</div></div><div class="actions"><button type="button" id="preview-button">Load preview</button><button type="button" id="play-selection">Play from trim start</button></div><p id="preview-meta" class="muted small">Preview stays in this browser.</p></section>
+</div>
+<section class="panel"><div class="inline"><div><h2>Manage my videos</h2><p class="muted small">Edit details, update trim points, publish or unpublish, and delete your videos.</p></div><button id="refresh-mine" type="button">Refresh</button></div><div id="my-videos" class="grid"><p class="muted">Loading your videos…</p></div></section>
+<section class="panel"><div class="inline"><div><h2>Community videos</h2><p class="muted small">Videos published by ConfigKit members. Only videos marked public appear here.</p></div><button id="refresh-community" type="button">Refresh feed</button></div><div id="community-videos" class="grid"><p class="muted">Loading community videos…</p></div></section>
+</div>
+</main>
+<footer>ConfigKit Video Studio · Respect copyright and privacy. Only upload videos you own or have permission to share.</footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+ const $ = id => document.getElementById(id);
+ const status = $('status'), app = $('app');
+ const config = window.CONFIGKIT_AUTH || {};
+ const setStatus = (message, error=false) => { status.textContent=message; status.classList.toggle('error',error); };
+ if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { setStatus('Supabase authentication is not configured.',true); return; }
+ const db = window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ let user=null, previewObjectUrl=null, previewRecord=null, editingRecord=null;
+ const BUCKET='configkit-videos';
+ const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const youtubeId = value => {
+   try {
+     const u=new URL(value);
+     if (u.hostname==='youtu.be') return u.pathname.split('/').filter(Boolean)[0] || null;
+     if (!/(^|\.)youtube\.com$/.test(u.hostname)) return null;
+     if (u.pathname==='/watch') return u.searchParams.get('v');
+     const match=u.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/);
+     return match ? match[1] : null;
+   } catch (_) { return null; }
+ };
+ const embedUrl = value => { const id=youtubeId(value); return id ? 'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?rel=0' : null; };
+ const signedVideoUrl = async row => {
+   if (row.source_type==='youtube') return embedUrl(row.source_url);
+   const {data,error}=await db.storage.from(BUCKET).createSignedUrl(row.storage_path,3600);
+   if(error) throw error;
+   return data.signedUrl;
+ };
+ const clearPreview = () => {
+   if(previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+   previewObjectUrl=null; previewRecord=null;
+ };
+ const renderPreview = async (source, type) => {
+   clearPreview();
+   const host=$('preview'); host.replaceChildren();
+   if(type==='youtube') {
+     const url=embedUrl(source);
+     if(!url) throw new Error('Enter a valid YouTube video URL.');
+     const frame=document.createElement('iframe'); frame.src=url; frame.title='YouTube video preview'; frame.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'; frame.allowFullscreen=true; frame.referrerPolicy='strict-origin-when-cross-origin'; host.append(frame);
+     $('preview-meta').textContent='YouTube preview · trim markers are saved as editor notes; YouTube does not expose frame-level trimming here.';
+   } else {
+     let url=source;
+     if(source instanceof File) { previewObjectUrl=URL.createObjectURL(source); url=previewObjectUrl; }
+     const video=document.createElement('video'); video.src=url; video.controls=true; video.preload='metadata'; video.playsInline=true; video.addEventListener('loadedmetadata',()=>{ $('preview-meta').textContent='Duration: '+video.duration.toFixed(1)+' seconds'; if(!$('trim-end').value) $('trim-end').placeholder=video.duration.toFixed(1); }); host.append(video);
+   }
+ };
+ const currentSource = () => $('source-type').value==='youtube' ? $('youtube-url').value.trim() : $('video-file').files[0];
+ $('source-type').addEventListener('change',()=>{ $('upload-fields').classList.toggle('hidden',$('source-type').value!=='upload'); $('youtube-fields').classList.toggle('hidden',$('source-type').value!=='youtube'); });
+ $('preview-button').addEventListener('click',async()=>{
+   try {
+     const source=currentSource();
+     if(!source) throw new Error('Choose a video file or enter a YouTube URL first.');
+     await renderPreview(source,$('source-type').value);
+   } catch(e){setStatus(e.message,true);}
+ });
+ $('play-selection').addEventListener('click',async()=>{
+   const video=$('preview').querySelector('video');
+   if(!video){setStatus('For YouTube, use the player controls. Uploaded videos support trim-start playback.',true);return;}
+   const start=Math.max(0,Number($('trim-start').value)||0);
+   try { if(video.readyState<1) await new Promise((resolve,reject)=>{video.addEventListener('loadedmetadata',resolve,{once:true});video.addEventListener('error',reject,{once:true});}); video.currentTime=start; await video.play(); } catch(e){setStatus('Could not start preview: '+e.message,true);}
+ });
+ $('preview').addEventListener('timeupdate',()=>{
+   const video=$('preview').querySelector('video'); if(!video) return;
+   const end=Number($('trim-end').value);
+   if(end>0 && video.currentTime>=end){video.pause();video.currentTime=Math.max(0,Number($('trim-start').value)||0);}
+ });
+ const resetForm=()=>{
+   $('video-form').reset(); $('video-id').value=''; $('trim-start').value='0'; $('trim-end').value='';
+   $('source-type').value='upload'; $('upload-fields').classList.remove('hidden'); $('youtube-fields').classList.add('hidden');
+   $('save-button').textContent='Save video draft'; editingRecord=null; clearPreview();
+   $('preview').innerHTML='<div class="placeholder">Choose a video file or paste a YouTube URL to preview it.</div>';
+   $('preview-meta').textContent='Preview stays in this browser.';
+ };
+ $('reset-button').addEventListener('click',resetForm);
+ const loadVideos = async (target, own) => {
+   target.innerHTML='<p class="muted">Loading…</p>';
+   let query=db.from('configkit_videos').select('*').order('created_at',{ascending:false}).limit(60);
+   if(own) query=query.eq('user_id',user.id); else query=query.eq('visibility','public');
+   const {data,error}=await query;
+   if(error) throw error;
+   if(!data?.length){target.innerHTML='<p class="muted">'+(own?'You have not created any videos yet.':'No community videos have been published yet.')+'</p>';return;}
+   target.replaceChildren();
+   for(const row of data){
+     const card=document.createElement('article');card.className='video-card';
+     const heading=document.createElement('h3');heading.textContent=row.title;
+     const badge=document.createElement('span');badge.className='pill';badge.textContent=row.visibility==='public'?'Community':'Draft';
+     const desc=document.createElement('p');desc.textContent=row.description||'No description provided.';
+     const meta=document.createElement('p');meta.className='small muted';meta.textContent=(row.source_type==='youtube'?'YouTube link':'Uploaded video')+' · '+new Date(row.created_at).toLocaleDateString();
+     const frame=document.createElement('div');frame.className='video-frame';frame.innerHTML='<div class="placeholder">Preparing preview…</div>';
+     try{
+       const url=await signedVideoUrl(row);
+       if(url){
+         if(row.source_type==='youtube'){const f=document.createElement('iframe');f.src=url;f.title=row.title;f.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';f.allowFullscreen=true;f.referrerPolicy='strict-origin-when-cross-origin';frame.replaceChildren(f);}
+         else {const v=document.createElement('video');v.src=url;v.controls=true;v.preload='metadata';v.playsInline=true;frame.replaceChildren(v);}
+       } else frame.innerHTML='<div class="placeholder">Preview unavailable</div>';
+     }catch(e){frame.innerHTML='<div class="placeholder">Preview unavailable</div>';}
+     card.append(badge,heading,desc,frame,meta);
+     if(own){
+       const actions=document.createElement('div');actions.className='actions';
+       const edit=document.createElement('button');edit.textContent='Edit';edit.addEventListener('click',()=>editVideo(row));
+       const publish=document.createElement('button');publish.textContent=row.visibility==='public'?'Unpublish':'Share with community';publish.addEventListener('click',()=>togglePublish(row));
+       const del=document.createElement('button');del.className='danger';del.textContent='Delete';del.addEventListener('click',()=>deleteVideo(row));
+       actions.append(edit,publish,del);card.append(actions);
+     } else {
+       const by=document.createElement('p');by.className='small muted';by.textContent='Shared by a ConfigKit member';card.append(by);
+     }
+     target.append(card);
+   }
+ };
+ const refresh=async()=>{try{await Promise.all([loadVideos($('my-videos'),true),loadVideos($('community-videos'),false)]);}catch(e){setStatus('Could not load videos: '+e.message,true);}};
+ const editVideo=async row=>{
+   editingRecord=row; $('video-id').value=row.id; $('video-title').value=row.title; $('video-description').value=row.description||'';
+   $('source-type').value=row.source_type; $('trim-start').value=row.trim_start||0; $('trim-end').value=row.trim_end||'';
+   $('upload-fields').classList.toggle('hidden',row.source_type!=='upload');$('youtube-fields').classList.toggle('hidden',row.source_type!=='youtube');
+   $('youtube-url').value=row.source_url||''; $('save-button').textContent='Save changes';
+   try{const url=await signedVideoUrl(row);if(row.source_type==='youtube')await renderPreview(row.source_url,'youtube');else await renderPreview(url,'remote');}catch(e){setStatus('Could not load this video preview: '+e.message,true);}
+   window.scrollTo({top:0,behavior:'smooth'});
+ };
+ const togglePublish=async row=>{
+   const next=row.visibility==='public'?'draft':'public';
+   const {error}=await db.from('configkit_videos').update({visibility:next,updated_at:new Date().toISOString()}).eq('id',row.id).eq('user_id',user.id);
+   if(error){setStatus(error.message,true);return;}
+   setStatus(next==='public'?'Your video is now shared with the community.':'Your video is now private.');await refresh();
+ };
+ const deleteVideo=async row=>{
+   if(!confirm('Delete “'+row.title+'”? This cannot be undone.'))return;
+   if(row.storage_path){const {error:storageError}=await db.storage.from(BUCKET).remove([row.storage_path]);if(storageError){setStatus('Could not delete the stored video: '+storageError.message,true);return;}}
+   const {error}=await db.from('configkit_videos').delete().eq('id',row.id).eq('user_id',user.id);
+   if(error){setStatus(error.message,true);return;}
+   if(editingRecord?.id===row.id)resetForm();setStatus('Video deleted.');await refresh();
+ };
+ $('video-form').addEventListener('submit',async event=>{
+   event.preventDefault();const button=$('save-button');button.disabled=true;
+   try{
+     const title=$('video-title').value.trim(),description=$('video-description').value.trim(),type=$('source-type').value;
+     const start=Math.max(0,Number($('trim-start').value)||0),end=$('trim-end').value===''?null:Number($('trim-end').value);
+     if(!title)throw new Error('Add a video title.');
+     if(end!==null&&end<=start)throw new Error('Trim end must be greater than trim start.');
+     let sourceUrl=null,storagePath=editingRecord?.storage_path||null;
+     if(type==='youtube'){
+       sourceUrl=$('youtube-url').value.trim();if(!embedUrl(sourceUrl))throw new Error('Enter a valid YouTube video URL.');
+       storagePath=null;
+     }else{
+       const file=$('video-file').files[0];
+       if(file){
+         if(!['video/mp4','video/webm','video/quicktime'].includes(file.type))throw new Error('Choose an MP4, WebM or MOV video.');
+         if(file.size>100*1024*1024)throw new Error('Video files must be 100 MB or smaller.');
+         const ext=(file.name.split('.').pop()||'mp4').toLowerCase().replace(/[^a-z0-9]/g,'')||'mp4';
+         storagePath=user.id+'/'+crypto.randomUUID()+'.'+ext;
+         const {error:uploadError}=await db.storage.from(BUCKET).upload(storagePath,file,{contentType:file.type,upsert:false});
+         if(uploadError)throw uploadError;
+       }else if(!editingRecord||editingRecord.source_type!=='upload'||!storagePath)throw new Error('Choose a video file to upload.');
+       sourceUrl=null;
+     }
+     const payload={user_id:user.id,title,description,source_type:type,source_url:sourceUrl,storage_path:storagePath,trim_start:start,trim_end:end,updated_at:new Date().toISOString()};
+     if(editingRecord) {
+       payload.visibility=editingRecord.visibility;
+       const {error}=await db.from('configkit_videos').update(payload).eq('id',editingRecord.id).eq('user_id',user.id);
+       if(error)throw error;
+     } else {
+       const {error}=await db.from('configkit_videos').insert({...payload,visibility:'draft'});
+       if(error)throw error;
+     }
+     setStatus(editingRecord?'Video updated.':'Video saved as a private draft.');resetForm();await refresh();
+   }catch(e){setStatus(e.message||'Could not save this video.',true);}
+   finally{button.disabled=false;}
+ });
+ $('refresh-mine').addEventListener('click',()=>loadVideos($('my-videos'),true).catch(e=>setStatus(e.message,true)));
+ $('refresh-community').addEventListener('click',()=>loadVideos($('community-videos'),false).catch(e=>setStatus(e.message,true)));
+ const init=async()=>{
+   try{
+     const {data,error}=await db.auth.getSession();if(error)throw error;
+     if(!data.session){setStatus('Please sign in to use Video Studio. ');const link=document.createElement('a');link.href='login.html?next=video-studio.html';link.textContent='Sign in';status.append(link);return;}
+     user=data.session.user;app.classList.remove('hidden');setStatus('Signed in. Your drafts are private until you publish them.');
+     await refresh();
+   }catch(e){setStatus('Could not start Video Studio: '+e.message,true);}
+ };
+ init();
+ db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)location.replace('login.html');});
+})();
+</script>
+</body></html>
