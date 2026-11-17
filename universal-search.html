@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Search ConfigKit tools, community content, videos, files and learning resources from one place.">
+<title>Universal Search — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#17251f;--muted:#64746b;--line:#dce7df;--paper:#f4f8f5;--green:#176344;--mint:#e4f3e9;--red:#9b3030;--shadow:0 12px 32px rgba(18,54,37,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(1120px,calc(100% - 32px));margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:1rem 0;border-bottom:1px solid var(--line)}.brand{font-weight:800;color:var(--ink);text-decoration:none}nav{display:flex;gap:1rem;flex-wrap:wrap}main{padding:2.5rem 0 3rem}.eyebrow{display:inline-block;padding:.25rem .7rem;border-radius:99px;background:var(--mint);color:var(--green);font-size:.82rem;font-weight:800}h1{font-size:clamp(2.1rem,5vw,3.3rem);line-height:1.1;margin:.7rem 0}.muted{color:var(--muted)}.hero{max-width:780px;margin:0 auto 1.5rem;text-align:center}.search-panel,.result-card,.empty,.notice{background:white;border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow)}.search-panel{padding:1rem;max-width:900px;margin:1.5rem auto}.search-row{display:flex;gap:.65rem}.search-row input{flex:1;min-width:0;font:inherit;padding:.9rem 1rem;border:1px solid var(--line);border-radius:.75rem;background:white;color:var(--ink)}button,.button{font:inherit;font-weight:750;border:1px solid var(--line);border-radius:.75rem;padding:.75rem 1rem;background:white;color:var(--ink);cursor:pointer;text-decoration:none}.primary{background:var(--green);border-color:var(--green);color:white}.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0 0}.filter{font-size:.9rem;padding:.45rem .75rem;border-radius:99px}.filter[aria-pressed=true]{background:var(--mint);border-color:#b9d9c5;color:var(--green)}.hint{font-size:.88rem;color:var(--muted);margin:.65rem .15rem 0}.status{max-width:900px;margin:1rem auto;padding:.7rem 1rem;border-radius:.7rem;background:var(--mint);color:var(--green-dark,var(--green))}.status.error{background:#fff0f0;color:var(--red)}.status:empty{display:none}.results-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin:1.7rem 0 .8rem}.results-head h2{margin:0}.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:.85rem}.result-card{padding:1rem;min-width:0}.result-top{display:flex;align-items:center;justify-content:space-between;gap:.7rem}.tag{display:inline-block;font-size:.76rem;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:var(--green);background:var(--mint);padding:.18rem .55rem;border-radius:99px}.result-card h3{font-size:1.08rem;line-height:1.35;margin:.65rem 0 .35rem;overflow-wrap:anywhere}.result-card p{margin:0;color:var(--muted);font-size:.94rem;overflow-wrap:anywhere}.result-card a{display:inline-flex;margin-top:.8rem;font-weight:750;text-decoration:none}.result-card a:hover{text-decoration:underline}.date{font-size:.8rem;color:var(--muted);white-space:nowrap}.empty{padding:2rem;text-align:center;grid-column:1/-1}.empty h3{margin:.2rem 0}.hidden{display:none!important}.quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem;margin-top:1rem}.quick a{display:block;padding:1rem;border:1px solid var(--line);border-radius:.9rem;background:#fff;text-decoration:none;font-weight:750}.quick small{display:block;color:var(--muted);font-weight:400;margin-top:.2rem}footer{padding:1rem 0 2rem;color:var(--muted);font-size:.9rem}@media(max-width:620px){header{align-items:flex-start}nav{gap:.65rem}.search-row{flex-direction:column}.search-row button{width:100%}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="dashboard.html">⌘ ConfigKit · Universal Search</a><nav><a href="dashboard.html">Dashboard</a><a href="index.html">Home</a><a href="community.html">Community</a></nav></header>
+<main>
+<section class="hero"><span class="eyebrow">One search · All of ConfigKit</span><h1>Find anything in ConfigKit.</h1><p class="muted">Search tools, guides, community discussions, people, videos, files and education resources from one place.</p></section>
+<section class="search-panel" aria-label="Universal search">
+<form id="search-form" class="search-row" role="search"><input id="query" type="search" maxlength="120" autocomplete="off" placeholder="Try “Wi-Fi profile”, “video editing” or “study notes”…" aria-label="Search ConfigKit"><button class="primary" id="search-button" type="submit">Search</button></form>
+<div class="filters" role="group" aria-label="Filter search results">
+<button class="filter" type="button" data-filter="all" aria-pressed="true">All</button>
+<button class="filter" type="button" data-filter="tools" aria-pressed="false">Tools &amp; guides</button>
+<button class="filter" type="button" data-filter="community" aria-pressed="false">Community</button>
+<button class="filter" type="button" data-filter="people" aria-pressed="false">People</button>
+<button class="filter" type="button" data-filter="videos" aria-pressed="false">Videos</button>
+<button class="filter" type="button" data-filter="files" aria-pressed="false">Files</button>
+<button class="filter" type="button" data-filter="education" aria-pressed="false">Education</button>
+</div>
+<p class="hint">Tip: press / or Ctrl K to focus search. Use quotes for an exact phrase, OR for alternatives, and -word to exclude a term.</p>
+</section>
+<div id="status" class="status" role="status" aria-live="polite"></div>
+<section aria-labelledby="results-title"><div class="results-head"><h2 id="results-title">Explore ConfigKit</h2><span id="result-count" class="muted">Popular destinations</span></div><div id="results" class="results"></div></section>
+</main>
+<footer>Search results follow your account permissions. Private Drive files, saved profiles and education content are only returned when your signed-in account is allowed to view them.</footer>
+<script src="auth-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id), queryInput=$('query'), resultsEl=$('results'), statusEl=$('status');
+const pages=[
+ {title:'Mobileconfig Studio',description:'Build Apple configuration profiles for Wi-Fi, DNS, web clips and more.',href:'mobileconfig-builder.html',kind:'Tools & guides',filter:'tools',keywords:'mobileconfig configuration profile apple builder'},
+ {title:'Wi-Fi Profile Builder',description:'Create a Wi-Fi configuration profile for your devices.',href:'index.html#wifi-builder',kind:'Tools & guides',filter:'tools',keywords:'wifi wireless network mobileconfig'},
+ {title:'DNS Profile Builder',description:'Configure DNS settings and encrypted DNS options.',href:'dns-builder.html',kind:'Tools & guides',filter:'tools',keywords:'dns encrypted resolver'},
+ {title:'Web Clip Builder',description:'Create Home Screen web clips for Apple devices.',href:'webclip-builder.html',kind:'Tools & guides',filter:'tools',keywords:'web clip home screen shortcut'},
+ {title:'Profile Inspector',description:'Inspect configuration profile payloads and review settings.',href:'prepare-profile.html',kind:'Tools & guides',filter:'tools',keywords:'inspect validate xml safety'},
+ {title:'Examples Library',description:'Browse configuration examples and practical setup patterns.',href:'examples.html',kind:'Tools & guides',filter:'tools',keywords:'examples templates'},
+ {title:'Mobileconfig Guide',description:'Learn about Apple configuration profiles and how to use them safely.',href:'mobileconfig-guide.html',kind:'Tools & guides',filter:'tools',keywords:'guide help documentation'},
+ {title:'Mobileconfig Tips Assistant',description:'Get practical explanations for profile settings.',href:'mobileconfig-tips.html',kind:'Tools & guides',filter:'tools',keywords:'tips assistant'},
+ {title:'School Finder',description:'Find schools and explore locations on a map.',href:'school-finder.html',kind:'Tools & guides',filter:'tools',keywords:'school education finder'},
+ {title:'Pro Map',description:'Explore places, categories, favourites and routes.',href:'pro-map.html',kind:'Tools & guides',filter:'tools',keywords:'map places directions navigation'},
+ {title:'ConfigKit AI',description:'Get help with ConfigKit, planning, learning and technology questions.',href:'configkit-ai.html',kind:'Tools & guides',filter:'tools',keywords:'ai assistant chatbot'},
+ {title:'ConfigKit Drive',description:'Manage your private files and folders.',href:'drive.html',kind:'Files',filter:'files',keywords:'drive storage upload documents files folders'},
+ {title:'Saved Profiles',description:'Review saved configuration profiles.',href:'profile-viewer.html',kind:'Files',filter:'files',keywords:'saved profile downloads mobileconfig'},
+ {title:'Video Studio',description:'Upload or link videos, preview, trim, manage drafts and publish to the community.',href:'video-studio.html',kind:'Videos',filter:'videos',keywords:'video youtube upload edit trim creator'},
+ {title:'Community',description:'Discover ConfigKit members and shared community content.',href:'community.html',kind:'Community',filter:'community',keywords:'social members posts'},
+ {title:'Groups',description:'Create or join groups and collaborate with members.',href:'groups.html',kind:'Community',filter:'community',keywords:'groups collaboration'},
+ {title:'Builder Discussions',description:'Ask questions and discuss configuration builders.',href:'builder-discussion.html',kind:'Community',filter:'community',keywords:'discussion forum questions help'},
+ {title:'Community Games',description:'Discover games made and shared by the community.',href:'community-games.html',kind:'Community',filter:'community',keywords:'games play'},
+ {title:'Community Events',description:'Find events and community activities.',href:'events.html',kind:'Community',filter:'community',keywords:'events calendar meetup'},
+ {title:'Community Store',description:'Browse community tools and shared resources.',href:'community-store.html',kind:'Community',filter:'community',keywords:'store marketplace tools'},
+ {title:'ConfigKit App Store',description:'Explore apps shared through ConfigKit.',href:'configkit-app-store.html',kind:'Tools & guides',filter:'tools',keywords:'app store applications'},
+ {title:'Planner',description:'Organise tasks, events and reminders.',href:'planner.html',kind:'Tools & guides',filter:'tools',keywords:'tasks reminders calendar planner'},
+ {title:'Money Manager',description:'Track accounts, transactions and bills.',href:'finance.html',kind:'Tools & guides',filter:'tools',keywords:'money finance budgets bills'},
+ {title:'ConfigKit Connect',description:'Review connected financial accounts and consented data.',href:'connect.html',kind:'Tools & guides',filter:'tools',keywords:'bank connections finance'},
+ {title:'ConfigKit Insights',description:'Review personal activity and planning summaries.',href:'insights.html',kind:'Tools & guides',filter:'tools',keywords:'analytics dashboard reports'},
+ {title:'Education Dashboard',description:'Manage books, documents, assignments, tests and slideshows.',href:'Education-dashboard.html',kind:'Education',filter:'education',keywords:'education teacher student lessons books assignments slideshow'},
+ {title:'Student Dashboard',description:'Access learning activities and assigned resources.',href:'student-dashboard.html',kind:'Education',filter:'education',keywords:'student learning class'},
+ {title:'Family Dashboard',description:'Coordinate family tools, activities and settings.',href:'family-dashboard.html',kind:'Education',filter:'education',keywords:'family parent children'},
+ {title:'Family Planner',description:'Organise shared family tasks and events.',href:'family-planner.html',kind:'Education',filter:'education',keywords:'family calendar chores'},
+ {title:'Kids Zone',description:'Explore parent-approved activities and resources.',href:'kids-zone.html',kind:'Education',filter:'education',keywords:'kids children games videos'},
+ {title:'Developer Dashboard',description:'Manage your ConfigKit developer workspace.',href:'developer-dashboard.html',kind:'Tools & guides',filter:'tools',keywords:'developer api apps'},
+ {title:'Enterprise Dashboard',description:'Access organization and enterprise tools.',href:'enterprise-dashboard.html',kind:'Tools & guides',filter:'tools',keywords:'enterprise organization business'},
+ {title:'ConfigKit Mail',description:'Open your ConfigKit mailbox and messages.',href:'mail.html',kind:'Tools & guides',filter:'tools',keywords:'mail email inbox messages'},
+ {title:'Account Settings',description:'Manage your account, sign-in and security preferences.',href:'account-settings.html',kind:'Tools & guides',filter:'tools',keywords:'account settings security passkey two factor'},
+ {title:'Account Help & Support',description:'Find help or contact ConfigKit support.',href:'support.html',kind:'Tools & guides',filter:'tools',keywords:'support help contact'}
+];
+const cfg=window.CONFIGKIT_AUTH||{};
+const db=cfg.supabaseUrl&&cfg.supabaseAnonKey&&window.supabase?.createClient
+ ? window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})
+ : null;
+let user=null,dbRows=[],activeFilter='all',timer=null,lastQuery='';
+const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const setStatus=(message,error=false)=>{statusEl.textContent=message||'';statusEl.classList.toggle('error',!!error);};
+const typeName=value=>({'app':'App','tool':'Community tool','profile':'Member','discussion':'Discussion','profile-post':'Shared profile','video':'Video','group':'Group','event':'Event','game':'Community game','book':'Book','document':'Document','slideshow':'Slideshow','file':'Drive file','saved-profile':'Saved profile'}[value]||value);
+const filterForDb=value=>({app:'tools',tool:'community',profile:'people','discussion':'community','profile-post':'community',video:'videos',group:'community',event:'community',game:'community',book:'education',document:'education',slideshow:'education',file:'files','saved-profile':'files'}[value]||'all');
+const allResults=()=>[
+ ...pages.map(p=>({...p,id:'page-'+p.href,source:'page'})),
+ ...dbRows.map(r=>({...r,kind:typeName(r.category),filter:filterForDb(r.category),source:'database'}))
+];
+function render(){
+ const q=lastQuery.trim().toLocaleLowerCase();
+ const matches=allResults().filter(r=>{
+   const inFilter=activeFilter==='all'||r.filter===activeFilter;
+   const hay=[r.title,r.description,r.keywords,r.kind].join(' ').toLocaleLowerCase();
+   return inFilter&&(!q||hay.includes(q)||r.source==='database');
+ }).filter(r=>{
+   if(r.source==='database'&&q)return true;
+   if(!q)return true;
+   const hay=[r.title,r.description,r.keywords].join(' ').toLocaleLowerCase();
+   return hay.includes(q);
+ });
+ // Database rows have already been ranked and matched by PostgreSQL; preserve their order.
+ const ordered=q?[...matches.filter(x=>x.source==='database'),...matches.filter(x=>x.source==='page')]:matches;
+ $('results-title').textContent=q?'Search results':'Explore ConfigKit';
+ $('result-count').textContent=q?ordered.length+' results':'Popular destinations';
+ if(!ordered.length){
+   resultsEl.innerHTML='<div class="empty"><h3>No results found</h3><p class="muted">Try a different phrase or select another category.</p></div>';return;
+ }
+ resultsEl.innerHTML=ordered.map(r=>{
+   const href=/^[a-zA-Z0-9_./#?=&%-]+$/.test(r.href||'')&&!r.href.startsWith('//')?r.href:'#';
+   const date=r.updated_at?new Date(r.updated_at).toLocaleDateString():'';
+   return '<article class="result-card"><div class="result-top"><span class="tag">'+escapeHTML(r.kind)+'</span>'+(date?'<time class="date">'+escapeHTML(date)+'</time>':'')+'</div><h3>'+escapeHTML(r.title)+'</h3><p>'+escapeHTML(r.description||'Open this ConfigKit section to explore more.')+'</p><a href="'+escapeHTML(href)+'">Open result →</a></article>';
+ }).join('');
+}
+async function runSearch(value){
+ const q=String(value||'').trim().slice(0,120);lastQuery=q;
+ const url=new URL(location.href);if(q)url.searchParams.set('q',q);else url.searchParams.delete('q');history.replaceState({},'',url);
+ dbRows=[];
+ if(q.length>=2&&db&&user){
+   setStatus('Searching your ConfigKit content…');
+   try{
+     const {data,error}=await db.rpc('configkit_universal_search',{p_query:q,p_category:null,p_limit:50});
+     if(error)throw error;
+     dbRows=Array.isArray(data)?data:[];
+     setStatus('Search complete. Private results are limited to content your account can access.');
+   }catch(error){
+     setStatus('Platform content search is temporarily unavailable. You can still search the tool and guide directory. '+(error.message||''),true);
+   }
+ }else if(q.length>=2&&!user){
+   setStatus('Sign in to include community content, videos and your private files. Tool and guide results are available below.');
+ }else if(q.length===1){
+   setStatus('Enter at least 2 characters to search.');
+ }else{
+   setStatus('');
+ }
+ render();
+}
+$('search-form').addEventListener('submit',event=>{event.preventDefault();runSearch(queryInput.value);});
+queryInput.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>runSearch(queryInput.value),280);});
+document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{
+ activeFilter=button.dataset.filter;document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();
+}));
+document.addEventListener('keydown',event=>{
+ if((event.key==='/'&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName))||((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k')){event.preventDefault();queryInput.focus();}
+ if(event.key==='Escape'&&document.activeElement===queryInput){queryInput.value='';runSearch('');queryInput.blur();}
+});
+async function init(){
+ const initial=new URLSearchParams(location.search).get('q')||'';queryInput.value=initial;
+ if(db){
+   try{const {data,error}=await db.auth.getSession();if(error)throw error;user=data.session?.user||null;}
+   catch(error){setStatus('Could not verify your sign-in. '+(error.message||''),true);}
+   db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session){user=null;dbRows=[];runSearch(queryInput.value);}});
+ }
+ await runSearch(initial);
+}
+init();
+})();
+</script>
+</body>
+</html>
