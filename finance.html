@@ -133,7 +133,8 @@ function parseCsv(text){
  if(dateLike&&amountLike&&first.length>=3){
   // Headerless NAB exports vary by generation. Older files may include an ID;
   // newer exports may append balance, category and merchant fields.
-  if(first.length>=7)return lines.map(v=>({date:v[0],amount:v[1],id:v[2]||'',type:v[3]||'',description:v[4]||'',balance:v[5]||'',category:v[6]||'Other',merchant:v[7]||''}));
+  if(first.length>=8)return lines.map(v=>({date:v[0],amount:v[1],id:v[2]||'',type:v[3]||'',description:v[4]||'',balance:v[5]||'',category:v[6]||'Other',merchant:v[7]||''}));
+  if(first.length===7)return lines.map(v=>({date:v[0],amount:v[1],type:v[2]||'',description:v[3]||'',balance:v[4]||'',category:v[5]||'Other',merchant:v[6]||''}));
   if(first.length===6)return lines.map(v=>({date:v[0],amount:v[1],id:v[2]||'',type:v[3]||'',description:v[4]||'',balance:v[5]||''}));
   if(first.length===5){
    const fifth=String(first[4]||'').replace(/[$,\\s]/g,'');
