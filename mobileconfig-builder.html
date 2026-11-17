@@ -37,7 +37,7 @@
         <div class="actions"><button type="submit">Generate profile</button></div>
       </form>
       <p id="build-status" class="status" role="status" aria-live="polite" hidden></p>
-      <section id="result" class="panel" hidden><h2>Review your profile</h2><p>Inspect the XML and verify every value before installation. Profile contents remain on your device unless you choose to share a community post below (which does not include the profile file or its contents).</p><pre id="xml-preview"></pre><div class="actions"><a class="button" id="download" download="configkit-profile.mobileconfig">Download .mobileconfig</a></div></section>
+      <section id="result" class="panel" hidden><h2>Review your profile</h2><p>Inspect the XML and verify every value before installation. Profile contents remain on your device unless you choose to share a community post below (which does not include the profile file or its contents).</p><pre id="xml-preview"></pre><div class="actions"><a class="button" id="download" download="configkit-profile.mobileconfig">Download .mobileconfig</a><button type="button" id="save-to-library">Save to Profile Library</button></div></section>
       <section class="panel" aria-labelledby="share-title"><h2 id="share-title">Share with the community</h2><p>Share a title and your own description in ConfigKit discussions. The generated profile, Wi-Fi name/password, resolver URL, and XML are never sent. Do not put secrets or personal information in your description.</p><form id="share-form"><div class="field"><label for="share-heading">Post title</label><input id="share-heading" type="text" maxlength="120" required placeholder="A clear title for your profile idea"></div><div class="field"><label for="share-description">Description</label><textarea id="share-description" maxlength="2000" required placeholder="Describe the intended use without including credentials or private details."></textarea></div><label class="check"><input type="checkbox" id="share-confirm" required><span>I confirm that my description contains no passwords, personal data, or other secrets, and I understand that only this text is posted.</span></label><button id="share-button" type="submit">Post description to community</button><p id="share-status" role="status" aria-live="polite"></p></form></section>
     </div>
   </main>
@@ -51,7 +51,7 @@
       const config = window.CONFIGKIT_AUTH || {};
       if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { authStatus.textContent = 'Authentication is not configured. Ask the site owner to finish Supabase setup.'; authStatus.classList.add('error'); return; }
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-      let currentUser = null;
+      let currentUser = null, generatedProfile = null;
       async function checkSession() {
         const {data,error} = await client.auth.getSession();
         if (error) { authStatus.textContent = 'Could not check your sign-in. Please refresh and try again.'; authStatus.classList.add('error'); return; }
@@ -81,7 +81,36 @@
         const profileFields=[str('PayloadType','Configuration','\t'),'\t<key>PayloadVersion</key>\n\t<integer>1</integer>',str('PayloadIdentifier',profileKey,'\t'),str('PayloadUUID',profileId,'\t'),str('PayloadDisplayName',name,'\t'),...(organization?[str('PayloadOrganization',organization,'\t')]:[]),'\t<key>PayloadContent</key>\n\t<array>\n'+payloads.join('\n')+'\n\t</array>'];
         const xml='<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n'+profileFields.join('\n')+'\n</dict>\n</plist>\n';
         const parsed=new DOMParser().parseFromString(xml,'application/xml');if(parsed.querySelector('parsererror'))return fail('Could not generate valid XML. Check the fields and try again.');
-        const old=document.getElementById('download').dataset.url;if(old)URL.revokeObjectURL(old);const objectUrl=URL.createObjectURL(new Blob([xml],{type:'application/x-apple-aspen-config'}));const link=document.getElementById('download');link.href=objectUrl;link.dataset.url=objectUrl;link.download=`${name.replace(/[^a-z0-9_-]+/gi,'-').replace(/^-|-$/g,'')||'configkit-profile'}.mobileconfig`;document.getElementById('xml-preview').textContent=xml;document.getElementById('result').hidden=false;status.hidden=false;status.classList.remove('error');status.textContent='Profile generated locally. Review the XML and settings before downloading or installing.';
+        const old=document.getElementById('download').dataset.url;if(old)URL.revokeObjectURL(old);const objectUrl=URL.createObjectURL(new Blob([xml],{type:'application/x-apple-aspen-config'}));const link=document.getElementById('download');link.href=objectUrl;link.dataset.url=objectUrl;link.download=`${name.replace(/[^a-z0-9_-]+/gi,'-').replace(/^-|-$/g,'')||'configkit-profile'}.mobileconfig`;generatedProfile={name,xml,filename:link.download};const saveButton=document.getElementById('save-to-library');saveButton.disabled=false;saveButton.textContent='Save to Profile Library';document.getElementById('xml-preview').textContent=xml;document.getElementById('result').hidden=false;status.hidden=false;status.classList.remove('error');status.textContent='Profile generated locally. Review the XML and settings before downloading or installing.';
+      });
+
+      document.getElementById('save-to-library').addEventListener('click',async()=>{
+        const button=document.getElementById('save-to-library'),status=document.getElementById('build-status');
+        if(!generatedProfile||!currentUser){status.hidden=false;status.classList.add('error');status.textContent='Generate a profile and make sure you are signed in first.';return;}
+        button.disabled=true;button.textContent='Saving privately…';status.hidden=false;status.classList.remove('error');status.textContent='Saving the generated file and version history to your private library…';
+        let profileId=null,path=null;
+        try{
+          const blob=new Blob([generatedProfile.xml],{type:'application/x-apple-aspen-config'});
+          if(blob.size>2097152)throw new Error('This generated profile is larger than the 2 MB Profile Library limit.');
+          const {data:p,error:pe}=await client.from('configkit_profiles').insert({user_id:currentUser.id,name:generatedProfile.name,description:'Created with ConfigKit Mobileconfig Studio.',folder:'My Profiles',tags:['mobileconfig','builder']}).select('id').single();
+          if(pe)throw pe;profileId=p.id;
+          const versionId=crypto.randomUUID(),ext='mobileconfig';path=currentUser.id+'/'+profileId+'/'+versionId+'.'+ext;
+          const {error:up}=await client.storage.from('configkit-profile-library').upload(path,blob,{contentType:'application/x-apple-aspen-config',upsert:false});
+          if(up)throw up;
+          const hash=await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()),checksum=[...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');
+          const parsedReport=new DOMParser().parseFromString(generatedProfile.xml,'application/xml');
+          const types=[...parsedReport.querySelectorAll('key')].filter(k=>k.textContent.trim()==='PayloadType').map(k=>k.nextElementSibling?.textContent?.trim()).filter(x=>x&&x!=='Configuration');
+          const warnings=[];
+          if(types.some(x=>x.toLowerCase().includes('wifi')))warnings.push('Wi-Fi payload may include network credentials. Keep this file private.');
+          if(types.some(x=>x.toLowerCase().includes('dns')))warnings.push('DNS payload changes name resolution for its configured scope.');
+          const {error:ins}=await client.from('configkit_profile_versions').insert({id:versionId,profile_id:profileId,user_id:currentUser.id,version_number:1,filename:generatedProfile.filename,storage_path:path,mime_type:'application/x-apple-aspen-config',file_size:blob.size,checksum,notes:'Generated with ConfigKit Mobileconfig Studio',safety_report:{validXml:true,payloadTypes:types,warnings,notes:['Generated locally by ConfigKit. Review all settings and trust the source before installation.'],reviewedAt:new Date().toISOString()}});
+          if(ins)throw ins;
+          status.textContent='Saved to your private Profile Library. Open the library to organize it, review safety flags, or add new versions.';button.textContent='Saved to Profile Library ✓';
+        }catch(error){
+          if(path)await client.storage.from('configkit-profile-library').remove([path]);
+          if(profileId)await client.from('configkit_profiles').delete().eq('id',profileId);
+          status.classList.add('error');status.textContent=error.message||'Could not save this profile to your library.';button.disabled=false;button.textContent='Save to Profile Library';
+        }
       });
       window.addEventListener('pagehide',()=>{const url=document.getElementById('download').dataset.url;if(url)URL.revokeObjectURL(url);});
       document.getElementById('share-form').addEventListener('submit',async event=>{event.preventDefault();const status=document.getElementById('share-status'),button=document.getElementById('share-button'),title=document.getElementById('share-heading').value.trim(),description=document.getElementById('share-description').value.trim();status.classList.remove('error');if(!currentUser){status.textContent='Please sign in again before posting.';status.classList.add('error');return;}if(!document.getElementById('share-confirm').checked||!title||!description){status.textContent='Confirm the safety note and enter a title and description.';status.classList.add('error');return;}button.disabled=true;status.textContent='Posting your description…';try{const {error}=await client.from('builder_discussions').insert({user_id:currentUser.id,title,body:description});if(error)throw error;event.target.reset();status.textContent='Posted to the community. Only your title and description were shared; the profile and its settings stayed on your device.';}catch(error){status.textContent=error.message||'Could not post. Make sure community discussions are configured, then try again.';status.classList.add('error');}finally{button.disabled=false;}});
