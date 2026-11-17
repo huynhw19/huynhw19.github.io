@@ -107,7 +107,7 @@ function render(){
    resultsEl.innerHTML='<div class="empty"><h3>No results found</h3><p class="muted">Try a different phrase or select another category.</p></div>';return;
  }
  resultsEl.innerHTML=ordered.map(r=>{
-   const destination=r.category==='saved-profile'?'dashboard.html#saved-profiles':r.href;
+   const destination=r.category==='saved-profile'?'dashboard.html#saved-profiles':r.category==='tool'?'community-tools.html':r.href;
    const href=/^[a-zA-Z0-9_./#?=&%-]+$/.test(destination||'')&&!destination.startsWith('//')?destination:'#';
    const date=r.updated_at?new Date(r.updated_at).toLocaleDateString():'';
    return '<article class="result-card"><div class="result-top"><span class="tag">'+escapeHTML(r.kind)+'</span>'+(date?'<time class="date">'+escapeHTML(date)+'</time>':'')+'</div><h3>'+escapeHTML(r.title)+'</h3><p>'+escapeHTML(r.description||'Open this ConfigKit section to explore more.')+'</p><a href="'+escapeHTML(href)+'">Open result →</a></article>';
