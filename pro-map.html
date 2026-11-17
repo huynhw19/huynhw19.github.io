@@ -68,16 +68,38 @@ async function loadPlaces(lat,lon,label){center={lat,lon};areaName=label;const r
 const endpoints=['https://overpass.private.coffee/api/interpreter','https://maps.mail.ru/osm/tools/overpass/api/interpreter','https://overpass-api.de/api/interpreter'];
 for(let i=0;i<endpoints.length;i++){const endpoint=endpoints[i];let controller,timer;status.textContent='Loading nearby places… trying nearby-place data server '+(i+1)+' of '+endpoints.length+'.';try{controller=new AbortController();timer=setTimeout(()=>controller.abort(),15000);const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','Accept':'application/json'},body:'data='+encodeURIComponent(query),signal:controller.signal});if(!response.ok)throw Error('Server returned HTTP '+response.status+'.');const contentType=response.headers.get('content-type')||'';if(!contentType.includes('json'))throw Error('Server returned an unexpected response.');const result=await response.json();if(result.remark)throw Error('Server could not complete this search.');if(!Array.isArray(result.elements))throw Error('Server returned incomplete place data.');data=result;break}catch(e){last=e.name==='AbortError'?Error('Server timed out.'):e;data=null}finally{if(timer)clearTimeout(timer)}}
 if(!data){
-  status.textContent='Overpass servers are unavailable. Trying the alternate OpenStreetMap place search…';
-  const photonKeys=c==='all'?['amenity','shop','leisure','public_transport','highway']:(c==='shops'?['shop']:(c==='outdoors'?['leisure']:(c==='transport'?['public_transport','highway']:['amenity'])));
-  const photonResults=await Promise.allSettled(photonKeys.map(async key=>{
-    const url='https://photon.komoot.io/reverse?lon='+encodeURIComponent(lon)+'&lat='+encodeURIComponent(lat)+'&radius='+encodeURIComponent(Math.max(1,radius/1000))+'&limit=50&osm_tag='+encodeURIComponent(key);
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
-    try{const response=await fetch(url,{signal:controller.signal,headers:{'Accept':'application/geo+json, application/json'}});if(!response.ok)throw Error('Photon HTTP '+response.status);const json=await response.json();return json.features||[]}finally{clearTimeout(timer)}
-  }));
-  const features=photonResults.flatMap(x=>x.status==='fulfilled'?x.value:[]);
-  if(!features.length)throw Error('Nearby place search is unavailable right now. The public OpenStreetMap services are not responding. Please try again later.');
-  data={elements:features.map((f,i)=>{const p=f.properties||{},coords=f.geometry?.coordinates||[];const tags={name:p.name||'',amenity:p.osm_key==='amenity'?p.osm_value:undefined,shop:p.osm_key==='shop'?p.osm_value:undefined,leisure:p.osm_key==='leisure'?p.osm_value:undefined,public_transport:p.osm_key==='public_transport'?p.osm_value:undefined,highway:p.osm_key==='highway'?p.osm_value:undefined,'addr:street':p.street||'','addr:housenumber':p.housenumber||'','addr:suburb':p.district||p.city||'','addr:city':p.city||'','addr:postcode':p.postcode||''};if(p.extra)Object.assign(tags,p.extra);return {type:'node',id:p.osm_id||('photon-'+i),lat:coords[1],lon:coords[0],tags}})};
+  status.textContent='Overpass is unavailable. Trying Photon nearby-place search…';
+  const photonTags={
+    food:['amenity:restaurant','amenity:cafe','amenity:fast_food','amenity:food_court','amenity:pub'],
+    shops:['shop'],
+    health:['amenity:hospital','amenity:clinic','amenity:doctors','amenity:dentist','amenity:pharmacy'],
+    education:['amenity:school','amenity:kindergarten','amenity:college','amenity:university'],
+    outdoors:['leisure:park','leisure:playground','leisure:sports_centre','leisure:garden'],
+    transport:['public_transport:station','public_transport:stop_position','public_transport:platform','highway:bus_stop'],
+    community:['amenity:library','amenity:community_centre','amenity:arts_centre'],
+    essentials:['amenity:atm','amenity:toilets']
+  };
+  const tags=(c==='all'?Object.keys(photonTags):groups).flatMap(g=>photonTags[g]||[]);
+  const url=new URL('https://photon.komoot.io/reverse');
+  url.searchParams.set('lon',String(lon));url.searchParams.set('lat',String(lat));
+  url.searchParams.set('radius',String(Math.max(1,radius/1000)));url.searchParams.set('limit','50');url.searchParams.set('lang','en');
+  tags.forEach(tag=>url.searchParams.append('osm_tag',tag));
+  let photonError='';
+  try{
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+    let response;
+    try{response=await fetch(url.toString(),{signal:controller.signal,headers:{'Accept':'application/geo+json, application/json'}})}
+    finally{clearTimeout(timer)}
+    if(!response.ok)throw Error('Photon returned HTTP '+response.status+'.');
+    const json=await response.json();
+    if(!Array.isArray(json.features))throw Error('Photon returned an unexpected response.');
+    data={elements:json.features.map((feature,i)=>{
+      const p=feature.properties||{},coords=feature.geometry?.coordinates||[];
+      const tags={name:p.name||'',amenity:p.osm_key==='amenity'?p.osm_value:undefined,shop:p.osm_key==='shop'?p.osm_value:undefined,leisure:p.osm_key==='leisure'?p.osm_value:undefined,public_transport:p.osm_key==='public_transport'?p.osm_value:undefined,highway:p.osm_key==='highway'?p.osm_value:undefined,'addr:street':p.street||'','addr:housenumber':p.housenumber||'','addr:suburb':p.district||p.city||'','addr:city':p.city||''};
+      return {type:'node',id:p.osm_id||('photon-'+i),lat:coords[1],lon:coords[0],tags};
+    }).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon)&&x.tags.name)};
+  }catch(e){photonError=e.name==='AbortError'?'Photon timed out.':e.message||'Photon request failed.'}
+  if(!data)throw Error('Nearby place search failed. Overpass servers timed out and Photon could not return results. '+photonError);
 }
 const unique=new Map();for(const el of data.elements||[]){const t=el.tags||{},name=t.name||t['name:en'];if(!name)continue;const pt=el.lat!=null?{lat:el.lat,lon:el.lon}:el.center;if(!pt)continue;const id=el.type+'-'+el.id;const amenity=t.amenity||'';let group=t.shop?'shops':t.leisure?'outdoors':(t.public_transport||t.highway==='bus_stop')?'transport':(amenity==='restaurant'||amenity==='cafe'||amenity==='fast_food'||amenity==='food_court'||amenity==='pub')?'food':(['hospital','clinic','doctors','dentist','pharmacy'].includes(amenity))?'health':(['school','kindergarten','college','university'].includes(amenity))?'education':(['library','community_centre','arts_centre'].includes(amenity))?'community':(['atm','toilets'].includes(amenity))?'essentials':null;if(!group||!(groups.includes(group)))continue;const address=[t['addr:housenumber'],t['addr:street'],t['addr:suburb']||t['addr:city']].filter(Boolean).join(' ');const type=t.amenity||t.shop||t.leisure||t.public_transport||t.highway||'';unique.set(id,{id,name,lat:+pt.lat,lon:+pt.lon,group,address,type,distance:L.latLng(lat,lon).distanceTo([pt.lat,pt.lon]),website:safeWebsite(t.website||t['contact:website']||''),phone:t.phone||t['contact:phone']||'',email:t.email||t['contact:email']||'',openingHours:t.opening_hours||'',cuisine:t.cuisine||'',operator:t.operator||'',wheelchair:t.wheelchair==='yes'?'Yes':t.wheelchair==='no'?'No':t.wheelchair==='limited'?'Limited':''})}
 places=[...unique.values()].sort((a,b)=>a.distance-b.distance);render();status.textContent=places.length?'Found '+places.length+' mapped places within '+(radius/1000)+' km of '+label+'.':'No mapped places found. Try a larger radius or another category.';if(!places.length)list.innerHTML='<div class="empty"><strong>No mapped places found</strong>Try a different category or wider search radius.</div>'}
