@@ -37,7 +37,7 @@
 <div><label for="profile-folder">Folder</label><input id="profile-folder" type="text" maxlength="80" value="My Profiles" list="folder-suggestions" required><datalist id="folder-suggestions"></datalist></div>
 <div class="wide"><label for="profile-description">Description</label><textarea id="profile-description" rows="2" maxlength="2000" placeholder="What is this profile for? Avoid including passwords or private details."></textarea></div>
 <div class="wide"><label for="profile-tags">Tags</label><input id="profile-tags" type="text" maxlength="300" placeholder="wifi, dns, work (comma separated)"><p class="hint">Use tags to find related profiles quickly.</p></div>
-<div class="wide"><label for="profile-file">Profile file (.mobileconfig or XML, max 2 MB)</label><input id="profile-file" type="file" accept=".mobileconfig,.xml,application/x-apple-aspen-config,application/xml,text/xml" required><p class="hint">The original file is stored as a private, immutable version. Uploading a changed file later creates a new version.</p></div>
+<div class="wide"><label for="profile-file">Profile file (XML-format .mobileconfig or .xml, max 2 MB)</label><input id="profile-file" type="file" accept=".mobileconfig,.xml,application/x-apple-aspen-config,application/xml,text/xml" required><p class="hint">The original file is stored as a private, immutable version. Uploading a changed file later creates a new version.</p></div>
 <div class="wide"><label for="profile-notes">Version notes (optional)</label><input id="profile-notes" type="text" maxlength="1000" placeholder="Initial version, updated DNS resolver, etc."></div>
 </div>
 <div class="create-actions"><span class="hint">Legacy download history contains metadata only. Re-upload a local file here to preserve its actual contents.</span><button class="primary" id="create-button" type="submit">＋ Add to library</button></div>
@@ -73,7 +73,7 @@ function parseSafety(file,text){
  const doc=new DOMParser().parseFromString(text,'application/xml');
  if(doc.querySelector('parsererror'))throw new Error('This file is not valid XML. Export an XML-format .mobileconfig file and try again.');
  const plist=doc.documentElement;
- if(plist?.tagName!=='plist'||!plist.querySelector(':scope > dict'))throw new Error('The XML does not contain a valid Apple plist profile.');
+ if(plist?.tagName!=='plist'||plist.firstElementChild?.tagName!=='dict')throw new Error('The XML does not contain a valid Apple plist profile.');
  const keys=[...doc.querySelectorAll('key')];
  const getAfter=key=>{const k=keys.find(x=>x.textContent.trim()===key);return k?.nextElementSibling?.textContent?.trim()||''};
  if(getAfter('PayloadType')!=='Configuration')throw new Error('This does not appear to be an Apple configuration profile (PayloadType must be Configuration).');
