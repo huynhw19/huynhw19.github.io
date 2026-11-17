@@ -67,7 +67,7 @@ catch(e){say(e.message,true);loading=false;$('connect').disabled=false}
 });
 $('refresh').addEventListener('click',async()=>{
 if(loading)return;loading=true;$('refresh').disabled=true;say('Requesting a bank data refresh…');
-try{const data=await call('refresh');say(data.message||'Refresh started. Reload this page in a little while.');setTimeout(()=>load(),12000)}
+try{const data=await call('refresh');say(data.message||'Refresh started. Reload this page in a little while.');loading=false;$('refresh').disabled=false;setTimeout(()=>load(),12000)}
 catch(e){say(e.message,true);loading=false;$('refresh').disabled=false}
 });
 $('connections').addEventListener('click',async ev=>{
