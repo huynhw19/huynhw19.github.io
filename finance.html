@@ -108,6 +108,42 @@ function render(){
  const entries=Object.entries(byCategory).sort((x,y)=>y[1]-x[1]),max=entries[0]?.[1]||1;
  $('spending-chart').innerHTML=entries.length?entries.map(([cat,val])=>'<div class="barrow"><span>'+escapeHtml(cat)+'</span><div class="track"><div class="fill" style="width:'+Math.round(val/max*100)+'%"></div></div><strong>'+money(val,mainCurrency)+'</strong></div>').join(''):'<div class="empty">No expenses recorded this month.</div>';
 }
+let importRows=[];
+function parseCsv(text){
+ const lines=[];let row=[],field='',q=false;
+ for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(q){if(c==='"'&&n==='"'){field+='"';i++}else if(c==='"')q=false;else field+=c}else if(c==='"')q=true;else if(c===','){row.push(field);field=''}else if(c==='\n'){row.push(field);if(row.some(v=>v.trim()))lines.push(row);row=[];field=''}else if(c!=='\r')field+=c}
+ row.push(field);if(row.some(v=>v.trim()))lines.push(row);if(q)throw Error('Unclosed quoted CSV field.');if(!lines.length)throw Error('CSV is empty.');
+ const first=lines[0].map(v=>v.trim().replace(/^\uFEFF/,''));
+ const dateLike=/^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$/.test(first[0]||''),amountLike=/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(String(first[1]||'').replace(/[$,\s]/g,''));
+ if(dateLike&&amountLike&&first.length>=3)return lines.map(v=>({date:v[0],amount:v[1],description:v[2],balance:v[3]||''}));
+ const headers=lines.shift().map(v=>v.trim().replace(/^\uFEFF/,'').toLowerCase());
+ return lines.map(v=>Object.fromEntries(headers.map((h,i)=>[h,(v[i]||'').trim()])));
+}
+function showImportPreview(){
+ const file=$('statement-file').files[0],msg=$('import-status'),panel=$('import-preview');importRows=[];panel.hidden=true;$('confirm-import').disabled=true;
+ if(!file){msg.hidden=false;msg.classList.add('error');msg.textContent='Choose a CSV file first.';return}
+ if(file.size>5*1024*1024){msg.hidden=false;msg.classList.add('error');msg.textContent='Choose a CSV smaller than 5 MB.';return}
+ const reader=new FileReader();reader.onload=()=>{try{
+  const records=parseCsv(String(reader.result||''));if(records.length>1000)throw Error('Maximum 1,000 rows per import.');
+  const headers=Object.keys(records[0]||{}),pick=tests=>headers.find(h=>tests.some(t=>t.test(h)))||'';
+  const dateCol=pick([/^date$/, /transaction.*date/, /posting.*date/]),descCol=pick([/^description$/, /^details$/, /transaction.*description/, /^narrative$/, /^particulars$/]),amountCol=pick([/^amount$/, /transaction amount/, /^value$/]),debitCol=pick([/^debit$/, /withdrawal/, /money out/, /^dr$/]),creditCol=pick([/^credit$/, /deposit/, /money in/, /^cr$/]),merchantCol=pick([/^merchant$/, /^payee$/, /^counterparty$/]),categoryCol=pick([/^category$/]),typeCol=pick([/^type$/, /transaction type/]);
+  if(!dateCol||!descCol||(!amountCol&&!debitCol&&!creditCol))throw Error('Could not identify the columns. Expected date, description and amount, or debit/credit columns.');
+  const dateOf=v=>{const z=String(v||'').trim(),m=z.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);if(m){let y=+m[3];if(y<100)y+=y<70?2000:1900;const d=new Date(y,+m[2]-1,+m[1],12);return d.getFullYear()===y&&d.getMonth()===+m[2]-1&&d.getDate()===+m[1]?d:null}const d=new Date(z);return isNaN(d)?null:d};
+  const num=v=>{const n=Number(String(v||'').replace(/[$,\s]/g,''));return Number.isFinite(n)?n:0};
+  const existing=new Set(transactions.filter(t=>t.account_id===$('import-account').value).map(t=>[new Date(t.created_at).toISOString().slice(0,10),Number(t.amount).toFixed(2),String(t.description||'').trim().toLowerCase()].join('|'))),seen=new Set();
+  importRows=records.map((r,i)=>{const date=dateOf(r[dateCol]),description=String(r[descCol]||'').trim();let amount=0,kind='expense';
+   if(debitCol||creditCol){const d=Math.abs(num(r[debitCol])),c=Math.abs(num(r[creditCol]));if(c>0){amount=c;kind='income'}else amount=d}
+   else{const raw=String(r[amountCol]||'').trim();amount=Math.abs(num(raw));kind=/^-|^\(.*\)$/.test(raw)?'expense':'income';if(typeCol&&/debit|withdraw|purchase|payment/i.test(r[typeCol]))kind='expense';if(typeCol&&/credit|deposit|refund|salary/i.test(r[typeCol]))kind='income'}
+   return {date,description,amount,kind,merchant:r[merchantCol]||null,category:r[categoryCol]||'Other',row:i+1};
+  }).filter(x=>x.date&&x.description&&x.amount>0).map(x=>{x.key=[x.date.toISOString().slice(0,10),x.amount.toFixed(2),x.description.toLowerCase()].join('|');x.duplicate=existing.has(x.key)||seen.has(x.key);seen.add(x.key);x.selected=!x.duplicate;return x});
+  if(!importRows.length)throw Error('No valid transactions found in this CSV.');
+  const dup=importRows.filter(x=>x.duplicate).length;
+  panel.innerHTML='<table><thead><tr><th>Import</th><th>Date</th><th>Description</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody>'+importRows.map((x,i)=>'<tr><td><input type="checkbox" data-import-index="'+i+'" '+(x.selected?'checked':'')+' '+(x.duplicate?'disabled':'')+'></td><td>'+escapeHtml(x.date.toLocaleDateString('en-AU'))+'</td><td>'+escapeHtml(x.description)+'</td><td>'+x.kind+'</td><td>'+money(x.amount)+'</td><td>'+(x.duplicate?'Possible duplicate':'Ready')+'</td></tr>').join('')+'</tbody></table>';
+  panel.hidden=false;msg.hidden=false;msg.classList.remove('error');msg.textContent=importRows.length+' valid rows · '+dup+' possible duplicates skipped · '+(records.length-importRows.length)+' invalid rows ignored.';$('confirm-import').disabled=!importRows.some(x=>x.selected);
+ }catch(e){msg.hidden=false;msg.classList.add('error');msg.textContent=e.message||'Could not read CSV.'}};
+ reader.onerror=()=>{msg.hidden=false;msg.classList.add('error');msg.textContent='Could not read file.'};reader.readAsText(file);
+}
+
 async function init(){
  const {data,error}=await db.auth.getSession();if(error)throw error;
  if(!data.session){location.replace('login.html?next=finance.html');return}
