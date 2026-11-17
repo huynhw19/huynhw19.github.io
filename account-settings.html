@@ -326,14 +326,17 @@
             return;
           }
 
-          // Group identical browser/device fingerprints so repeat sign-ins on the
-          // same browser do not look like duplicate devices. Keep every session
-          // separately visible and revocable inside its device group.
+          // Group sessions by the normalised device/browser class, not the raw
+          // user-agent string. Browser patch versions and minor UA differences
+          // otherwise create multiple cards for the same device.
           const deviceGroups = new Map();
           for (const item of rows) {
-            const deviceName = item.device_name && !item.device_name.includes('Mozilla/')
-              ? item.device_name : describeDevice(item.user_agent);
-            const groupKey = deviceName + '|' + (item.user_agent || '');
+            const hasUserAgent = typeof item.user_agent === 'string' && item.user_agent.trim().length > 0;
+            const deviceName = hasUserAgent
+              ? describeDevice(item.user_agent)
+              : (item.device_name && !item.device_name.includes('Mozilla/')
+                  ? item.device_name : 'Unknown device · Browser');
+            const groupKey = deviceName.toLowerCase();
             if (!deviceGroups.has(groupKey)) deviceGroups.set(groupKey,{name:deviceName,items:[]});
             deviceGroups.get(groupKey).items.push(item);
           }
