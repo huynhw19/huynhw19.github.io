@@ -200,7 +200,7 @@
       <section class="card" aria-labelledby="export-data-title">
         <h2 id="export-data-title">Export your data</h2>
         <p class="muted">Download a copy of your ConfigKit account information and personal records available to your account as a JSON file. The export is generated in your browser using your signed-in session.</p>
-        <p class="muted">Passwords, passkey private keys, MFA secrets, recovery codes, verification hashes, active session tokens, and third-party bank connection credentials are excluded. Uploaded files are represented by their database metadata; download the files separately from the feature where they were uploaded.</p>
+        <p class="muted">Passwords, passkey private keys, MFA secrets and email-based 2FA settings, recovery codes, verification hashes, active session tokens, and third-party bank connection credentials are excluded. Uploaded files are represented by their database metadata; download the files separately from the feature where they were uploaded.</p>
         <div class="actions"><button id="export-account-data" type="button">Download my data</button></div>
         <p id="export-data-status" class="muted" role="status" aria-live="polite"></p>
       </section>
@@ -326,64 +326,101 @@
             return;
           }
 
+          // Group identical browser/device fingerprints so repeat sign-ins on the
+          // same browser do not look like duplicate devices. Keep every session
+          // separately visible and revocable inside its device group.
+          const deviceGroups = new Map();
           for (const item of rows) {
-            const row=document.createElement('div');
-            row.className='provider';
-            const detail=document.createElement('div');
-            detail.style.minWidth='0';
-            const name=document.createElement('strong');
-            name.textContent=item.device_name && !item.device_name.includes('Mozilla/')
+            const deviceName = item.device_name && !item.device_name.includes('Mozilla/')
               ? item.device_name : describeDevice(item.user_agent);
-            const dates=document.createElement('div');
-            dates.className='muted';
-            const lastActive=item.refreshed_at || item.created_at;
-            dates.textContent='Signed in ' + new Date(item.created_at).toLocaleString()
-              + ' · Last active ' + (lastActive ? new Date(lastActive).toLocaleString() : 'Unknown');
-            detail.append(name,dates);
-            if (item.is_current || item.session_id===currentSessionId) {
-              const current=document.createElement('div');
-              current.className='muted';
-              current.textContent='Current device';
-              detail.append(current);
-            }
-            row.append(detail);
+            const groupKey = deviceName + '|' + (item.user_agent || '');
+            if (!deviceGroups.has(groupKey)) deviceGroups.set(groupKey,{name:deviceName,items:[]});
+            deviceGroups.get(groupKey).items.push(item);
+          }
 
-            if (!item.is_current && item.session_id!==currentSessionId) {
-              const revoke=document.createElement('button');
-              revoke.type='button';
-              revoke.className='danger';
-              revoke.textContent='Revoke';
-              revoke.setAttribute('aria-label','Revoke session for '+name.textContent);
-              revoke.addEventListener('click',async()=>{
-                if(!window.confirm('Revoke this device session? It will need to sign in again.')) return;
-                revoke.disabled=true;
-                revoke.textContent='Revoking…';
-                try {
-                  const {data,error}=await client.rpc('revoke_my_auth_session',{p_session_id:item.session_id});
-                  if(error) throw error;
-                  if(!data) throw new Error('That session is no longer active.');
-                  row.remove();
-                  setStatus('Device session revoked. Its refresh token can no longer be used; an already-issued access token may remain valid until it expires.');
-                  if(!list.querySelector('.provider')) {
-                    const empty=document.createElement('p');
-                    empty.className='muted';
-                    empty.textContent='No other active devices.';
-                    list.append(empty);
+          for (const group of deviceGroups.values()) {
+            const groupRow=document.createElement('div');
+            groupRow.className='provider device-group';
+            groupRow.style.display='block';
+            const heading=document.createElement('div');
+            heading.style.display='flex';
+            heading.style.justifyContent='space-between';
+            heading.style.alignItems='center';
+            heading.style.gap='12px';
+            const name=document.createElement('strong');
+            name.textContent=group.name;
+            const count=document.createElement('span');
+            count.className='muted';
+            count.textContent=group.items.length + (group.items.length===1 ? ' session' : ' sessions');
+            heading.append(name,count);
+            groupRow.append(heading);
+
+            for (const item of group.items) {
+              const sessionRow=document.createElement('div');
+              sessionRow.style.display='flex';
+              sessionRow.style.alignItems='center';
+              sessionRow.style.justifyContent='space-between';
+              sessionRow.style.gap='12px';
+              sessionRow.style.padding='10px 0';
+              sessionRow.style.borderTop='1px solid var(--line)';
+              const detail=document.createElement('div');
+              detail.style.minWidth='0';
+              const dates=document.createElement('div');
+              dates.className='muted';
+              const lastActive=item.refreshed_at || item.created_at;
+              dates.textContent='Signed in ' + new Date(item.created_at).toLocaleString()
+                + ' · Last active ' + (lastActive ? new Date(lastActive).toLocaleString() : 'Unknown');
+              detail.append(dates);
+              const isCurrent=!!item.is_current || item.session_id===currentSessionId;
+              if (isCurrent) {
+                const current=document.createElement('div');
+                current.className='muted';
+                current.textContent='Current session';
+                detail.append(current);
+              }
+              sessionRow.append(detail);
+
+              if (!isCurrent) {
+                const revoke=document.createElement('button');
+                revoke.type='button';
+                revoke.className='danger';
+                revoke.textContent='Revoke';
+                revoke.setAttribute('aria-label','Revoke session for '+group.name);
+                revoke.addEventListener('click',async()=>{
+                  if(!window.confirm('Revoke this device session? It will need to sign in again.')) return;
+                  revoke.disabled=true;
+                  revoke.textContent='Revoking…';
+                  try {
+                    const {data,error}=await client.rpc('revoke_my_auth_session',{p_session_id:item.session_id});
+                    if(error) throw error;
+                    if(!data) throw new Error('That session is no longer active.');
+                    sessionRow.remove();
+                    const remaining=groupRow.querySelectorAll('[data-device-session]');
+                    if (!remaining.length) groupRow.remove();
+                    setStatus('Device session revoked. Its refresh token can no longer be used; an already-issued access token may remain valid until it expires.');
+                    if(!list.querySelector('.device-group')) {
+                      const empty=document.createElement('p');
+                      empty.className='muted';
+                      empty.textContent='No other active devices.';
+                      list.append(empty);
+                    }
+                  } catch(error) {
+                    revoke.disabled=false;
+                    revoke.textContent='Revoke';
+                    setStatus(error.message||'Could not revoke this device session.',true);
                   }
-                } catch(error) {
-                  revoke.disabled=false;
-                  revoke.textContent='Revoke';
-                  setStatus(error.message||'Could not revoke this device session.',true);
-                }
-              });
-              row.append(revoke);
-            } else {
-              const currentLabel=document.createElement('span');
-              currentLabel.className='muted';
-              currentLabel.textContent='In use';
-              row.append(currentLabel);
+                });
+                sessionRow.append(revoke);
+              } else {
+                const currentLabel=document.createElement('span');
+                currentLabel.className='muted';
+                currentLabel.textContent='In use';
+                sessionRow.append(currentLabel);
+              }
+              sessionRow.setAttribute('data-device-session','');
+              groupRow.append(sessionRow);
             }
-            list.append(row);
+            list.append(groupRow);
           }
         } catch(error) {
           list.replaceChildren();
@@ -1304,7 +1341,7 @@
               created_at:user.created_at || null,updated_at:user.updated_at || null,
               user_metadata:user.user_metadata || {}},
             data:{},
-            excluded:['Passwords and passkey private keys','MFA secrets, recovery codes and verification challenge hashes',
+            excluded:['Passwords and passkey private keys','MFA secrets, email-based 2FA settings, recovery codes and verification challenge hashes',
               'Active authentication sessions and access/refresh tokens',
               'Third-party bank connection credentials and provider tokens',
               'Binary uploads (database metadata may be included)']
@@ -1347,7 +1384,7 @@
           const directTables = [
             ['community_profiles','user_id'],['builder_discussions','user_id'],
             ['builder_discussion_comments','user_id'],['mobileconfig_posts','user_id'],
-            ['enterprise_jobs','user_id'],['saved_profiles','user_id'],['email_2fa_settings','user_id'],
+            ['enterprise_jobs','user_id'],['saved_profiles','user_id'],
             ['education_students','user_id'],['education_assignments','user_id'],
             ['education_slideshows','user_id'],['education_documents','user_id'],
             ['education_books','user_id'],['education_tests','user_id'],
