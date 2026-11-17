@@ -34,7 +34,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(244,248,245,.96);backdro
 <header>
 <a class="brand" href="index.html">⌘ ConfigKit</a>
 <nav class="header-links" aria-label="Main navigation">
-<a href="index.html">Home</a><a href="mobileconfig-guide.html">Beginner guide</a><a href="dashboard.html">Dashboard</a><a href="account-docs.html">Account help</a>
+<a href="index.html">Home</a><a href="mobileconfig-guide.html">Beginner guide</a><a href="dashboard.html">Dashboard</a><a href="account-docs.html">Account help</a><a href="support.html">Support</a>
 </nav>
 </header>
 <main id="main">
@@ -42,7 +42,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(244,248,245,.96);backdro
 <span class="eyebrow">Documentation · Help · Troubleshooting</span>
 <h1>Find your way around ConfigKit.</h1>
 <p class="lead">Searchable documentation for profile builders, accounts, dashboards, community features, and technical setup. Start with a guide, jump to a feature, or search for the exact problem you are trying to solve.</p>
-<div class="hero-actions"><a class="button primary" href="mobileconfig-guide.html">Start with the beginner guide</a><a class="button" href="index.html#builders">Explore profile builders</a></div>
+<div class="hero-actions"><a class="button primary" href="mobileconfig-guide.html">Start with the beginner guide</a><a class="button" href="index.html#builders">Explore profile builders</a><a class="button" href="support.html">Contact support</a></div>
 </section>
 
 <div class="search-wrap">
@@ -101,6 +101,11 @@ header{position:sticky;top:0;z-index:20;background:rgba(244,248,245,.96);backdro
 <article class="card" data-search="organization dashboard workspace organization checklist profile preparation"><h3>Organization dashboard</h3><p>Organization workspace and getting-started resources for teams reviewing and preparing configuration profiles.</p><a href="organization-dashboard.html">Open organization dashboard →</a></article>
 <article class="card" data-search="education dashboard teachers students assignments student profiles qr"><h3>Education dashboard</h3><p>Education-oriented workspace for student records and assignment workflows available to the signed-in account.</p><a href="Education-dashboard.html">Open education dashboard →</a></article>
 <article class="card" data-search="student dashboard assignments documents lesson slideshows student records"><h3>Student dashboard</h3><p>Student view for assigned work and available lesson slideshows or documents.</p><a href="student-dashboard.html">Open student dashboard →</a></article>
+<article class="card" data-search="configkit planner personal tasks events reminders calendar assignments due dates"><h3>ConfigKit Planner</h3><p>Organise personal tasks, events and reminders in a calendar. Published Education assignments can appear as read-only items in the student's planner.</p><a href="planner.html">Open Planner →</a></article>
+<article class="card" data-search="family planner shared household tasks chores events family id members"><h3>Family Planner</h3><p>Coordinate shared household tasks, chores and family events with members of the same Family ID. This is separate from your personal Planner.</p><a href="family-planner.html">Open Family Planner →</a></article>
+<article class="card" data-search="configkit drive cloud files folders upload download share private storage 50 mb"><h3>ConfigKit Drive</h3><p>Store and organise private files and folders, upload and download files, preview supported content, and create time-limited sharing links. It is browser-based, not a desktop sync service.</p><a href="drive.html">Open ConfigKit Drive →</a></article>
+<article class="card" data-search="finance money manager accounts transactions bills csv tracker bank import no live banking"><h3>Finance tracker</h3><p>Track accounts, transactions and bills, and import supported bank CSV files. It does not connect to banks or move real money.</p><a href="finance.html">Open Finance tracker →</a></article>
+<article class="card" data-search="configkit ai assistant questions planner study planning technology chat"><h3>ConfigKit AI</h3><p>Ask questions about ConfigKit, technology, study planning and task organisation. AI responses can be incorrect, so verify important information.</p><a href="configkit-ai.html">Open ConfigKit AI →</a></article>
 </div>
 </section>
 
@@ -121,6 +126,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(244,248,245,.96);backdro
 <article class="card" data-search="privacy data browser local profile builder account community services"><h3>Privacy policy</h3><p>Read the site's explanation of browser-side profile generation, account and community features, and technical information handled by the service.</p><a href="privacy.html">Read privacy policy →</a></article>
 <article class="card" data-search="terms use acceptable use limitations conditions"><h3>Terms of use</h3><p>Review the site's terms, intended use, and limitations.</p><a href="terms.html">Read terms →</a></article>
 <article class="card" data-search="credits apple documentation references independent project"><h3>Credits and references</h3><p>See project acknowledgements and references to Apple's platform and device-management documentation.</p><a href="credits.html">View credits →</a></article>
+<article class="card" data-search="support request contact help report bug question private track status"><h3>Contact ConfigKit Support</h3><p>Submit a private support request from your signed-in account and track its status and any response. Do not include passwords or authentication secrets.</p><a href="support.html">Open support portal →</a></article>
 </div>
 <div class="notice"><strong>Remember:</strong> ConfigKit is an independent project, not an Apple service or a replacement for a device-management platform. A profile viewer or XML validator cannot certify a profile as safe. For managed devices, follow your organization's administrator and deployment policies.</div>
 </section>
@@ -181,7 +187,8 @@ header{position:sticky;top:0;z-index:20;background:rgba(244,248,245,.96);backdro
   count.textContent=q?shown+' matching topic'+(shown===1?'':'s')+'.':'Browse all topics or search by feature, task, or problem.';
   empty.classList.toggle('visible',q.length>0&&shown===0);
  }
- input.addEventListener('input',filter);\n filter();
+ input.addEventListener('input',filter);
+ filter();
 })();
 </script>
 </body>
