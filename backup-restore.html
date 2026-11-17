@@ -23,6 +23,7 @@
 <h2>Create a new backup</h2><p class="muted">Collect your notes, profile library, Drive files and saved-profile download history into one integrity-checked archive.</p>
 <div class="included">
 <div>📝 <strong>ConfigKit Notes</strong><small>Including archived and trashed notes</small></div>
+<div>📋 <strong>ConfigKit Forms</strong><small>Form definitions and submitted responses</small></div>
 <div>📱 <strong>Profile Library</strong><small>Profiles, versions and profile files</small></div>
 <div>📁 <strong>ConfigKit Drive</strong><small>Folders, files and bin contents</small></div>
 <div>⬇️ <strong>Saved Profiles</strong><small>Download-history metadata</small></div>
@@ -63,21 +64,23 @@ function fromB64(s){const raw=atob(s),out=new Uint8Array(raw.length);for(let i=0
 async function sha256(buffer){const hash=await crypto.subtle.digest('SHA-256',buffer);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function allRows(table){let out=[],offset=0;for(;;){const {data,error}=await db.from(table).select('*').eq('user_id',user.id).range(offset,offset+999);if(error)throw new Error('Could not read '+table+': '+error.message);out.push(...(data||[]));if(!data||data.length<1000)break;offset+=1000;if(offset>50000)throw new Error('Too many records in '+table+' for one browser backup.')}return out}
 async function addFile(files,bucket,path,name,mime,expectedSize){if(!path)return null;const {data,error}=await db.storage.from(bucket).download(path);if(error)throw new Error('A file in '+bucket+' could not be read. '+error.message);const blob=data;if(expectedSize!=null&&blob.size!==Number(expectedSize))throw new Error('File size check failed for '+name+'.');const raw=new Uint8Array(await blob.arrayBuffer());files.push({bucket,path,name:name||path.split('/').pop(),mimeType:mime||blob.type||'application/octet-stream',size:raw.byteLength,base64:b64(raw)});return raw.byteLength}
+async function allFormSubmissions(formIds){let out=[];for(let i=0;i<formIds.length;i+=100){let offset=0;for(;;){const ids=formIds.slice(i,i+100);const {data,error}=await db.from('configkit_form_submissions').select('*').in('form_id',ids).range(offset,offset+999);if(error)throw new Error('Could not read form responses: '+error.message);out.push(...(data||[]));if(!data||data.length<1000)break;offset+=1000;if(offset>50000)throw new Error('Too many form responses for one browser backup.')}}return out}
 async function createPayload(){
  progress(3,'Reading your private ConfigKit records…');
- const [notes,profiles,versions,driveItems,savedProfiles]=await Promise.all(['configkit_notes','configkit_profiles','configkit_profile_versions','drive_items','saved_profiles'].map(allRows));
+ const [notes,profiles,versions,driveItems,savedProfiles,forms]=await Promise.all(['configkit_notes','configkit_profiles','configkit_profile_versions','drive_items','saved_profiles','configkit_forms'].map(allRows));
+ const formSubmissions=await allFormSubmissions(forms.map(f=>f.id));
  const missingDriveFiles=driveItems.filter(x=>x.item_type==='file'&&!x.storage_path);if(missingDriveFiles.length)throw new Error(missingDriveFiles.length+' Drive file record(s) have no Storage path, so a complete file backup cannot be made. Repair or remove those records first.');const files=[];let rawTotal=0,done=0;const targets=[
  ...versions.map(v=>({bucket:'configkit-profile-library',path:v.storage_path,name:v.filename,mime:v.mime_type,size:v.file_size})),
  ...driveItems.filter(x=>x.item_type==='file'&&x.storage_path).map(x=>({bucket:'configkit-drive-files',path:x.storage_path,name:x.name,mime:x.mime_type,size:x.size_bytes}))
  ];
  for(const f of targets){rawTotal+=await addFile(files,f.bucket,f.path,f.name,f.mime,f.size);done++;progress(5+Math.round(done/Math.max(1,targets.length)*65),'Backing up files '+done+' of '+targets.length+'…');if(rawTotal>MAX_RAW_FILES)throw new Error('Your selected files exceed the 65 MB archive content limit. Reduce the Drive/profile files and try again.')}
- const data={notes,profiles,profileVersions:versions,driveItems,savedProfiles};
+ const data={notes,profiles,profileVersions:versions,driveItems,savedProfiles,forms,formSubmissions};
  const core={format:'configkit-workspace-backup',formatVersion:1,createdAt:new Date().toISOString(),data,files};
  const digest=await sha256(new TextEncoder().encode(JSON.stringify(core)));
  const archive={...core,integrity:{algorithm:'SHA-256',digest}};
  const blob=new Blob([JSON.stringify(archive)],{type:'application/json'});
  if(blob.size>MAX_ARCHIVE)throw new Error('The finished archive is larger than 90 MB. Reduce the selected files and try again.');
- return {blob,counts:{notes:notes.length,profiles:profiles.length,profileVersions:versions.length,driveItems:driveItems.length,savedProfiles:savedProfiles.length},fileCount:files.length,digest};
+ return {blob,counts:{notes:notes.length,profiles:profiles.length,profileVersions:versions.length,driveItems:driveItems.length,savedProfiles:savedProfiles.length,forms:forms.length,formSubmissions:formSubmissions.length},fileCount:files.length,digest};
 }
 async function uploadArchive(path,blob){
  const opts={contentType:'application/json',upsert:false,cacheControl:'3600'};
@@ -109,12 +112,17 @@ function fileLookup(files,bucket,path){const f=files.find(x=>x.bucket===bucket&&
 function uuid(){return crypto.randomUUID()}
 async function insertBatches(table,rows,created){for(let i=0;i<rows.length;i+=200){const part=rows.slice(i,i+200);const {error}=await db.from(table).insert(part);if(error)throw new Error('Could not restore '+table+': '+error.message);created[table].push(...part.map(x=>x.id))}}
 async function restoreCore(core){
- const d=core.data,files=core.files,created={configkit_notes:[],configkit_profiles:[],configkit_profile_versions:[],drive_items:[],saved_profiles:[]},objects=[];
- const rollback=async()=>{for(const [table,ids] of [['configkit_profile_versions',created.configkit_profile_versions],['configkit_profiles',created.configkit_profiles],['drive_items',created.drive_items],['configkit_notes',created.configkit_notes],['saved_profiles',created.saved_profiles]])if(ids.length)try{await db.from(table).delete().in('id',ids).eq(table==='configkit_profiles'||table==='configkit_notes'||table==='configkit_profile_versions'||table==='drive_items'||table==='saved_profiles'?'user_id':'user_id',user.id)}catch(e){console.warn('Restore rollback table cleanup failed',table,e)}for(const x of objects)try{await db.storage.from(x.bucket).remove([x.path])}catch(e){console.warn('Restore rollback file cleanup failed',e)}};
+ const d=core.data,files=core.files,created={configkit_notes:[],configkit_profiles:[],configkit_profile_versions:[],drive_items:[],saved_profiles:[],configkit_forms:[],configkit_form_submissions:[]},objects=[];
+ const rollback=async()=>{for(const [table,ids] of [['configkit_form_submissions',created.configkit_form_submissions],['configkit_profile_versions',created.configkit_profile_versions],['configkit_profiles',created.configkit_profiles],['drive_items',created.drive_items],['configkit_notes',created.configkit_notes],['saved_profiles',created.saved_profiles],['configkit_forms',created.configkit_forms]])if(ids.length)try{let q=db.from(table).delete().in('id',ids);if(table!=='configkit_form_submissions')q=q.eq('user_id',user.id);await q}catch(e){console.warn('Restore rollback table cleanup failed',table,e)}for(const x of objects)try{await db.storage.from(x.bucket).remove([x.path])}catch(e){console.warn('Restore rollback file cleanup failed',e)}};
  try{
   progress(5,'Restoring notes…');
   const noteRows=d.notes.map(n=>({id:uuid(),user_id:user.id,title:String(n.title||'Untitled note').slice(0,200),content:String(n.content||'').slice(0,100000),folder:String(n.folder||'Personal').slice(0,80),tags:Array.isArray(n.tags)?n.tags.slice(0,30).map(x=>String(x).slice(0,32)):[],color:['sage','blue','amber','rose','violet','slate'].includes(n.color)?n.color:'sage',is_pinned:!!n.is_pinned,is_favorite:!!n.is_favorite,is_archived:!!n.is_archived,deleted_at:n.deleted_at||null,created_at:n.created_at,updated_at:n.updated_at}));
   await insertBatches('configkit_notes',noteRows,created);
+  progress(12,'Restoring ConfigKit Forms…');
+  const formMap=new Map(),formRows=(d.forms||[]).map(f=>{const id=uuid();formMap.set(f.id,id);return{id,user_id:user.id,public_token:uuid(),title:String(f.title||'Restored form').slice(0,140),description:String(f.description||'').slice(0,3000),fields:Array.isArray(f.fields)?f.fields.slice(0,50):[],settings:f.settings&&typeof f.settings==='object'&&!Array.isArray(f.settings)?f.settings:{},status:['draft','published','archived'].includes(f.status)?f.status:'draft',accepting_responses:!!f.accepting_responses,created_at:f.created_at,updated_at:f.updated_at}});
+  await insertBatches('configkit_forms',formRows,created);
+  const submissionRows=(d.formSubmissions||[]).map(s=>{const form_id=formMap.get(s.form_id);if(!form_id)throw new Error('A form response refers to a form that is missing from the backup.');return{id:uuid(),form_id,answers:s.answers&&typeof s.answers==='object'&&!Array.isArray(s.answers)?s.answers:{},submitted_at:s.submitted_at}});
+  await insertBatches('configkit_form_submissions',submissionRows,created);
   progress(18,'Restoring Profile Library records…');
   const profileMap=new Map(),profileRows=d.profiles.map(p=>{const id=uuid();profileMap.set(p.id,id);return{id,user_id:user.id,name:String(p.name||'Restored profile').slice(0,120),description:String(p.description||'').slice(0,2000),folder:String(p.folder||'My Profiles').slice(0,80),tags:Array.isArray(p.tags)?p.tags.slice(0,30).map(x=>String(x).slice(0,32)):[],is_favorite:!!p.is_favorite,created_at:p.created_at,updated_at:p.updated_at}});
   await insertBatches('configkit_profiles',profileRows,created);
@@ -134,10 +142,10 @@ async function restoreCore(core){
   progress(88,'Restoring saved-profile history…');
   const savedRows=d.savedProfiles.map(s=>({id:uuid(),user_id:user.id,profile_name:String(s.profile_name||'Restored profile').slice(0,200),filename:String(s.filename||'profile.mobileconfig').slice(0,255),tool:String(s.tool||'ConfigKit').slice(0,120),mime_type:String(s.mime_type||'application/x-apple-aspen-config').slice(0,120),file_size:Number(s.file_size)||0,created_at:s.created_at}));
   await insertBatches('saved_profiles',savedRows,created);
-  return {notes:noteRows.length,profiles:profileRows.length,versions:d.profileVersions.length,drive:d.driveItems.length,saved:savedRows.length,files:objects.length};
+  return {notes:noteRows.length,forms:formRows.length,formSubmissions:submissionRows.length,profiles:profileRows.length,versions:d.profileVersions.length,drive:d.driveItems.length,saved:savedRows.length,files:objects.length};
  }catch(e){await rollback();throw e}
 }
-async function restoreArchive(a,label){if(busy)return;setBusy(true);try{const core=await verifyArchive(a);const total=Object.values(core.data).reduce((n,x)=>n+x.length,0);if(!confirm('Restore '+total+' records from '+label+'?\n\nThis adds new copies to your account. It does not overwrite existing items. If the restore fails, ConfigKit will attempt to remove items created by this run.'))return;const result=await restoreCore(core);status('Restore complete. Added '+result.notes+' notes, '+result.profiles+' profiles, '+result.versions+' profile versions, '+result.drive+' Drive items and '+result.saved+' saved-profile history records.');await loadBackups()}catch(e){status(e.message||'Restore failed.',true)}finally{setBusy(false);endProgress()}}
+async function restoreArchive(a,label){if(busy)return;setBusy(true);try{const core=await verifyArchive(a);const total=Object.values(core.data).reduce((n,x)=>n+x.length,0);if(!confirm('Restore '+total+' records from '+label+'?\n\nThis adds new copies to your account. It does not overwrite existing items. If the restore fails, ConfigKit will attempt to remove items created by this run.'))return;const result=await restoreCore(core);status('Restore complete. Added '+result.notes+' notes, '+result.forms+' forms, '+result.formSubmissions+' form responses, '+result.profiles+' profiles, '+result.versions+' profile versions, '+result.drive+' Drive items and '+result.saved+' saved-profile history records.');await loadBackups()}catch(e){status(e.message||'Restore failed.',true)}finally{setBusy(false);endProgress()}}
 async function downloadBackup(b){if(busy)return;setBusy(true);try{const raw=await readStored(b),blob=new Blob([raw],{type:'application/json'});downloadBlob(blob,(b.name||'configkit-backup').replace(/[^a-z0-9_-]+/gi,'-')+'.json');status('Backup downloaded. Keep a copy somewhere separate from your ConfigKit account.')}catch(e){status(e.message,true)}finally{setBusy(false)}}
 async function deleteBackup(b){if(busy||!confirm('Delete this cloud backup? Downloaded copies will not be affected.'))return;setBusy(true);try{const {error:rm}=await db.storage.from(BUCKET).remove([b.storage_path]);if(rm)throw rm;const {error:del}=await db.from('configkit_backups').delete().eq('id',b.id).eq('user_id',user.id);if(del)throw del;await loadBackups();status('Cloud backup deleted.')}catch(e){status(e.message||'Could not delete backup.',true)}finally{setBusy(false)}}
 $('create-backup').addEventListener('click',createBackup);$('refresh').addEventListener('click',()=>loadBackups().then(()=>status('Backup history refreshed.')).catch(e=>status(e.message,true)));
