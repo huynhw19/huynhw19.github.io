@@ -97,7 +97,7 @@ function render(){
    if(r.source==='database'&&q)return true;
    if(!q)return true;
    const hay=[r.title,r.description,r.keywords].join(' ').toLocaleLowerCase();
-   return hay.includes(q);
+   return q.split(/\s+/).every(term=>hay.includes(term));
  });
  // Database rows have already been ranked and matched by PostgreSQL; preserve their order.
  const ordered=q?[...matches.filter(x=>x.source==='database'),...matches.filter(x=>x.source==='page')]:matches;
