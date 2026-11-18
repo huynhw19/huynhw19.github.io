@@ -378,6 +378,27 @@
     @media(max-width:760px) { .quick-paths{grid-template-columns:1fr} .topbar .wrap{justify-content:space-between} nav{width:100%;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding:.35rem 0 .6rem;scrollbar-width:thin} nav a{white-space:nowrap} }
     @media(prefers-reduced-motion:reduce) { html{scroll-behavior:auto} *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important} }
 
+
+    /* ConfigKit global weather */
+    .weather-panel{margin-top:2rem}
+    .weather-search{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.7rem;margin:1rem 0}
+    .weather-search input,.weather-controls select{min-height:46px;padding:.7rem .8rem;border:1px solid var(--line);border-radius:.75rem;background:#fff;color:var(--ink);font:inherit}
+    .weather-search button,.weather-controls button{cursor:pointer}
+    .weather-results{display:grid;gap:.45rem;margin:.5rem 0 1rem}
+    .weather-result{width:100%;text-align:left;padding:.7rem .85rem;border:1px solid var(--line);border-radius:.7rem;background:#fff;color:var(--ink);font:inherit;cursor:pointer}
+    .weather-result:hover{border-color:var(--green)}
+    .weather-controls{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center}
+    .weather-current{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.7rem;margin:1rem 0}
+    .weather-stat{padding:.85rem;border:1px solid var(--line);border-radius:.8rem;background:#fbfdfb}
+    .weather-stat strong{display:block;font-size:1.25rem}
+    .weather-stat span{color:var(--muted);font-size:.88rem}
+    .weather-summary{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;padding:1rem;border-radius:1rem;background:var(--mint)}
+    .weather-summary strong{font-size:clamp(2rem,5vw,3rem);line-height:1.1}
+    .weather-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.65rem;margin-top:1rem}
+    .weather-day{padding:.8rem;border:1px solid var(--line);border-radius:.8rem;text-align:center;background:#fff}
+    .weather-day strong,.weather-day span{display:block}
+    .weather-day span{font-size:.9rem;color:var(--muted)}
+    @media(max-width:560px){.weather-search{grid-template-columns:1fr}.weather-search button{width:100%}}
   </style>
 </head>
 <body>
@@ -425,6 +446,34 @@
         <a class="button primary" href="#wifi-builder" data-i18n="openWifi">Open Wi‑Fi builder</a>
         <a class="button" href="mobileconfig-guide.html" data-i18n="beginnerGuideButton">Start with the guide</a>
         <a class="button" href="wiki.html">Browse help &amp; troubleshooting</a>
+      </div>
+    </section>
+
+    <section class="panel weather-panel" id="configkit-weather" aria-labelledby="weather-title">
+      <span class="eyebrow">ConfigKit Weather · Worldwide</span>
+      <h2 class="section-title" id="weather-title">Weather for any city or location</h2>
+      <p>Search cities and places around the world, or choose to share your device location for local weather. Location access is optional and only requested when you press the button.</p>
+      <form class="weather-search" id="weather-search-form" role="search">
+        <label class="visually-hidden" for="weather-query">Search city, country, or place</label>
+        <input id="weather-query" type="search" maxlength="120" autocomplete="off" placeholder="Search a city, country, or place (e.g. Tokyo, Japan)" required>
+        <button class="button primary" type="submit" id="weather-search-button">Search locations</button>
+      </form>
+      <div class="weather-results" id="weather-results" aria-live="polite"></div>
+      <div class="weather-controls">
+        <button class="button" type="button" id="weather-geolocate">Use my current location</button>
+        <label for="weather-units">Temperature</label>
+        <select id="weather-units" aria-label="Temperature units"><option value="celsius">Celsius (°C)</option><option value="fahrenheit">Fahrenheit (°F)</option></select>
+      </div>
+      <div class="status" id="weather-status" role="status" aria-live="polite">Search for a place to see its current weather and 7-day forecast.</div>
+      <div id="weather-output" hidden>
+        <div class="weather-summary">
+          <div><span class="muted" id="weather-place"></span><h3 id="weather-description" style="margin:.2rem 0"></h3><span class="muted" id="weather-local-time"></span></div>
+          <strong id="weather-temperature"></strong>
+        </div>
+        <div class="weather-current" id="weather-current"></div>
+        <h3>7-day forecast</h3>
+        <div class="weather-days" id="weather-days"></div>
+        <p class="muted fine-print">Weather data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>. Forecast availability and place coverage depend on the data provider.</p>
       </div>
     </section>
     <section class="quick-paths" aria-label="Choose your next step">
@@ -588,6 +637,126 @@
   </footer>
 
   <script>
+
+    (() => {
+      const form = document.getElementById('weather-search-form');
+      if (!form) return;
+      const query = document.getElementById('weather-query');
+      const results = document.getElementById('weather-results');
+      const status = document.getElementById('weather-status');
+      const output = document.getElementById('weather-output');
+      const units = document.getElementById('weather-units');
+      const searchButton = document.getElementById('weather-search-button');
+      const geoButton = document.getElementById('weather-geolocate');
+      let selectedPlace = null;
+      let requestNumber = 0;
+      const weatherText = code => {
+        if (code === 0) return 'Clear sky';
+        if ([1,2,3].includes(code)) return 'Partly cloudy';
+        if ([45,48].includes(code)) return 'Fog';
+        if ([51,53,55,56,57].includes(code)) return 'Drizzle';
+        if ([61,63,65,66,67].includes(code)) return 'Rain';
+        if ([71,73,75,77].includes(code)) return 'Snow';
+        if ([80,81,82].includes(code)) return 'Rain showers';
+        if ([85,86].includes(code)) return 'Snow showers';
+        if ([95,96,99].includes(code)) return 'Thunderstorm';
+        return 'Weather conditions';
+      };
+      const showStatus = (message, error=false) => {
+        status.textContent = message;
+        status.className = error ? 'status error' : 'status';
+      };
+      const displayName = place => [place.name, place.admin1, place.country].filter((v,i,a) => v && a.indexOf(v) === i).join(', ');
+      async function loadWeather(place) {
+        const id = ++requestNumber;
+        selectedPlace = place;
+        output.hidden = true;
+        showStatus('Loading weather…');
+        const tempUnit = units.value;
+        const url = new URL('https://api.open-meteo.com/v1/forecast');
+        url.search = new URLSearchParams({
+          latitude: place.latitude, longitude: place.longitude,
+          current: 'temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code',
+          daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+          forecast_days: '7', timezone: 'auto', temperature_unit: tempUnit,
+          wind_speed_unit: 'kmh'
+        }).toString();
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('Weather service returned an error (' + response.status + ').');
+          const data = await response.json();
+          if (id !== requestNumber) return;
+          const current = data.current;
+          const symbol = tempUnit === 'fahrenheit' ? '°F' : '°C';
+          document.getElementById('weather-place').textContent = place.label || displayName(place);
+          document.getElementById('weather-description').textContent = weatherText(current.weather_code);
+          document.getElementById('weather-local-time').textContent = 'Local time: ' + current.time.replace('T',' ') + ' · ' + (data.timezone || 'local timezone');
+          document.getElementById('weather-temperature').textContent = Math.round(current.temperature_2m) + symbol;
+          const stats = [
+            ['Feels like', Math.round(current.apparent_temperature) + symbol],
+            ['Humidity', current.relative_humidity_2m + '%'],
+            ['Wind', Math.round(current.wind_speed_10m) + ' km/h']
+          ];
+          document.getElementById('weather-current').innerHTML = stats.map(item => '<div class="weather-stat"><span>' + item[0] + '</span><strong>' + item[1] + '</strong></div>').join('');
+          document.getElementById('weather-days').innerHTML = data.daily.time.map((day,i) => {
+            const date = new Date(day + 'T12:00:00');
+            const label = date.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+            const rain = data.daily.precipitation_probability_max[i];
+            return '<div class="weather-day"><strong>' + label + '</strong><span>' + weatherText(data.daily.weather_code[i]) + '</span><strong>' + Math.round(data.daily.temperature_2m_max[i]) + '° / ' + Math.round(data.daily.temperature_2m_min[i]) + '°</strong><span>Rain: ' + (rain == null ? '—' : rain + '%') + '</span></div>';
+          }).join('');
+          output.hidden = false;
+          showStatus('Weather updated successfully.');
+        } catch (error) {
+          if (id === requestNumber) showStatus(error.message || 'Could not load weather. Please try again.', true);
+        }
+      }
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        const term = query.value.trim();
+        if (!term) return;
+        searchButton.disabled = true;
+        results.replaceChildren();
+        showStatus('Searching worldwide locations…');
+        try {
+          const url = new URL('https://geocoding-api.open-meteo.com/v1/search');
+          url.search = new URLSearchParams({name:term,count:'10',language:'en',format:'json'}).toString();
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('Location search is temporarily unavailable.');
+          const data = await response.json();
+          if (!data.results?.length) { showStatus('No matching locations found. Try another city or include the country.', true); return; }
+          showStatus('Choose the correct location:');
+          data.results.forEach(place => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'weather-result';
+            button.textContent = displayName(place) + (place.feature_code ? ' · ' + place.feature_code : '');
+            button.addEventListener('click', () => {
+              query.value = displayName(place);
+              results.replaceChildren();
+              loadWeather({...place,label:displayName(place)});
+            });
+            results.append(button);
+          });
+        } catch (error) { showStatus(error.message || 'Location search failed.', true); }
+        finally { searchButton.disabled = false; }
+      });
+      geoButton.addEventListener('click', () => {
+        if (!navigator.geolocation) { showStatus('Your browser does not support location access. Search for a city instead.', true); return; }
+        geoButton.disabled = true;
+        showStatus('Waiting for your permission to access device location…');
+        navigator.geolocation.getCurrentPosition(position => {
+          geoButton.disabled = false;
+          const coords = {latitude:position.coords.latitude,longitude:position.coords.longitude,label:'Your current location (' + position.coords.latitude.toFixed(3) + ', ' + position.coords.longitude.toFixed(3) + ')'};
+          loadWeather(coords);
+        }, error => {
+          geoButton.disabled = false;
+          const message = error.code === 1 ? 'Location permission was denied. You can still search for any city or place.' : 'Could not determine your location. Please search for a city instead.';
+          showStatus(message, true);
+        }, {enableHighAccuracy:false,timeout:12000,maximumAge:300000});
+      });
+      units.addEventListener('change', () => { if (selectedPlace) loadWeather(selectedPlace); });
+    })();
+
     const translations = {
       en: {
         navBuilders: 'Builders',
