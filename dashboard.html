@@ -8,6 +8,24 @@
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px rgba(23,35,31,.08)}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(100% - 32px,1000px);margin:0 auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}.brand{font-weight:700;text-decoration:none;color:var(--ink)}nav{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}button{font:inherit;font-weight:600;border:1px solid var(--line);border-radius:.7rem;padding:.65rem .9rem;background:var(--white);color:var(--ink);cursor:pointer}main{padding:2rem 0 3rem}.status,.card,.welcome{background:var(--white);border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow)}.status{padding:1rem;margin:1rem 0}.status.error{color:var(--red)}.welcome{padding:1.5rem;margin:1rem 0 1.25rem}.eyebrow{display:inline-block;padding:.3rem .7rem;border-radius:999px;background:var(--mint);color:var(--green-dark);font-size:.85rem;font-weight:700}.badge{display:inline-block;margin:.4rem;padding:.25rem .65rem;background:var(--mint);border-radius:999px;color:var(--green-dark);font-size:.85rem;font-weight:700}.muted{color:var(--muted)}h1{margin:.65rem 0;font-size:clamp(2rem,5vw,3rem);line-height:1.15}h2{margin:.1rem 0 .6rem}.section-title{margin-top:1.75rem}.workspace,.getting-started{padding:1.2rem;margin:1rem 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1rem 0 2rem}.card{padding:1.2rem}.card p{margin:.35rem 0 .8rem;color:var(--muted)}.getting-started ol{padding-left:1.4rem}.getting-started li{padding:.25rem 0}.achievements-summary{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}.achievement-count{font-size:1.7rem;font-weight:800;color:var(--green-dark)}.achievement-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.75rem;margin-top:1rem}.achievement-item{display:flex;gap:.8rem;align-items:flex-start;border:1px solid var(--line);border-radius:.8rem;padding:.85rem;background:#fff}.achievement-item.earned{background:var(--mint);border-color:#c8dfd1}.achievement-icon{font-size:1.5rem;line-height:1.4}.achievement-item strong{display:block}.achievement-item small{color:var(--muted)}.achievement-item.locked{opacity:.68}footer{padding:1.5rem 0 2rem;color:var(--muted)}[hidden]{display:none!important}@media(max-width:600px){header{padding:.8rem 0;align-items:flex-start;flex-direction:column}nav{gap:.65rem}}
+
+    .calendar-time-panel{margin:1rem 0 1.5rem;padding:1.2rem}
+    .ct-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .ct-clock{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;letter-spacing:-.04em;line-height:1.2;font-variant-numeric:tabular-nums}
+    .ct-date,.ct-muted{color:var(--muted)}
+    .ct-toolbar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:1rem 0}
+    .ct-toolbar button{padding:.45rem .75rem}
+    .ct-toolbar select{min-height:42px;max-width:100%;padding:.45rem .65rem;border:1px solid var(--line);border-radius:.7rem;background:#fff;color:var(--ink);font:inherit}
+    .ct-month{font-weight:750;min-width:155px;text-align:center}
+    .ct-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.35rem}
+    .ct-weekday{text-align:center;color:var(--muted);font-size:.82rem;font-weight:700;padding:.35rem 0}
+    .ct-day{min-height:65px;padding:.45rem;border:1px solid var(--line);border-radius:.65rem;background:#fff;color:var(--ink);text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:.2rem}
+    .ct-day:disabled{opacity:.35;cursor:default}
+    .ct-day[aria-pressed="true"]{border:2px solid var(--green);background:var(--mint);padding:calc(.45rem - 1px)}
+    .ct-day.today .ct-day-number{color:var(--green-dark);font-weight:850}
+    .ct-day-number{font-size:.95rem}
+    .ct-selected{margin-top:1rem;padding:.9rem;border-radius:.8rem;background:var(--paper);border:1px solid var(--line)}
+    @media(max-width:520px){.ct-calendar{gap:.2rem}.ct-day{min-height:50px;padding:.3rem}.ct-day-number{font-size:.85rem}.ct-weekday{font-size:.72rem}}
   </style>
 </head>
 <body>
@@ -46,6 +64,26 @@
         <span id="account-type-badge" class="badge" hidden></span>
         <p id="account-label" class="muted"></p>
         <div id="workspace-details" class="workspace" hidden><strong>Work account workspace</strong><div id="workplace-label" class="muted"></div><small class="muted">This is a local profile label and does not provide employer-managed access.</small></div>
+      </section>
+
+      <section class="card calendar-time-panel" id="configkit-calendar-time" aria-labelledby="ct-title">
+        <div class="ct-top">
+          <div><span class="eyebrow">ConfigKit Calendar &amp; Time</span><h2 id="ct-title">Your calendar and world clock</h2><p class="ct-muted">Check today's date, browse months, and see the time in a time zone of your choice.</p></div>
+          <div aria-live="off"><div class="ct-clock" id="ct-clock">--:--:--</div><div class="ct-date" id="ct-live-date">Loading local time…</div></div>
+        </div>
+        <div class="ct-toolbar">
+          <label for="ct-timezone">Time zone</label>
+          <select id="ct-timezone" aria-label="Choose a time zone"></select>
+        </div>
+        <div class="ct-toolbar">
+          <button type="button" id="ct-prev" aria-label="Previous month">←</button>
+          <div class="ct-month" id="ct-month-label" aria-live="polite"></div>
+          <button type="button" id="ct-next" aria-label="Next month">→</button>
+          <button type="button" id="ct-today">Today</button>
+        </div>
+        <div class="ct-calendar" id="ct-calendar" role="group" aria-label="Monthly calendar"></div>
+        <div class="ct-selected" id="ct-selected-date" aria-live="polite"></div>
+        <p class="ct-muted" style="font-size:.85rem;margin:.8rem 0 0">The clock uses your selected time zone. Calendar dates use your device's local calendar. No calendar events are saved or synced.</p>
       </section>
       <section class="card" id="achievements" aria-labelledby="achievements-title" style="padding:1.2rem;margin:1rem 0 1.5rem">
         <div class="achievements-summary">
@@ -309,6 +347,73 @@
       });
       client.auth.onAuthStateChange((event, session) => { if (event === 'SIGNED_OUT' && !session) window.location.replace('login.html'); });
       void renderSession();
+    })();
+  </script>
+  <script>
+
+    (() => {
+      const root = document.getElementById('configkit-calendar-time');
+      if (!root) return;
+      const clock = document.getElementById('ct-clock');
+      const liveDate = document.getElementById('ct-live-date');
+      const zoneSelect = document.getElementById('ct-timezone');
+      const monthLabel = document.getElementById('ct-month-label');
+      const calendar = document.getElementById('ct-calendar');
+      const selectedLabel = document.getElementById('ct-selected-date');
+      const now = new Date();
+      let shownYear = now.getFullYear();
+      let shownMonth = now.getMonth();
+      let selectedDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
+      const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      const zones = typeof Intl.supportedValuesOf === 'function' ? Intl.supportedValuesOf('timeZone') : ['UTC','Australia/Melbourne','Australia/Sydney','Asia/Tokyo','Asia/Singapore','Europe/London','Europe/Paris','America/Los_Angeles','America/New_York'];
+      [...new Set([localZone,...zones])].sort().forEach(zone => {
+        const option = document.createElement('option');
+        option.value = zone; option.textContent = zone;
+        zoneSelect.append(option);
+      });
+      zoneSelect.value = localZone;
+      const dateKey = d => [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+      const updateClock = () => {
+        const current = new Date();
+        try {
+          clock.textContent = new Intl.DateTimeFormat(undefined,{timeZone:zoneSelect.value,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true}).format(current);
+          liveDate.textContent = new Intl.DateTimeFormat(undefined,{timeZone:zoneSelect.value,weekday:'long',year:'numeric',month:'long',day:'numeric',timeZoneName:'short'}).format(current);
+        } catch (_) { clock.textContent = current.toLocaleTimeString(); liveDate.textContent = current.toLocaleDateString(); }
+      };
+      const renderCalendar = () => {
+        monthLabel.textContent = new Date(shownYear,shownMonth,1).toLocaleDateString(undefined,{month:'long',year:'numeric'});
+        calendar.replaceChildren();
+        ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(day => {
+          const label = document.createElement('div'); label.className = 'ct-weekday'; label.textContent = day; calendar.append(label);
+        });
+        const firstDay = new Date(shownYear,shownMonth,1).getDay();
+        const daysInMonth = new Date(shownYear,shownMonth+1,0).getDate();
+        const total = Math.ceil((firstDay+daysInMonth)/7)*7;
+        for (let i=0;i<total;i++) {
+          const dayNumber = i-firstDay+1;
+          const button = document.createElement('button');
+          button.type = 'button'; button.className = 'ct-day';
+          if (dayNumber<1 || dayNumber>daysInMonth) { button.disabled = true; button.tabIndex = -1; button.setAttribute('aria-hidden','true'); }
+          else {
+            const date = new Date(shownYear,shownMonth,dayNumber);
+            const key = dateKey(date);
+            const todayKey = dateKey(new Date());
+            button.classList.toggle('today',key===todayKey);
+            button.setAttribute('aria-pressed',String(key===dateKey(selectedDate)));
+            button.setAttribute('aria-label',date.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'}));
+            const number = document.createElement('span'); number.className='ct-day-number'; number.textContent=String(dayNumber); button.append(number);
+            if (key===todayKey) { const today = document.createElement('small'); today.textContent='Today'; button.append(today); }
+            button.addEventListener('click',() => { selectedDate=date; selectedLabel.textContent='Selected date: '+date.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'}); renderCalendar(); });
+          }
+          calendar.append(button);
+        }
+        selectedLabel.textContent='Selected date: '+selectedDate.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+      };
+      document.getElementById('ct-prev').addEventListener('click',() => { shownMonth--; if(shownMonth<0){shownMonth=11;shownYear--;} renderCalendar(); });
+      document.getElementById('ct-next').addEventListener('click',() => { shownMonth++; if(shownMonth>11){shownMonth=0;shownYear++;} renderCalendar(); });
+      document.getElementById('ct-today').addEventListener('click',() => { const d=new Date(); shownYear=d.getFullYear(); shownMonth=d.getMonth(); selectedDate=new Date(d.getFullYear(),d.getMonth(),d.getDate()); renderCalendar(); });
+      zoneSelect.addEventListener('change',updateClock);
+      updateClock(); renderCalendar(); window.setInterval(updateClock,1000);
     })();
   </script>
   <script src="saved-profiles.js"></script>
