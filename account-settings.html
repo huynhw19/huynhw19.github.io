@@ -7,6 +7,7 @@
   <title>Account settings — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8;--shadow:0 12px 32px #17231f12}
+    body.ck-dark{--ink:#e8eee9;--muted:#aab8af;--line:#34463c;--paper:#111a15;--white:#1b2820;--green:#65b58d;--green-dark:#9bd7b6;--mint:#263e30;--gold:#342d1d;--shadow:0 12px 32px #0005;color-scheme:dark}body.ck-dark input,body.ck-dark select,body.ck-dark textarea{background:#142019;color:var(--ink);border-color:#465b4d}body.ck-dark .secondary{background:#294536;color:#d9f0e1}body.ck-dark .notice{background:#302b1e;color:var(--ink)}body.ck-dark .status.error{background:#321f1f}body.ck-dark .card{background:var(--white);border-color:var(--line)}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,820px);margin-inline:auto}header{padding:22px 0}header a,footer a{color:var(--green-dark);font-weight:650}main{padding:20px 0 56px}h1{font-size:clamp(2rem,5vw,2.7rem);line-height:1.15;margin:8px 0}h2{font-size:1.3rem;margin:0 0 12px}.muted{color:var(--muted)}.status,.notice{padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--white)}.status{margin:20px 0}.status.error{color:var(--red);border-color:#e7bcbc;background:#fff8f8}.notice{background:var(--gold);margin:14px 0}.notice p{margin:5px 0 0}.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;margin:18px 0;box-shadow:var(--shadow)}.field{margin:16px 0}label{display:block;font-weight:650;margin-bottom:6px}input,select{width:100%;padding:11px 12px;border:1px solid #cbd6d0;border-radius:9px;background:#fff;color:var(--ink);font:inherit}#work-days input{width:auto}#work-days label{display:inline-flex;align-items:center;gap:6px;font-weight:500}input:focus,select:focus,button:focus-visible,a:focus-visible{outline:3px solid #83bca2;outline-offset:2px}button{border:0;border-radius:9px;padding:11px 16px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer}button:hover{background:var(--green-dark)}button:disabled{opacity:.55;cursor:not-allowed}.secondary{background:#edf4ef;color:var(--green-dark)}.secondary:hover{background:#dcebe1}.danger{background:#9b3030}.danger:hover{background:#762424}.provider{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}.provider:last-child{border-bottom:0}.actions{display:flex;flex-wrap:wrap;gap:10px}footer{padding:18px 0 30px;border-top:1px solid var(--line)}[hidden]{display:none!important}
   </style>
 </head>
@@ -17,6 +18,19 @@
     <p class="muted">Manage your ConfigKit sign-in and account preferences.</p>
     <div id="status" class="status" role="status" aria-live="polite">Checking your session…</div>
     <div id="settings" hidden>
+      <section class="card" aria-labelledby="account-overview-title">
+        <h2 id="account-overview-title">Account overview</h2>
+        <p class="muted">A quick view of your signed-in account.</p>
+        <div id="account-overview" aria-live="polite" class="provider"></div>
+      </section>
+      <section class="card" aria-labelledby="preferences-title">
+        <h2 id="preferences-title">Appearance &amp; preferences</h2>
+        <p class="muted">These preferences are saved on this browser only. They do not change your account security or other devices.</p>
+        <div class="field"><label for="ck-theme">Appearance</label><select id="ck-theme"><option value="system">Use device setting</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+        <div class="field"><label for="ck-timezone">Time zone</label><select id="ck-timezone"></select></div>
+        <div class="field"><label for="ck-date-format">Date format</label><select id="ck-date-format"><option value="locale">Device default</option><option value="dmy">Day / month / year</option><option value="mdy">Month / day / year</option><option value="ymd">Year-month-day</option></select></div>
+        <p id="ck-preferences-status" class="muted" role="status" aria-live="polite">Preferences are stored on this device.</p>
+      </section>
       <section class="card" aria-labelledby="connected-apps-title"><h2 id="connected-apps-title">Connected applications</h2><p class="muted">Review and revoke third-party applications that you have authorized to access your ConfigKit account.</p><a href="connected-apps.html">Manage connected apps →</a></section>
       <section class="card" aria-labelledby="profile-title">
         <h2 id="profile-title">Profile</h2>
@@ -271,6 +285,49 @@
         return;
       }
       const user = userData.user;
+
+      // Account overview uses the authenticated user returned by getUser().
+      const overview = document.getElementById('account-overview');
+      const emailState = user.email_confirmed_at ? 'Email verified' : 'Email not yet verified';
+      const created = user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Not available';
+      overview.textContent = (user.email || 'Signed-in account') + ' · ' + emailState + ' · Member since ' + created;
+
+      // Appearance and display preferences are deliberately device-local.
+      const preferenceKey = 'configkit.account.preferences.v1';
+      let savedPreferences = {};
+      try { savedPreferences = JSON.parse(localStorage.getItem(preferenceKey) || '{}') || {}; }
+      catch (_) { savedPreferences = {}; }
+      const themeSelect = document.getElementById('ck-theme');
+      const zoneSelect = document.getElementById('ck-timezone');
+      const dateSelect = document.getElementById('ck-date-format');
+      const preferenceStatus = document.getElementById('ck-preferences-status');
+      const applyTheme = value => {
+        const dark = value === 'dark' || (value === 'system' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+        document.body.classList.toggle('ck-dark', !!dark);
+      };
+      const knownZones = ['Australia/Melbourne','Australia/Sydney','Australia/Brisbane','Australia/Perth','Pacific/Auckland','Asia/Singapore','Asia/Tokyo','Europe/London','Europe/Paris','America/Los_Angeles','America/New_York','UTC'];
+      let zones = knownZones;
+      try { if (typeof Intl.supportedValuesOf === 'function') zones = [...new Set([...knownZones,...Intl.supportedValuesOf('timeZone')])].sort(); } catch (_) {}
+      for (const zone of zones) { const option=document.createElement('option'); option.value=zone; option.textContent=zone; zoneSelect.append(option); }
+      const detectedZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      themeSelect.value = ['system','light','dark'].includes(savedPreferences.theme) ? savedPreferences.theme : 'system';
+      zoneSelect.value = zones.includes(savedPreferences.timeZone) ? savedPreferences.timeZone : (zones.includes(detectedZone) ? detectedZone : 'UTC');
+      dateSelect.value = ['locale','dmy','mdy','ymd'].includes(savedPreferences.dateFormat) ? savedPreferences.dateFormat : 'locale';
+      applyTheme(themeSelect.value);
+      const savePreferences = () => {
+        const next = {theme:themeSelect.value,timeZone:zoneSelect.value,dateFormat:dateSelect.value};
+        try { localStorage.setItem(preferenceKey,JSON.stringify(next)); preferenceStatus.textContent='Saved on this device.'; }
+        catch (_) { preferenceStatus.textContent='Your browser blocked local storage; these preferences will reset when you leave this page.'; }
+        applyTheme(next.theme);
+      };
+      themeSelect.addEventListener('change',savePreferences);
+      zoneSelect.addEventListener('change',savePreferences);
+      dateSelect.addEventListener('change',savePreferences);
+      if (themeSelect.value === 'system' && window.matchMedia) {
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const updateSystemTheme = () => { if (themeSelect.value === 'system') applyTheme('system'); };
+        if (systemTheme.addEventListener) systemTheme.addEventListener('change',updateSystemTheme);
+      }
 
       // Record the current browser label, then load the authoritative active
       // sessions from auth.sessions through an ownership-checked RPC.
