@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A private, read-only ConfigKit control and diagnostics page.">
+  <meta name="theme-color" content="#f7f9f6">
+  <title>AI Control Hub — ConfigKit</title>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 30px,850px);margin:auto}header{padding:1rem 0;border-bottom:1px solid var(--line)}a{color:var(--green)}main{padding:1.5rem 0 3rem}h1{font-size:clamp(1.9rem,6vw,2.7rem);line-height:1.15;margin:.4rem 0}h2{font-size:1.2rem;margin:0 0 .5rem}.muted,small{color:var(--muted)}.card{background:var(--white);border:1px solid var(--line);border-radius:1rem;padding:1.1rem;margin:1rem 0}.intro{padding:1.3rem;background:var(--mint);border-radius:1rem}.pill{display:inline-block;padding:.2rem .65rem;border-radius:99px;background:#eef2ef;font-size:.83rem;font-weight:700}.status{padding:.85rem;border-radius:.7rem;background:#f1f4f2;overflow-wrap:anywhere}.status.error{background:#fff0f0;color:var(--red)}.status.good{background:var(--mint);color:var(--dark)}button{font:inherit;font-weight:650;border:1px solid var(--line);border-radius:.7rem;padding:.7rem .95rem;background:var(--green);color:white;cursor:pointer}button.secondary{background:white;color:var(--dark)}button:disabled{opacity:.55}.actions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.8rem}.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}.metric{border:1px solid var(--line);border-radius:.75rem;padding:.8rem;min-width:0}.metric strong{display:block;font-size:1.55rem;font-variant-numeric:tabular-nums}.metric span{font-size:.83rem;color:var(--muted)}.item{padding:.7rem 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.item:last-child{border-bottom:0}.item strong{display:block}.item small{display:block}.empty{color:var(--muted);padding:.6rem 0}footer{padding:1rem 0 2rem;color:var(--muted)}[hidden]{display:none!important}@media(max-width:480px){.metric-grid{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:span 2}}
+  </style>
+</head>
+<body>
+<header><a href="dashboard.html">← Back to ConfigKit Dashboard</a></header>
+<main>
+  <div class="intro">
+    <span class="pill">Private · Read-only</span>
+    <h1>ConfigKit AI Control Hub</h1>
+    <p>Use this page as a safe snapshot of your own ConfigKit account. It can inspect basic account details, Drive metadata, forms and achievements. It cannot edit, delete, submit, or access file contents.</p>
+  </div>
+  <section class="card">
+    <h2>Connection status</h2>
+    <p id="connection" class="status" role="status" aria-live="polite">Checking your ConfigKit sign-in…</p>
+    <div id="account" hidden>
+      <p><strong id="email"></strong></p>
+      <p class="muted" id="account-meta"></p>
+    </div>
+    <div class="actions">
+      <button id="refresh" type="button" disabled>Refresh account checks</button>
+      <button id="copy" class="secondary" type="button" disabled>Copy safe report</button>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Your workspace at a glance</h2>
+    <div class="metric-grid">
+      <div class="metric"><strong id="drive-count">—</strong><span>Drive items checked</span></div>
+      <div class="metric"><strong id="form-count">—</strong><span>Your forms checked</span></div>
+      <div class="metric"><strong id="achievement-count">—</strong><span>Achievements checked</span></div>
+    </div>
+    <p id="check-summary" class="muted">Sign in to run the read-only checks.</p>
+  </section>
+  <section class="card">
+    <h2>Recent Drive items</h2>
+    <p class="muted">Names and basic metadata only. File contents and storage paths are never loaded.</p>
+    <div id="drive-list" class="empty">Not checked yet.</div>
+  </section>
+  <section class="card">
+    <h2>Your forms</h2>
+    <p class="muted">Form details only. Submitted responses are never loaded.</p>
+    <div id="forms-list" class="empty">Not checked yet.</div>
+  </section>
+  <section class="card">
+    <h2>Achievements</h2>
+    <div id="achievements-list" class="empty">Not checked yet.</div>
+  </section>
+  <section class="card">
+    <h2>Working with ChatGPT on iPhone</h2>
+    <ol>
+      <li>Tap <strong>Refresh account checks</strong> on this page.</li>
+      <li>Tap <strong>Copy safe report</strong>.</li>
+      <li>Return to this ChatGPT conversation and paste the report.</li>
+      <li>I can review the results and prepare a change plan for your approval.</li>
+    </ol>
+    <p class="muted">This is a manual hand-off, not remote browser control. The report excludes passwords, tokens, file contents, form responses and private storage paths. Do not paste passwords, verification codes or connector tokens into ChatGPT.</p>
+  </section>
+</main>
+<footer>ConfigKit AI Control Hub · Read-only checks · Your existing account permissions still apply.</footer>
+<script>
+(() => {
+  const config = window.CONFIGKIT_AUTH || {};
+  const $ = id => document.getElementById(id);
+  const connection = $('connection');
+  let client = null, currentUser = null, report = null;
+  const setMessage = (message, error=false) => {
+    connection.textContent = message;
+    connection.className = 'status' + (error ? ' error' : ' good');
+  };
+  const dateText = value => value ? new Date(value).toLocaleString() : 'Not available';
+  const addItem = (container, title, detail) => {
+    const row = document.createElement('div'); row.className = 'item';
+    const strong = document.createElement('strong'); strong.textContent = title || 'Untitled';
+    const small = document.createElement('small'); small.textContent = detail || '';
+    row.append(strong, small); container.append(row);
+  };
+  async function runChecks() {
+    if (!currentUser) return;
+    $('refresh').disabled = true; $('copy').disabled = true;
+    $('check-summary').textContent = 'Running read-only checks…';
+    for (const id of ['drive-list','forms-list','achievements-list']) $(id).textContent = 'Checking…';
+    try {
+      const [drive, forms, achievements] = await Promise.all([
+        client.from('drive_items').select('id,name,item_type,mime_type,size_bytes,created_at,updated_at').eq('user_id',currentUser.id).is('deleted_at',null).order('updated_at',{ascending:false}).limit(25),
+        client.from('configkit_forms').select('id,title,status,accepting_responses,created_at,updated_at').eq('user_id',currentUser.id).order('updated_at',{ascending:false}).limit(25),
+        client.from('user_achievements').select('achievement_key,earned_at').eq('user_id',currentUser.id).order('earned_at',{ascending:false}).limit(100)
+      ]);
+      const results = {drive,forms,achievements};
+      const errors = Object.entries(results).filter(([,v]) => v.error).map(([k,v]) => k + ': ' + v.error.message);
+      const driveRows = drive.data || [], formRows = forms.data || [], achievementRows = achievements.data || [];
+      $('drive-count').textContent = drive.error ? '!' : driveRows.length;
+      $('form-count').textContent = forms.error ? '!' : formRows.length;
+      $('achievement-count').textContent = achievements.error ? '!' : achievementRows.length;
+      $('drive-list').replaceChildren();
+      if (drive.error) $('drive-list').textContent = 'Could not read Drive metadata: ' + drive.error.message;
+      else if (!driveRows.length) $('drive-list').textContent = 'No Drive items found for this account.';
+      else driveRows.forEach(item => addItem($('drive-list'), item.name, [item.item_type || 'item', item.mime_type || '', item.size_bytes == null ? '' : item.size_bytes + ' bytes', 'Updated ' + dateText(item.updated_at)].filter(Boolean).join(' · ')));
+      $('forms-list').replaceChildren();
+      if (forms.error) $('forms-list').textContent = 'Could not read forms: ' + forms.error.message;
+      else if (!formRows.length) $('forms-list').textContent = 'No forms found for this account.';
+      else formRows.forEach(item => addItem($('forms-list'), item.title, [item.status || 'status unavailable', item.accepting_responses ? 'Accepting responses' : 'Not accepting responses', 'Updated ' + dateText(item.updated_at)].join(' · ')));
+      $('achievements-list').replaceChildren();
+      if (achievements.error) $('achievements-list').textContent = 'Could not read achievements: ' + achievements.error.message;
+      else if (!achievementRows.length) $('achievements-list').textContent = 'No achievements found for this account.';
+      else achievementRows.forEach(item => addItem($('achievements-list'), item.achievement_key, 'Earned ' + dateText(item.earned_at)));
+      report = {
+        page: 'ConfigKit AI Control Hub',
+        checked_at: new Date().toISOString(),
+        account: {email:currentUser.email || null, created_at:currentUser.created_at || null, last_sign_in_at:currentUser.last_sign_in_at || null, email_confirmed:!!currentUser.email_confirmed_at},
+        counts: {drive_items:drive.error ? null : driveRows.length, forms:forms.error ? null : formRows.length, achievements:achievements.error ? null : achievementRows.length},
+        recent_drive_items: drive.error ? [] : driveRows.map(x => ({name:x.name,item_type:x.item_type,mime_type:x.mime_type,size_bytes:x.size_bytes,updated_at:x.updated_at})),
+        forms: forms.error ? [] : formRows.map(x => ({title:x.title,status:x.status,accepting_responses:x.accepting_responses,updated_at:x.updated_at})),
+        achievements: achievements.error ? [] : achievementRows.map(x => ({achievement_key:x.achievement_key,earned_at:x.earned_at})),
+        check_errors: errors
+      };
+      $('check-summary').textContent = errors.length ? 'Some checks need attention: ' + errors.join(' | ') : 'All three data checks completed successfully. Only your own metadata was requested.';
+      $('copy').disabled = false;
+      if (errors.length) setMessage('Signed in, but one or more read-only checks returned an error. See each section below.', true);
+      else setMessage('Signed in and verified. Your account-scoped, read-only checks completed.');
+    } catch (error) {
+      $('check-summary').textContent = error.message || 'The checks could not be completed.';
+      setMessage('The checks could not be completed. Please refresh and try again.', true);
+    } finally { $('refresh').disabled = false; }
+  }
+  $('refresh').addEventListener('click', runChecks);
+  $('copy').addEventListener('click', async () => {
+    if (!report) return;
+    const value = JSON.stringify(report,null,2);
+    try { await navigator.clipboard.writeText(value); $('check-summary').textContent = 'Safe report copied. Paste it into your ChatGPT conversation for review.'; }
+    catch (_) { const area=document.createElement('textarea'); area.value=value; area.setAttribute('readonly',''); area.style.cssText='position:fixed;left:-9999px'; document.body.append(area); area.select(); const ok=document.execCommand('copy'); area.remove(); $('check-summary').textContent = ok ? 'Safe report copied. Paste it into your ChatGPT conversation for review.' : 'Copy was blocked by the browser. Please try again.'; }
+  });
+  if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { setMessage('ConfigKit sign-in is not configured on this page.',true); return; }
+  client = window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  client.auth.getUser().then(async ({data,error}) => {
+    if (error || !data.user) { setMessage('You are not signed in. Sign in to ConfigKit, then reopen this page.',true); return; }
+    currentUser = data.user;
+    $('account').hidden = false;
+    $('email').textContent = currentUser.email || 'Signed-in ConfigKit account';
+    $('account-meta').textContent = 'Account created: ' + dateText(currentUser.created_at) + ' · Last sign-in: ' + dateText(currentUser.last_sign_in_at) + ' · Email confirmed: ' + (currentUser.email_confirmed_at ? 'Yes' : 'No');
+    $('refresh').disabled = false;
+    await runChecks();
+  }).catch(() => setMessage('Could not verify your ConfigKit sign-in. Please sign in again.',true));
+  client.auth.onAuthStateChange((event,session) => {
+    if (!session) { currentUser=null; report=null; $('account').hidden=true; $('refresh').disabled=true; $('copy').disabled=true; setMessage('You have been signed out.'); }
+  });
+})();
+</script>
+</body>
+</html>
