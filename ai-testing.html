@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Manage a limited, read-only AI testing connection for your ConfigKit account.">
+  <title>AI Testing Connector — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,760px);margin:0 auto}header{padding:1.2rem 0;border-bottom:1px solid var(--line)}a{color:var(--green)}main{padding:2rem 0}.card{background:var(--white);border:1px solid var(--line);border-radius:1rem;padding:clamp(1rem,4vw,1.6rem);margin:1rem 0}.muted{color:var(--muted)}button{font:inherit;font-weight:650;border:0;border-radius:.6rem;padding:.7rem 1rem;background:var(--green);color:white;cursor:pointer;margin:.3rem .3rem .3rem 0}button.secondary{background:var(--mint);color:var(--green-dark);border:1px solid var(--line)}button.danger{background:#9b3030}button:disabled{opacity:.55;cursor:wait}.notice{padding:1rem;border-radius:.65rem;background:var(--mint);margin:1rem 0}.warning{background:var(--gold)}.status{padding:.8rem;border-radius:.6rem;background:#f1f4f2;white-space:pre-wrap;overflow-wrap:anywhere}.token{width:100%;min-height:5rem;font: .9rem ui-monospace,SFMono-Regular,Consolas,monospace;padding:.75rem;border:1px solid var(--line);border-radius:.6rem;overflow-wrap:anywhere}ul{padding-left:1.3rem}li{margin:.35rem 0}footer{padding:1rem 0 2rem;color:var(--muted)}[hidden]{display:none!important}
+  </style>
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+</head>
+<body>
+<header><a href="dashboard.html">← Back to ConfigKit Dashboard</a></header>
+<main>
+  <h1>ConfigKit AI Testing Connector</h1>
+  <p class="muted">Create a limited connection for an AI assistant or compatible MCP client to inspect this ConfigKit account.</p>
+  <div class="notice warning"><strong>Read-only access only.</strong> The connector cannot change your account, create or delete files, read file contents, inspect form responses, or access another user's data. Tokens expire after 30 days and can be revoked here.</div>
+  <section class="card" aria-labelledby="account-title">
+    <h2 id="account-title">Connected account</h2>
+    <p id="account-status" class="status" role="status" aria-live="polite">Checking your sign-in…</p>
+    <div id="manage" hidden>
+      <h2>Connector token</h2>
+      <p class="muted">Create a token only when you're ready to connect a compatible client. It is shown once. Anyone holding it can read the limited metadata described below.</p>
+      <button id="create-token" type="button">Create read-only token</button>
+      <button id="refresh-tokens" class="secondary" type="button">Refresh token list</button>
+      <div id="new-token-panel" hidden>
+        <p><strong>Copy this token now. It will not be shown again.</strong></p>
+        <textarea id="new-token" class="token" rows="3" readonly aria-label="New connector token"></textarea>
+        <button id="copy-token" class="secondary" type="button">Copy token</button>
+        <p id="token-expiry" class="muted"></p>
+      </div>
+      <h3>Active and previous tokens</h3>
+      <div id="token-list" class="status">No token list loaded.</div>
+      <button id="revoke-all" class="danger" type="button">Revoke all connector tokens</button>
+    </div>
+  </section>
+  <section class="card">
+    <h2>What the connector can read</h2>
+    <ul>
+      <li>Basic status for this account (email, account creation and last sign-in timestamps).</li>
+      <li>Up to 25 Drive item names and metadata; never file contents or storage paths.</li>
+      <li>Up to 25 forms owned by this account; never submitted responses.</li>
+      <li>Achievement keys and earned dates for this account.</li>
+    </ul>
+    <p class="muted">It does not offer arbitrary SQL, write actions, account administration, or access to the public website's other users.</p>
+  </section>
+  <section class="card">
+    <h2>Connection details</h2>
+    <p><strong>Remote MCP endpoint</strong></p>
+    <code>https://gwhqnqzzlgslwgijkkpt.supabase.co/functions/v1/configkit-ai-testing</code>
+    <p><strong>Authentication</strong></p>
+    <code>Bearer token</code>
+    <p class="muted">A compatible client must support remote MCP over HTTPS and bearer-token authentication. ChatGPT plan and workspace eligibility are separate requirements; this page does not connect ChatGPT automatically.</p>
+  </section>
+</main>
+<footer>ConfigKit AI Testing · Read-only access · Token expiry: 30 days</footer>
+<script>
+(() => {
+  const config = window.CONFIGKIT_AUTH || {};
+  const endpoint = 'https://gwhqnqzzlgslwgijkkpt.supabase.co/functions/v1/configkit-ai-testing';
+  const status = document.getElementById('account-status');
+  const manage = document.getElementById('manage');
+  const tokenPanel = document.getElementById('new-token-panel');
+  const tokenText = document.getElementById('new-token');
+  const list = document.getElementById('token-list');
+  if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+    status.textContent = 'ConfigKit sign-in is not configured on this page.';
+    return;
+  }
+  const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
+  let session = null;
+  const setStatus = (message, error=false) => {
+    status.textContent = message;
+    status.style.color = error ? 'var(--red)' : 'var(--green-dark)';
+  };
+  async function api(action) {
+    if (!session?.access_token) throw new Error('Your sign-in session has expired. Please sign in again.');
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + session.access_token,
+        'apikey': config.supabaseAnonKey
+      },
+      body: JSON.stringify({ action }),
+      cache: 'no-store'
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error || 'The connector request failed.');
+    return body;
+  }
+  async function refreshTokens() {
+    list.textContent = 'Loading token list…';
+    try {
+      const data = await api('list_tokens');
+      if (!data.tokens?.length) { list.textContent = 'No connector tokens have been created for this account.'; return; }
+      list.replaceChildren();
+      for (const item of data.tokens) {
+        const row = document.createElement('div');
+        row.style.cssText = 'padding:.65rem 0;border-bottom:1px solid var(--line)';
+        const title = document.createElement('strong');
+        title.textContent = item.label + (item.revoked_at ? ' · REVOKED' : new Date(item.expires_at) <= new Date() ? ' · EXPIRED' : ' · ACTIVE');
+        const details = document.createElement('div');
+        details.className = 'muted';
+        details.textContent = 'Created ' + new Date(item.created_at).toLocaleString() + ' · Expires ' + new Date(item.expires_at).toLocaleString() + (item.last_used_at ? ' · Last used ' + new Date(item.last_used_at).toLocaleString() : ' · Not used yet');
+        row.append(title, details);
+        list.append(row);
+      }
+    } catch (error) { list.textContent = error.message; }
+  }
+  document.getElementById('create-token').addEventListener('click', async event => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+      const data = await api('create_token');
+      tokenText.value = data.token;
+      tokenPanel.hidden = false;
+      document.getElementById('token-expiry').textContent = 'Expires: ' + new Date(data.expires_at).toLocaleString();
+      await refreshTokens();
+    } catch (error) { setStatus(error.message, true); }
+    finally { button.disabled = false; }
+  });
+  document.getElementById('refresh-tokens').addEventListener('click', refreshTokens);
+  document.getElementById('copy-token').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(tokenText.value); setStatus('Token copied. Store it securely; it cannot be displayed again after you leave this page.'); }
+    catch (_) { tokenText.focus(); tokenText.select(); setStatus('Select and copy the token manually.'); }
+  });
+  document.getElementById('revoke-all').addEventListener('click', async event => {
+    if (!confirm('Revoke every active ConfigKit AI testing token for this account? Existing connector sessions will stop working.')) return;
+    const button = event.currentTarget;
+    button.disabled = true;
+    try { await api('revoke_all'); tokenPanel.hidden = true; tokenText.value = ''; setStatus('All connector tokens have been revoked.'); await refreshTokens(); }
+    catch (error) { setStatus(error.message, true); }
+    finally { button.disabled = false; }
+  });
+  client.auth.getSession().then(async ({data, error}) => {
+    if (error) throw error;
+    session = data.session;
+    if (!session) { setStatus('You are not signed in. Please sign in to ConfigKit, then reopen this page.', true); return; }
+    const {data:userData, error:userError} = await client.auth.getUser();
+    if (userError || !userData.user) { setStatus('Your sign-in could not be verified. Please sign in again.', true); return; }
+    setStatus('Signed in as ' + (userData.user.email || 'your ConfigKit account') + '. Token management is available.');
+    manage.hidden = false;
+    await refreshTokens();
+  }).catch(error => setStatus(error.message || 'Could not check your ConfigKit session.', true));
+  client.auth.onAuthStateChange((_event, nextSession) => {
+    session = nextSession;
+    if (!nextSession) { manage.hidden = true; setStatus('You have been signed out.'); }
+  });
+})();
+</script>
+</body>
+</html>
