@@ -87,6 +87,14 @@
 
       </div>
       <p class="muted fine-print" id="chatgptComingSoonNote">ChatGPT sign-in is planned. It will become available if OpenAI enables OAuth access for this app; this button is not active yet.</p>
+      <section class="education-note" id="samlSignIn" aria-labelledby="saml-title">
+        <h2 id="saml-title">Organization SAML sign-in</h2>
+        <p class="muted">Enter your work or organization email address to continue through your configured SAML identity provider.</p>
+        <label for="samlEmail">Work email</label>
+        <input id="samlEmail" type="email" autocomplete="username" maxlength="254" placeholder="you@company.com">
+        <div class="form-actions"><button class="provider" id="samlLogin" type="button">Sign in with SAML</button></div>
+        <small class="muted">Your email domain must be registered to a SAML provider in Supabase Auth.</small>
+      </section>
       <div class="providers"><button class="provider" id="passkeyLogin" type="button">Sign in / unlock with a passkey</button></div>
       <p class="status" id="status" role="status" aria-live="polite">Checking sign-in configuration…</p>
       <section id="mfa-challenge" class="education-note" hidden aria-labelledby="mfa-title">
@@ -162,6 +170,32 @@
       }
 
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,experimental:{passkey:true}}});
+      const samlEmail = document.getElementById('samlEmail');
+      const samlLogin = document.getElementById('samlLogin');
+      samlLogin.addEventListener('click', async () => {
+        const value = samlEmail.value.trim();
+        const match = /^[^\\s@]+@([^\\s@]+\\.[^\\s@]+)$/.exec(value);
+        if (!match) {
+          setStatus('Enter a valid work email address to find your organization SAML provider.', true);
+          samlEmail.focus();
+          return;
+        }
+        samlLogin.disabled = true;
+        setStatus('Connecting to your organization identity provider…');
+        try {
+          const {data, error} = await client.auth.signInWithSSO({
+            domain: match[1].toLowerCase(),
+            options: {redirectTo: callbackUrl}
+          });
+          if (error) throw error;
+          if (!data?.url) throw new Error('Supabase did not return a SAML sign-in URL. Check that this email domain has an enabled SAML provider.');
+          window.location.assign(data.url);
+        } catch (error) {
+          setStatus(error.message || 'SAML sign-in could not be started.', true);
+          samlLogin.disabled = false;
+        }
+      });
+
       const loginParams = new URLSearchParams(window.location.search);
       const requestedNext = loginParams.get('next');
       // Only allow known same-site destinations. OAuth consent keeps its authorization id.
