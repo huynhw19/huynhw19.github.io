@@ -602,8 +602,42 @@
               const history=document.createElement('p');history.className='assignment-meta';
               history.textContent='Attempt '+attempt.attempt_number+' · '+attempt.status+' · '+(attempt.total_score===null?'Awaiting grade':attempt.total_score+' / '+(attempt.points_possible??'?'));
               card.append(history);
-              if(attempt.status==='graded'&&attempt.teacher_feedback){
-                const feedback=document.createElement('p');feedback.textContent='Teacher feedback: '+attempt.teacher_feedback;card.append(feedback);
+              if(attempt.status==='graded'){
+                if(attempt.teacher_feedback){
+                  const feedback=document.createElement('p');feedback.textContent='Teacher feedback: '+attempt.teacher_feedback;card.append(feedback);
+                }
+                const review=document.createElement('button');review.type='button';review.className='secondary';review.textContent='Review question feedback';
+                const reviewPanel=document.createElement('section');reviewPanel.className='record';reviewPanel.hidden=true;
+                review.addEventListener('click',async()=>{
+                  if(!reviewPanel.hidden){reviewPanel.hidden=true;review.textContent='Review question feedback';return}
+                  review.disabled=true;review.textContent='Loading feedback…';reviewPanel.replaceChildren();
+                  const [questionsResult,responsesResult]=await Promise.all([
+                    client.from('education_test_questions').select('id,sort_order,question_type,prompt,points').eq('test_id',test.id).order('sort_order',{ascending:true}),
+                    client.from('education_test_responses').select('question_id,answer,auto_points,manual_points,teacher_feedback').eq('attempt_id',attempt.id)
+                  ]);
+                  review.disabled=false;review.textContent='Hide question feedback';
+                  if(questionsResult.error||responsesResult.error){
+                    const error=document.createElement('p');error.className='error';error.textContent='Feedback could not be loaded. Please refresh and try again.';reviewPanel.append(error);
+                  }else{
+                    const responseMap=new Map((responsesResult.data||[]).map(item=>[item.question_id,item]));
+                    (questionsResult.data||[]).forEach((question,index)=>{
+                      const response=responseMap.get(question.id);
+                      const block=document.createElement('div');block.className='record';
+                      const heading=document.createElement('strong');heading.textContent='Question '+(index+1)+': '+question.prompt;
+                      const answer=document.createElement('p');answer.textContent='Your answer: '+(response?.answer||'No answer recorded.');
+                      const earned=Number(response?.auto_points||0)+Number(response?.manual_points||0);
+                      const score=document.createElement('p');score.className='assignment-meta';score.textContent='Your score: '+earned+' / '+question.points+' points';
+                      block.append(heading,answer,score);
+                      if(response?.teacher_feedback){
+                        const note=document.createElement('p');note.textContent='Teacher feedback: '+response.teacher_feedback;block.append(note);
+                      }
+                      reviewPanel.append(block);
+                    });
+                    if(!(questionsResult.data||[]).length){const empty=document.createElement('p');empty.textContent='No question feedback is available.';reviewPanel.append(empty);}
+                  }
+                  reviewPanel.hidden=false;
+                });
+                card.append(review,reviewPanel);
               }
             });
             const canStart=current||(attempts||[]).length<(test.attempt_limit||1);
