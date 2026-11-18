@@ -26,6 +26,13 @@
     .ct-day-number{font-size:.95rem}
     .ct-selected{margin-top:1rem;padding:.9rem;border-radius:.8rem;background:var(--paper);border:1px solid var(--line)}
     @media(max-width:520px){.ct-calendar{gap:.2rem}.ct-day{min-height:50px;padding:.3rem}.ct-day-number{font-size:.85rem}.ct-weekday{font-size:.72rem}}
+
+    .studio-tabs,.studio-actions{display:flex;gap:.55rem;flex-wrap:wrap;margin:.8rem 0}
+    .studio-tabs button[aria-pressed="true"]{background:var(--green-dark);color:white}
+    .studio-actions button.secondary,.studio-tabs button:not([aria-pressed="true"]){background:#fff;color:var(--ink);border:1px solid var(--line)}
+    .studio-editor{display:grid;gap:.55rem;margin-top:1rem}
+    .studio-editor input,.studio-editor textarea{width:100%;font:inherit;padding:.7rem;border:1px solid var(--line);border-radius:.65rem}
+    .studio-editor textarea{resize:vertical;line-height:1.55}
   </style>
 </head>
 <body>
@@ -84,6 +91,27 @@
         <div class="ct-calendar" id="ct-calendar" role="group" aria-label="Monthly calendar"></div>
         <div class="ct-selected" id="ct-selected-date" aria-live="polite"></div>
         <p class="ct-muted" style="font-size:.85rem;margin:.8rem 0 0">The clock uses your selected time zone. Calendar dates use your device's local calendar. No calendar events are saved or synced.</p>
+      </section>
+
+      <section class="card" id="dashboard-studio" aria-labelledby="studio-title" style="padding:1.2rem;margin:1rem 0 1.5rem">
+        <span class="eyebrow">Create, edit &amp; store</span><h2 id="studio-title">ConfigKit Docs &amp; Slides Studio</h2>
+        <p class="muted">Create documents and slide decks directly from your dashboard. Export or import files on this device, or save and open them in your private ConfigKit Drive.</p>
+        <div class="studio-tabs" role="group" aria-label="Choose editor"><button type="button" data-studio-tab="doc" aria-pressed="true">Documents</button><button type="button" data-studio-tab="slides" aria-pressed="false">Slides</button></div>
+        <section id="studio-doc" class="studio-editor">
+          <h3>Document editor</h3><label for="studio-doc-title">Document title</label><input id="studio-doc-title" maxlength="180" placeholder="My document">
+          <label for="studio-doc-body">Content (plain text or Markdown)</label><textarea id="studio-doc-body" rows="12" maxlength="200000" placeholder="Start writing…"></textarea>
+          <div class="studio-actions"><button type="button" id="doc-device-save">Save to device</button><button type="button" id="doc-device-load" class="secondary">Load from device</button><button type="button" id="doc-drive-save">Save to Drive</button><button type="button" id="doc-drive-load" class="secondary">Load from Drive</button></div>
+          <input id="doc-file-input" type="file" accept=".md,.txt,.ckdoc,application/json,text/plain,text/markdown" hidden>
+        </section>
+        <section id="studio-slides" class="studio-editor" hidden>
+          <h3>Slide deck editor</h3><label for="studio-slides-title">Presentation title</label><input id="studio-slides-title" maxlength="180" placeholder="My presentation">
+          <label for="studio-slides-description">Description</label><input id="studio-slides-description" maxlength="1000" placeholder="Optional description">
+          <label for="studio-slides-body">Slides (one slide per section, separated by a line containing ---)</label><textarea id="studio-slides-body" rows="14" maxlength="200000" placeholder="Slide 1&#10;Your first slide content&#10;---&#10;Slide 2&#10;Your second slide content"></textarea>
+          <div class="studio-actions"><button type="button" id="slides-device-save">Save to device</button><button type="button" id="slides-device-load" class="secondary">Load from device</button><button type="button" id="slides-drive-save">Save to Drive</button><button type="button" id="slides-drive-load" class="secondary">Load from Drive</button></div>
+          <input id="slides-file-input" type="file" accept=".json,.ckslides,application/json,text/plain" hidden>
+        </section>
+        <p id="studio-status" class="muted" role="status" aria-live="polite"></p>
+        <p class="muted" style="font-size:.85rem">Drive files are private to your signed-in account and use your existing ConfigKit Drive storage and access policies. Saving creates a separate file; it does not overwrite an existing Drive file.</p>
       </section>
       <section class="card" id="achievements" aria-labelledby="achievements-title" style="padding:1.2rem;margin:1rem 0 1.5rem">
         <div class="achievements-summary">
@@ -414,6 +442,81 @@
       document.getElementById('ct-today').addEventListener('click',() => { const d=new Date(); shownYear=d.getFullYear(); shownMonth=d.getMonth(); selectedDate=new Date(d.getFullYear(),d.getMonth(),d.getDate()); renderCalendar(); });
       zoneSelect.addEventListener('change',updateClock);
       updateClock(); renderCalendar(); window.setInterval(updateClock,1000);
+    })();
+  </script>
+
+  <script>
+    (() => {
+      const $ = id => document.getElementById(id);
+      const status = $('studio-status');
+      const config = window.CONFIGKIT_AUTH || {};
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { status.textContent='Supabase is not configured. Device import and export remain available only after the dashboard loads.'; return; }
+      const db = window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      let user = null;
+      const BUCKET='configkit-drive-files';
+      const say=(message,error=false)=>{status.textContent=message;status.style.color=error?'var(--red)':'var(--green-dark)'};
+      const download=(name,blob)=>{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)};
+      const docData=()=>({format:'configkit-doc',version:1,title:$('studio-doc-title').value.trim()||'Untitled document',content:$('studio-doc-body').value,updatedAt:new Date().toISOString()});
+      const slidesData=()=>({format:'configkit-slides',version:1,title:$('studio-slides-title').value.trim()||'Untitled presentation',description:$('studio-slides-description').value,slides:$('studio-slides-body').value.split(/^---\s*$/m).map(x=>x.trim()).filter(Boolean),updatedAt:new Date().toISOString()});
+      const safeName=(s,fallback)=>String(s||fallback).replace(/[\\/:*?"<>|]+/g,'-').trim().slice(0,140)||fallback;
+      const filename=(kind,data)=>safeName(data.title,kind)+(kind==='doc'?'.ckdoc.json':'.ckslides.json');
+      function apply(kind,data){
+        if(kind==='doc'){
+          if(data.format!=='configkit-doc'&&typeof data.content!=='string')throw new Error('That file is not a ConfigKit document.');
+          $('studio-doc-title').value=data.title||'Imported document';$('studio-doc-body').value=data.content||'';
+        }else{
+          if(data.format!=='configkit-slides'&&!Array.isArray(data.slides))throw new Error('That file is not a ConfigKit slide deck.');
+          $('studio-slides-title').value=data.title||'Imported presentation';$('studio-slides-description').value=data.description||'';
+          $('studio-slides-body').value=(data.slides||[]).map(s=>typeof s==='string'?s:(s.title||'')+'\n'+(s.content||'')).join('\n---\n');
+        }
+      }
+      async function saveDevice(kind){
+        const data=kind==='doc'?docData():slidesData();
+        download(filename(kind,data),new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+        say((kind==='doc'?'Document':'Slide deck')+' exported to your device.');
+      }
+      async function loadDevice(kind){
+        const input=$(kind==='doc'?'doc-file-input':'slides-file-input');
+        input.onchange=async()=>{const file=input.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());apply(kind,data);say(file.name+' loaded from your device.');}catch(e){say(e.message||'Could not read that file.',true)}finally{input.value=''}};
+        input.click();
+      }
+      async function saveDrive(kind){
+        if(!user)throw new Error('Please sign in again to use ConfigKit Drive.');
+        const data=kind==='doc'?docData():slidesData();
+        const name=filename(kind,data),id=crypto.randomUUID(),path=user.id+'/'+id+'/blob';
+        const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+        const {error:uploadError}=await db.storage.from(BUCKET).upload(path,blob,{contentType:'application/json',upsert:false});
+        if(uploadError)throw uploadError;
+        const {error:rowError}=await db.from('drive_items').insert({id,user_id:user.id,parent_id:null,item_type:'file',name,mime_type:'application/json',size_bytes:blob.size,storage_path:path});
+        if(rowError){await db.storage.from(BUCKET).remove([path]);throw rowError;}
+        say(name+' saved to your ConfigKit Drive.');
+      }
+      async function loadDrive(kind){
+        if(!user)throw new Error('Please sign in again to use ConfigKit Drive.');
+        const suffix=kind==='doc'?'.ckdoc.json':'.ckslides.json';
+        const {data,error}=await db.from('drive_items').select('id,name,storage_path,updated_at').eq('user_id',user.id).eq('item_type','file').is('deleted_at',null).ilike('name','%'+suffix).order('updated_at',{ascending:false}).limit(100);
+        if(error)throw error;
+        const matches=data||[];
+        if(!matches.length){say('No '+(kind==='doc'?'documents':'slide decks')+' found in your Drive yet.');return;}
+        const choice=prompt('Choose a file to load from your Drive (enter its number):\n'+matches.map((r,i)=>(i+1)+'. '+r.name+' — '+new Date(r.updated_at).toLocaleString()).join('\n'));
+        if(choice===null)return;
+        const index=Number(choice)-1;
+        if(!Number.isInteger(index)||index<0||index>=matches.length)throw new Error('That file number is not valid.');
+        const {data:blob,error:downloadError}=await db.storage.from(BUCKET).download(matches[index].storage_path);
+        if(downloadError)throw downloadError;
+        const parsed=JSON.parse(await blob.text());apply(kind,parsed);say(matches[index].name+' loaded from your Drive.');
+      }
+      function bind(id,fn){$(id).addEventListener('click',()=>Promise.resolve().then(fn).catch(e=>say(e.message||'That action failed.',true)))}
+      document.querySelectorAll('[data-studio-tab]').forEach(button=>button.addEventListener('click',()=>{
+        const tab=button.dataset.studioTab;
+        $('studio-doc').hidden=tab!=='doc';$('studio-slides').hidden=tab!=='slides';
+        document.querySelectorAll('[data-studio-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+      }));
+      bind('doc-device-save',()=>saveDevice('doc'));bind('doc-device-load',()=>loadDevice('doc'));
+      bind('doc-drive-save',()=>saveDrive('doc'));bind('doc-drive-load',()=>loadDrive('doc'));
+      bind('slides-device-save',()=>saveDevice('slides'));bind('slides-device-load',()=>loadDevice('slides'));
+      bind('slides-drive-save',()=>saveDrive('slides'));bind('slides-drive-load',()=>loadDrive('slides'));
+      db.auth.getSession().then(({data,error})=>{if(error)throw error;user=data.session?.user||null;if(!user)say('Sign in to save or load files in ConfigKit Drive. Device import and export are available while signed in.');}).catch(e=>say(e.message||'Could not check your Drive session.',true));
     })();
   </script>
   <script src="saved-profiles.js"></script>
