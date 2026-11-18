@@ -345,7 +345,13 @@
       </form>
       <div id="test-message" class="status" role="status" aria-live="polite"></div>
       <section aria-labelledby="manage-tests-title">
-        <h2 id="manage-tests-title">Manage tests</h2>
+        <h2 id="manage-tests-title">Assessment insights &amp; results</h2>
+        <p class="muted">Track submissions, spot work awaiting marking and review learner performance.</p>
+        <div id="test-insights" class="two-col" aria-live="polite"></div>
+        <div class="two-col">
+          <label>Find an assessment<input id="test-search" type="search" maxlength="100" placeholder="Search title or student"></label>
+          <label>Filter by status<select id="test-status-filter"><option value="">All statuses</option><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+        </div>
         <div id="test-list"><p class="muted">Loading tests…</p></div>
         <div id="test-review-panel" class="assignment-item" hidden></div>
       </section>
@@ -1302,15 +1308,35 @@
       }
       async function loadTests(){
         testList.replaceChildren();testReviewPanel.hidden=true;
+        const searchTerm=(document.getElementById('test-search')?.value||'').trim().toLowerCase();
+        const statusFilter=document.getElementById('test-status-filter')?.value||'';
+        const insights=document.getElementById('test-insights');
+        if(insights)insights.replaceChildren();
         const {data,error}=await client.from('education_tests')
           .select('id,student_id,title,description,instructions,due_date,duration_minutes,attempt_limit,status,created_at,education_students(student_name)')
           .eq('user_id',currentUserId).order('created_at',{ascending:false});
         if(error){const p=document.createElement('p');p.className='error';p.textContent=error.message||'Could not load tests.';testList.append(p);return}
         if(!data?.length){const p=document.createElement('p');p.className='muted';p.textContent='No tests yet. Create your first test above.';testList.append(p);return}
-        for(const test of data){
+        const filteredTests=data.filter(test=>{
+          const studentName=test.education_students?.student_name||'';
+          const matchesText=!searchTerm||(test.title+' '+(test.description||'')+' '+studentName).toLowerCase().includes(searchTerm);
+          return matchesText&&(!statusFilter||test.status===statusFilter);
+        });
+        if(!filteredTests.length){const p=document.createElement('p');p.className='muted';p.textContent='No assessments match those filters.';testList.append(p);return}
+        let attemptCount=0,awaitingMarking=0,publishedCount=0;
+        const gradedPercentages=[];
+        for(const test of filteredTests){
           const {data:attempts,error:attemptError}=await client.from('education_test_attempts')
             .select('id,status,attempt_number,started_at,submitted_at,auto_score,total_score,points_possible,teacher_feedback')
             .eq('test_id',test.id).order('attempt_number',{ascending:true});
+          attemptCount+=(attempts||[]).length;
+          awaitingMarking+=(attempts||[]).filter(a=>a.status==='submitted').length;
+          if(test.status==='published')publishedCount++;
+          (attempts||[]).forEach(a=>{
+            if(a.status==='graded'&&a.total_score!==null&&Number(a.points_possible)>0){
+              gradedPercentages.push(Number(a.total_score)/Number(a.points_possible)*100);
+            }
+          });
           const article=document.createElement('article');article.className='assignment-item';
           const h=document.createElement('h3');h.textContent=test.title;
           const meta=document.createElement('p');meta.className='assignment-meta';
@@ -1381,7 +1407,25 @@
           });
           testList.append(article);
         }
+        if(insights){
+          const average=gradedPercentages.length?Math.round(gradedPercentages.reduce((sum,n)=>sum+n,0)/gradedPercentages.length)+'%':'—';
+          const metrics=[
+            ['Assessments',filteredTests.length+' shown'],
+            ['Published',publishedCount],
+            ['Attempts',attemptCount],
+            ['Awaiting marking',awaitingMarking],
+            ['Average graded score',average]
+          ];
+          metrics.forEach(([label,value])=>{
+            const box=document.createElement('div');box.className='assignment-item';
+            const strong=document.createElement('strong');strong.textContent=String(value);
+            const caption=document.createElement('p');caption.className='assignment-meta';caption.textContent=label;
+            box.append(strong,caption);insights.append(box);
+          });
+        }
       }
+      document.getElementById('test-search')?.addEventListener('input',()=>void loadTests());
+      document.getElementById('test-status-filter')?.addEventListener('change',()=>void loadTests());
       async function reviewTestAttempt(test,attempt){
         testReviewPanel.hidden=false;testReviewPanel.replaceChildren();
         const heading=document.createElement('h3');heading.textContent='Review: '+test.title+' · Attempt '+attempt.attempt_number;testReviewPanel.append(heading);
