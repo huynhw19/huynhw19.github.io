@@ -473,7 +473,7 @@
         <div class="weather-current" id="weather-current"></div>
         <h3>7-day forecast</h3>
         <div class="weather-days" id="weather-days"></div>
-        <p class="muted fine-print">Weather data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>. Current conditions are model-based estimates, not guaranteed live weather-station observations. Forecasts can differ from local meteorological services, especially in coastal and rapidly changing conditions.</p>
+        <p class="muted fine-print">Weather data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>. Current conditions are model-based estimates for the displayed valid time, not guaranteed live weather-station observations. Current rain and precipitation are recent 15-minute accumulations. Daily rain probability is the maximum probability during that day, not a guarantee of rain. Forecasts can differ from local meteorological services, especially in coastal, mountainous and rapidly changing conditions. Check your national weather service for warnings and safety-critical decisions.</p>
       </div>
     </section>
     <section class="quick-paths" aria-label="Choose your next step">
@@ -747,7 +747,7 @@
           const symbol = tempUnit === 'fahrenheit' ? '°F' : '°C';
           document.getElementById('weather-place').textContent = place.label || displayName(place) || 'Selected location';
           document.getElementById('weather-description').textContent = weatherText(current.weather_code);
-          document.getElementById('weather-local-time').textContent = 'Local time: ' + String(current.time || '').replace('T',' ') + ' · ' + (data.timezone || 'local timezone');
+          document.getElementById('weather-local-time').textContent = 'Model estimate valid at: ' + String(current.time || '').replace('T',' ') + ' · ' + (data.timezone || 'local timezone');
           document.getElementById('weather-temperature').textContent = formatNumber(current.temperature_2m, 1) + symbol;
 
           const windDirection = value => {
@@ -760,8 +760,8 @@
             ['Humidity', formatNumber(current.relative_humidity_2m) + '%'],
             ['Wind', formatNumber(current.wind_speed_10m, 1) + ' km/h ' + windDirection(current.wind_direction_10m)],
             ['Wind gusts', formatNumber(current.wind_gusts_10m, 1) + ' km/h'],
-            ['Rain now', formatNumber(current.rain, 1) + ' mm'],
-            ['Precipitation', formatNumber(current.precipitation, 1) + ' mm'],
+            ['Rain (last 15 min)', formatNumber(current.rain, 1) + ' mm'],
+            ['Precipitation (last 15 min)', formatNumber(current.precipitation, 1) + ' mm'],
             ['Cloud cover', formatNumber(current.cloud_cover) + '%']
           ];
           const currentContainer = document.getElementById('weather-current');
