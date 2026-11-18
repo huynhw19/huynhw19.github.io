@@ -655,17 +655,22 @@
       let activeSearchController = null;
 
       const weatherText = code => {
-        if (code === 0) return 'Clear sky';
-        if ([1,2,3].includes(code)) return 'Partly cloudy';
-        if ([45,48].includes(code)) return 'Fog';
-        if ([51,53,55,56,57].includes(code)) return 'Drizzle';
-        if ([61,63,65,66,67].includes(code)) return 'Rain';
-        if ([71,73,75,77].includes(code)) return 'Snow';
-        if ([80,81,82].includes(code)) return 'Rain showers';
-        if ([85,86].includes(code)) return 'Snow showers';
-        if ([95,96,99].includes(code)) return 'Thunderstorm';
-        return 'Weather conditions';
+        const descriptions = {
+          0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
+          45:'Fog', 48:'Depositing rime fog',
+          51:'Light drizzle', 53:'Moderate drizzle', 55:'Dense drizzle',
+          56:'Light freezing drizzle', 57:'Dense freezing drizzle',
+          61:'Slight rain', 63:'Moderate rain', 65:'Heavy rain',
+          66:'Light freezing rain', 67:'Heavy freezing rain',
+          71:'Slight snow fall', 73:'Moderate snow fall', 75:'Heavy snow fall', 77:'Snow grains',
+          80:'Slight rain showers', 81:'Moderate rain showers', 82:'Violent rain showers',
+          85:'Slight snow showers', 86:'Heavy snow showers',
+          95:'Thunderstorm', 96:'Thunderstorm with slight hail', 99:'Thunderstorm with heavy hail'
+        };
+        return descriptions[Number(code)] || 'Weather conditions unavailable';
       };
+      const formatNumber = value => Number.isFinite(Number(value)) && value !== null && value !== ''
+        ? String(Math.round(Number(value))) : '—';
       const showStatus = (message, error=false) => {
         status.textContent = message;
         status.className = error ? 'status error' : 'status';
@@ -743,12 +748,12 @@
           document.getElementById('weather-place').textContent = place.label || displayName(place) || 'Selected location';
           document.getElementById('weather-description').textContent = weatherText(current.weather_code);
           document.getElementById('weather-local-time').textContent = 'Local time: ' + String(current.time || '').replace('T',' ') + ' · ' + (data.timezone || 'local timezone');
-          document.getElementById('weather-temperature').textContent = Math.round(current.temperature_2m) + symbol;
+          document.getElementById('weather-temperature').textContent = formatNumber(current.temperature_2m) + symbol;
 
           const stats = [
-            ['Feels like', Math.round(current.apparent_temperature) + symbol],
-            ['Humidity', current.relative_humidity_2m + '%'],
-            ['Wind', Math.round(current.wind_speed_10m) + ' km/h']
+            ['Feels like', formatNumber(current.apparent_temperature) + symbol],
+            ['Humidity', formatNumber(current.relative_humidity_2m) + '%'],
+            ['Wind', formatNumber(current.wind_speed_10m) + ' km/h']
           ];
           const currentContainer = document.getElementById('weather-current');
           currentContainer.replaceChildren();
@@ -766,7 +771,8 @@
           const daysContainer = document.getElementById('weather-days');
           daysContainer.replaceChildren();
           data.daily.time.forEach((day,i) => {
-            const date = new Date(day + 'T12:00:00');
+            const [year, month, dateOfMonth] = day.split('-').map(Number);
+            const date = new Date(year, month - 1, dateOfMonth, 12);
             const label = date.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
             const rain = data.daily.precipitation_probability_max?.[i];
             const card = document.createElement('div');
@@ -776,7 +782,7 @@
             const description = document.createElement('span');
             description.textContent = weatherText(data.daily.weather_code?.[i]);
             const temperatures = document.createElement('strong');
-            temperatures.textContent = Math.round(data.daily.temperature_2m_max?.[i]) + '° / ' + Math.round(data.daily.temperature_2m_min?.[i]) + '°';
+            temperatures.textContent = formatNumber(data.daily.temperature_2m_max?.[i]) + symbol + ' / ' + formatNumber(data.daily.temperature_2m_min?.[i]) + symbol;
             const precipitation = document.createElement('span');
             precipitation.textContent = 'Rain: ' + (rain == null ? '—' : rain + '%');
             card.append(dateNode, description, temperatures, precipitation);
