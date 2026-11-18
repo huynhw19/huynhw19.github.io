@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f8f6">
+<title>Student Progress Centre — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#173329;--muted:#60736b;--line:#dce8e1;--paper:#fff;--bg:#f4f8f6;--green:#176b4b;--soft:#eaf5ef}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:1050px;margin:0 auto;padding:24px 16px 56px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+a{color:var(--green);font-weight:650}.hero{padding:26px;border-radius:18px;background:linear-gradient(125deg,#e5f5eb,#edf4ff);border:1px solid #d5e7dc}
+h1{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.12;margin:8px 0}.eyebrow{font-size:.78rem;letter-spacing:.12em;font-weight:800;color:var(--green)}.muted,.meta{color:var(--muted)}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px;min-width:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-top:16px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}.stat strong{display:block;font-size:1.65rem;line-height:1.25}.stat span{font-size:.9rem;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px}
+button,input,select{font:inherit}button{border:0;border-radius:9px;padding:10px 14px;background:var(--green);color:white;font-weight:650;cursor:pointer}button.secondary{background:#eaf1ed;color:var(--ink)}button:disabled{opacity:.55;cursor:not-allowed}
+input,select{width:100%;padding:11px;border:1px solid #cbd9d1;border-radius:9px;background:#fff;color:var(--ink)}label{display:block;font-weight:650;margin:10px 0 5px}
+form .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.goal,.lesson,.achievement,.history-item{padding:13px 0;border-top:1px solid var(--line)}.goal:first-child,.lesson:first-child,.achievement:first-child,.history-item:first-child{border-top:0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.progress-track{height:10px;background:#e9efeb;border-radius:99px;overflow:hidden;margin:9px 0}.progress-fill{height:100%;background:#269667;border-radius:99px}
+.pill{display:inline-block;padding:3px 9px;border-radius:99px;background:var(--soft);color:#176b4b;font-size:.82rem;font-weight:700}
+.status{min-height:1.5em}.error{color:#a32e2e}.empty{padding:12px 0;color:var(--muted)}
+#certificate{display:none}
+@media(max-width:520px){main{padding:16px 12px 40px}.hero{padding:20px}.panel{padding:15px}}
+@media print{body{background:white}main>*:not(#certificate){display:none!important}#certificate{display:block!important;margin:12vh auto 0;max-width:760px;padding:50px;border:8px double #176b4b;text-align:center;color:#173329}#certificate h1{font-size:2.8rem}#certificate .cert-name{font-size:1.6rem;font-weight:750;margin:32px 0}#certificate .cert-stats{margin:30px 0;font-size:1.1rem}#certificate .cert-date{margin-top:45px}}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><a href="student-dashboard.html">← Student dashboard</a><a href="dashboard.html">ConfigKit dashboard</a></div>
+<section class="hero">
+<div class="eyebrow">YOUR LEARNING JOURNEY</div>
+<h1>🎓 Student Progress Centre</h1>
+<p class="muted">Set goals, celebrate completed lessons, follow your quiz results and see the progress you are making.</p>
+<p id="status" class="status" role="status" aria-live="polite">Checking your sign in…</p>
+<div class="stats">
+<div class="stat"><strong id="stat-attempts">—</strong><span>Practice attempts</span></div>
+<div class="stat"><strong id="stat-correct">—</strong><span>Correct answers</span></div>
+<div class="stat"><strong id="stat-tests">—</strong><span>Tests submitted</span></div>
+<div class="stat"><strong id="stat-average">—</strong><span>Average graded test</span></div>
+<div class="stat"><strong id="stat-lessons">—</strong><span>Lessons completed</span></div>
+<div class="stat"><strong id="stat-assignments">—</strong><span>Published assignments</span></div>
+</div>
+</section>
+
+<div class="grid">
+<section class="panel">
+<h2>🎯 My learning goals</h2>
+<p class="muted">Choose a goal and track it using your learning activity. Goals are private to your account.</p>
+<form id="goal-form">
+<label for="goal-title">Goal</label><input id="goal-title" maxlength="120" required placeholder="e.g. Practise multiplication regularly">
+<div class="fields">
+<div><label for="goal-subject">Subject (optional)</label><input id="goal-subject" maxlength="80" placeholder="Mathematics"></div>
+<div><label for="goal-type">Track progress by</label><select id="goal-type"><option value="practice_attempts">Practice attempts</option><option value="correct_answers">Correct answers</option><option value="completed_tests">Tests submitted</option><option value="completed_lessons">Lessons completed</option></select></div>
+<div><label for="goal-target">Target</label><input id="goal-target" type="number" min="1" max="10000" value="10" required></div>
+<div><label for="goal-due">Target date (optional)</label><input id="goal-due" type="date"></div>
+</div>
+<p><button type="submit" id="goal-save">Add learning goal</button></p>
+</form>
+<p id="goal-status" class="meta" role="status" aria-live="polite"></p>
+<div id="goal-list"><p class="empty">Your goals will appear here.</p></div>
+</section>
+
+<section class="panel">
+<h2>📚 My published lessons</h2>
+<p class="muted">Mark a lesson complete when you have finished it. You can revisit your lesson plans from the Student Dashboard.</p>
+<div id="lesson-list"><p class="empty">Loading lessons…</p></div>
+</section>
+</div>
+
+<div class="grid">
+<section class="panel">
+<h2>📝 Quiz and test results</h2>
+<div id="test-list"><p class="empty">Loading your results…</p></div>
+</section>
+<section class="panel">
+<h2>⭐ Achievements</h2>
+<div id="achievement-list"><p class="empty">Loading achievements…</p></div>
+<button id="print-certificate" type="button" class="secondary">Print progress certificate</button>
+</section>
+</div>
+
+<section class="panel">
+<h2>📈 Recent practice</h2>
+<div id="practice-history"><p class="empty">Loading practice history…</p></div>
+</section>
+
+<section id="certificate" aria-label="Student progress certificate">
+<div class="eyebrow">CONFIGKIT EDUCATION</div>
+<h1>Certificate of Learning Progress</h1>
+<p>This certificate recognises the learning effort and progress of</p>
+<div class="cert-name" id="cert-name">Student</div>
+<p>for continuing to practise, learn and build new skills.</p>
+<div class="cert-stats" id="cert-stats"></div>
+<p id="cert-achievements"></p>
+<div class="cert-date" id="cert-date"></div>
+</section>
+</main>
+<script src="auth-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const status=$('status'),goalStatus=$('goal-status');
+const config=window.CONFIGKIT_AUTH||{};
+const setStatus=(message,error)=>{status.textContent=message;status.className=error?'status error':'status'};
+if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){setStatus('Authentication is not configured. Please contact the site owner.',true);return}
+const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let currentUser=null,lessons=[],lessonCompletions=[],goals=[],practiceRows=[],attemptRows=[],achievementRows=[];
+const fmtDate=value=>value?new Date(value+'T00:00:00').toLocaleDateString(): 'No target date';
+const safeText=value=>String(value??'');
+const node=(tag,text,className)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el};
+const goalLabels={practice_attempts:'Practice attempts',correct_answers:'Correct answers',completed_tests:'Tests submitted',completed_lessons:'Lessons completed'};
+function goalValue(type){
+if(type==='practice_attempts')return practiceRows.length;
+if(type==='correct_answers')return practiceRows.filter(x=>x.is_correct===true).length;
+if(type==='completed_tests')return attemptRows.filter(x=>x.submitted_at||['submitted','graded','completed'].includes(x.status)).length;
+if(type==='completed_lessons')return lessonCompletions.length;
+return 0;
+}
+function renderStats(){
+const completed=attemptRows.filter(x=>x.submitted_at||['submitted','graded','completed'].includes(x.status));
+const graded=completed.filter(x=>x.total_score!==null&&x.total_score!==undefined&&Number(x.points_possible)>0);
+const percent=graded.length?Math.round(graded.reduce((sum,x)=>sum+(Number(x.total_score)/Number(x.points_possible))*100,0)/graded.length):null;
+$('stat-attempts').textContent=practiceRows.length.toLocaleString();
+$('stat-correct').textContent=practiceRows.filter(x=>x.is_correct===true).length.toLocaleString();
+$('stat-tests').textContent=completed.length.toLocaleString();
+$('stat-average').textContent=percent===null?'—':percent+'%';
+$('stat-lessons').textContent=lessonCompletions.length.toLocaleString();
+$('stat-assignments').textContent=assignments.length.toLocaleString();
+}
+let assignments=[];
+function renderGoals(){
+const host=$('goal-list');host.replaceChildren();
+if(!goals.length){host.append(node('p','No learning goals yet. Add one above to get started.','empty'));return}
+goals.forEach(goal=>{
+const current=goalValue(goal.goal_type),target=Number(goal.target_value),pct=Math.min(100,Math.round(current/target*100));
+const wrap=node('article',undefined,'goal');
+const top=node('div',undefined,'row');
+const title=node('strong',goal.title);const badge=node('span',current>=target?'Goal reached!':'In progress','pill');top.append(title,badge);
+const detail=node('p',goalLabels[goal.goal_type]+' · '+current+' / '+target+(goal.subject?' · '+goal.subject:'')+(goal.due_date?' · Target date '+fmtDate(goal.due_date):''),'meta');
+const track=node('div',undefined,'progress-track');const fill=node('div',undefined,'progress-fill');fill.style.width=pct+'%';track.append(fill);
+const bottom=node('div',undefined,'row');bottom.append(node('span',pct+'% complete','meta'));
+const remove=node('button','Remove','secondary');remove.type='button';remove.addEventListener('click',()=>deleteGoal(goal.id,remove));bottom.append(remove);
+wrap.append(top,detail,track,bottom);host.append(wrap);
+});
+}
+async function deleteGoal(id,button){
+if(!confirm('Remove this learning goal?'))return;button.disabled=true;
+const {error}=await client.from('education_student_goals').delete().eq('id',id);
+if(error){button.disabled=false;goalStatus.textContent='Could not remove that goal. Please try again.';return}
+goals=goals.filter(x=>x.id!==id);renderGoals();goalStatus.textContent='Learning goal removed.';
+}
+function renderLessons(){
+const host=$('lesson-list');host.replaceChildren();
+if(!lessons.length){host.append(node('p','No published lessons are currently available.','empty'));return}
+const completedIds=new Set(lessonCompletions.map(x=>x.lesson_plan_id));
+lessons.forEach(lesson=>{
+const wrap=node('article',undefined,'lesson');const row=node('div',undefined,'row');
+const details=node('div');details.append(node('strong',lesson.title),node('p',(lesson.subject||'Subject not set')+' · '+(lesson.grade_level||'Level not set')+(lesson.duration_minutes?' · '+lesson.duration_minutes+' minutes':''),'meta'));
+const done=completedIds.has(lesson.id);const action=node('button',done?'✓ Completed':'Mark complete',done?'secondary':'');action.type='button';action.disabled=done;
+if(!done)action.addEventListener('click',()=>completeLesson(lesson.id,action));
+row.append(details,action);wrap.append(row);host.append(wrap);
+});
+}
+async function completeLesson(id,button){
+button.disabled=true;button.textContent='Saving…';
+const {data,error}=await client.from('education_student_lesson_progress').insert({student_user_id:currentUser.id,lesson_plan_id:id}).select('id,lesson_plan_id,completed_at').single();
+if(error){
+if(error.code==='23505'){button.textContent='✓ Completed';setStatus('This lesson is already marked complete.');await loadData();return}
+button.disabled=false;button.textContent='Mark complete';setStatus('Could not save lesson completion. Please try again.',true);return
+}
+lessonCompletions.unshift(data);renderLessons();renderStats();renderGoals();setStatus('Lesson marked complete. Great work!');
+}
+function renderTests(){
+const host=$('test-list');host.replaceChildren();
+if(!attemptRows.length){host.append(node('p','No submitted test attempts yet. Your results will appear here after you complete a quiz or test.','empty'));return}
+attemptRows.slice(0,20).forEach(item=>{
+const wrap=node('article',undefined,'history-item');
+const score=item.total_score===null||item.total_score===undefined?'Awaiting teacher marking':item.total_score+' / '+(item.points_possible??'?')+' points';
+wrap.append(node('strong','Test attempt '+item.attempt_number),node('p',(item.status||'in progress')+' · '+score,'meta'));
+if(item.submitted_at)wrap.append(node('p','Submitted '+new Date(item.submitted_at).toLocaleString(),'meta'));
+host.append(wrap);
+});
+}
+function renderAchievements(){
+const host=$('achievement-list');host.replaceChildren();
+if(!achievementRows.length){host.append(node('p','Your achievements will appear here as you earn them. Keep practising!','empty'));return}
+achievementRows.forEach(item=>{
+const wrap=node('article',undefined,'achievement');
+const label=safeText(item.achievement_key).replace(/[_-]+/g,' ').replace(/\b\w/g,ch=>ch.toUpperCase());
+wrap.append(node('strong','🏅 '+label),node('p','Earned '+new Date(item.earned_at).toLocaleDateString(),'meta'));host.append(wrap);
+});
+}
+function renderPractice(){
+const host=$('practice-history');host.replaceChildren();
+if(!practiceRows.length){host.append(node('p','No practice activity recorded yet. Try a mission in the Learning Zone on your Student Dashboard.','empty'));return}
+practiceRows.slice(0,12).forEach(item=>{
+const wrap=node('article',undefined,'history-item');
+wrap.append(node('strong',item.is_correct===true?'✓ Correct answer':'Practice completed'),node('p',new Date(item.completed_at).toLocaleString(),'meta'));host.append(wrap);
+});
+}
+async function loadData(){
+setStatus('Loading your learning progress…');
+const results=await Promise.all([
+client.from('education_student_goals').select('id,title,subject,goal_type,target_value,due_date,created_at').order('created_at',{ascending:false}),
+client.from('education_student_lesson_progress').select('id,lesson_plan_id,completed_at').order('completed_at',{ascending:false}),
+client.from('education_lesson_plans').select('id,title,subject,grade_level,duration_minutes,updated_at').eq('status','published').order('updated_at',{ascending:false}),
+client.from('education_assignments').select('id,title,due_date,status').eq('status','published').order('due_date',{ascending:true,nullsFirst:false}),
+client.from('education_test_attempts').select('id,test_id,attempt_number,status,submitted_at,total_score,points_possible').order('submitted_at',{ascending:false,nullsFirst:false}),
+client.from('education_learning_progress').select('id,game_id,is_correct,completed_at').order('completed_at',{ascending:false}).limit(500),
+client.from('user_achievements').select('achievement_key,earned_at').order('earned_at',{ascending:false}).limit(100)
+]);
+const [g,l,lp,a,t,p,ach]=results;
+goals=g.data||[];lessonCompletions=l.data||[];lessons=lp.data||[];assignments=a.data||[];attemptRows=t.data||[];practiceRows=p.data||[];achievementRows=ach.data||[];
+const errors=results.filter(x=>x.error);
+renderStats();renderGoals();renderLessons();renderTests();renderAchievements();renderPractice();
+if(errors.length)setStatus('Some progress sections could not be loaded. Refresh the page to try again.',true);
+else setStatus('Your progress is up to date. Keep going!');
+}
+$('goal-form').addEventListener('submit',async event=>{
+event.preventDefault();if(!currentUser)return;
+const button=$('goal-save');button.disabled=true;goalStatus.textContent='Saving your goal…';
+const row={student_user_id:currentUser.id,title:$('goal-title').value.trim(),subject:$('goal-subject').value.trim()||null,goal_type:$('goal-type').value,target_value:Number($('goal-target').value),due_date:$('goal-due').value||null};
+const {data,error}=await client.from('education_student_goals').insert(row).select('id,title,subject,goal_type,target_value,due_date,created_at').single();
+button.disabled=false;
+if(error){goalStatus.textContent='Could not save this goal. Please check the details and try again.';return}
+goals.unshift(data);$('goal-form').reset();$('goal-target').value='10';renderGoals();goalStatus.textContent='Your learning goal has been saved.';
+});
+$('print-certificate').addEventListener('click',()=>{
+$('cert-name').textContent=currentUser?.user_metadata?.display_name||'ConfigKit Student';
+$('cert-stats').textContent=practiceRows.length+' practice attempts · '+practiceRows.filter(x=>x.is_correct===true).length+' correct answers · '+lessonCompletions.length+' completed lessons · '+attemptRows.filter(x=>x.submitted_at).length+' tests submitted';
+$('cert-achievements').textContent=achievementRows.length?achievementRows.length+' achievement(s) earned':'Every learning step counts. Keep building your skills!';
+$('cert-date').textContent='Issued '+new Date().toLocaleDateString();
+window.print();
+});
+client.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace('student-login.html')});
+(async()=>{
+const {data,error}=await client.auth.getSession();
+if(error||!data.session){window.location.replace('student-login.html');return}
+currentUser=data.session.user;
+await loadData();
+})();
+})();
+</script>
+</body>
+</html>
