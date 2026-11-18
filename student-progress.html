@@ -111,6 +111,7 @@ if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient)
 const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let currentUser=null,lessons=[],lessonCompletions=[],goals=[],practiceRows=[],attemptRows=[],achievementRows=[];
 let practiceAttemptCount=0,correctAnswerCount=0,completedTestCount=0,completedLessonCount=0;
+let testTitleById=new Map();
 const fmtDate=value=>value?new Date(value+'T00:00:00').toLocaleDateString(): 'No target date';
 const safeText=value=>String(value??'');
 const node=(tag,text,className)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el};
@@ -182,7 +183,7 @@ if(!attemptRows.length){host.append(node('p','No submitted test attempts yet. Yo
 attemptRows.slice(0,20).forEach(item=>{
 const wrap=node('article',undefined,'history-item');
 const score=item.total_score===null||item.total_score===undefined?'Awaiting teacher marking':item.total_score+' / '+(item.points_possible??'?')+' points';
-wrap.append(node('strong','Test attempt '+item.attempt_number),node('p',(item.status||'in progress')+' · '+score,'meta'));
+wrap.append(node('strong',(testTitleById.get(item.test_id)||'Test')+' · Attempt '+item.attempt_number),node('p',(item.status||'in progress')+' · '+score,'meta'));
 if(item.submitted_at)wrap.append(node('p','Submitted '+new Date(item.submitted_at).toLocaleString(),'meta'));
 host.append(wrap);
 });
@@ -212,6 +213,7 @@ client.from('education_student_lesson_progress').select('id,lesson_plan_id,compl
 client.from('education_lesson_plans').select('id,title,subject,grade_level,duration_minutes,updated_at').eq('status','published').order('updated_at',{ascending:false}),
 client.from('education_assignments').select('id,title,due_date,status').eq('status','published').order('due_date',{ascending:true,nullsFirst:false}),
 client.from('education_test_attempts').select('id,test_id,attempt_number,status,submitted_at,total_score,points_possible').order('submitted_at',{ascending:false,nullsFirst:false}),
+client.from('education_tests').select('id,title').eq('status','published'),
 client.from('education_learning_progress').select('id,game_id,is_correct,completed_at').order('completed_at',{ascending:false}).limit(500),
 client.from('user_achievements').select('achievement_key,earned_at').order('earned_at',{ascending:false}).limit(100),
 client.from('education_learning_progress').select('id',{count:'exact',head:true}),
@@ -219,8 +221,9 @@ client.from('education_learning_progress').select('id',{count:'exact',head:true}
 client.from('education_test_attempts').select('id',{count:'exact',head:true}).not('submitted_at','is',null),
 client.from('education_student_lesson_progress').select('id',{count:'exact',head:true})
 ]);
-const [g,l,lp,a,t,p,ach,pc,cc,tc,lc]=results;
+const [g,l,lp,a,t,p,ach,et,pc,cc,tc,lc]=results;
 goals=g.data||[];lessonCompletions=l.data||[];lessons=lp.data||[];assignments=a.data||[];attemptRows=t.data||[];practiceRows=p.data||[];achievementRows=ach.data||[];
+testTitleById=new Map((et.data||[]).map(item=>[item.id,item.title]));
 practiceAttemptCount=pc.count||0;correctAnswerCount=cc.count||0;completedTestCount=tc.count||0;completedLessonCount=lc.count||0;
 const errors=results.filter(x=>x.error);
 renderStats();renderGoals();renderLessons();renderTests();renderAchievements();renderPractice();
