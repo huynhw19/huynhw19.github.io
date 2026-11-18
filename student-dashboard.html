@@ -54,6 +54,12 @@
         <div id="student-document-records"></div>
       </section>
 
+      <section id="student-lessons" class="card" aria-labelledby="student-lessons-title" hidden>
+        <h2 id="student-lessons-title">📚 My lesson plans</h2>
+        <p class="learning-meta">Lessons published by your linked teachers.</p>
+        <div id="student-lesson-records"></div>
+      </section>
+
       <section id="learning-zone" class="card learning-zone" aria-labelledby="learning-zone-title" hidden>
         <h2 id="learning-zone-title">🎮 Learning Zone</h2>
         <p>Explore 50,000 quick maths missions. Search by operation or question, choose your grade and difficulty, and build your skills one challenge at a time.</p>
@@ -491,6 +497,41 @@
             const body=document.createElement('div'); body.className='document-content'; body.textContent=doc.content || '';
             article.append(title,meta,body); documentRecords.append(article);
           });
+        }
+
+        const {data:publishedLessons,error:lessonsError} = await client.from('education_lesson_plans')
+          .select('id,user_id,student_id,title,subject,grade_level,duration_minutes,learning_objectives,materials,lesson_activities,assessment,updated_at')
+          .in('user_id',teacherIds).eq('status','published').order('updated_at',{ascending:false});
+        const lessonsPanel = document.getElementById('student-lessons');
+        const lessonRecords = document.getElementById('student-lesson-records');
+        lessonsPanel.hidden = false;
+        lessonRecords.replaceChildren();
+        if (lessonsError) {
+          const warning=document.createElement('p'); warning.className='error';
+          warning.textContent='Could not load your lesson plans. Please refresh or ask your teacher for help.';
+          lessonRecords.append(warning);
+        } else {
+          const visibleLessons=(publishedLessons||[]).filter(lesson=>!lesson.student_id||studentRecords.some(student=>student.id===lesson.student_id));
+          if (!visibleLessons.length) {
+            const empty=document.createElement('p'); empty.textContent='Your teachers have not published any lesson plans for you yet.';
+            lessonRecords.append(empty);
+          } else {
+            visibleLessons.forEach(lesson=>{
+              const article=document.createElement('article'); article.className='assignment';
+              const heading=document.createElement('h3'); heading.textContent=lesson.title;
+              const meta=document.createElement('p'); meta.className='assignment-meta';
+              meta.textContent=[lesson.subject||'Lesson',lesson.grade_level||'Learning level',lesson.duration_minutes+' minutes','Updated '+new Date(lesson.updated_at).toLocaleDateString()].join(' · ');
+              article.append(heading,meta);
+              [['Learning objectives',lesson.learning_objectives],['Materials and resources',lesson.materials],['Lesson activities',lesson.lesson_activities],['Assessment',lesson.assessment]].forEach(([label,value])=>{
+                if(!value)return;
+                const section=document.createElement('section'); section.className='record';
+                const title=document.createElement('h4'); title.textContent=label;
+                const body=document.createElement('div'); body.className='document-content'; body.textContent=value;
+                section.append(title,body); article.append(section);
+              });
+              lessonRecords.append(article);
+            });
+          }
         }
 
         const studentIds = studentRecords.map(student => student.id);
