@@ -1,0 +1,92 @@
+name: ConfigKit website smoke tests
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "23 18 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: configkit-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install browser test dependency
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+
+      - name: Test published ConfigKit pages
+        env:
+          SITE_URL: https://huynhw19.github.io
+        run: |
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+
+          const base = process.env.SITE_URL;
+          const pages = ['/', '/login.html', '/dashboard.html', '/forms.html', '/account-docs.html'];
+          const results = [];
+          const browser = await chromium.launch({ headless: true });
+
+          try {
+            for (const path of pages) {
+              const page = await browser.newPage();
+              const errors = [];
+              page.on('pageerror', error => errors.push('JavaScript: ' + error.message));
+              page.on('console', message => {
+                if (message.type() === 'error') errors.push('Console: ' + message.text());
+              });
+
+              let status = 0;
+              try {
+                const response = await page.goto(base + path, {
+                  waitUntil: 'domcontentloaded',
+                  timeout: 30000
+                });
+                status = response?.status() ?? 0;
+                await page.waitForTimeout(1500);
+              } catch (error) {
+                errors.push('Navigation: ' + error.message);
+              }
+
+              const passed = status >= 200 && status < 400 && errors.length === 0;
+              results.push({ path, status, passed, errors });
+              await page.close();
+            }
+          } finally {
+            await browser.close();
+          }
+
+          const lines = [
+            '# ConfigKit automated smoke test',
+            '',
+            '| Page | HTTP | Result | Details |',
+            '|---|---:|---|---|',
+            ...results.map(r => '| ' + r.path + ' | ' + r.status + ' | ' +
+              (r.passed ? 'PASS' : 'FAIL') + ' | ' +
+              (r.errors.length ? r.errors.join('; ').replaceAll('|', '\\|') : 'No browser errors observed') + ' |'),
+            '',
+            'This test does not sign in, submit forms, change data, or save screenshots.',
+            'A passing result confirms page navigation and absence of captured browser JavaScript/console errors; it is not a complete functional test.'
+          ];
+          const report = lines.join('\n');
+          console.log(report);
+          await import('node:fs/promises').then(fs => fs.appendFile(process.env.GITHUB_STEP_SUMMARY, report + '\n'));
+          if (results.some(r => !r.passed)) process.exit(1);
+          NODE
