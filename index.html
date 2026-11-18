@@ -747,7 +747,7 @@
           let currentSource = 'Open-Meteo model estimate';
           let currentValidTime = String(current.time || '').replace('T',' ') + ' · ' + (data.timezone || 'local timezone');
           let bomObservation = null;
-          const nearMelbourneOlympicPark = String(place.country_code || '').toUpperCase() === 'AU' &&
+          const nearMelbourneOlympicPark =
             Math.abs(Number(place.latitude) - (-37.8)) < 0.35 &&
             Math.abs(Number(place.longitude) - 145.0) < 0.45;
           if (nearMelbourneOlympicPark) {
@@ -782,7 +782,7 @@
           }
           const symbol = tempUnit === 'fahrenheit' ? '°F' : '°C';
           const displayTemperature = value => value == null || !Number.isFinite(Number(value))
-            ? '—' : formatNumber(tempUnit === 'fahrenheit' ? Number(value) * 9 / 5 + 32 : value, 1);
+            ? '—' : formatNumber(tempUnit === 'fahrenheit' && bomObservation ? Number(value) * 9 / 5 + 32 : value, 1);
           document.getElementById('weather-place').textContent = place.label || displayName(place) || 'Selected location';
           document.getElementById('weather-description').textContent = bomObservation
             ? (bomObservation.weather && bomObservation.weather !== '-' ? bomObservation.weather : 'Latest station observation')
