@@ -669,8 +669,8 @@
         };
         return descriptions[Number(code)] || 'Weather conditions unavailable';
       };
-      const formatNumber = value => Number.isFinite(Number(value)) && value !== null && value !== ''
-        ? String(Math.round(Number(value))) : '—';
+      const formatNumber = (value, decimals=0) => Number.isFinite(Number(value)) && value !== null && value !== ''
+        ? Number(value).toFixed(decimals) : '—';
       const showStatus = (message, error=false) => {
         status.textContent = message;
         status.className = error ? 'status error' : 'status';
@@ -748,12 +748,12 @@
           document.getElementById('weather-place').textContent = place.label || displayName(place) || 'Selected location';
           document.getElementById('weather-description').textContent = weatherText(current.weather_code);
           document.getElementById('weather-local-time').textContent = 'Local time: ' + String(current.time || '').replace('T',' ') + ' · ' + (data.timezone || 'local timezone');
-          document.getElementById('weather-temperature').textContent = formatNumber(current.temperature_2m) + symbol;
+          document.getElementById('weather-temperature').textContent = formatNumber(current.temperature_2m, 1) + symbol;
 
           const stats = [
-            ['Feels like', formatNumber(current.apparent_temperature) + symbol],
+            ['Feels like', formatNumber(current.apparent_temperature, 1) + symbol],
             ['Humidity', formatNumber(current.relative_humidity_2m) + '%'],
-            ['Wind', formatNumber(current.wind_speed_10m) + ' km/h']
+            ['Wind', formatNumber(current.wind_speed_10m, 1) + ' km/h']
           ];
           const currentContainer = document.getElementById('weather-current');
           currentContainer.replaceChildren();
@@ -782,7 +782,7 @@
             const description = document.createElement('span');
             description.textContent = weatherText(data.daily.weather_code?.[i]);
             const temperatures = document.createElement('strong');
-            temperatures.textContent = formatNumber(data.daily.temperature_2m_max?.[i]) + symbol + ' / ' + formatNumber(data.daily.temperature_2m_min?.[i]) + symbol;
+            temperatures.textContent = formatNumber(data.daily.temperature_2m_max?.[i], 1) + symbol + ' / ' + formatNumber(data.daily.temperature_2m_min?.[i], 1) + symbol;
             const precipitation = document.createElement('span');
             precipitation.textContent = 'Rain: ' + (rain == null ? '—' : rain + '%');
             card.append(dateNode, description, temperatures, precipitation);
