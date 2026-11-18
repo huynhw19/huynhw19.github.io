@@ -672,18 +672,44 @@
       };
       const displayName = place => [place.name, place.admin1, place.country].filter((v,i,a) => v && a.indexOf(v) === i).join(', ');
 
-      async function fetchJson(url, controller, timeoutMs=15000) {
-        const timer = setTimeout(() => controller.abort(), timeoutMs);
-        try {
-          const response = await fetch(url, {signal:controller.signal, headers:{Accept:'application/json'}});
-          const data = await response.json().catch(() => ({}));
-          if (!response.ok || data.error) {
-            throw new Error(data.reason || data.message || 'Weather service returned an error (' + response.status + ').');
+      async function fetchJson(url, parentController, timeoutMs=30000) {
+        let lastError;
+        for (let attempt = 0; attempt < 2; attempt++) {
+          if (parentController.signal.aborted) throw new DOMException('Request cancelled', 'AbortError');
+          const requestController = new AbortController();
+          const abortFromParent = () => requestController.abort();
+          parentController.signal.addEventListener('abort', abortFromParent, {once:true});
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            requestController.abort();
+          }, timeoutMs);
+          try {
+            const response = await fetch(url, {
+              signal:requestController.signal,
+              headers:{Accept:'application/json'},
+              cache:'no-store'
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || data.error) {
+              throw new Error(data.reason || data.message || 'Weather service returned an error (' + response.status + ').');
+            }
+            return data;
+          } catch (error) {
+            if (parentController.signal.aborted) throw new DOMException('Request cancelled', 'AbortError');
+            lastError = error;
+            const transient = timedOut || error instanceof TypeError || error.name === 'AbortError';
+            if (!transient || attempt === 1) {
+              if (timedOut) throw new Error('The weather service took too long to respond twice. Please try again in a moment.');
+              throw error;
+            }
+            await new Promise(resolve => setTimeout(resolve, 700));
+          } finally {
+            clearTimeout(timer);
+            parentController.signal.removeEventListener('abort', abortFromParent);
           }
-          return data;
-        } finally {
-          clearTimeout(timer);
         }
+        throw lastError || new Error('Could not load weather. Please try again.');
       }
 
       async function loadWeather(place) {
@@ -761,7 +787,7 @@
         } catch (error) {
           if (id !== requestNumber) return;
           const message = error.name === 'AbortError'
-            ? 'The weather request timed out. Check your connection and try again.'
+            ? 'Weather loading was cancelled because a newer request started. Please wait for the latest result.'
             : (error.message || 'Could not load weather. Please try again.');
           showStatus(message, true);
         } finally {
