@@ -88,17 +88,30 @@ const allResults=()=>[
  ...pages.map(p=>({...p,id:'page-'+p.href,source:'page'})),
  ...dbRows.map(r=>({...r,kind:typeName(r.category),filter:filterForDb(r.category),source:'database'}))
 ];
+function matchesLocalQuery(text,query){
+ const groups=[[]];
+ const tokens=String(query).match(/-?"[^"]+"|-?\\S+/g)||[];
+ for(const token of tokens){
+   if(token.toLocaleUpperCase()==='OR'){if(groups[groups.length-1].length)groups.push([]);continue;}
+   const excluded=token.startsWith('-');
+   let term=token.slice(excluded?1:0);
+   if(term.startsWith('"')&&term.endsWith('"'))term=term.slice(1,-1);
+   if(term)groups[groups.length-1].push({term:term.toLocaleLowerCase(),excluded});
+ }
+ const hay=String(text||'').toLocaleLowerCase();
+ return groups.some(group=>{
+   if(!group.length)return false;
+   const required=group.filter(item=>!item.excluded);
+   const blocked=group.filter(item=>item.excluded);
+   return required.every(item=>hay.includes(item.term))&&blocked.every(item=>!hay.includes(item.term));
+ });
+}
 function render(){
- const q=lastQuery.trim().toLocaleLowerCase();
+ const q=lastQuery.trim();
  const matches=allResults().filter(r=>{
    const inFilter=activeFilter==='all'||r.filter===activeFilter;
-   const hay=[r.title,r.description,r.keywords,r.kind].join(' ').toLocaleLowerCase();
-   return inFilter&&(!q||r.source==='database'||q.split(/\s+/).every(term=>hay.includes(term)));
- }).filter(r=>{
-   if(r.source==='database'&&q)return true;
-   if(!q)return true;
-   const hay=[r.title,r.description,r.keywords].join(' ').toLocaleLowerCase();
-   return q.split(/\s+/).every(term=>hay.includes(term));
+   const hay=[r.title,r.description,r.keywords,r.kind].join(' ');
+   return inFilter&&(!q||(r.source==='database'?true:matchesLocalQuery(hay,q)));
  });
  // Database rows have already been ranked and matched by PostgreSQL; preserve their order.
  const ordered=q?[...matches.filter(x=>x.source==='database'),...matches.filter(x=>x.source==='page')]:matches;
