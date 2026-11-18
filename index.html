@@ -650,6 +650,10 @@
       const geoButton = document.getElementById('weather-geolocate');
       let selectedPlace = null;
       let requestNumber = 0;
+      let searchNumber = 0;
+      let activeWeatherController = null;
+      let activeSearchController = null;
+
       const weatherText = code => {
         if (code === 0) return 'Clear sky';
         if ([1,2,3].includes(code)) return 'Partly cloudy';
@@ -667,69 +671,130 @@
         status.className = error ? 'status error' : 'status';
       };
       const displayName = place => [place.name, place.admin1, place.country].filter((v,i,a) => v && a.indexOf(v) === i).join(', ');
+
+      async function fetchJson(url, controller, timeoutMs=15000) {
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const response = await fetch(url, {signal:controller.signal, headers:{Accept:'application/json'}});
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok || data.error) {
+            throw new Error(data.reason || data.message || 'Weather service returned an error (' + response.status + ').');
+          }
+          return data;
+        } finally {
+          clearTimeout(timer);
+        }
+      }
+
       async function loadWeather(place) {
         const id = ++requestNumber;
+        if (activeWeatherController) activeWeatherController.abort();
+        const controller = new AbortController();
+        activeWeatherController = controller;
         selectedPlace = place;
         output.hidden = true;
         showStatus('Loading weather…');
         const tempUnit = units.value;
         const url = new URL('https://api.open-meteo.com/v1/forecast');
         url.search = new URLSearchParams({
-          latitude: place.latitude, longitude: place.longitude,
+          latitude: String(place.latitude), longitude: String(place.longitude),
           current: 'temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code',
           daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
           forecast_days: '7', timezone: 'auto', temperature_unit: tempUnit,
           wind_speed_unit: 'kmh'
         }).toString();
         try {
-          const response = await fetch(url);
-          if (!response.ok) throw new Error('Weather service returned an error (' + response.status + ').');
-          const data = await response.json();
+          if (!Number.isFinite(Number(place.latitude)) || !Number.isFinite(Number(place.longitude))) {
+            throw new Error('This location did not include valid coordinates. Please choose another result.');
+          }
+          const data = await fetchJson(url, controller);
           if (id !== requestNumber) return;
+          if (!data.current || !data.daily || !Array.isArray(data.daily.time)) {
+            throw new Error('The weather provider returned incomplete data. Please try again.');
+          }
           const current = data.current;
           const symbol = tempUnit === 'fahrenheit' ? '°F' : '°C';
-          document.getElementById('weather-place').textContent = place.label || displayName(place);
+          document.getElementById('weather-place').textContent = place.label || displayName(place) || 'Selected location';
           document.getElementById('weather-description').textContent = weatherText(current.weather_code);
-          document.getElementById('weather-local-time').textContent = 'Local time: ' + current.time.replace('T',' ') + ' · ' + (data.timezone || 'local timezone');
+          document.getElementById('weather-local-time').textContent = 'Local time: ' + String(current.time || '').replace('T',' ') + ' · ' + (data.timezone || 'local timezone');
           document.getElementById('weather-temperature').textContent = Math.round(current.temperature_2m) + symbol;
+
           const stats = [
             ['Feels like', Math.round(current.apparent_temperature) + symbol],
             ['Humidity', current.relative_humidity_2m + '%'],
             ['Wind', Math.round(current.wind_speed_10m) + ' km/h']
           ];
-          document.getElementById('weather-current').innerHTML = stats.map(item => '<div class="weather-stat"><span>' + item[0] + '</span><strong>' + item[1] + '</strong></div>').join('');
-          document.getElementById('weather-days').innerHTML = data.daily.time.map((day,i) => {
+          const currentContainer = document.getElementById('weather-current');
+          currentContainer.replaceChildren();
+          stats.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'weather-stat';
+            const label = document.createElement('span');
+            label.textContent = item[0];
+            const value = document.createElement('strong');
+            value.textContent = item[1];
+            card.append(label, value);
+            currentContainer.append(card);
+          });
+
+          const daysContainer = document.getElementById('weather-days');
+          daysContainer.replaceChildren();
+          data.daily.time.forEach((day,i) => {
             const date = new Date(day + 'T12:00:00');
             const label = date.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
-            const rain = data.daily.precipitation_probability_max[i];
-            return '<div class="weather-day"><strong>' + label + '</strong><span>' + weatherText(data.daily.weather_code[i]) + '</span><strong>' + Math.round(data.daily.temperature_2m_max[i]) + '° / ' + Math.round(data.daily.temperature_2m_min[i]) + '°</strong><span>Rain: ' + (rain == null ? '—' : rain + '%') + '</span></div>';
-          }).join('');
+            const rain = data.daily.precipitation_probability_max?.[i];
+            const card = document.createElement('div');
+            card.className = 'weather-day';
+            const dateNode = document.createElement('strong');
+            dateNode.textContent = label;
+            const description = document.createElement('span');
+            description.textContent = weatherText(data.daily.weather_code?.[i]);
+            const temperatures = document.createElement('strong');
+            temperatures.textContent = Math.round(data.daily.temperature_2m_max?.[i]) + '° / ' + Math.round(data.daily.temperature_2m_min?.[i]) + '°';
+            const precipitation = document.createElement('span');
+            precipitation.textContent = 'Rain: ' + (rain == null ? '—' : rain + '%');
+            card.append(dateNode, description, temperatures, precipitation);
+            daysContainer.append(card);
+          });
           output.hidden = false;
           showStatus('Weather updated successfully.');
         } catch (error) {
-          if (id === requestNumber) showStatus(error.message || 'Could not load weather. Please try again.', true);
+          if (id !== requestNumber) return;
+          const message = error.name === 'AbortError'
+            ? 'The weather request timed out. Check your connection and try again.'
+            : (error.message || 'Could not load weather. Please try again.');
+          showStatus(message, true);
+        } finally {
+          if (id === requestNumber) activeWeatherController = null;
         }
       }
+
       form.addEventListener('submit', async event => {
         event.preventDefault();
         const term = query.value.trim();
         if (!term) return;
+        const id = ++searchNumber;
+        if (activeSearchController) activeSearchController.abort();
+        const controller = new AbortController();
+        activeSearchController = controller;
         searchButton.disabled = true;
         results.replaceChildren();
         showStatus('Searching worldwide locations…');
         try {
           const url = new URL('https://geocoding-api.open-meteo.com/v1/search');
           url.search = new URLSearchParams({name:term,count:'10',language:'en',format:'json'}).toString();
-          const response = await fetch(url);
-          if (!response.ok) throw new Error('Location search is temporarily unavailable.');
-          const data = await response.json();
-          if (!data.results?.length) { showStatus('No matching locations found. Try another city or include the country.', true); return; }
+          const data = await fetchJson(url, controller, 12000);
+          if (id !== searchNumber) return;
+          if (!Array.isArray(data.results) || !data.results.length) {
+            showStatus('No matching locations found. Try another city or include the country.', true);
+            return;
+          }
           showStatus('Choose the correct location:');
           data.results.forEach(place => {
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'weather-result';
-            button.textContent = displayName(place) + (place.feature_code ? ' · ' + place.feature_code : '');
+            button.textContent = displayName(place) || 'Unnamed location';
             button.addEventListener('click', () => {
               query.value = displayName(place);
               results.replaceChildren();
@@ -737,16 +802,31 @@
             });
             results.append(button);
           });
-        } catch (error) { showStatus(error.message || 'Location search failed.', true); }
-        finally { searchButton.disabled = false; }
+        } catch (error) {
+          if (id !== searchNumber) return;
+          showStatus(error.name === 'AbortError' ? 'Location search timed out. Please try again.' : (error.message || 'Location search failed.'), true);
+        } finally {
+          if (id === searchNumber) {
+            searchButton.disabled = false;
+            activeSearchController = null;
+          }
+        }
       });
+
       geoButton.addEventListener('click', () => {
-        if (!navigator.geolocation) { showStatus('Your browser does not support location access. Search for a city instead.', true); return; }
+        if (!navigator.geolocation) {
+          showStatus('Your browser does not support location access. Search for a city instead.', true);
+          return;
+        }
         geoButton.disabled = true;
         showStatus('Waiting for your permission to access device location…');
         navigator.geolocation.getCurrentPosition(position => {
           geoButton.disabled = false;
-          const coords = {latitude:position.coords.latitude,longitude:position.coords.longitude,label:'Your current location (' + position.coords.latitude.toFixed(3) + ', ' + position.coords.longitude.toFixed(3) + ')'};
+          const coords = {
+            latitude:position.coords.latitude,
+            longitude:position.coords.longitude,
+            label:'Your current location (' + position.coords.latitude.toFixed(3) + ', ' + position.coords.longitude.toFixed(3) + ')'
+          };
           loadWeather(coords);
         }, error => {
           geoButton.disabled = false;
@@ -754,7 +834,10 @@
           showStatus(message, true);
         }, {enableHighAccuracy:false,timeout:12000,maximumAge:300000});
       });
-      units.addEventListener('change', () => { if (selectedPlace) loadWeather(selectedPlace); });
+
+      units.addEventListener('change', () => {
+        if (selectedPlace) loadWeather(selectedPlace);
+      });
     })();
 
     const translations = {
