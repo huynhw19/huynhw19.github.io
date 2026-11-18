@@ -395,7 +395,7 @@ window.CONFIGKIT_AUTH = {
               const {data: assurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
               if (assurance?.currentLevel === 'aal2') return;
               const currentPage = window.location.pathname.split('/').pop();
-              const destination = ['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','community-games.html','video-studio.html','universal-search.html','profile-library.html','notes.html','tasks.html','contacts.html','backup-restore.html','forms.html','roadmap.html'].includes(currentPage) ? currentPage : 'dashboard.html';
+              const destination = ['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','community-games.html','video-studio.html','universal-search.html','profile-library.html','notes.html','tasks.html','contacts.html','invoices.html','backup-restore.html','forms.html','roadmap.html'].includes(currentPage) ? currentPage : 'dashboard.html';
               window.location.replace('login.html?next=' + encodeURIComponent(destination));
             } catch (_) {
               // RLS still denies protected data if verification is missing.
