@@ -473,7 +473,7 @@
         <div class="weather-current" id="weather-current"></div>
         <h3>7-day forecast</h3>
         <div class="weather-days" id="weather-days"></div>
-        <p class="muted fine-print">Weather data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>. Forecast availability and place coverage depend on the data provider.</p>
+        <p class="muted fine-print">Weather data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>. Current conditions are model-based estimates, not guaranteed live weather-station observations. Forecasts can differ from local meteorological services, especially in coastal and rapidly changing conditions.</p>
       </div>
     </section>
     <section class="quick-paths" aria-label="Choose your next step">
@@ -729,8 +729,8 @@
         const url = new URL('https://api.open-meteo.com/v1/forecast');
         url.search = new URLSearchParams({
           latitude: String(place.latitude), longitude: String(place.longitude),
-          current: 'temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code',
-          daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+          current: 'temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation,rain,cloud_cover,is_day,weather_code',
+          daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,uv_index_max',
           forecast_days: '7', timezone: 'auto', temperature_unit: tempUnit,
           wind_speed_unit: 'kmh'
         }).toString();
@@ -750,10 +750,19 @@
           document.getElementById('weather-local-time').textContent = 'Local time: ' + String(current.time || '').replace('T',' ') + ' · ' + (data.timezone || 'local timezone');
           document.getElementById('weather-temperature').textContent = formatNumber(current.temperature_2m, 1) + symbol;
 
+          const windDirection = value => {
+            if (value == null || !Number.isFinite(Number(value))) return '—';
+            const directions = ['N','NE','E','SE','S','SW','W','NW'];
+            return directions[Math.round(Number(value) / 45) % 8];
+          };
           const stats = [
             ['Feels like', formatNumber(current.apparent_temperature, 1) + symbol],
             ['Humidity', formatNumber(current.relative_humidity_2m) + '%'],
-            ['Wind', formatNumber(current.wind_speed_10m, 1) + ' km/h']
+            ['Wind', formatNumber(current.wind_speed_10m, 1) + ' km/h ' + windDirection(current.wind_direction_10m)],
+            ['Wind gusts', formatNumber(current.wind_gusts_10m, 1) + ' km/h'],
+            ['Rain now', formatNumber(current.rain, 1) + ' mm'],
+            ['Precipitation', formatNumber(current.precipitation, 1) + ' mm'],
+            ['Cloud cover', formatNumber(current.cloud_cover) + '%']
           ];
           const currentContainer = document.getElementById('weather-current');
           currentContainer.replaceChildren();
@@ -775,6 +784,9 @@
             const date = new Date(year, month - 1, dateOfMonth, 12);
             const label = date.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
             const rain = data.daily.precipitation_probability_max?.[i];
+            const rainfall = data.daily.precipitation_sum?.[i];
+            const maxWind = data.daily.wind_speed_10m_max?.[i];
+            const uv = data.daily.uv_index_max?.[i];
             const card = document.createElement('div');
             card.className = 'weather-day';
             const dateNode = document.createElement('strong');
@@ -784,7 +796,10 @@
             const temperatures = document.createElement('strong');
             temperatures.textContent = formatNumber(data.daily.temperature_2m_max?.[i], 1) + symbol + ' / ' + formatNumber(data.daily.temperature_2m_min?.[i], 1) + symbol;
             const precipitation = document.createElement('span');
-            precipitation.textContent = 'Rain: ' + (rain == null ? '—' : rain + '%');
+            precipitation.textContent = 'Rain chance: ' + (rain == null ? '—' : rain + '%') +
+              ' · Rainfall: ' + (rainfall == null ? '—' : formatNumber(rainfall, 1) + ' mm') +
+              ' · Wind: ' + (maxWind == null ? '—' : formatNumber(maxWind, 1) + ' km/h') +
+              ' · UV: ' + (uv == null ? '—' : formatNumber(uv, 1));
             card.append(dateNode, description, temperatures, precipitation);
             daysContainer.append(card);
           });
