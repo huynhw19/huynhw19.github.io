@@ -110,24 +110,25 @@ const setStatus=(message,error)=>{status.textContent=message;status.className=er
 if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){setStatus('Authentication is not configured. Please contact the site owner.',true);return}
 const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let currentUser=null,lessons=[],lessonCompletions=[],goals=[],practiceRows=[],attemptRows=[],achievementRows=[];
+let practiceAttemptCount=0,correctAnswerCount=0,completedTestCount=0,completedLessonCount=0;
 const fmtDate=value=>value?new Date(value+'T00:00:00').toLocaleDateString(): 'No target date';
 const safeText=value=>String(value??'');
 const node=(tag,text,className)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el};
 const goalLabels={practice_attempts:'Practice attempts',correct_answers:'Correct answers',completed_tests:'Tests submitted',completed_lessons:'Lessons completed'};
 function goalValue(type){
-if(type==='practice_attempts')return practiceRows.length;
-if(type==='correct_answers')return practiceRows.filter(x=>x.is_correct===true).length;
-if(type==='completed_tests')return attemptRows.filter(x=>x.submitted_at||['submitted','graded','completed'].includes(x.status)).length;
-if(type==='completed_lessons')return lessonCompletions.length;
+if(type==='practice_attempts')return practiceAttemptCount;
+if(type==='correct_answers')return correctAnswerCount;
+if(type==='completed_tests')return completedTestCount;
+if(type==='completed_lessons')return completedLessonCount;
 return 0;
 }
 function renderStats(){
 const completed=attemptRows.filter(x=>x.submitted_at||['submitted','graded','completed'].includes(x.status));
 const graded=completed.filter(x=>x.total_score!==null&&x.total_score!==undefined&&Number(x.points_possible)>0);
 const percent=graded.length?Math.round(graded.reduce((sum,x)=>sum+(Number(x.total_score)/Number(x.points_possible))*100,0)/graded.length):null;
-$('stat-attempts').textContent=practiceRows.length.toLocaleString();
-$('stat-correct').textContent=practiceRows.filter(x=>x.is_correct===true).length.toLocaleString();
-$('stat-tests').textContent=completed.length.toLocaleString();
+$('stat-attempts').textContent=practiceAttemptCount.toLocaleString();
+$('stat-correct').textContent=correctAnswerCount.toLocaleString();
+$('stat-tests').textContent=completedTestCount.toLocaleString();
 $('stat-average').textContent=percent===null?'—':percent+'%';
 $('stat-lessons').textContent=lessonCompletions.length.toLocaleString();
 $('stat-assignments').textContent=assignments.length.toLocaleString();
@@ -212,10 +213,15 @@ client.from('education_lesson_plans').select('id,title,subject,grade_level,durat
 client.from('education_assignments').select('id,title,due_date,status').eq('status','published').order('due_date',{ascending:true,nullsFirst:false}),
 client.from('education_test_attempts').select('id,test_id,attempt_number,status,submitted_at,total_score,points_possible').order('submitted_at',{ascending:false,nullsFirst:false}),
 client.from('education_learning_progress').select('id,game_id,is_correct,completed_at').order('completed_at',{ascending:false}).limit(500),
-client.from('user_achievements').select('achievement_key,earned_at').order('earned_at',{ascending:false}).limit(100)
+client.from('user_achievements').select('achievement_key,earned_at').order('earned_at',{ascending:false}).limit(100),
+client.from('education_learning_progress').select('id',{count:'exact',head:true}),
+client.from('education_learning_progress').select('id',{count:'exact',head:true}).eq('is_correct',true),
+client.from('education_test_attempts').select('id',{count:'exact',head:true}).not('submitted_at','is',null),
+client.from('education_student_lesson_progress').select('id',{count:'exact',head:true})
 ]);
-const [g,l,lp,a,t,p,ach]=results;
+const [g,l,lp,a,t,p,ach,pc,cc,tc,lc]=results;
 goals=g.data||[];lessonCompletions=l.data||[];lessons=lp.data||[];assignments=a.data||[];attemptRows=t.data||[];practiceRows=p.data||[];achievementRows=ach.data||[];
+practiceAttemptCount=pc.count||0;correctAnswerCount=cc.count||0;completedTestCount=tc.count||0;completedLessonCount=lc.count||0;
 const errors=results.filter(x=>x.error);
 renderStats();renderGoals();renderLessons();renderTests();renderAchievements();renderPractice();
 if(errors.length)setStatus('Some progress sections could not be loaded. Refresh the page to try again.',true);
@@ -232,7 +238,7 @@ goals.unshift(data);$('goal-form').reset();$('goal-target').value='10';renderGoa
 });
 $('print-certificate').addEventListener('click',()=>{
 $('cert-name').textContent=currentUser?.user_metadata?.display_name||'ConfigKit Student';
-$('cert-stats').textContent=practiceRows.length+' practice attempts · '+practiceRows.filter(x=>x.is_correct===true).length+' correct answers · '+lessonCompletions.length+' completed lessons · '+attemptRows.filter(x=>x.submitted_at).length+' tests submitted';
+$('cert-stats').textContent=practiceAttemptCount+' practice attempts · '+correctAnswerCount+' correct answers · '+completedLessonCount+' completed lessons · '+completedTestCount+' tests submitted';
 $('cert-achievements').textContent=achievementRows.length?achievementRows.length+' achievement(s) earned':'Every learning step counts. Keep building your skills!';
 $('cert-date').textContent='Issued '+new Date().toLocaleDateString();
 window.print();
