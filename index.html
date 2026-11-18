@@ -473,7 +473,7 @@
         <div class="weather-current" id="weather-current"></div>
         <h3>7-day forecast</h3>
         <div class="weather-days" id="weather-days"></div>
-        <p class="muted fine-print">Weather data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>. Current conditions are model-based estimates for the displayed valid time, not guaranteed live weather-station observations. Current rain and precipitation are recent 15-minute accumulations. Daily rain probability is the maximum probability during that day, not a guarantee of rain. Forecasts can differ from local meteorological services, especially in coastal, mountainous and rapidly changing conditions. Check your national weather service for warnings and safety-critical decisions.</p>
+        <p class="muted fine-print">Melbourne current conditions use the latest available <a href="https://www.bom.gov.au/products/IDV60901/IDV60901.95936.shtml" target="_blank" rel="noopener noreferrer">Bureau of Meteorology (BOM) Melbourne Olympic Park observations</a> where available. Other locations use Open-Meteo model estimates. The 7-day forecast is provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>. BOM observations are station readings and may differ across suburbs; rainfall is since 9 am. Forecasts can differ from local conditions. Check official warnings for safety-critical decisions.</p>
       </div>
     </section>
     <section class="quick-paths" aria-label="Choose your next step">
@@ -743,26 +743,69 @@
           if (!data.current || !data.daily || !Array.isArray(data.daily.time)) {
             throw new Error('The weather provider returned incomplete data. Please try again.');
           }
-          const current = data.current;
+          let current = data.current;
+          let currentSource = 'Open-Meteo model estimate';
+          let currentValidTime = String(current.time || '').replace('T',' ') + ' · ' + (data.timezone || 'local timezone');
+          let bomObservation = null;
+          const nearMelbourneOlympicPark = String(place.country_code || '').toUpperCase() === 'AU' &&
+            Math.abs(Number(place.latitude) - (-37.8)) < 0.35 &&
+            Math.abs(Number(place.longitude) - 145.0) < 0.45;
+          if (nearMelbourneOlympicPark) {
+            try {
+              const bomUrl = 'https://www.bom.gov.au/fwo/IDV60901/IDV60901.95936.json';
+              const bomData = await fetchJson(bomUrl, controller, 12000);
+              const rows = bomData?.observations?.data;
+              if (Array.isArray(rows) && rows.length) {
+                const station = rows.find(row => row.air_temp !== null && row.air_temp !== '-' && Number.isFinite(Number(row.air_temp)));
+                if (station) {
+                  bomObservation = station;
+                  current = {
+                    temperature_2m: Number(station.air_temp),
+                    apparent_temperature: station.apparent_t == null || station.apparent_t === '-' ? null : Number(station.apparent_t),
+                    relative_humidity_2m: station.rel_hum == null || station.rel_hum === '-' ? null : Number(station.rel_hum),
+                    wind_speed_10m: station.wind_spd_kmh == null || station.wind_spd_kmh === '-' ? null : Number(station.wind_spd_kmh),
+                    wind_gusts_10m: station.gust_kmh == null || station.gust_kmh === '-' ? null : Number(station.gust_kmh),
+                    wind_direction_10m: station.wind_dir || null,
+                    rain_since_9am: station.rain_trace == null || station.rain_trace === '-' ? null : Number(station.rain_trace),
+                    weather_code: null
+                  };
+                  currentSource = 'Bureau of Meteorology station observation';
+                  const stamp = String(station.local_date_time_full || '');
+                  currentValidTime = stamp.length === 14
+                    ? stamp.slice(0,4) + '-' + stamp.slice(4,6) + '-' + stamp.slice(6,8) + ' ' + stamp.slice(8,10) + ':' + stamp.slice(10,12) + ' ' + (bomData.observations.header?.[0]?.time_zone || 'local time')
+                    : String(station.local_date_time || 'Latest station reading');
+                }
+              }
+            } catch (bomError) {
+              console.warn('BOM observations unavailable; using Open-Meteo instead.', bomError);
+            }
+          }
           const symbol = tempUnit === 'fahrenheit' ? '°F' : '°C';
+          const displayTemperature = value => value == null || !Number.isFinite(Number(value))
+            ? '—' : formatNumber(tempUnit === 'fahrenheit' ? Number(value) * 9 / 5 + 32 : value, 1);
           document.getElementById('weather-place').textContent = place.label || displayName(place) || 'Selected location';
-          document.getElementById('weather-description').textContent = weatherText(current.weather_code);
-          document.getElementById('weather-local-time').textContent = 'Model estimate valid at: ' + String(current.time || '').replace('T',' ') + ' · ' + (data.timezone || 'local timezone');
-          document.getElementById('weather-temperature').textContent = formatNumber(current.temperature_2m, 1) + symbol;
+          document.getElementById('weather-description').textContent = bomObservation
+            ? (bomObservation.weather && bomObservation.weather !== '-' ? bomObservation.weather : 'Latest station observation')
+            : weatherText(current.weather_code);
+          document.getElementById('weather-local-time').textContent = currentSource + ' · observed/valid at: ' + currentValidTime;
+          document.getElementById('weather-temperature').textContent = displayTemperature(current.temperature_2m) + symbol;
 
           const windDirection = value => {
-            if (value == null || !Number.isFinite(Number(value))) return '—';
-            const directions = ['N','NE','E','SE','S','SW','W','NW'];
-            return directions[Math.round(Number(value) / 45) % 8];
+            if (value == null || value === '' || value === '-') return '—';
+            if (Number.isFinite(Number(value))) {
+              const directions = ['N','NE','E','SE','S','SW','W','NW'];
+              return directions[Math.round(Number(value) / 45) % 8];
+            }
+            return String(value);
           };
           const stats = [
-            ['Feels like', formatNumber(current.apparent_temperature, 1) + symbol],
-            ['Humidity', formatNumber(current.relative_humidity_2m) + '%'],
-            ['Wind', formatNumber(current.wind_speed_10m, 1) + ' km/h ' + windDirection(current.wind_direction_10m)],
-            ['Wind gusts', formatNumber(current.wind_gusts_10m, 1) + ' km/h'],
-            ['Rain (last 15 min)', formatNumber(current.rain, 1) + ' mm'],
-            ['Precipitation (last 15 min)', formatNumber(current.precipitation, 1) + ' mm'],
-            ['Cloud cover', formatNumber(current.cloud_cover) + '%']
+            ['Feels like', displayTemperature(current.apparent_temperature) + symbol],
+            ['Humidity', current.relative_humidity_2m == null ? '—' : formatNumber(current.relative_humidity_2m) + '%'],
+            ['Wind', (current.wind_speed_10m == null ? '—' : formatNumber(current.wind_speed_10m, 1) + ' km/h') + ' ' + windDirection(current.wind_direction_10m)],
+            ['Wind gusts', current.wind_gusts_10m == null ? '—' : formatNumber(current.wind_gusts_10m, 1) + ' km/h'],
+            [bomObservation ? 'Rain since 9 am' : 'Rain (last 15 min)', current.rain_since_9am == null ? (bomObservation ? '—' : formatNumber(current.rain, 1) + ' mm') : formatNumber(current.rain_since_9am, 1) + ' mm'],
+            ...(bomObservation ? [] : [['Precipitation (last 15 min)', formatNumber(current.precipitation, 1) + ' mm']]),
+            ...(!bomObservation ? [['Cloud cover', formatNumber(current.cloud_cover) + '%']] : [])
           ];
           const currentContainer = document.getElementById('weather-current');
           currentContainer.replaceChildren();
