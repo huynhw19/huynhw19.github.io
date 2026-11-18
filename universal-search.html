@@ -90,7 +90,7 @@ const allResults=()=>[
 ];
 function matchesLocalQuery(text,query){
  const groups=[[]];
- const tokens=String(query).match(/-?"[^"]+"|-?\\S+/g)||[];
+ const tokens=String(query).match(/-?"[^"]+"|-?\S+/g)||[];
  for(const token of tokens){
    if(token.toLocaleUpperCase()==='OR'){if(groups[groups.length-1].length)groups.push([]);continue;}
    const excluded=token.startsWith('-');
