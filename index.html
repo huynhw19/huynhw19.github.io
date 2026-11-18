@@ -1105,12 +1105,12 @@
     }
 
     if (select) {
-      const saved = localStorage.getItem('configkit-lang') || 'en';
-      select.value = saved;
+      let saved = 'en';
+      try { saved = localStorage.getItem('configkit-lang') || 'en'; } catch (_) {}
       applyLanguage(saved);
       select.addEventListener('change', (event) => {
         const lang = event.target.value;
-        localStorage.setItem('configkit-lang', lang);
+        try { localStorage.setItem('configkit-lang', lang); } catch (_) {}
         applyLanguage(lang);
       });
     }
@@ -1157,11 +1157,15 @@
           en: {
             missing: 'Please provide a profile name and Wi‑Fi network name.',
             password: 'Please enter a password for secured networks.',
+            passwordLength: 'For WPA/WPA2, use 8–63 characters or a 64-character hexadecimal key. For WEP, use 5 or 13 characters, or a 10- or 26-character hexadecimal key.',
+            ssidLength: 'The Wi‑Fi network name must be 32 UTF-8 bytes or fewer.',
             success: 'Profile downloaded. Review it before installing on a device.'
           },
           es: {
             missing: 'Proporciona un nombre de perfil y un nombre de red Wi‑Fi.',
             password: 'Introduce una contraseña para redes protegidas.',
+            passwordLength: 'Para WPA/WPA2, usa entre 8 y 63 caracteres o una clave hexadecimal de 64 caracteres. Para WEP, usa 5 o 13 caracteres, o una clave hexadecimal de 10 o 26 caracteres.',
+            ssidLength: 'El nombre de la red Wi‑Fi debe tener 32 bytes UTF-8 o menos.',
             success: 'Perfil descargado. Revísalo antes de instalarlo en un dispositivo.'
           }
         };
@@ -1172,10 +1176,30 @@
           return;
         }
 
-        if (type !== 'None' && !passwordValue) {
+        const byteLength = value => new TextEncoder().encode(value).length;
+        if (byteLength(ssid) > 32) {
           status.className = 'status error';
-          status.textContent = messages[locale]?.password || messages.en.password;
+          status.textContent = messages[locale]?.ssidLength || messages.en.ssidLength;
+          document.getElementById('ssid').focus();
           return;
+        }
+
+        if (type !== 'None') {
+          if (!passwordValue) {
+            status.className = 'status error';
+            status.textContent = messages[locale]?.password || messages.en.password;
+            password.focus();
+            return;
+          }
+          const passwordBytes = byteLength(passwordValue);
+          const validWpa = (passwordBytes >= 8 && passwordBytes <= 63) || /^[a-f0-9]{64}$/i.test(passwordValue);
+          const validWep = [5, 13].includes(passwordBytes) || /^(?:[a-f0-9]{10}|[a-f0-9]{26})$/i.test(passwordValue);
+          if ((type === 'WPA' && !validWpa) || (type === 'WEP' && !validWep)) {
+            status.className = 'status error';
+            status.textContent = messages[locale]?.passwordLength || messages.en.passwordLength;
+            password.focus();
+            return;
+          }
         }
 
         const profileId = uuid();
@@ -1187,8 +1211,10 @@
         const link = document.createElement('a');
         link.href = url;
         link.download = `${name.replace(/[^a-z0-9-_]+/gi, '-').toLowerCase() || 'wifi-profile'}.mobileconfig`;
+        document.body.append(link);
         link.click();
-        URL.revokeObjectURL(url);
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 60000);
 
         status.className = 'status success';
         status.textContent = messages[locale]?.success || messages.en.success;
