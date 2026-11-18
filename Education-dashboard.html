@@ -79,6 +79,27 @@
       <p class="muted">The site QR code opens ConfigKit for students. Education status is self-declared, and teachers should never ask for or set a student's password. Test with sample data before using real student information.</p>
     </section>
 
+    <section class="card" id="lesson-planner-panel" aria-labelledby="lesson-planner-title">
+      <h2 id="lesson-planner-title">📚 Lesson Planner</h2>
+      <p class="muted">Create structured lessons with clear learning objectives, materials, activities and assessment. Save drafts privately, or publish lessons to your linked students.</p>
+      <form id="lesson-plan-form">
+        <label>Lesson title<input id="lesson-title" maxlength="160" required placeholder="e.g. Introduction to fractions"></label>
+        <label>Subject<input id="lesson-subject" maxlength="100" placeholder="e.g. Mathematics"></label>
+        <label>Grade / learning level<input id="lesson-grade" maxlength="80" placeholder="e.g. Year 5"></label>
+        <label>Share with<select id="lesson-student"><option value="">All linked students</option></select></label>
+        <label>Lesson duration (minutes)<input id="lesson-duration" type="number" min="5" max="360" step="5" value="45" required></label>
+        <label>Learning objectives<textarea id="lesson-objectives" rows="3" maxlength="5000" placeholder="What should students know or be able to do by the end?"></textarea></label>
+        <label>Materials and resources<textarea id="lesson-materials" rows="3" maxlength="5000" placeholder="Books, worksheets, equipment, links…"></textarea></label>
+        <label>Lesson activities / teaching sequence<textarea id="lesson-activities" rows="6" maxlength="20000" placeholder="1. Starter activity…&#10;2. Explain and model…&#10;3. Guided practice…&#10;4. Independent practice…&#10;5. Reflection…"></textarea></label>
+        <label>Assessment and evidence of learning<textarea id="lesson-assessment" rows="3" maxlength="5000" placeholder="How will you check understanding?"></textarea></label>
+        <label>Visibility<select id="lesson-status"><option value="draft">Draft — only you can see it</option><option value="published">Published — visible to selected students</option><option value="archived">Archived — hidden from students</option></select></label>
+        <div class="form-actions"><button id="lesson-submit" type="submit">Save lesson plan</button><button id="lesson-cancel" class="secondary" type="button" hidden>Cancel editing</button></div>
+      </form>
+      <p id="lesson-plan-message" class="status" role="status" aria-live="polite"></p>
+      <h3>My lesson plans</h3>
+      <div id="lesson-plan-list"><p class="muted">Loading lesson plans…</p></div>
+    </section>
+
     <section class="card">
       <h2 id="student-form-title">Create student</h2>
       <form id="student-form">
@@ -365,6 +386,155 @@
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
       });
 
+      let editingLessonPlanId = null;
+      const lessonForm = document.getElementById('lesson-plan-form');
+      const lessonMessage = document.getElementById('lesson-plan-message');
+      const lessonList = document.getElementById('lesson-plan-list');
+      const lessonStudentSelect = document.getElementById('lesson-student');
+      const lessonSubmit = document.getElementById('lesson-submit');
+      const lessonCancel = document.getElementById('lesson-cancel');
+
+      function lessonMessageText(message, isError = false) {
+        lessonMessage.textContent = message;
+        lessonMessage.className = 'status' + (isError ? ' error' : '');
+      }
+
+      function resetLessonForm() {
+        lessonForm.reset();
+        document.getElementById('lesson-duration').value = '45';
+        document.getElementById('lesson-status').value = 'draft';
+        editingLessonPlanId = null;
+        lessonSubmit.textContent = 'Save lesson plan';
+        lessonCancel.hidden = true;
+      }
+
+      async function loadLessonPlans() {
+        if (!currentUserId) return;
+        const {data: students, error: studentsError} = await client.from('education_students')
+          .select('id,student_name,grade').eq('user_id', currentUserId).order('student_name');
+        if (studentsError) {
+          lessonMessageText('Could not load your linked students. Refresh and try again.', true);
+          return;
+        }
+        lessonStudentSelect.replaceChildren();
+        const allOption = document.createElement('option');
+        allOption.value = '';
+        allOption.textContent = 'All linked students';
+        lessonStudentSelect.append(allOption);
+        (students || []).forEach(student => {
+          const option = document.createElement('option');
+          option.value = student.id;
+          option.textContent = student.student_name + (student.grade ? ' · ' + student.grade : '');
+          lessonStudentSelect.append(option);
+        });
+
+        lessonList.replaceChildren();
+        const {data: plans, error} = await client.from('education_lesson_plans')
+          .select('id,user_id,student_id,title,subject,grade_level,duration_minutes,learning_objectives,materials,lesson_activities,assessment,status,created_at,updated_at')
+          .eq('user_id', currentUserId).order('updated_at', {ascending:false});
+        if (error) {
+          lessonList.textContent = 'Lesson plans could not be loaded. Please refresh and try again.';
+          lessonMessageText(error.message || 'Could not load lesson plans.', true);
+          return;
+        }
+        if (!plans?.length) {
+          lessonList.textContent = 'No lesson plans yet. Create your first lesson above.';
+          return;
+        }
+        const studentNames = new Map((students || []).map(student => [student.id, student.student_name]));
+        plans.forEach(plan => {
+          const article = document.createElement('article');
+          article.className = 'assignment-item';
+          const heading = document.createElement('h3');
+          heading.textContent = plan.title;
+          const meta = document.createElement('p');
+          meta.className = 'assignment-meta';
+          meta.textContent = [plan.subject || 'No subject', plan.grade_level || 'No level', plan.duration_minutes + ' minutes',
+            plan.status === 'published' ? (plan.student_id ? 'Published to ' + (studentNames.get(plan.student_id) || 'one student') : 'Published to all linked students') : plan.status]
+            .join(' · ');
+          article.append(heading, meta);
+          [['Learning objectives',plan.learning_objectives],['Materials and resources',plan.materials],['Lesson activities',plan.lesson_activities],['Assessment',plan.assessment]].forEach(([label,value])=>{
+            if (!value) return;
+            const section = document.createElement('p');
+            const strong = document.createElement('strong');
+            strong.textContent = label + ': ';
+            const content = document.createElement('span');
+            content.style.whiteSpace = 'pre-wrap';
+            content.textContent = value;
+            section.append(strong,content);
+            article.append(section);
+          });
+          const actions = document.createElement('div');
+          actions.className = 'assignment-actions';
+          const edit = document.createElement('button');
+          edit.type = 'button'; edit.className = 'secondary'; edit.textContent = 'Edit';
+          edit.addEventListener('click',()=>{
+            editingLessonPlanId = plan.id;
+            document.getElementById('lesson-title').value = plan.title || '';
+            document.getElementById('lesson-subject').value = plan.subject || '';
+            document.getElementById('lesson-grade').value = plan.grade_level || '';
+            lessonStudentSelect.value = plan.student_id || '';
+            document.getElementById('lesson-duration').value = String(plan.duration_minutes || 45);
+            document.getElementById('lesson-objectives').value = plan.learning_objectives || '';
+            document.getElementById('lesson-materials').value = plan.materials || '';
+            document.getElementById('lesson-activities').value = plan.lesson_activities || '';
+            document.getElementById('lesson-assessment').value = plan.assessment || '';
+            document.getElementById('lesson-status').value = plan.status || 'draft';
+            lessonSubmit.textContent = 'Save changes';
+            lessonCancel.hidden = false;
+            lessonForm.scrollIntoView({behavior:'smooth',block:'start'});
+            document.getElementById('lesson-title').focus();
+          });
+          const remove = document.createElement('button');
+          remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Delete';
+          remove.addEventListener('click',async()=>{
+            if (!window.confirm('Delete this lesson plan permanently?')) return;
+            remove.disabled = true;
+            const result = await client.from('education_lesson_plans').delete().eq('id',plan.id).eq('user_id',currentUserId);
+            if (result.error) { remove.disabled=false; lessonMessageText(result.error.message || 'Could not delete lesson.',true); return; }
+            lessonMessageText('Lesson plan deleted.');
+            await loadLessonPlans();
+          });
+          actions.append(edit,remove);
+          article.append(actions);
+          lessonList.append(article);
+        });
+      }
+
+      lessonForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!currentUserId) { lessonMessageText('Please sign in again.',true); return; }
+        lessonSubmit.disabled = true;
+        lessonSubmit.textContent = 'Saving…';
+        const payload = {
+          user_id: currentUserId,
+          student_id: lessonStudentSelect.value || null,
+          title: document.getElementById('lesson-title').value.trim(),
+          subject: document.getElementById('lesson-subject').value.trim(),
+          grade_level: document.getElementById('lesson-grade').value.trim(),
+          duration_minutes: Number(document.getElementById('lesson-duration').value),
+          learning_objectives: document.getElementById('lesson-objectives').value.trim(),
+          materials: document.getElementById('lesson-materials').value.trim(),
+          lesson_activities: document.getElementById('lesson-activities').value.trim(),
+          assessment: document.getElementById('lesson-assessment').value.trim(),
+          status: document.getElementById('lesson-status').value,
+          updated_at: new Date().toISOString()
+        };
+        let result;
+        if (editingLessonPlanId) {
+          result = await client.from('education_lesson_plans').update(payload).eq('id',editingLessonPlanId).eq('user_id',currentUserId).select('id').single();
+        } else {
+          result = await client.from('education_lesson_plans').insert(payload).select('id').single();
+        }
+        lessonSubmit.disabled = false;
+        lessonSubmit.textContent = editingLessonPlanId ? 'Save changes' : 'Save lesson plan';
+        if (result.error) { lessonMessageText(result.error.message || 'Could not save lesson plan.',true); return; }
+        resetLessonForm();
+        lessonMessageText('Lesson plan saved successfully.');
+        await loadLessonPlans();
+      });
+      lessonCancel.addEventListener('click',resetLessonForm);
+
       function toggleQr(show) {
         qrPanel.hidden = !show;
         showQrButton.setAttribute('aria-expanded', String(show));
@@ -582,6 +752,7 @@
         resetStudentForm();
         setStatus(wasEditing ? 'Student updated successfully.' : 'Student added successfully. Share the student sign-in page and have them register using this email address.');
         await loadStudents();
+        await loadLessonPlans();
         await loadLearningSessions();
         await loadAssignmentStudents();
       });
