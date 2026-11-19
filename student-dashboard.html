@@ -564,11 +564,12 @@
             item.append(title, meta);
             if (assignment.instructions) { const instructions = document.createElement('p'); instructions.textContent = assignment.instructions; item.append(instructions); }
 
-            const [submissionResult, reviewResult] = await Promise.all([
-              client.from('education_assignment_submissions').select('id,response_text,status,submitted_at').eq('assignment_id',assignment.id).eq('student_user_id',data.session.user.id).maybeSingle(),
-              client.from('education_assignment_reviews').select('marks_awarded,teacher_feedback,graded_at').eq('submission_id',
-                (await client.from('education_assignment_submissions').select('id').eq('assignment_id',assignment.id).eq('student_user_id',data.session.user.id).maybeSingle()).data?.id || '00000000-0000-0000-0000-000000000000').maybeSingle()
-            ]);
+            const submissionResult = await client.from('education_assignment_submissions')
+              .select('id,response_text,status,submitted_at')
+              .eq('assignment_id',assignment.id).eq('student_user_id',data.session.user.id).maybeSingle();
+            const reviewResult = submissionResult.data
+              ? await client.from('education_assignment_reviews').select('marks_awarded,teacher_feedback,graded_at').eq('submission_id',submissionResult.data.id).maybeSingle()
+              : {data:null,error:null};
             if (submissionResult.error) {
               const warning=document.createElement('p');warning.className='error';warning.textContent='Your submission status could not be loaded.';item.append(warning);
             } else {
