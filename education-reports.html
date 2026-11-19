@@ -32,6 +32,7 @@ body{background:#fff;color:#111;font-size:12pt}main{max-width:none;padding:0}.to
 <div class="eyebrow">CONFIGKIT EDUCATION · FINAL STAGE</div>
 <h1 id="page-title">Education Reports & Insights</h1>
 <p id="page-intro" class="muted">Bring lessons, assessments and homework together in one clear learning report.</p>
+<p id="report-person" class="badge" hidden></p>
 <div class="stats" id="summary-stats"></div>
 </section>
 <section class="panel no-print" id="selector-panel" hidden>
@@ -95,7 +96,7 @@ if(!suggestions.length)suggestions.push('As more lessons, assessments and assign
 suggestions.forEach(s=>host.append(node('p','• '+s)));
 }
 async function loadTeacherReport(student){
-selectedStudent=student;$('student-select').value=student.id;setStatus('Building report for '+student.student_name+'…');
+selectedStudent=student;$('student-select').value=student.id;$('report-person').hidden=false;$('report-person').textContent='Learning report for '+student.student_name+(student.grade?' · '+student.grade:'');setStatus('Building report for '+student.student_name+'…');
 const [lessonsRes,completionRes,assignmentsRes,testsRes]=await Promise.all([
 client.from('education_lesson_plans').select('id,title,subject,status,student_id,created_at').eq('user_id',currentUser.id).or('student_id.eq.'+student.id+',student_id.is.null').eq('status','published').order('created_at',{ascending:false}),
 client.from('education_student_lesson_progress').select('id,lesson_plan_id,completed_at').eq('student_user_id',student.student_user_id||'00000000-0000-0000-0000-000000000000').order('completed_at',{ascending:false}),
@@ -143,6 +144,7 @@ $('page-intro').textContent='Your personal learning report, bringing together le
 const {data:links,error}=await client.from('education_students').select('id,user_id,student_name,grade').eq('student_user_id',currentUser.id);
 if(error||!links?.length){setStatus('No linked student record was found. Check with your teacher.',true);return}
 const ids=links.map(x=>x.id);
+$('report-person').hidden=false;$('report-person').textContent='Student report · '+(links[0].student_name||'ConfigKit student')+(links[0].grade?' · '+links[0].grade:'');
 const [lessonsRes,completionsRes,testsRes,assignmentsRes,practiceRes,achRes]=await Promise.all([
 client.from('education_lesson_plans').select('id,title,subject,grade_level').in('user_id',[...new Set(links.map(x=>x.user_id))]).eq('status','published'),
 client.from('education_student_lesson_progress').select('id,lesson_plan_id,completed_at').order('completed_at',{ascending:false}),
