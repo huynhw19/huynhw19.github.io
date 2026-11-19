@@ -143,26 +143,70 @@ Deno.serve(async (req: Request) => {
     }
 
 
+    if (action === "lookup_education_student") {
+      const childId = String(body.child_id || "");
+      const { data: child } = await admin.from("family_children").select("id").eq("id", childId).eq("parent_id", user.id).maybeSingle();
+      if (!child) return json({ error: "Child profile not found" }, 404);
+      const studentCode = String(body.student_id || "").trim();
+      if (!studentCode) {
+        const { data: link } = await admin.from("kids_education_links").select("education_student_id").eq("child_id", childId).maybeSingle();
+        if (!link) return json({ linked: false });
+        const { data: record } = await admin.from("education_students").select("student_name,school,grade").eq("id", link.education_student_id).maybeSingle();
+        return json({ linked: !!record, student_name: record?.student_name || "", school: record?.school || "", grade: record?.grade || "" });
+      }
+      if (studentCode.length > 100) return json({ error: "Student ID is not valid" }, 400);
+      const { data: record } = await admin.from("education_students").select("id,student_name,school,grade").eq("student_id", studentCode).maybeSingle();
+      if (!record) return json({ found: false });
+      return json({ found: true, student_name: record.student_name, school: record.school || "", grade: record.grade || "" });
+    }
+
+    if (action === "link_education_student") {
+      const childId = String(body.child_id || "");
+      const studentCode = String(body.student_id || "").trim();
+      if (body.confirm !== true || !studentCode || studentCode.length > 100) return json({ error: "Confirm the student record before linking" }, 400);
+      const { data: child } = await admin.from("family_children").select("id").eq("id", childId).eq("parent_id", user.id).maybeSingle();
+      if (!child) return json({ error: "Child profile not found" }, 404);
+      const { data: record } = await admin.from("education_students").select("id,student_name").eq("student_id", studentCode).maybeSingle();
+      if (!record) return json({ error: "Student ID was not found. Check it with the teacher." }, 404);
+      const { data: existing } = await admin.from("kids_education_links").select("child_id").eq("education_student_id", record.id).maybeSingle();
+      if (existing && existing.child_id !== childId) return json({ error: "This student record is already linked to another family profile" }, 409);
+      const { error } = await admin.from("kids_education_links").upsert({ child_id: childId, education_student_id: record.id, linked_by: user.id }, { onConflict: "child_id" });
+      if (error) return json({ error: "Could not link the student record" }, 400);
+      return json({ ok: true, student_name: record.student_name });
+    }
+
+    if (action === "unlink_education_student") {
+      const childId = String(body.child_id || "");
+      const { data: child } = await admin.from("family_children").select("id").eq("id", childId).eq("parent_id", user.id).maybeSingle();
+      if (!child) return json({ error: "Child profile not found" }, 404);
+      const { error } = await admin.from("kids_education_links").delete().eq("child_id", childId);
+      if (error) return json({ error: "Could not unlink the student record" }, 400);
+      await admin.from("kids_teacher_contacts").delete().eq("child_id", childId);
+      return json({ ok: true });
+    }
+
     if (action === "teacher_students") {
-      const { data: links, error } = await admin.from("education_students")
-        .select("student_user_id,student_name,grade,school")
-        .eq("user_id", user.id).not("student_user_id", "is", null);
-      if (error) return json({ error: "Could not load linked students" }, 400);
+      const { data: records, error } = await admin.from("education_students")
+        .select("id,student_name,grade,school").eq("user_id", user.id);
+      if (error) return json({ error: "Could not load linked student records" }, 400);
+      const recordIds = (records || []).map((row) => row.id);
+      if (!recordIds.length) return json({ students: [] });
+      const { data: links, error: linkError } = await admin.from("kids_education_links")
+        .select("child_id,education_student_id").in("education_student_id", recordIds);
+      if (linkError) return json({ error: "Could not load parent-approved student links" }, 400);
+      const byRecord = new Map((records || []).map((row) => [row.id, row]));
       const students = [];
       for (const link of (links || [])) {
-        if (!link.student_user_id) continue;
+        const record = byRecord.get(link.education_student_id);
         const { data: child } = await admin.from("family_children")
-          .select("id,child_name,messaging_enabled")
-          .eq("child_user_id", link.student_user_id).maybeSingle();
-        if (!child || !child.messaging_enabled) continue;
+          .select("id,child_name,messaging_enabled").eq("id", link.child_id).maybeSingle();
+        if (!child || !child.messaging_enabled || !record) continue;
         const { data: contact } = await admin.from("kids_teacher_contacts")
           .select("requested_at,approved_at").eq("child_id", child.id)
           .eq("teacher_user_id", user.id).maybeSingle();
-        students.push({
-          child_id: child.id, child_name: child.child_name || link.student_name || "Linked student",
-          grade: link.grade || "", school: link.school || "",
-          requested_at: contact?.requested_at || null, approved: !!contact?.approved_at,
-        });
+        students.push({ child_id: child.id, child_name: child.child_name || record.student_name || "Linked student",
+          grade: record.grade || "", school: record.school || "",
+          requested_at: contact?.requested_at || null, approved: !!contact?.approved_at });
       }
       return json({ students });
     }
@@ -172,9 +216,11 @@ Deno.serve(async (req: Request) => {
       const { data: child } = await admin.from("family_children")
         .select("id,child_user_id,messaging_enabled").eq("id", childId).maybeSingle();
       if (!child?.child_user_id || !child.messaging_enabled) return json({ error: "Student profile is not available for messaging" }, 404);
-      const { data: linked } = await admin.from("education_students").select("id")
-        .eq("user_id", user.id).eq("student_user_id", child.child_user_id).maybeSingle();
-      if (!linked) return json({ error: "You are not the linked teacher for this student" }, 403);
+      const { data: teacherRecords } = await admin.from("education_students").select("id").eq("user_id", user.id);
+      const recordIds = (teacherRecords || []).map((row) => row.id);
+      const { data: linked } = recordIds.length ? await admin.from("kids_education_links").select("id")
+        .eq("child_id", child.id).in("education_student_id", recordIds).maybeSingle() : { data: null };
+      if (!linked) return json({ error: "This student has not been linked to your class by their parent or guardian" }, 403);
       const { error } = await admin.from("kids_teacher_contacts").upsert({
         child_id: child.id, teacher_user_id: user.id, requested_at: new Date().toISOString(),
         approved_at: null, approved_by: null,
@@ -190,8 +236,10 @@ Deno.serve(async (req: Request) => {
       const { data: child } = await admin.from("family_children")
         .select("id,child_user_id").eq("id", childId).eq("parent_id", user.id).maybeSingle();
       if (!child) return json({ error: "Child profile not found" }, 404);
-      const { data: linked } = await admin.from("education_students").select("id")
-        .eq("user_id", teacherId).eq("student_user_id", child.child_user_id).maybeSingle();
+      const { data: teacherRecords } = await admin.from("education_students").select("id").eq("user_id", teacherId);
+      const recordIds = (teacherRecords || []).map((row) => row.id);
+      const { data: linked } = recordIds.length ? await admin.from("kids_education_links").select("id")
+        .eq("child_id", child.id).in("education_student_id", recordIds).maybeSingle() : { data: null };
       if (!linked) return json({ error: "This teacher is no longer linked to the student" }, 403);
       const { data: request } = await admin.from("kids_teacher_contacts").select("id")
         .eq("child_id", child.id).eq("teacher_user_id", teacherId).maybeSingle();
@@ -228,18 +276,19 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === "teacher_friend_requests") {
-      const { data: linkedRows } = await admin.from("education_students")
-        .select("student_user_id").eq("user_id", user.id).not("student_user_id", "is", null);
-      const studentIds = (linkedRows || []).map((row) => row.student_user_id).filter(Boolean);
-      if (!studentIds.length) return json({ requests: [] });
-      const { data: childRows } = await admin.from("family_children")
-        .select("id,child_name,child_user_id").in("child_user_id", studentIds);
-      const children = childRows || [];
-      const childIds = children.map((row) => row.id);
+      const { data: records } = await admin.from("education_students").select("id").eq("user_id", user.id);
+      const recordIds = (records || []).map((row) => row.id);
+      if (!recordIds.length) return json({ requests: [] });
+      const { data: links } = await admin.from("kids_education_links").select("child_id,education_student_id").in("education_student_id", recordIds);
+      const childIds = (links || []).map((row) => row.child_id);
       if (childIds.length < 2) return json({ requests: [] });
+      const { data: childRows } = await admin.from("family_children").select("id,child_name").in("id", childIds);
+      const children = childRows || [];
+      const approvedChildIds = children.map((row) => row.id);
+      if (approvedChildIds.length < 2) return json({ requests: [] });
       const { data: rows, error } = await admin.from("kids_friendships")
         .select("id,child_a_id,child_b_id,parent_a_approved,parent_b_approved,status")
-        .in("child_a_id", childIds).in("child_b_id", childIds)
+        .in("child_a_id", approvedChildIds).in("child_b_id", approvedChildIds)
         .eq("status", "pending").eq("parent_a_approved", true).eq("parent_b_approved", true);
       if (error) return json({ error: "Could not load classmate approval requests" }, 400);
       const byId = new Map(children.map((row) => [row.id, row.child_name]));
@@ -257,12 +306,10 @@ Deno.serve(async (req: Request) => {
       if (!f || f.status !== "pending" || !f.parent_a_approved || !f.parent_b_approved) {
         return json({ error: "Both families must approve before teacher review" }, 409);
       }
-      const { data: linkedChildren } = await admin.from("family_children")
-        .select("id,child_user_id").in("id", [f.child_a_id, f.child_b_id]);
-      const userIds = (linkedChildren || []).map((row) => row.child_user_id).filter(Boolean);
-      if (userIds.length !== 2) return json({ error: "Both students need linked ConfigKit child profiles" }, 409);
-      const { data: links } = await admin.from("education_students").select("id")
-        .eq("user_id", user.id).in("student_user_id", userIds);
+      const { data: teacherRecords } = await admin.from("education_students").select("id").eq("user_id", user.id);
+      const recordIds = (teacherRecords || []).map((row) => row.id);
+      const { data: links } = recordIds.length ? await admin.from("kids_education_links").select("child_id")
+        .in("child_id", [f.child_a_id, f.child_b_id]).in("education_student_id", recordIds) : { data: [] };
       if ((links || []).length < 2) return json({ error: "Only a teacher linked to both students can approve this connection" }, 403);
       const { error } = await admin.from("kids_friendships").update({
         teacher_approved_by: user.id, teacher_approved_at: new Date().toISOString(),
