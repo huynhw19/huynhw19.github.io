@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="ConfigKit Money Tracker — personal accounts, spending, bills and CSV imports.">
+<meta name="description" content="ConfigKit Money Tracker — personal accounts, spending and bills.">
 <title>Money Tracker — ConfigKit</title>
 <style>
  :root{color-scheme:light;--ink:#142b3b;--muted:#687985;--line:#e1e8ed;--paper:#f3f7fa;--white:#fff;--green:#087e78;--dark:#075b59;--mint:#e5f5f2;--red:#b13e4a;--shadow:0 14px 34px #17354a12}
@@ -75,7 +75,7 @@ footer{width:min(1180px,calc(100% - 40px));border-top:1px solid #e1e8ee;font-siz
 <main>
 <div id="status" class="notice" role="status" aria-live="polite">Checking your sign-in…</div>
 <div id="app" hidden>
-<span class="eyebrow">AUSTRALIAN MONEY DASHBOARD · AUD</span><h1>Your money, at a glance.</h1><p class="muted">Everyday spending, savings, bills and transfers — organised in one simple place.</p><div class="notice small"><strong>Manual money tracker.</strong> This page records your own entries and CSV imports; payments and transfers are not executed. This is a manual tracker. It does not connect to a bank or move money.</div>
+<span class="eyebrow">AUSTRALIAN MONEY DASHBOARD · AUD</span><h1>Your money, at a glance.</h1><p class="muted">Everyday spending, savings, bills and transfers — organised in one simple place.</p><div class="notice small"><strong>Manual money tracker.</strong> This page records your own entries; payments and transfers are not executed. This is a manual tracker. It does not connect to a bank or move money.</div>
 
 <section class="card section" aria-labelledby="import-title">
  <div class="toolbar"><h2 id="import-title">Import bank transactions</h2><span class="eyebrow">CSV IMPORT</span></div>
@@ -153,7 +153,7 @@ function render(){
   return '<article class="account"><strong>'+escapeHtml(a.name)+'</strong><span class="muted small">'+escapeHtml(a.account_type)+' · '+escapeHtml(a.currency)+'</span><div class="acct-balance">'+money(balance,a.currency)+'</div><button class="secondary small edit-account" data-id="'+a.id+'" type="button">Rename</button> <button class="danger small delete-account" data-id="'+a.id+'" type="button">Delete</button></article>'
  }).join(''):'<div class="card muted">No accounts yet. Add an account to start tracking your money.</div>';
  const opts=accounts.map(a=>'<option value="'+a.id+'">'+escapeHtml(a.name)+' ('+a.currency+')</option>').join('');
- ['tx-account','transfer-from','transfer-to','import-account'].forEach(id=>$(id).innerHTML=opts);
+ ['tx-account','transfer-from','transfer-to'].forEach(id=>$(id).innerHTML=opts);
  const usable=accounts.length>1;
  $('transfer-form').querySelector('button').disabled=!usable;
  const knownPayees=[...new Map(transactions.filter(t=>t.merchant&&t.merchant.trim()).map(t=>[t.merchant.trim().toLocaleLowerCase(),t.merchant.trim()])).values()].sort((a,b)=>a.localeCompare(b));$('payee-suggestions').innerHTML=knownPayees.map(n=>'<option value="'+escapeHtml(n)+'">').join('');
