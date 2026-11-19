@@ -40,7 +40,7 @@ jobs:
           import { chromium } from 'playwright';
 
           const base = process.env.SITE_URL;
-          const pages = ['/', '/login.html', '/dashboard.html', '/forms.html', '/account-docs.html', '/Education-dashboard.html', '/student-dashboard.html', '/student-progress.html', '/education-ai.html'];
+          const pages = ['/', '/login.html', '/dashboard.html', '/forms.html', '/account-docs.html', '/Education-dashboard.html', '/student-dashboard.html', '/student-progress.html', '/education-ai.html', '/education-reports.html', '/education-reports.html?view=student'];
           const results = [];
           const browser = await chromium.launch({ headless: true });
 
