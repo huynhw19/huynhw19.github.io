@@ -175,6 +175,13 @@ Deno.serve(async (req: Request) => {
       if (!record) return json({ error: "Student ID was not found. Check it with the teacher." }, 404);
       const { data: existing } = await admin.from("kids_education_links").select("child_id").eq("education_student_id", record.id).maybeSingle();
       if (existing && existing.child_id !== childId) return json({ error: "This student record is already linked to another family profile" }, 409);
+      const { data: currentLink } = await admin.from("kids_education_links").select("education_student_id").eq("child_id", childId).maybeSingle();
+      if (currentLink && currentLink.education_student_id !== record.id) {
+        await admin.from("kids_teacher_contacts").delete().eq("child_id", childId);
+        await admin.from("kids_friendships").update({
+          status: "pending", teacher_approved_by: null, teacher_approved_at: null, updated_at: new Date().toISOString(),
+        }).or("child_a_id.eq." + childId + ",child_b_id.eq." + childId);
+      }
       const { error } = await admin.from("kids_education_links").upsert({ child_id: childId, education_student_id: record.id, linked_by: user.id }, { onConflict: "child_id" });
       if (error) return json({ error: "Could not link the student record" }, 400);
       return json({ ok: true, student_name: record.student_name });
@@ -187,6 +194,9 @@ Deno.serve(async (req: Request) => {
       const { error } = await admin.from("kids_education_links").delete().eq("child_id", childId);
       if (error) return json({ error: "Could not unlink the student record" }, 400);
       await admin.from("kids_teacher_contacts").delete().eq("child_id", childId);
+      await admin.from("kids_friendships").update({
+        status: "pending", teacher_approved_by: null, teacher_approved_at: null, updated_at: new Date().toISOString(),
+      }).or("child_a_id.eq." + childId + ",child_b_id.eq." + childId);
       return json({ ok: true });
     }
 
