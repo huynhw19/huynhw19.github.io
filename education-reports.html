@@ -103,7 +103,8 @@ client.from('education_assignments').select('id,title,subject,due_date,max_marks
 client.from('education_tests').select('id,title,status,due_date,student_id').eq('user_id',currentUser.id).eq('student_id',student.id).order('created_at',{ascending:false})
 ]);
 const lessons=lessonsRes.data||[],completions=completionRes.data||[],assignments=assignmentsRes.data||[],tests=testsRes.data||[];
-const lessonIds=new Set(completions.map(x=>x.lesson_plan_id));
+const relevantCompletions=completions.filter(c=>lessons.some(l=>l.id===c.lesson_plan_id));
+const lessonIds=new Set(relevantCompletions.map(x=>x.lesson_plan_id));
 const [subRes,attemptRes]=await Promise.all([
 assignments.length?client.from('education_assignment_submissions').select('id,assignment_id,status,submitted_at').in('assignment_id',assignments.map(x=>x.id)):Promise.resolve({data:[],error:null}),
 tests.length?client.from('education_test_attempts').select('id,test_id,status,attempt_number,submitted_at,total_score,points_possible,teacher_feedback').in('test_id',tests.map(x=>x.id)).eq('student_user_id',student.student_user_id||'00000000-0000-0000-0000-000000000000').order('submitted_at',{ascending:false}):Promise.resolve({data:[],error:null})
@@ -124,7 +125,7 @@ const assignmentHost=$('assignment-report');clear('assignment-report');
 if(!assignments.length)empty(assignmentHost,'No assignments have been published for this student.');
 else assignments.forEach(a=>{const sub=submissions.filter(x=>x.assignment_id===a.id);const el=record(assignmentHost,a.title,(a.subject||'General')+' · Due '+(a.due_date||'not set')+' · '+a.max_marks+' marks',sub.length?sub.map(x=>x.status).join(', '):'Not submitted');sub.forEach(x=>{const r=reviews.get(x.id);if(r){addScoreBar(el,'Homework mark',r.marks_awarded,a.max_marks);if(r.teacher_feedback)el.append(node('p','Feedback: '+r.teacher_feedback));}});});
 const activity=$('activity-report');clear('activity-report');record(activity,'Lesson completion',lessons.filter(x=>lessonIds.has(x.id)).length+' of '+lessons.length+' lessons completed');record(activity,'Homework progress',gradedAssignments.length+' of '+assignments.length+' assignments marked and returned');record(activity,'Assessment progress',gradedTests.length+' graded test attempt(s)');
-renderInsights({lessons,completedLessons:completions,tests,assignments,gradedAssignments,gradedTests});
+renderInsights({lessons,completedLessons:relevantCompletions,tests,assignments,gradedAssignments,gradedTests});
 if([lessonsRes,completionRes,assignmentsRes,testsRes,subRes,attemptRes,reviewsRes].some(x=>x.error))setStatus('Report loaded with some unavailable sections. Check permissions or refresh.',true);else setStatus('Report ready for '+student.student_name+'.');
 }
 async function initTeacher(){
@@ -151,6 +152,7 @@ client.from('education_learning_progress').select('id,is_correct,completed_at').
 client.from('user_achievements').select('achievement_key,earned_at').eq('user_id',currentUser.id).order('earned_at',{ascending:false}).limit(100)
 ]);
 const lessons=lessonsRes.data||[],completions=completionsRes.data||[],attempts=testsRes.data||[],assignments=assignmentsRes.data||[],practice=practiceRes.data||[],achievements=achRes.data||[];
+const relevantCompletions=completions.filter(c=>lessons.some(l=>l.id===c.lesson_plan_id));
 const [testRes,subRes]=await Promise.all([
 attempts.length?client.from('education_tests').select('id,title').in('id',[...new Set(attempts.map(x=>x.test_id))]):Promise.resolve({data:[],error:null}),
 assignments.length?client.from('education_assignment_submissions').select('id,assignment_id,status,submitted_at').eq('student_user_id',currentUser.id).in('assignment_id',assignments.map(x=>x.id)):Promise.resolve({data:[],error:null})
@@ -158,7 +160,7 @@ assignments.length?client.from('education_assignment_submissions').select('id,as
 const submissions=subRes.data||[];
 const reviewsRes=submissions.length?await client.from('education_assignment_reviews').select('submission_id,marks_awarded,teacher_feedback').in('submission_id',submissions.filter(x=>x.status==='returned').map(x=>x.id)):{data:[],error:null};
 const reviews=new Map((reviewsRes.data||[]).map(x=>[x.submission_id,x]));
-const completedIds=new Set(completions.map(x=>x.lesson_plan_id));
+const completedIds=new Set(relevantCompletions.map(x=>x.lesson_plan_id));
 const gradedTests=attempts.filter(x=>x.submitted_at&&x.total_score!==null&&x.points_possible);
 const gradedAssignments=submissions.filter(x=>x.status==='returned'&&reviews.has(x.id));
 const avg=gradedTests.length?Math.round(gradedTests.reduce((n,x)=>n+safePct(x.total_score,x.points_possible),0)/gradedTests.length)+'%':'—';
@@ -174,7 +176,7 @@ if(!assignments.length)empty(assignmentHost,'No published homework yet.');
 else assignments.forEach(a=>{const sub=submissions.find(x=>x.assignment_id===a.id);const el=record(assignmentHost,a.title,(a.subject||'General')+' · Due '+(a.due_date||'not set')+' · '+a.max_marks+' marks',sub?sub.status:'Not started');const review=sub?reviews.get(sub.id):null;if(review){addScoreBar(el,'Mark',review.marks_awarded,a.max_marks);if(review.teacher_feedback)el.append(node('p','Teacher feedback: '+review.teacher_feedback));}});
 const activity=$('activity-report');clear('activity-report');record(activity,'Practice attempts',practice.length);record(activity,'Correct answers',practice.filter(x=>x.is_correct===true).length);record(activity,'Achievements earned',achievements.length);
 if(achievements.length)achievements.slice(0,8).forEach(x=>record(activity,x.achievement_key.replace(/[_-]+/g,' '),'Earned '+dateLabel(x.earned_at)));
-renderInsights({lessons,completedLessons:completions,tests:attempts,assignments,gradedAssignments,gradedTests});
+renderInsights({lessons,completedLessons:relevantCompletions,tests:attempts,assignments,gradedAssignments,gradedTests});
 const all=[lessonsRes,completionsRes,testsRes,assignmentsRes,practiceRes,achRes,testRes,subRes,reviewsRes];
 if(all.some(x=>x.error))setStatus('Report loaded with some unavailable sections. Refresh to retry.',true);else setStatus('Your learning report is ready.');
 }
