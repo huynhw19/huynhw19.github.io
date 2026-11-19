@@ -1167,10 +1167,10 @@
               const marks=Number(markInput.value);
               if(!Number.isFinite(marks)||marks<0||marks>Number(assignment.max_marks)){note.textContent='Enter a mark from 0 to '+assignment.max_marks+'.';return;}
               save.disabled=true;note.textContent='Saving feedback…';
-              const payload={submission_id:submission.id,marks_awarded:marks,teacher_feedback:feedbackInput.value.trim(),graded_by:currentUserId,graded_at:new Date().toISOString(),updated_at:new Date().toISOString()};
+              const reviewFields={marks_awarded:marks,teacher_feedback:feedbackInput.value.trim(),graded_by:currentUserId,graded_at:new Date().toISOString(),updated_at:new Date().toISOString()};
               const saved=reviewResult.data
-                ? await client.from('education_assignment_reviews').update(payload).eq('id',reviewResult.data.id)
-                : await client.from('education_assignment_reviews').insert(payload);
+                ? await client.from('education_assignment_reviews').update(reviewFields).eq('id',reviewResult.data.id)
+                : await client.from('education_assignment_reviews').insert({submission_id:submission.id,...reviewFields});
               if(saved.error){save.disabled=false;note.textContent=saved.error.message||'Could not save marks.';return;}
               const returned=await client.from('education_assignment_submissions').update({status:'returned',updated_at:new Date().toISOString()}).eq('id',submission.id);
               save.disabled=false;
