@@ -12,7 +12,7 @@
 - Existing parent-controlled voice/video calling is separate from message attachments and remains subject to the existing call permissions.
 
 ## Parent transparency
-Children are told before using the feature that their parent/guardian can review all their messages, including classmate and teacher conversations. Parents can review peer conversations and all adult conversations from the Family & Teacher Message Centre. Parents can send in the family conversation; they cannot impersonate a teacher in a teacher thread.
+Children are told before using the feature that their parent/guardian can review all their messages, including classmate and teacher conversations. Parents can review peer conversations and all adult conversations from the Family & Teacher Message Centre. Parents can send in the family conversation; they cannot impersonate a teacher in a teacher thread. The existing Family Dashboard associates each child with one primary parent account; additional guardian accounts are not automatically granted access.
 
 ## Teacher boundaries
 Teachers see only linked students whose parent has approved messaging. They can send and receive in their own student conversation, and approve classmate connections only when linked to both students. Teachers cannot read family or peer conversations.
