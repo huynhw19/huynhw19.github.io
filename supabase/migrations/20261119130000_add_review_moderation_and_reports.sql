@@ -13,7 +13,7 @@ alter table public.community_book_reports alter column book_id drop not null;
 alter table public.community_book_reports add column if not exists review_id uuid references public.community_book_reviews(id) on delete cascade;
 alter table public.community_book_reports drop constraint if exists community_book_reports_target_check;
 alter table public.community_book_reports add constraint community_book_reports_target_check
-check (((book_id is not null)::integer + (review_id is not null)::integer)=1);
+check ((book_id is null) <> (review_id is null));
 drop policy if exists community_book_reports_insert_self on public.community_book_reports;
 create policy community_book_reports_insert_self on public.community_book_reports for insert to authenticated
 with check (
