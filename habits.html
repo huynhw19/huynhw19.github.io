@@ -21,7 +21,7 @@ const monday=s=>{const d=new Date(s+'T12:00:00');d.setDate(d.getDate()-(d.getDay
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const done=(id,date)=>entries.some(e=>e.habit_id===id&&e.completed_on===date);
 const isScheduled=(h,date)=>{const d=new Date(date+'T12:00:00').getDay();return h.frequency==='daily'||(h.frequency==='weekdays'&&d>=1&&d<=5)||h.frequency==='weekly'};
-function streak(h){let d=today(),n=0;if(!done(h.id,d))d=dateAdd(d,-1);for(let i=0;i<370;i++){if(!isScheduled(h,d)){d=dateAdd(d,-1);continue}if(!done(h.id,d))break;n++;d=dateAdd(d,-1)}return n}
+function streak(h){if(h.frequency==='weekly'){let start=monday(today()),count=0;for(let i=0;i<52;i++){const n=Array.from({length:7},(_,j)=>dateAdd(start,j)).filter(day=>done(h.id,day)).length;if(n<(h.target_per_week||1))break;count++;start=dateAdd(start,-7)}return count*7}let d=today(),n=0;if(!done(h.id,d))d=dateAdd(d,-1);for(let i=0;i<370;i++){if(!isScheduled(h,d)){d=dateAdd(d,-1);continue}if(!done(h.id,d))break;n++;d=dateAdd(d,-1)}return n}
 function weekCount(h){const start=monday(today());let n=0;for(let i=0;i<7;i++)if(done(h.id,dateAdd(start,i)))n++;return n}
 function active(){return habits.filter(h=>!h.archived_at)}
 function visible(){const q=$('search').value.trim().toLowerCase(),v=$('view-filter').value;return habits.filter(h=>(v==='all'||(v==='archived'?!!h.archived_at:!h.archived_at))&&(!q||(h.name+' '+(h.description||'')+' '+h.category).toLowerCase().includes(q))&&(!$('category-filter').value||h.category===$('category-filter').value)).sort((a,b)=>a.name.localeCompare(b.name))}
