@@ -78,7 +78,11 @@ jobs:
                 contentType: 'application/json',
                 body: JSON.stringify({
                   responseStatus: 200,
-                  responseData: { translatedText: 'Hola mundo' }
+                  responseData: {
+                    translatedText: new URL(route.request().url()).searchParams.get('langpair') === 'en|it'
+                      ? 'Ciao'
+                      : 'Hola mundo'
+                  }
                 })
               })
             );
@@ -94,6 +98,17 @@ jobs:
             if (translatedText !== 'Hola mundo') {
               throw new Error('Translation result was not displayed');
             }
+            // Verify the English-to-Italian language code and output path as well.
+            await translationPage.locator('#translation-target').selectOption('it');
+            await translationPage.locator('#translation-input').fill('Hello');
+            await translationPage.locator('#translate-button').click();
+            await translationPage.waitForFunction(() =>
+              document.querySelector('#translation-output')?.value === 'Ciao'
+            );
+            if (await translationPage.locator('#translation-output').inputValue() !== 'Ciao') {
+              throw new Error('English-to-Italian translation result was not displayed');
+            }
+            await translationPage.locator('#translation-target').selectOption('es');
             await translationPage.locator('#translation-swap').click();
             if (await translationPage.locator('#translation-source').inputValue() !== 'es' ||
                 await translationPage.locator('#translation-target').inputValue() !== 'en') {
