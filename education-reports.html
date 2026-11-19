@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f8f6">
+<title>Education Reports & Insights — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#173329;--muted:#60736b;--line:#dce8e1;--paper:#fff;--bg:#f4f8f6;--green:#176b4b;--soft:#eaf5ef;--blue:#eaf1fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:1100px;margin:auto;padding:22px 15px 55px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+a{color:var(--green);font-weight:650}.hero{padding:24px;border-radius:18px;background:linear-gradient(125deg,#e5f5eb,#edf4ff);border:1px solid #d5e7dc}
+h1{font-size:clamp(1.8rem,5vw,2.5rem);line-height:1.15;margin:8px 0}.eyebrow{font-size:.78rem;letter-spacing:.12em;font-weight:800;color:var(--green)}
+.muted,.meta{color:var(--muted)}.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:17px;margin-top:15px;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:14px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px}.stat strong{display:block;font-size:1.65rem;line-height:1.25}.stat span{font-size:.88rem;color:var(--muted)}
+button,input,select,textarea{font:inherit}button{border:0;border-radius:9px;padding:10px 14px;background:var(--green);color:white;font-weight:650;cursor:pointer}button.secondary{background:#eaf1ed;color:var(--ink)}button:disabled{opacity:.55;cursor:not-allowed}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cbd9d1;border-radius:9px;background:#fff;color:var(--ink)}label{display:block;font-weight:650;margin:10px 0 5px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.record{padding:12px 0;border-top:1px solid var(--line)}.record:first-child{border-top:0}
+.badge{display:inline-block;padding:3px 9px;border-radius:99px;background:var(--soft);color:var(--green);font-size:.82rem;font-weight:700}
+.bar{height:10px;background:#e9efeb;border-radius:99px;overflow:hidden;margin:7px 0 12px}.bar>span{display:block;height:100%;background:#269667;border-radius:99px}
+.empty{padding:14px;background:#f7faf8;border-radius:9px;color:var(--muted)}.status{min-height:1.4em;color:var(--green)}.error{color:#9b3030}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:end}.toolbar>div{flex:1 1 220px}.small{font-size:.9rem}
+@media(max-width:560px){main{padding:14px 11px 40px}.hero{padding:19px}.panel{padding:14px}}
+@media print{
+body{background:#fff;color:#111;font-size:12pt}main{max-width:none;padding:0}.top,.no-print,#status{display:none!important}.hero{background:#fff;border:0;padding:0}.panel{break-inside:avoid;border:1px solid #bbb;box-shadow:none;margin:10px 0;padding:12px}.grid{grid-template-columns:1fr 1fr}.stats{grid-template-columns:repeat(4,1fr)}a{color:#111;text-decoration:none}.bar{border:1px solid #aaa}.bar>span{background:#777!important;print-color-adjust:exact}
+}
+</style>
+</head>
+<body><main>
+<div class="top no-print"><a href="dashboard.html">← ConfigKit dashboard</a><a id="education-link" href="Education-dashboard.html">Education Dashboard →</a></div>
+<section class="hero">
+<div class="eyebrow">CONFIGKIT EDUCATION · FINAL STAGE</div>
+<h1 id="page-title">Education Reports & Insights</h1>
+<p id="page-intro" class="muted">Bring lessons, assessments and homework together in one clear learning report.</p>
+<div class="stats" id="summary-stats"></div>
+</section>
+<section class="panel no-print" id="selector-panel" hidden>
+<div class="toolbar"><div><label for="student-select">Choose a student</label><select id="student-select"><option value="">Loading students…</option></select></div><div><button id="refresh" type="button" class="secondary">Refresh report</button></div><div><button id="print" type="button">Print / Save as PDF</button></div></div>
+</section>
+<section class="panel no-print" id="student-tools" hidden>
+<div class="row"><strong>Report options</strong><button id="student-print" type="button">Print / Save as PDF</button></div>
+</section>
+<p id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</p>
+<section class="grid">
+<div class="panel"><h2>📚 Lessons & learning progress</h2><div id="lesson-report"><p class="empty">Loading lesson information…</p></div></div>
+<div class="panel"><h2>📝 Quiz & assessment results</h2><div id="test-report"><p class="empty">Loading assessment information…</p></div></div>
+<div class="panel"><h2>📘 Homework & assignments</h2><div id="assignment-report"><p class="empty">Loading homework information…</p></div></div>
+<div class="panel"><h2>⭐ Achievements & practice</h2><div id="activity-report"><p class="empty">Loading learning activity…</p></div></div>
+</section>
+<section class="panel">
+<h2>🧭 Strengths & next steps</h2>
+<div id="insights"><p class="empty">Insights will appear after the report loads.</p></div>
+<label for="teacher-comments" id="comments-label">Teacher comments / learning notes</label>
+<textarea id="teacher-comments" rows="4" maxlength="5000" placeholder="Add a personal comment or suggested next step before printing this report."></textarea>
+<p class="muted small">Comments are included when you print or save this report as a PDF. They are not saved to the database.</p>
+</section>
+<section class="panel">
+<div class="row"><div><h2>Report details</h2><p id="report-date" class="muted small"></p></div><button id="print-bottom" type="button" class="no-print">Print report</button></div>
+<p class="muted small">This report summarises the records currently available to your signed-in ConfigKit account. Scores are shown only where marking has been completed.</p>
+</section>
+</main>
+<script src="auth-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const config=window.CONFIGKIT_AUTH||{};
+const setStatus=(message,isError=false)=>{$('status').textContent=message;$('status').className=isError?'status error':'status'};
+if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){setStatus('Authentication is not configured. Please contact the site owner.',true);return}
+const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const params=new URLSearchParams(window.location.search);
+const mode=params.get('view')==='student'?'student':'teacher';
+let currentUser=null,students=[],selectedStudent=null;
+const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el};
+const safePct=(n,d)=>d>0?Math.max(0,Math.min(100,Math.round(Number(n)/Number(d)*100))):0;
+const clear=id=>$(id).replaceChildren();
+function stat(label,value){const el=node('div',undefined,'stat');el.append(node('strong',String(value)),node('span',label));return el}
+function record(host,title,meta,detail){const el=node('article',undefined,'record');el.append(node('strong',title));if(meta)el.append(node('p',meta,'meta small'));if(detail)el.append(node('p',detail));host.append(el);return el}
+function empty(host,message){host.append(node('p',message,'empty'))}
+function setStats(items){clear('summary-stats');items.forEach(([label,value])=>$('summary-stats').append(stat(label,value)))}
+function dateLabel(value){return value?new Date(value).toLocaleDateString():'Date not recorded'}
+function scoreLabel(item){if(item.total_score===null||item.total_score===undefined||item.points_possible===null||item.points_possible===undefined)return 'Awaiting marking';return item.total_score+' / '+item.points_possible+' points'}
+function addScoreBar(host,label,score,possible){const wrap=node('div');const pct=safePct(score,possible);wrap.append(node('div',label+' · '+(possible?score+' / '+possible+' ('+pct+'%)':'Not marked'),'small'));const bar=node('div',undefined,'bar');const fill=node('span');fill.style.width=pct+'%';bar.append(fill);wrap.append(bar);host.append(wrap)}
+function printReport(){$('report-date').textContent='Generated '+new Date().toLocaleString();window.print()}
+$('print').addEventListener('click',printReport);$('student-print').addEventListener('click',printReport);$('print-bottom').addEventListener('click',printReport);
+$('refresh').addEventListener('click',()=>{if(selectedStudent)loadTeacherReport(selectedStudent);});
+function renderInsights({lessons,completedLessons,tests,assignments,gradedAssignments,gradedTests}){
+const host=$('insights');clear('insights');const suggestions=[];
+if(lessons.length&&completedLessons.length===lessons.length)suggestions.push('All published lessons in this report are marked complete. Consider introducing the next learning objectives.');
+else if(lessons.length)suggestions.push((lessons.length-completedLessons.length)+' published lesson(s) are not yet marked complete. Review these with the student.');
+if(gradedTests.length){const avg=gradedTests.reduce((sum,x)=>sum+safePct(x.total_score,x.points_possible),0)/gradedTests.length;suggestions.push(avg>=80?'Assessment results show a strong overall score average ('+Math.round(avg)+'%). Extend learning with more challenging questions.':avg>=50?'Assessment results show developing understanding ('+Math.round(avg)+'% average). Reinforce topics where marks were lost.':'Assessment results suggest the student may benefit from extra guided practice ('+Math.round(avg)+'% average).');}
+else suggestions.push('There are no graded quiz results yet. Marking completed assessments will make this section more informative.');
+if(assignments.length&&gradedAssignments.length<assignments.length)suggestions.push((assignments.length-gradedAssignments.length)+' assignment(s) are not yet marked and returned.');
+if(!suggestions.length)suggestions.push('As more lessons, assessments and assignments are completed, this report will provide a clearer picture of progress.');
+suggestions.forEach(s=>host.append(node('p','• '+s)));
+}
+async function loadTeacherReport(student){
+selectedStudent=student;$('student-select').value=student.id;setStatus('Building report for '+student.student_name+'…');
+const [lessonsRes,completionRes,assignmentsRes,testsRes]=await Promise.all([
+client.from('education_lesson_plans').select('id,title,subject,status,student_id,created_at').eq('user_id',currentUser.id).or('student_id.eq.'+student.id+',student_id.is.null').eq('status','published').order('created_at',{ascending:false}),
+client.from('education_student_lesson_progress').select('id,lesson_plan_id,completed_at').eq('student_user_id',student.student_user_id||'00000000-0000-0000-0000-000000000000').order('completed_at',{ascending:false}),
+client.from('education_assignments').select('id,title,subject,due_date,max_marks,status,student_id').eq('user_id',currentUser.id).eq('student_id',student.id).order('created_at',{ascending:false}),
+client.from('education_tests').select('id,title,status,due_date,student_id').eq('user_id',currentUser.id).eq('student_id',student.id).order('created_at',{ascending:false})
+]);
+const lessons=lessonsRes.data||[],completions=completionRes.data||[],assignments=assignmentsRes.data||[],tests=testsRes.data||[];
+const lessonIds=new Set(completions.map(x=>x.lesson_plan_id));
+const [subRes,attemptRes]=await Promise.all([
+assignments.length?client.from('education_assignment_submissions').select('id,assignment_id,status,submitted_at').in('assignment_id',assignments.map(x=>x.id)):Promise.resolve({data:[],error:null}),
+tests.length?client.from('education_test_attempts').select('id,test_id,status,attempt_number,submitted_at,total_score,points_possible,teacher_feedback').in('test_id',tests.map(x=>x.id)).eq('student_user_id',student.student_user_id||'00000000-0000-0000-0000-000000000000').order('submitted_at',{ascending:false}):Promise.resolve({data:[],error:null})
+]);
+const submissions=subRes.data||[],attempts=attemptRes.data||[];
+const reviewsRes=submissions.length?await client.from('education_assignment_reviews').select('submission_id,marks_awarded,teacher_feedback,graded_at').in('submission_id',submissions.map(x=>x.id)): {data:[],error:null};
+const reviews=new Map((reviewsRes.data||[]).map(x=>[x.submission_id,x]));
+const gradedAssignments=submissions.filter(x=>x.status==='returned'&&reviews.has(x.id));
+const gradedTests=attempts.filter(x=>x.submitted_at&&x.total_score!==null&&x.points_possible);
+setStats([['Published lessons',lessons.length],['Lessons completed',lessons.filter(x=>lessonIds.has(x.id)).length],['Assignments',assignments.length],['Marked homework',gradedAssignments.length],['Test attempts',attempts.filter(x=>x.submitted_at).length],['Graded tests',gradedTests.length]]);
+const lessonHost=$('lesson-report');clear('lesson-report');
+if(!lessons.length)empty(lessonHost,'No published lessons are currently assigned to this student.');
+else lessons.forEach(x=>record(lessonHost,x.title,(x.subject||'General')+' · '+(lessonIds.has(x.id)?'Completed':'Not yet marked complete'),lessonIds.has(x.id)?'Completed '+dateLabel(completions.find(c=>c.lesson_plan_id===x.id)?.completed_at):''));
+const testHost=$('test-report');clear('test-report');
+if(!attempts.length)empty(testHost,'No test attempts recorded yet.');
+else {const titleMap=new Map(tests.map(x=>[x.id,x.title]));attempts.forEach(x=>{const el=record(testHost,titleMap.get(x.test_id)||'Assessment','Attempt '+x.attempt_number+' · '+(x.status||'')+' · '+(x.submitted_at?dateLabel(x.submitted_at):'Not submitted'),scoreLabel(x));if(x.points_possible&&x.total_score!==null)addScoreBar(el,'Score',x.total_score,x.points_possible);if(x.teacher_feedback)el.append(node('p','Teacher feedback: '+x.teacher_feedback));});}
+const assignmentHost=$('assignment-report');clear('assignment-report');
+if(!assignments.length)empty(assignmentHost,'No assignments have been published for this student.');
+else assignments.forEach(a=>{const sub=submissions.filter(x=>x.assignment_id===a.id);const el=record(assignmentHost,a.title,(a.subject||'General')+' · Due '+(a.due_date||'not set')+' · '+a.max_marks+' marks',sub.length?sub.map(x=>x.status).join(', '):'Not submitted');sub.forEach(x=>{const r=reviews.get(x.id);if(r){addScoreBar(el,'Homework mark',r.marks_awarded,a.max_marks);if(r.teacher_feedback)el.append(node('p','Feedback: '+r.teacher_feedback));}});});
+const activity=$('activity-report');clear('activity-report');record(activity,'Lesson completion',lessons.filter(x=>lessonIds.has(x.id)).length+' of '+lessons.length+' lessons completed');record(activity,'Homework progress',gradedAssignments.length+' of '+assignments.length+' assignments marked and returned');record(activity,'Assessment progress',gradedTests.length+' graded test attempt(s)');
+renderInsights({lessons,completedLessons:completions,tests,assignments,gradedAssignments,gradedTests});
+if([lessonsRes,completionRes,assignmentsRes,testsRes,subRes,attemptRes,reviewsRes].some(x=>x.error))setStatus('Report loaded with some unavailable sections. Check permissions or refresh.',true);else setStatus('Report ready for '+student.student_name+'.');
+}
+async function initTeacher(){
+$('selector-panel').hidden=false;$('student-tools').hidden=true;$('page-intro').textContent='Teacher view: review each linked student’s lessons, assessments and homework in one printable report.';
+const {data,error}=await client.from('education_students').select('id,student_name,student_email,grade,student_user_id').eq('user_id',currentUser.id).order('student_name');
+if(error){setStatus('Could not load your linked students. Please refresh or contact the site owner.',true);return}
+students=data||[];const select=$('student-select');select.replaceChildren();select.append(new Option(students.length?'Choose a student':'No linked students yet',''));
+students.forEach(st=>select.append(new Option(st.student_name+(st.grade?' · '+st.grade:''),st.id)));
+select.addEventListener('change',()=>{const chosen=students.find(x=>x.id===select.value);if(chosen)loadTeacherReport(chosen);});
+if(students.length){await loadTeacherReport(students[0]);}else{setStats([['Linked students',0]]);setStatus('Add a student in the Education Dashboard to begin creating reports.');}
+}
+async function initStudent(){
+$('selector-panel').hidden=true;$('student-tools').hidden=false;$('education-link').href='student-dashboard.html';$('education-link').textContent='Student Dashboard →';
+$('page-intro').textContent='Your personal learning report, bringing together lessons, quiz results, homework, achievements and practice.';
+const {data:links,error}=await client.from('education_students').select('id,user_id,student_name,grade').eq('student_user_id',currentUser.id);
+if(error||!links?.length){setStatus('No linked student record was found. Check with your teacher.',true);return}
+const ids=links.map(x=>x.id);
+const [lessonsRes,completionsRes,testsRes,assignmentsRes,practiceRes,achRes]=await Promise.all([
+client.from('education_lesson_plans').select('id,title,subject,grade_level').in('user_id',[...new Set(links.map(x=>x.user_id))]).eq('status','published'),
+client.from('education_student_lesson_progress').select('id,lesson_plan_id,completed_at').order('completed_at',{ascending:false}),
+client.from('education_test_attempts').select('id,test_id,attempt_number,status,submitted_at,total_score,points_possible,teacher_feedback').eq('student_user_id',currentUser.id).order('submitted_at',{ascending:false,nullsFirst:false}),
+client.from('education_assignments').select('id,title,subject,due_date,max_marks,student_id').in('student_id',ids).eq('status','published').order('due_date',{ascending:true,nullsFirst:false}),
+client.from('education_learning_progress').select('id,is_correct,completed_at').eq('student_user_id',currentUser.id).order('completed_at',{ascending:false}).limit(500),
+client.from('user_achievements').select('achievement_key,earned_at').eq('user_id',currentUser.id).order('earned_at',{ascending:false}).limit(100)
+]);
+const lessons=lessonsRes.data||[],completions=completionsRes.data||[],attempts=testsRes.data||[],assignments=assignmentsRes.data||[],practice=practiceRes.data||[],achievements=achRes.data||[];
+const [testRes,subRes]=await Promise.all([
+attempts.length?client.from('education_tests').select('id,title').in('id',[...new Set(attempts.map(x=>x.test_id))]):Promise.resolve({data:[],error:null}),
+assignments.length?client.from('education_assignment_submissions').select('id,assignment_id,status,submitted_at').eq('student_user_id',currentUser.id).in('assignment_id',assignments.map(x=>x.id)):Promise.resolve({data:[],error:null})
+]);
+const submissions=subRes.data||[];
+const reviewsRes=submissions.length?await client.from('education_assignment_reviews').select('submission_id,marks_awarded,teacher_feedback').in('submission_id',submissions.filter(x=>x.status==='returned').map(x=>x.id)):{data:[],error:null};
+const reviews=new Map((reviewsRes.data||[]).map(x=>[x.submission_id,x]));
+const completedIds=new Set(completions.map(x=>x.lesson_plan_id));
+const gradedTests=attempts.filter(x=>x.submitted_at&&x.total_score!==null&&x.points_possible);
+const gradedAssignments=submissions.filter(x=>x.status==='returned'&&reviews.has(x.id));
+const avg=gradedTests.length?Math.round(gradedTests.reduce((n,x)=>n+safePct(x.total_score,x.points_possible),0)/gradedTests.length)+'%':'—';
+setStats([['Published lessons',lessons.length],['Lessons completed',lessons.filter(x=>completedIds.has(x.id)).length],['Assignments',assignments.length],['Marked homework',gradedAssignments.length],['Submitted tests',attempts.filter(x=>x.submitted_at).length],['Average graded test',avg]]);
+const lessonHost=$('lesson-report');clear('lesson-report');
+if(!lessons.length)empty(lessonHost,'No published lessons yet.');
+else lessons.forEach(x=>record(lessonHost,x.title,(x.subject||'General')+' · '+(completedIds.has(x.id)?'Completed':'In progress'),completedIds.has(x.id)?'Completed '+dateLabel(completions.find(c=>c.lesson_plan_id===x.id)?.completed_at):''));
+const testHost=$('test-report');clear('test-report');const titles=new Map((testRes.data||[]).map(x=>[x.id,x.title]));
+if(!attempts.length)empty(testHost,'No quiz or test attempts yet.');
+else attempts.forEach(x=>{const el=record(testHost,titles.get(x.test_id)||'Assessment','Attempt '+x.attempt_number+' · '+(x.status||'')+' · '+(x.submitted_at?dateLabel(x.submitted_at):'Not submitted'),scoreLabel(x));if(x.points_possible&&x.total_score!==null)addScoreBar(el,'Score',x.total_score,x.points_possible);if(x.teacher_feedback)el.append(node('p','Teacher feedback: '+x.teacher_feedback));});
+const assignmentHost=$('assignment-report');clear('assignment-report');
+if(!assignments.length)empty(assignmentHost,'No published homework yet.');
+else assignments.forEach(a=>{const sub=submissions.find(x=>x.assignment_id===a.id);const el=record(assignmentHost,a.title,(a.subject||'General')+' · Due '+(a.due_date||'not set')+' · '+a.max_marks+' marks',sub?sub.status:'Not started');const review=sub?reviews.get(sub.id):null;if(review){addScoreBar(el,'Mark',review.marks_awarded,a.max_marks);if(review.teacher_feedback)el.append(node('p','Teacher feedback: '+review.teacher_feedback));}});
+const activity=$('activity-report');clear('activity-report');record(activity,'Practice attempts',practice.length);record(activity,'Correct answers',practice.filter(x=>x.is_correct===true).length);record(activity,'Achievements earned',achievements.length);
+if(achievements.length)achievements.slice(0,8).forEach(x=>record(activity,x.achievement_key.replace(/[_-]+/g,' '),'Earned '+dateLabel(x.earned_at)));
+renderInsights({lessons,completedLessons:completions,tests:attempts,assignments,gradedAssignments,gradedTests});
+const all=[lessonsRes,completionsRes,testsRes,assignmentsRes,practiceRes,achRes,testRes,subRes,reviewsRes];
+if(all.some(x=>x.error))setStatus('Report loaded with some unavailable sections. Refresh to retry.',true);else setStatus('Your learning report is ready.');
+}
+client.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace('login.html')});
+(async()=>{
+const {data,error}=await client.auth.getSession();
+if(error||!data.session){window.location.replace('login.html');return}
+currentUser=data.session.user;
+$('page-title').textContent=mode==='student'?'My Learning Report':'Education Reports & Insights';
+$('comments-label').textContent=mode==='student'?'My reflections / next steps':'Teacher comments / learning notes';
+$('teacher-comments').placeholder=mode==='student'?'Write a reflection or goal for your next learning session…':'Add a personal comment or suggested next step before printing this report.';
+$('report-date').textContent='Generated '+new Date().toLocaleString();
+if(mode==='student')await initStudent();else await initTeacher();
+})();
+})();
+</script>
+</body></html>
