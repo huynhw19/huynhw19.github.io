@@ -253,7 +253,7 @@
               yes.disabled=no.disabled=true;
               const result=await client.functions.invoke('kids-messaging',{body:{action:'approve_friendship',friendship_id:f.id,approve}});
               if(result.error||result.data?.error){say(result.data?.error||result.error?.message||'Could not update request.',true);yes.disabled=no.disabled=false;return;}
-              say(approve?'Approval saved. The other family may still need to approve.':'Friend request rejected.');
+              say(approve?'Approval saved. Both families must approve, then a teacher linked to both students must approve the connection.':'Friend request rejected.');
               await loadKidsApprovals();
             };
             yes.addEventListener('click',()=>act(true));no.addEventListener('click',()=>act(false));
