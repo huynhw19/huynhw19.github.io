@@ -1155,8 +1155,8 @@
           const meta=document.createElement('p');meta.className='assignment-meta';meta.textContent=submission.status.toUpperCase()+' · '+(submission.submitted_at?new Date(submission.submitted_at).toLocaleString():'Not submitted');
           const answer=document.createElement('p');answer.style.whiteSpace='pre-wrap';answer.textContent=submission.response_text||'No written response yet.';
           block.append(name,meta,answer);
+          const reviewResult=await client.from('education_assignment_reviews').select('id,marks_awarded,teacher_feedback').eq('submission_id',submission.id).maybeSingle();
           if(submission.status==='submitted'){
-            const reviewResult=await client.from('education_assignment_reviews').select('id,marks_awarded,teacher_feedback').eq('submission_id',submission.id).maybeSingle();
             const markLabel=document.createElement('label');markLabel.textContent='Marks awarded (out of '+assignment.max_marks+')';
             const markInput=document.createElement('input');markInput.type='number';markInput.min='0';markInput.max=String(assignment.max_marks);markInput.step='0.25';markInput.required=true;markInput.value=reviewResult.data?.marks_awarded??'';
             const feedbackLabel=document.createElement('label');feedbackLabel.textContent='Feedback for student';
@@ -1178,6 +1178,11 @@
               note.textContent='Marked and returned to the student.';await loadAssignments();
             });
             block.append(markLabel,markInput,feedbackLabel,feedbackInput,save,note);
+          } else if(submission.status==='returned') {
+            const returned=document.createElement('p');returned.className='assignment-meta';
+            returned.textContent='Returned to student · '+(reviewResult.data?'Marked '+reviewResult.data.marks_awarded+' / '+assignment.max_marks:'Feedback saved');
+            block.append(returned);
+            if(reviewResult.data?.teacher_feedback){const note=document.createElement('p');note.textContent='Your feedback: '+reviewResult.data.teacher_feedback;block.append(note);}
           } else {
             const waiting=document.createElement('p');waiting.className='assignment-meta';waiting.textContent='Draft saved by student; waiting for submission.';block.append(waiting);
           }
