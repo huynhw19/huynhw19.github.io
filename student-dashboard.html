@@ -594,10 +594,10 @@
               async function saveSubmission(nextStatus) {
                 if(!response.value.trim()){state.textContent='Please write your response before saving or submitting.';return;}
                 save.disabled=true;submit.disabled=true;state.textContent=nextStatus==='submitted'?'Submitting your work…':'Saving your draft…';
-                const payload={assignment_id:assignment.id,student_user_id:data.session.user.id,response_text:response.value.trim(),status:nextStatus,submitted_at:nextStatus==='submitted'?new Date().toISOString():null,updated_at:new Date().toISOString()};
+                const submissionFields={response_text:response.value.trim(),status:nextStatus,submitted_at:nextStatus==='submitted'?new Date().toISOString():null,updated_at:new Date().toISOString()};
                 const result=submission
-                  ? await client.from('education_assignment_submissions').update(payload).eq('id',submission.id)
-                  : await client.from('education_assignment_submissions').insert(payload);
+                  ? await client.from('education_assignment_submissions').update(submissionFields).eq('id',submission.id)
+                  : await client.from('education_assignment_submissions').insert({assignment_id:assignment.id,student_user_id:data.session.user.id,...submissionFields});
                 if(result.error){save.disabled=false;submit.disabled=false;state.textContent=result.error.message||'Could not save your work.';return;}
                 state.textContent=nextStatus==='submitted'?'Homework submitted successfully.':'Draft saved. You can return and finish it later.';
                 response.disabled=nextStatus==='submitted';save.disabled=nextStatus==='submitted';submit.disabled=nextStatus==='submitted';
