@@ -196,10 +196,11 @@ Deno.serve(async (req: Request) => {
       const { data: request } = await admin.from("kids_teacher_contacts").select("id")
         .eq("child_id", child.id).eq("teacher_user_id", teacherId).maybeSingle();
       if (!request) return json({ error: "Teacher permission request not found" }, 404);
-      const { error } = await admin.from("kids_teacher_contacts").update({
-        approved_at: approve ? new Date().toISOString() : null,
-        approved_by: approve ? user.id : null,
-      }).eq("id", request.id);
+      const { error } = approve
+        ? await admin.from("kids_teacher_contacts").update({
+            approved_at: new Date().toISOString(), approved_by: user.id,
+          }).eq("id", request.id)
+        : await admin.from("kids_teacher_contacts").delete().eq("id", request.id);
       if (error) return json({ error: "Could not update teacher permission" }, 400);
       return json({ ok: true, approved: approve });
     }
