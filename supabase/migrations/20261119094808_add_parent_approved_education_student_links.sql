@@ -20,6 +20,6 @@ $$;
 revoke all on function private.kids_is_linked_teacher(uuid,uuid),private.kids_can_view_education_link(uuid,uuid) from public,anon;
 grant execute on function private.kids_is_linked_teacher(uuid,uuid),private.kids_can_view_education_link(uuid,uuid) to authenticated;
 alter table public.kids_education_links enable row level security;
-revoke all on public.kids_education_links from public,anon;
+revoke all on public.kids_education_links from public,anon,authenticated;
 grant select on public.kids_education_links to authenticated;
 create policy kids_education_links_related_read on public.kids_education_links for select to authenticated using(private.kids_can_view_education_link(child_id,education_student_id));
