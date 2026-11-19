@@ -447,7 +447,7 @@
       <p>Translate a short message, sentence or paragraph into another language. Choose your languages, enter text and tap Translate.</p>
       <div class="translation-grid">
         <div class="translation-field"><label for="translation-source">Translate from</label><select id="translation-source">
-          <option value="autodetect">Auto-detect language</option><option value="en">English</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="pt-BR">Portuguese (Brazil)</option><option value="zh-CN">Chinese (Simplified)</option><option value="zh-TW">Chinese (Traditional)</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="ar">Arabic</option><option value="hi">Hindi</option><option value="bn">Bengali</option><option value="ur">Urdu</option><option value="id">Indonesian</option><option value="ms">Malay</option><option value="vi">Vietnamese</option><option value="th">Thai</option><option value="tl">Filipino</option><option value="ru">Russian</option><option value="uk">Ukrainian</option><option value="nl">Dutch</option><option value="tr">Turkish</option><option value="pl">Polish</option><option value="el">Greek</option><option value="sv">Swedish</option><option value="da">Danish</option><option value="fi">Finnish</option><option value="no">Norwegian</option><option value="he">Hebrew</option><option value="cs">Czech</option><option value="ro">Romanian</option><option value="hu">Hungarian</option><option value="sw">Swahili</option>
+          <option value="en">English</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="pt-BR">Portuguese (Brazil)</option><option value="zh-CN">Chinese (Simplified)</option><option value="zh-TW">Chinese (Traditional)</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="ar">Arabic</option><option value="hi">Hindi</option><option value="bn">Bengali</option><option value="ur">Urdu</option><option value="id">Indonesian</option><option value="ms">Malay</option><option value="vi">Vietnamese</option><option value="th">Thai</option><option value="tl">Filipino</option><option value="ru">Russian</option><option value="uk">Ukrainian</option><option value="nl">Dutch</option><option value="tr">Turkish</option><option value="pl">Polish</option><option value="el">Greek</option><option value="sv">Swedish</option><option value="da">Danish</option><option value="fi">Finnish</option><option value="no">Norwegian</option><option value="he">Hebrew</option><option value="cs">Czech</option><option value="ro">Romanian</option><option value="hu">Hungarian</option><option value="sw">Swahili</option>
         </select></div>
         <div class="translation-field"><label for="translation-target">Translate to</label><select id="translation-target">
           <option value="en">English</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="pt-BR">Portuguese (Brazil)</option><option value="zh-CN">Chinese (Simplified)</option><option value="zh-TW">Chinese (Traditional)</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="ar">Arabic</option><option value="hi">Hindi</option><option value="bn">Bengali</option><option value="ur">Urdu</option><option value="id">Indonesian</option><option value="ms">Malay</option><option value="vi">Vietnamese</option><option value="th">Thai</option><option value="tl">Filipino</option><option value="ru">Russian</option><option value="uk">Ukrainian</option><option value="nl">Dutch</option><option value="tr">Turkish</option><option value="pl">Polish</option><option value="el">Greek</option><option value="sv">Swedish</option><option value="da">Danish</option><option value="fi">Finnish</option><option value="no">Norwegian</option><option value="he">Hebrew</option><option value="cs">Czech</option><option value="ro">Romanian</option><option value="hu">Hungarian</option><option value="sw">Swahili</option>
@@ -457,7 +457,7 @@
       </div>
       <div class="translation-actions"><button class="button primary" type="button" id="translate-button">Translate text</button><button class="button" type="button" id="translation-swap">↔ Swap languages</button><button class="button" type="button" id="translation-copy">Copy translation</button><button class="button" type="button" id="translation-clear">Clear</button></div>
       <div class="status" id="translation-status" role="status" aria-live="polite">Choose your languages and enter some text to get started.</div>
-      <p class="translation-note">Translations are provided by MyMemory. The free anonymous service is limited to 5,000 characters per day and 500 bytes per request. Your text is sent to MyMemory to be translated, so avoid entering passwords, private information or sensitive content. Machine translations may not be perfect; check important or official translations carefully.</p>
+      <p class="translation-note">Choose the language your text is written in before translating. Translations are provided by MyMemory. The free anonymous service is limited to 5,000 characters per day and 500 bytes per request. Your text is sent to MyMemory to be translated, so avoid entering passwords, private information or sensitive content. Machine translations may not be perfect; check important or official translations carefully.</p>
     </section>
     <section class="quick-paths" aria-label="Choose your next step">
       <article class="quick-path"><strong>I'm new to profiles</strong><p>Learn what a configuration profile can change before installing one.</p><a href="mobileconfig-guide.html">Read the beginner guide →</a></article>
@@ -644,8 +644,8 @@
         outputCount.textContent = output.value.length + ' characters';
       };
       input.addEventListener('input', updateCount);
-      source.addEventListener('change', () => { swap.disabled = source.value === 'autodetect'; });
-      swap.disabled = source.value === 'autodetect';
+      source.addEventListener('change', () => { swap.disabled = false; });
+      swap.disabled = false;
       document.getElementById('translation-clear').addEventListener('click', () => {
         if (requestController) requestController.abort();
         requestId++;
@@ -655,7 +655,7 @@
         setStatus('Text cleared. Enter something new to translate.');
       });
       swap.addEventListener('click', () => {
-        if (source.value === 'autodetect') return;
+        
         const previous = source.value;
         source.value = target.value; target.value = previous;
         const previousText = input.value;
@@ -691,7 +691,9 @@
           const data = await response.json();
           if (id !== requestId) return;
           if (data.responseStatus !== 200 || !data.responseData?.translatedText || /MYMEMORY WARNING/i.test(data.responseData.translatedText)) throw new Error(data.responseDetails||'No translation was returned. Try another language pair or shorter text.');
-          output.value=data.responseData.translatedText;
+          const translatedText = data.responseData.translatedText.trim();
+          if (translatedText.toLocaleLowerCase() === text.toLocaleLowerCase() && source.value !== target.value) throw new Error('The translation service returned the original text. Check the source language and try again.');
+          output.value=translatedText;
           resultNote.textContent='Translation ready'; updateCount();
           setStatus('Translation complete. Please review it for context and accuracy.');
         } catch(error) {
