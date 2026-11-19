@@ -142,6 +142,99 @@ Deno.serve(async (req: Request) => {
       return json({ ok: true });
     }
 
+
+    if (action === "teacher_students") {
+      const { data: links, error } = await admin.from("education_students")
+        .select("student_user_id,student_name,grade,school")
+        .eq("user_id", user.id).not("student_user_id", "is", null);
+      if (error) return json({ error: "Could not load linked students" }, 400);
+      const students = [];
+      for (const link of (links || [])) {
+        if (!link.student_user_id) continue;
+        const { data: child } = await admin.from("family_children")
+          .select("id,child_name,messaging_enabled")
+          .eq("child_user_id", link.student_user_id).maybeSingle();
+        if (!child || !child.messaging_enabled) continue;
+        const { data: contact } = await admin.from("kids_teacher_contacts")
+          .select("requested_at,approved_at").eq("child_id", child.id)
+          .eq("teacher_user_id", user.id).maybeSingle();
+        students.push({
+          child_id: child.id, child_name: child.child_name || link.student_name || "Linked student",
+          grade: link.grade || "", school: link.school || "",
+          requested_at: contact?.requested_at || null, approved: !!contact?.approved_at,
+        });
+      }
+      return json({ students });
+    }
+
+    if (action === "request_teacher_contact") {
+      const childId = String(body.child_id || "");
+      const { data: child } = await admin.from("family_children")
+        .select("id,child_user_id,messaging_enabled").eq("id", childId).maybeSingle();
+      if (!child?.child_user_id || !child.messaging_enabled) return json({ error: "Student profile is not available for messaging" }, 404);
+      const { data: linked } = await admin.from("education_students").select("id")
+        .eq("user_id", user.id).eq("student_user_id", child.child_user_id).maybeSingle();
+      if (!linked) return json({ error: "You are not the linked teacher for this student" }, 403);
+      const { error } = await admin.from("kids_teacher_contacts").upsert({
+        child_id: child.id, teacher_user_id: user.id, requested_at: new Date().toISOString(),
+        approved_at: null, approved_by: null,
+      }, { onConflict: "child_id,teacher_user_id" });
+      if (error) return json({ error: "Could not send parent permission request" }, 400);
+      return json({ ok: true, status: "pending" });
+    }
+
+    if (action === "review_teacher_contact") {
+      const childId = String(body.child_id || "");
+      const teacherId = String(body.teacher_user_id || "");
+      const approve = body.approve === true;
+      const { data: child } = await admin.from("family_children")
+        .select("id,child_user_id").eq("id", childId).eq("parent_id", user.id).maybeSingle();
+      if (!child) return json({ error: "Child profile not found" }, 404);
+      const { data: linked } = await admin.from("education_students").select("id")
+        .eq("user_id", teacherId).eq("student_user_id", child.child_user_id).maybeSingle();
+      if (!linked) return json({ error: "This teacher is no longer linked to the student" }, 403);
+      const { data: request } = await admin.from("kids_teacher_contacts").select("id")
+        .eq("child_id", child.id).eq("teacher_user_id", teacherId).maybeSingle();
+      if (!request) return json({ error: "Teacher permission request not found" }, 404);
+      const { error } = await admin.from("kids_teacher_contacts").update({
+        approved_at: approve ? new Date().toISOString() : null,
+        approved_by: approve ? user.id : null,
+      }).eq("id", request.id);
+      if (error) return json({ error: "Could not update teacher permission" }, 400);
+      return json({ ok: true, approved: approve });
+    }
+
+    if (action === "child_contacts") {
+      const { data: child } = await admin.from("family_children")
+        .select("id,parent_id,child_name,messaging_enabled").eq("child_user_id", user.id).maybeSingle();
+      if (!child || !child.messaging_enabled) return json({ error: "Messaging is not enabled for this child" }, 403);
+      const contacts = [];
+      const { data: parentData } = await admin.auth.admin.getUserById(child.parent_id);
+      contacts.push({
+        adult_user_id: child.parent_id, role: "Parent or guardian",
+        display_name: parentData?.user?.user_metadata?.display_name || "Parent or guardian",
+      });
+      const { data: teacherRows } = await admin.from("kids_teacher_contacts")
+        .select("teacher_user_id").eq("child_id", child.id).not("approved_at", "is", null);
+      for (const row of (teacherRows || [])) {
+        const { data: teacherData } = await admin.auth.admin.getUserById(row.teacher_user_id);
+        contacts.push({
+          adult_user_id: row.teacher_user_id, role: "Teacher",
+          display_name: teacherData?.user?.user_metadata?.display_name || teacherData?.user?.user_metadata?.full_name || "Approved teacher",
+        });
+      }
+      return json({ contacts });
+    }
+
+    if (action === "teacher_approve_friendship") {
+      const friendshipId = String(body.friendship_id || "");
+      const { data: status, error } = await admin.rpc("kids_teacher_approve_friendship", {
+        p_friendship_id: friendshipId,
+      });
+      if (error) return json({ error: error.message }, 403);
+      return json({ ok: true, status });
+    }
+
     if (action === "delete_child_profile") {
       const childId = String(body.child_id || "");
       const { data: child } = await admin.from("family_children")
