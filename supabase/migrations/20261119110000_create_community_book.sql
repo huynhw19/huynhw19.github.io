@@ -132,8 +132,15 @@ create table if not exists public.community_book_favourites (
 );
 alter table public.community_book_favourites enable row level security;
 drop policy if exists community_book_favourites_owner_all on public.community_book_favourites;
-create policy community_book_favourites_owner_all on public.community_book_favourites for all to authenticated
-using (user_id=(select auth.uid())) with check (user_id=(select auth.uid()) and exists(select 1 from public.community_books b where b.id=book_id and b.status='published'));
+drop policy if exists community_book_favourites_read_self on public.community_book_favourites;
+drop policy if exists community_book_favourites_insert_published on public.community_book_favourites;
+drop policy if exists community_book_favourites_delete_self on public.community_book_favourites;
+create policy community_book_favourites_read_self on public.community_book_favourites for select to authenticated
+using (user_id=(select auth.uid()));
+create policy community_book_favourites_insert_published on public.community_book_favourites for insert to authenticated
+with check (user_id=(select auth.uid()) and exists(select 1 from public.community_books b where b.id=book_id and b.status='published'));
+create policy community_book_favourites_delete_self on public.community_book_favourites for delete to authenticated
+using (user_id=(select auth.uid()));
 revoke all on public.community_book_favourites from anon, public;
 grant select,insert,delete on public.community_book_favourites to authenticated;
 
