@@ -23,6 +23,7 @@ Teachers see only linked students whose parent has approved messaging. They can 
 - kids_adult_conversations / kids_adult_messages: private parent/teacher conversations.
 - Existing kids_friendships / kids_messages: classmate conversations, now requiring parent and linked-teacher approval.
 - Row Level Security and private helper functions enforce access; the Edge Function verifies caller identity before privileged parent and teacher actions.
+- A database trigger limits each sender to 20 messages per minute. Changing or removing an Education link revokes teacher contacts and clears affected teacher approvals.
 - kids_messages_safe_content_only and kids_adult_messages_safe_content restrict payloads to text, stickers, or bounded drawing JSON.
 - Report and remove-friend controls reuse the existing Kids safety tables and parent inbox.
 
