@@ -1074,7 +1074,7 @@
       async function loadAssignments() {
         assignmentList.replaceChildren();
         const { data, error } = await client.from('education_assignments')
-          .select('id,student_id,title,instructions,due_date,status,created_at,education_students(student_name)')
+          .select('id,student_id,title,subject,instructions,due_date,max_marks,status,created_at,education_students(student_name)')
           .eq('user_id', currentUserId).order('created_at', { ascending: false });
         if (error) {
           const p = document.createElement('p'); p.className = 'error';
