@@ -38,11 +38,11 @@ const $=id=>document.getElementById(id),status=$('status'),content=$('insights')
 const say=(m,e=false)=>{status.hidden=false;status.textContent=m;status.classList.toggle('error',e)};
 if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient){say('Authentication is not configured. Please try again later.',true);return}
 const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const isoDays=n=>{const a=[];const now=new Date();for(let i=n-1;i>=0;i--){const d=new Date(now);d.setHours(0,0,0,0);d.setDate(d.getDate()-i);a.push(d.toISOString().slice(0,10))}return a};
+const dayKey=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};const isoDays=n=>{const a=[];const now=new Date();for(let i=n-1;i>=0;i--){const d=new Date(now);d.setHours(0,0,0,0);d.setDate(d.getDate()-i);a.push(dayKey(d))}return a};
 async function load(){
  const {data:sd,error:se}=await client.auth.getSession();if(se)throw se;if(!sd.session){say('Please sign in to view your private Personal Insights. ');const a=document.createElement('a');a.href='login.html?next=personal-insights.html';a.textContent='Sign in';status.append(a);content.hidden=true;return}
  const {data:ud,error:ue}=await client.auth.getUser();if(ue||!ud.user)throw ue||new Error('Could not verify your account.');
- const user=ud.user,now=new Date(),today=now.toISOString().slice(0,10),since=new Date(now);since.setDate(since.getDate()-29);since.setHours(0,0,0,0);const sinceDay=since.toISOString().slice(0,10);const nextWeek=new Date(now);nextWeek.setDate(nextWeek.getDate()+7);
+ const user=ud.user,now=new Date(),today=dayKey(now),since=new Date(now);since.setDate(since.getDate()-29);since.setHours(0,0,0,0);const sinceDay=dayKey(since);const nextWeek=new Date(now);nextWeek.setDate(nextWeek.getDate()+7);
  const queries=await Promise.all([
  client.from('planner_items').select('id,item_type,status,due_at,completed_at,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(2000),
  client.from('habits').select('id,archived_at,frequency,target_per_week,created_at').eq('user_id',user.id).limit(1000),
@@ -53,7 +53,7 @@ async function load(){
  ]);
  const labels=['Planner','Habits','Habit check-ins','Notes','Drive files','Achievements'];for(let i=0;i<queries.length;i++)if(queries[i].error)throw new Error(labels[i]+': '+queries[i].error.message);
  const [plannerQ,habitsQ,entriesQ,notesQ,driveQ,achQ]=queries,planner=plannerQ.data||[],habits=habitsQ.data||[],entries=entriesQ.data||[],notes=notesQ.data||[],files=driveQ.data||[],ach=achQ.data||[];
- const activeHabits=habits.filter(h=>!h.archived_at),completedTasks=planner.filter(p=>p.status==='completed'&&p.completed_at&&p.completed_at>=since.toISOString()),upcoming=planner.filter(p=>p.status!=='completed'&&p.due_at&&new Date(p.due_at)>=now&&new Date(p.due_at)<=nextWeek),activeNotes=notes.filter(n=>!n.deleted_at&&!n.is_archived),liveFiles=files.filter(f=>!f.deleted_at&&f.item_type==='file');
+ const activeHabits=habits.filter(h=>!h.archived_at),completedTasks=planner.filter(p=>p.item_type==='task'&&p.status==='completed'&&p.updated_at&&p.updated_at>=since.toISOString()),upcoming=planner.filter(p=>p.status!=='completed'&&p.due_at&&new Date(p.due_at)>=now&&new Date(p.due_at)<=nextWeek),activeNotes=notes.filter(n=>!n.deleted_at&&!n.is_archived),liveFiles=files.filter(f=>!f.deleted_at&&f.item_type==='file');
  $('habit-total').textContent=entries.length;$('tasks-total').textContent=completedTasks.length;$('active-habits').textContent=activeHabits.length;$('achievement-total').textContent=ach.length;$('notes-total').textContent=activeNotes.length;$('files-total').textContent=liveFiles.length;$('planner-total').textContent=planner.length;$('upcoming-total').textContent=upcoming.length;
  const days=isoDays(30),counts=new Map(days.map(d=>[d,0]));for(const e of entries)if(counts.has(e.completed_on))counts.set(e.completed_on,counts.get(e.completed_on)+1);
  const max=Math.max(1,...counts.values());$('habit-chart').replaceChildren();for(const d of days){const n=counts.get(d)||0,bar=document.createElement('div');bar.className='bar'+(d===today?' today':'');bar.style.height=Math.max(4,n/max*100)+'%';bar.title=d+': '+n+' check-in'+(n===1?'':'s');bar.setAttribute('aria-label',bar.title);$('habit-chart').append(bar)}
