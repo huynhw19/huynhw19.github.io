@@ -77,13 +77,7 @@ footer{width:min(1180px,calc(100% - 40px));border-top:1px solid #e1e8ee;font-siz
 <div id="app" hidden>
 <span class="eyebrow">AUSTRALIAN MONEY DASHBOARD · AUD</span><h1>Your money, at a glance.</h1><p class="muted">Everyday spending, savings, bills and transfers — organised in one simple place.</p><div class="notice small"><strong>Manual money tracker.</strong> This page records your own entries; payments and transfers are not executed. This is a manual tracker. It does not connect to a bank or move money.</div>
 
-<section class="card section" aria-labelledby="import-title">
- <div class="toolbar"><h2 id="import-title">Import bank transactions</h2><span class="eyebrow">CSV IMPORT</span></div>
- <p class="muted small">Import a CSV statement downloaded from your Australian bank. The file is read in this browser and is not uploaded to a third-party service. Review transactions before saving them.</p>
- <div class="import-controls"><div class="field"><label for="statement-file">Bank statement CSV</label><input id="statement-file" type="file" accept=".csv,text/csv"></div><div class="field"><label for="import-account">Add transactions to</label><select id="import-account"></select></div></div>
- <div class="actions"><button id="preview-import" type="button" class="secondary">Preview CSV</button><button id="confirm-import" type="button" disabled>Import selected transactions</button></div>
- <p id="import-status" class="notice small" role="status" aria-live="polite" hidden></p><div id="import-preview" class="import-preview section" hidden></div>
-</section>
+
 <div class="layout">
 <section class="card balance"><span class="muted">Total tracked balance</span><div class="amount" id="total-balance">$0.00</div><span class="muted small" id="balance-caption">Across your tracked accounts</span><div class="stats"><div class="stat"><span class="muted small">Money in · this month</span><strong id="month-income">$0.00</strong></div><div class="stat"><span class="muted small">Money out · this month</span><strong id="month-spend">$0.00</strong></div></div></section>
 <section class="card"><h2>Spending breakdown</h2><p class="muted small">Expenses this month by category</p><div id="spending-chart" class="empty">Add transactions to see your spending.</div></section>
@@ -183,56 +177,6 @@ function renderBills(){
  }).join(''):'<div class="empty">No bills saved yet. Add your first bill above.</div>';
 }
 
-let importRows=[];
-function parseCsv(text){
- const lines=[];let row=[],field='',q=false;
- for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(q){if(c==='"'&&n==='"'){field+='"';i++}else if(c==='"')q=false;else field+=c}else if(c==='"')q=true;else if(c===','){row.push(field);field=''}else if(c==='\n'){row.push(field);if(row.some(v=>v.trim()))lines.push(row);row=[];field=''}else if(c!=='\r')field+=c}
- row.push(field);if(row.some(v=>v.trim()))lines.push(row);if(q)throw Error('Unclosed quoted CSV field.');if(!lines.length)throw Error('CSV is empty.');
- const first=lines[0].map(v=>v.trim().replace(/^\uFEFF/,''));
- const dateLike=/^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$/.test(first[0]||'')||/^\d{1,2}\s+[A-Za-z]{3}\s+\d{2,4}$/.test(first[0]||''),amountLike=/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(String(first[1]||'').replace(/[$,\s]/g,''));
- if(dateLike&&amountLike&&first.length>=3){
-  // Headerless NAB exports vary by generation. Older files may include an ID;
-  // newer exports may append balance, category and merchant fields.
-  if(first.length>=8)return lines.map(v=>({date:v[0],amount:v[1],id:v[2]||'',type:v[3]||'',description:v[4]||'',balance:v[5]||'',category:v[6]||'Other',merchant:v[7]||''}));
-  if(first.length===7)return lines.map(v=>({date:v[0],amount:v[1],type:v[2]||'',description:v[3]||'',balance:v[4]||'',category:v[5]||'Other',merchant:v[6]||''}));
-  if(first.length===6)return lines.map(v=>({date:v[0],amount:v[1],id:v[2]||'',type:v[3]||'',description:v[4]||'',balance:v[5]||''}));
-  if(first.length===5){
-   const fifth=String(first[4]||'').replace(/[$,\\s]/g,'');
-   // If column five is numeric it is probably Balance and the optional ID is absent.
-   if(/^[+-]?(?:\\d+\\.?\\d*|\\.\\d+)$/.test(fifth))return lines.map(v=>({date:v[0],amount:v[1],type:v[2]||'',description:v[3]||'',balance:v[4]||''}));
-   return lines.map(v=>({date:v[0],amount:v[1],id:v[2]||'',type:v[3]||'',description:v[4]||''}));
-  }
-  // CommBank and ANZ personal exports use Date, Amount, Description (and sometimes Balance).
-  return lines.map(v=>({date:v[0],amount:v[1],description:v[2],balance:v[3]||''}));
- }
- const headers=lines.shift().map(v=>v.trim().replace(/^\uFEFF/,'').toLowerCase());
- return lines.map(v=>Object.fromEntries(headers.map((h,i)=>[h,(v[i]||'').trim()])));
-}
-function showImportPreview(){
- const file=$('statement-file').files[0],msg=$('import-status'),panel=$('import-preview');importRows=[];panel.hidden=true;$('confirm-import').disabled=true;
- if(!file){msg.hidden=false;msg.classList.add('error');msg.textContent='Choose a CSV file first.';return}
- if(file.size>5*1024*1024){msg.hidden=false;msg.classList.add('error');msg.textContent='Choose a CSV smaller than 5 MB.';return}
- const reader=new FileReader();reader.onload=()=>{try{
-  const records=parseCsv(String(reader.result||''));if(records.length>1000)throw Error('Maximum 1,000 rows per import.');
-  const headers=Object.keys(records[0]||{}),pick=tests=>headers.find(h=>tests.some(t=>t.test(h)))||'';
-  const dateCol=pick([/^date$/, /transaction.*date/, /posting.*date/, /^post date$/]),descCol=pick([/^description$/, /^details$/, /transaction.*description/, /transaction.*details/, /^narrative$/, /^particulars$/, /^memo$/]),amountCol=pick([/^amount$/, /transaction amount/, /^value$/]),debitCol=pick([/^debit$/, /debit amount/, /withdrawal/, /money out/, /^dr$/]),creditCol=pick([/^credit$/, /credit amount/, /deposit/, /money in/, /^cr$/]),merchantCol=pick([/^merchant$/, /^payee$/, /^counterparty$/]),categoryCol=pick([/^category$/]),typeCol=pick([/^type$/, /transaction type$/]);
-  if(!dateCol||!descCol||(!amountCol&&!debitCol&&!creditCol))throw Error('Could not identify the columns. Expected date, description and amount, or debit/credit columns.');
-  const dateOf=v=>{const z=String(v||'').trim(),m=z.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);if(m){let y=+m[3];if(y<100)y+=y<70?2000:1900;const d=new Date(y,+m[2]-1,+m[1],12);return d.getFullYear()===y&&d.getMonth()===+m[2]-1&&d.getDate()===+m[1]?d:null}const named=z.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{2,4})$/);if(named){let y=+named[3];if(y<100)y+=y<70?2000:1900;const months={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11},mo=months[named[2].toLowerCase()];if(mo===undefined)return null;const d=new Date(y,mo,+named[1],12);return d.getFullYear()===y&&d.getMonth()===mo&&d.getDate()===+named[1]?d:null}const d=new Date(z);return isNaN(d)?null:d};
-  const num=v=>{const n=Number(String(v||'').replace(/[$,\s]/g,''));return Number.isFinite(n)?n:0};
-  const existing=new Set(transactions.filter(t=>t.account_id===$('import-account').value).map(t=>[new Date(t.created_at).toISOString().slice(0,10),Number(t.amount).toFixed(2),String(t.description||'').trim().toLowerCase()].join('|'))),seen=new Set();
-  importRows=records.map((r,i)=>{const date=dateOf(r[dateCol]),description=String(r[descCol]||'').trim();let amount=0,kind='expense';
-   if(debitCol||creditCol){const d=Math.abs(num(r[debitCol])),c=Math.abs(num(r[creditCol]));if(c>0){amount=c;kind='income'}else amount=d}
-   else{const raw=String(r[amountCol]||'').trim();amount=Math.abs(num(raw));kind=/^-|^\(.*\)$/.test(raw)?'expense':'income';if(typeCol&&/debit|withdraw|purchase|payment/i.test(r[typeCol]))kind='expense';if(typeCol&&/credit|deposit|refund|salary/i.test(r[typeCol]))kind='income'}
-   return {date,description,amount,kind,merchant:r[merchantCol]||null,category:r[categoryCol]||'Other',row:i+1};
-  }).filter(x=>x.date&&x.description&&x.amount>0).map(x=>{x.key=[x.date.toISOString().slice(0,10),x.amount.toFixed(2),x.description.toLowerCase()].join('|');x.duplicate=existing.has(x.key)||seen.has(x.key);seen.add(x.key);x.selected=!x.duplicate;return x});
-  if(!importRows.length)throw Error('No valid transactions found in this CSV.');
-  const dup=importRows.filter(x=>x.duplicate).length;
-  panel.innerHTML='<table><thead><tr><th>Import</th><th>Date</th><th>Description</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody>'+importRows.map((x,i)=>'<tr><td><input type="checkbox" data-import-index="'+i+'" '+(x.selected?'checked':'')+' '+(x.duplicate?'disabled':'')+'></td><td>'+escapeHtml(x.date.toLocaleDateString('en-AU'))+'</td><td>'+escapeHtml(x.description)+'</td><td>'+x.kind+'</td><td>'+money(x.amount)+'</td><td>'+(x.duplicate?'Possible duplicate':'Ready')+'</td></tr>').join('')+'</tbody></table>';
-  panel.hidden=false;msg.hidden=false;msg.classList.remove('error');msg.textContent=importRows.length+' valid rows · '+dup+' possible duplicates skipped · '+(records.length-importRows.length)+' invalid rows ignored.';$('confirm-import').disabled=!importRows.some(x=>x.selected);
- }catch(e){msg.hidden=false;msg.classList.add('error');msg.textContent=e.message||'Could not read CSV.'}};
- reader.onerror=()=>{msg.hidden=false;msg.classList.add('error');msg.textContent='Could not read file.'};reader.readAsText(file);
-}
-
 async function init(){
  const {data,error}=await db.auth.getSession();if(error)throw error;
  if(!data.session){location.replace('login.html?next=finance.html');return}
@@ -245,16 +189,6 @@ let recoveryStatus={enabled:false,verified:false};const {data:recoveryData,error
  status.hidden=true;app.hidden=false;await load();
 }
 $('signout').addEventListener('click',async()=>{window.CONFIGKIT_PASSKEY_SESSION?.clear();const {error}=await db.auth.signOut({scope:'local'});if(error)setStatus(error.message,true);else location.replace('login.html')});
-$('preview-import').addEventListener('click',showImportPreview);
-$('statement-file').addEventListener('change',()=>{$('import-preview').hidden=true;$('import-status').hidden=true;$('confirm-import').disabled=true;importRows=[]});
-$('import-account').addEventListener('change',()=>{if(importRows.length)showImportPreview()});
-$('import-preview').addEventListener('change',e=>{const cb=e.target.closest('[data-import-index]');if(!cb)return;importRows[Number(cb.dataset.importIndex)].selected=cb.checked;$('confirm-import').disabled=!importRows.some(x=>x.selected)});
-$('confirm-import').addEventListener('click',async()=>{const button=$('confirm-import'),msg=$('import-status'),accountId=$('import-account').value,selected=importRows.filter(x=>x.selected&&!x.duplicate);if(!accountId||!selected.length)return;button.disabled=true;button.textContent='Importing…';
- const payload=selected.map(x=>({user_id:user.id,account_id:accountId,kind:x.kind,amount:x.amount,description:x.description.slice(0,160),category:(x.category||'Other').slice(0,80),merchant:x.merchant?x.merchant.slice(0,100):null,created_at:x.date.toISOString()}));
- const {error}=await db.from('money_transactions').insert(payload);if(error){msg.hidden=false;msg.classList.add('error');msg.textContent='Import failed: '+error.message;button.disabled=false;button.textContent='Import selected transactions';return}
- msg.hidden=false;msg.classList.remove('error');msg.textContent=payload.length+' transactions imported successfully.';$('import-preview').hidden=true;$('statement-file').value='';importRows=[];button.textContent='Import selected transactions';await load();
-});
-
 $('show-account-form').addEventListener('click',()=>{$('account-form-card').hidden=false;$('account-name').focus()});
 $('cancel-account').addEventListener('click',()=>{$('account-form-card').hidden=true});
 $('account-form').addEventListener('submit',async e=>{e.preventDefault();const payload={user_id:user.id,name:$('account-name').value.trim(),account_type:$('account-type').value,currency:$('account-currency').value,opening_balance:Number($('account-opening').value)};const {error}=await db.from('money_accounts').insert(payload);if(error){setStatus(error.message,true);return}$('account-form').reset();$('account-form-card').hidden=true;await load()});
