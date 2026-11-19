@@ -457,7 +457,7 @@
       </div>
       <div class="translation-actions"><button class="button primary" type="button" id="translate-button">Translate text</button><button class="button" type="button" id="translation-swap">↔ Swap languages</button><button class="button" type="button" id="translation-copy">Copy translation</button><button class="button" type="button" id="translation-clear">Clear</button></div>
       <div class="status" id="translation-status" role="status" aria-live="polite">Choose your languages and enter some text to get started.</div>
-      <p class="translation-note">Choose the language your text is written in before translating. Translations are provided by MyMemory. The free anonymous service is limited to 5,000 characters per day and 500 bytes per request. Your text is sent to MyMemory to be translated, so avoid entering passwords, private information or sensitive content. Machine translations may not be perfect; check important or official translations carefully.</p>
+      <p class="translation-note">Choose the language your text is written in before translating. Translations are powered by ConfigKit AI through Groq. You must be signed in. Your text is sent securely to the AI translation service; do not enter passwords, private information or sensitive content. AI translations can make mistakes, so check important or official translations carefully. Free AI usage limits may apply.</p>
     </section>
     <section class="quick-paths" aria-label="Choose your next step">
       <article class="quick-path"><strong>I'm new to profiles</strong><p>Learn what a configuration profile can change before installing one.</p><a href="mobileconfig-guide.html">Read the beginner guide →</a></article>
@@ -633,8 +633,8 @@
       const outputCount = document.getElementById('translation-output-count');
       const count = document.getElementById('translation-count');
       const swap = document.getElementById('translation-swap');
-      let requestController = null;
       let requestId = 0;
+      let db = null;
       const setStatus = (message, error = false) => {
         status.className = error ? 'status error' : 'status';
         status.textContent = message;
@@ -644,65 +644,64 @@
         outputCount.textContent = output.value.length + ' characters';
       };
       input.addEventListener('input', updateCount);
-      source.addEventListener('change', () => { swap.disabled = false; });
       swap.disabled = false;
       document.getElementById('translation-clear').addEventListener('click', () => {
-        if (requestController) requestController.abort();
-        requestId++;
-        input.value = ''; output.value = '';
-        resultNote.textContent = 'Ready when you are';
-        updateCount(); button.disabled = false;
-        setStatus('Text cleared. Enter something new to translate.');
+        requestId++; input.value = ''; output.value = '';
+        resultNote.textContent = 'Ready when you are'; updateCount();
+        button.disabled = false; setStatus('Text cleared. Enter something new to translate.');
       });
       swap.addEventListener('click', () => {
-        
-        const previous = source.value;
-        source.value = target.value; target.value = previous;
-        const previousText = input.value;
-        input.value = output.value; output.value = previousText;
+        const previous = source.value; source.value = target.value; target.value = previous;
+        const previousText = input.value; input.value = output.value; output.value = previousText;
         updateCount(); resultNote.textContent = 'Languages swapped';
-        setStatus('Languages swapped. Translate again to check the reverse translation.');
+        setStatus('Languages swapped. Translate again for the reverse translation.');
       });
       document.getElementById('translation-copy').addEventListener('click', async () => {
         if (!output.value) { setStatus('There is no translation to copy yet.', true); return; }
-        try {
-          await navigator.clipboard.writeText(output.value);
-          setStatus('Translation copied to your clipboard.');
-        } catch {
-          output.focus(); output.select();
-          setStatus('Select the translation and use Copy from your device menu.');
-        }
+        try { await navigator.clipboard.writeText(output.value); setStatus('Translation copied to your clipboard.'); }
+        catch { output.focus(); output.select(); setStatus('Select the translation and use Copy from your device menu.'); }
       });
       button.addEventListener('click', async () => {
         const text = input.value.trim();
         if (!text) { setStatus('Please enter some text first.', true); input.focus(); return; }
-        if (new TextEncoder().encode(text).length > 500) { setStatus('This text is over the service limit of 500 bytes. Please shorten it.', true); return; }
         if (source.value === target.value) { setStatus('Choose two different languages.', true); return; }
+        if (!db) { setStatus('Please sign in to use AI translation.', true); return; }
         const id = ++requestId;
-        if (requestController) requestController.abort();
-        requestController = new AbortController();
         button.disabled = true; output.value = '';
-        resultNote.textContent = 'Translating…'; updateCount();
-        setStatus('Translating your text…');
+        resultNote.textContent = 'Translating with AI…'; updateCount();
+        setStatus('Translating your text with ConfigKit AI…');
         try {
-          const params = new URLSearchParams({q:text,langpair:source.value+'|'+target.value});
-          const response = await fetch('https://api.mymemory.translated.net/get?'+params.toString(),{headers:{Accept:'application/json'},signal:requestController.signal});
-          if (!response.ok) throw new Error(response.status===429?'The translation service is busy. Please wait and try again.':'The translation service returned an error ('+response.status+').');
-          const data = await response.json();
+          const { data, error } = await db.functions.invoke('configkit-translate', { body: { text, source: source.value, target: target.value } });
           if (id !== requestId) return;
-          if (data.responseStatus !== 200 || !data.responseData?.translatedText || /MYMEMORY WARNING/i.test(data.responseData.translatedText)) throw new Error(data.responseDetails||'No translation was returned. Try another language pair or shorter text.');
-          const translatedText = data.responseData.translatedText.trim();
-          if (translatedText.toLocaleLowerCase() === text.toLocaleLowerCase() && source.value !== target.value) throw new Error('The translation service returned the original text. Check the source language and try again.');
-          output.value=translatedText;
-          resultNote.textContent='Translation ready'; updateCount();
-          setStatus('Translation complete. Please review it for context and accuracy.');
-        } catch(error) {
-          if(error.name==='AbortError') return;
-          output.value=''; resultNote.textContent='Translation unavailable'; updateCount();
-          setStatus(error.message||'Could not translate this text. Please try again later.',true);
-        } finally {
-          if(id===requestId) button.disabled=false;
+          if (error) {
+            let message = error.message || 'The AI translation service could not respond.';
+            try { const detail = await error.context?.json?.(); if (detail?.error) message = detail.error; } catch (_) {}
+            throw new Error(message);
+          }
+          if (!data?.translation) throw new Error(data?.error || 'No translation was returned. Please try again.');
+          output.value = data.translation.trim(); resultNote.textContent = 'Translation ready'; updateCount();
+          setStatus('Translation complete. Please review important translations for accuracy.');
+        } catch (error) {
+          if (id !== requestId) return;
+          output.value = ''; resultNote.textContent = 'Translation unavailable'; updateCount();
+          setStatus(error.message || 'Could not translate this text. Please try again.', true);
+        } finally { if (id === requestId) button.disabled = false; }
+      });
+      document.addEventListener('DOMContentLoaded', async () => {
+        const config = window.CONFIGKIT_AUTH;
+        if (!config?.supabaseUrl || !config?.supabaseAnonKey || !window.supabase?.createClient) {
+          setStatus('Sign-in is not configured. Please try again later.', true); return;
         }
+        try {
+          db = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+          const { data, error } = await db.auth.getSession();
+          if (error) throw error;
+          if (!data.session) {
+            setStatus('Please sign in to use AI-powered translations. Opening sign-in…', true);
+            window.location.href = 'login.html?next=' + encodeURIComponent('index.html#configkit-translation'); return;
+          }
+          setStatus('AI translation is ready. Your text is sent securely to ConfigKit’s translation service.');
+        } catch (error) { setStatus(error.message || 'Could not initialise translation. Please refresh and try again.', true); }
       });
       updateCount();
     })();
