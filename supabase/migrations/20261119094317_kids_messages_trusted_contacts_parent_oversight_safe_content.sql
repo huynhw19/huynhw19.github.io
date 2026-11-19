@@ -74,7 +74,7 @@ grant execute on function public.kids_parent_approve_friendship(uuid,uuid,boolea
 alter table public.kids_teacher_contacts enable row level security;
 alter table public.kids_adult_conversations enable row level security;
 alter table public.kids_adult_messages enable row level security;
-revoke all on public.kids_teacher_contacts,public.kids_adult_conversations,public.kids_adult_messages from public,anon;
+revoke all on public.kids_teacher_contacts,public.kids_adult_conversations,public.kids_adult_messages from public,anon,authenticated;
 grant select on public.kids_teacher_contacts to authenticated;
 grant select,insert on public.kids_adult_conversations to authenticated;
 grant select,insert on public.kids_adult_messages to authenticated;
