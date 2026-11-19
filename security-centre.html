@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A private overview of your ConfigKit account security, sign-in methods and protection settings.">
+<meta name="theme-color" content="#f5f8f5">
+<title>Security Centre — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#17251f;--muted:#65736b;--line:#dfe8e2;--paper:#f5f8f5;--card:#fff;--green:#176344;--mint:#e6f3ea;--red:#9b3030;--gold:#fff7e8}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,920px);margin:auto}header{padding:20px 0;border-bottom:1px solid var(--line)}a{color:var(--green)}header a{font-weight:700;text-decoration:none}main{padding:28px 0 52px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.12;margin:.5rem 0}h2{font-size:1.2rem;margin:0 0 .45rem}.muted{color:var(--muted)}.eyebrow{display:inline-block;border-radius:99px;background:var(--mint);color:var(--green);padding:.25rem .7rem;font-size:.82rem;font-weight:800}.panel,.tile,.status{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 8px 24px #17251f0a}.status{margin:18px 0}.status.error{border-color:#e8bcbc;color:var(--red)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:16px 0}.tile p{margin:.3rem 0 .8rem;color:var(--muted)}.tile a{font-weight:700}.metric{font-weight:800;font-size:1.12rem}.good{color:#176344}.warn{color:#8a5b00}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}button{font:inherit;font-weight:700;padding:10px 14px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);cursor:pointer}button.primary{background:var(--green);color:white;border-color:var(--green)}button:disabled{opacity:.6}.list{padding-left:1.2rem}.list li{margin:.4rem 0}.note{background:var(--gold);border:1px solid #eeddb7;border-radius:12px;padding:14px;margin:16px 0}.small{font-size:.9rem}footer{padding:20px 0 32px;border-top:1px solid var(--line)}[hidden]{display:none!important}@media(max-width:520px){.panel,.tile{padding:15px}}
+</style>
+</head>
+<body>
+<header><a href="dashboard.html">← ConfigKit Dashboard</a></header>
+<main>
+<span class="eyebrow">Your account protection</span>
+<h1>Security Centre</h1>
+<p class="muted">A clear overview of your sign-in security and shortcuts to the controls already available in ConfigKit. Your security details are loaded from your signed-in account.</p>
+<div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
+<section id="security-content" hidden>
+<div class="panel">
+<h2>Security overview</h2>
+<p id="account-email" class="muted"></p>
+<div class="grid">
+ <article class="tile"><h2>Email verification</h2><div id="email-state" class="metric">Checking…</div><p class="small">Confirm your email address to help protect account recovery.</p></article>
+ <article class="tile"><h2>Authenticator (2FA)</h2><div id="mfa-state" class="metric">Checking…</div><p class="small" id="mfa-detail">Checking registered factors…</p></article>
+ <article class="tile"><h2>Current session</h2><div id="session-state" class="metric">Checking…</div><p class="small" id="session-detail">This reflects the current sign-in session only.</p></article>
+ <article class="tile"><h2>Sign-in methods</h2><div id="provider-state" class="metric">Checking…</div><p class="small">Linked sign-in providers reported by your account.</p></article>
+</div>
+<p id="overview-updated" class="muted small" aria-live="polite"></p>
+</div>
+<h2 style="margin-top:26px">Manage your protections</h2>
+<div class="grid">
+ <article class="tile"><h2>Passkeys</h2><p>Use Face ID, Touch ID, a device PIN or a security key for passwordless sign-in. Review and remove old passkeys.</p><a href="account-settings.html#passkeys-title">Manage passkeys →</a></article>
+ <article class="tile"><h2>Two-factor authentication</h2><p>Add or remove authenticator factors and verify a second sign-in step.</p><a href="account-settings.html#mfa-settings-title">Manage 2FA →</a></article>
+ <article class="tile"><h2>Recovery codes</h2><p>Generate or replace single-use backup codes and revoke codes you no longer trust.</p><a href="account-settings.html#recovery-codes-title">Manage recovery codes →</a></article>
+ <article class="tile"><h2>Devices and sessions</h2><p>Review devices that have accessed your account and revoke sessions you do not recognise.</p><a href="account-settings.html#sessions-title">Review sessions →</a></article>
+ <article class="tile"><h2>Connected apps</h2><p>Review third-party applications authorised to access your ConfigKit account.</p><a href="connected-apps.html">Manage connected apps →</a></article>
+ <article class="tile"><h2>Sign-in providers</h2><p>Review linked providers and disconnect any you no longer use.</p><a href="account-settings.html#providers-title">Manage providers →</a></article>
+ <article class="tile"><h2>Password and email</h2><p>Update your primary sign-in details. Email changes may require confirmation.</p><a href="account-settings.html#security-title">Update sign-in details →</a></article>
+ <article class="tile"><h2>Emergency account lock</h2><p>Temporarily lock ConfigKit access across your signed-in devices if you suspect unauthorised access.</p><a href="account-settings.html#lock-account-title">Account lock controls →</a></article>
+</div>
+<div class="note"><strong>Important:</strong> If you suspect your email or Google/GitHub account has been compromised, secure that provider directly too. Revoking a ConfigKit session does not revoke sessions or permissions at an external provider. Already-issued access tokens may remain valid until expiry.</div>
+<div class="actions"><a href="account-settings.html">Open all account settings →</a><button id="refresh" type="button">Refresh security status</button></div>
+</section>
+<section class="panel" style="margin-top:18px">
+<h2>Good security habits</h2>
+<ul class="list">
+<li>Enable an authenticator factor and keep a separate backup method.</li>
+<li>Use a unique password and a passkey where supported.</li>
+<li>Keep recovery codes in a password manager, not in screenshots or shared notes.</li>
+<li>Review active sessions after using a shared or unfamiliar device.</li>
+<li>Never share verification codes, recovery codes or setup keys with anyone.</li>
+</ul>
+<p class="muted small">ConfigKit does not display your password, authenticator secret, passkey private key or recovery-code values in this overview.</p>
+</section>
+</main>
+<footer><a href="dashboard.html">Dashboard</a> · <a href="account-settings.html">Account settings</a> · <a href="privacy.html">Privacy</a></footer>
+<script src="auth-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+<script>
+(async()=>{
+ const status=document.getElementById('status'),content=document.getElementById('security-content');
+ const cfg=window.CONFIGKIT_AUTH||{};
+ const say=(message,error=false)=>{status.hidden=false;status.textContent=message;status.classList.toggle('error',error)};
+ if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient){say('Authentication is not configured. Please try again later.',true);return}
+ const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ async function load(){
+  const {data:sessionData,error:sessionError}=await client.auth.getSession();
+  if(sessionError)throw sessionError;
+  if(!sessionData.session){say('You are signed out. Please sign in to view your private security overview.');const a=document.createElement('a');a.href='login.html?next=security-centre.html';a.textContent='Sign in to ConfigKit';status.append(' ',a);content.hidden=true;return}
+  const {data:userData,error:userError}=await client.auth.getUser();
+  if(userError||!userData.user)throw userError||new Error('Your account could not be verified. Please sign in again.');
+  const user=userData.user;
+  const [{data:factorsData,error:factorsError},{data:assuranceData,error:assuranceError}]=await Promise.all([client.auth.mfa.listFactors(),client.auth.mfa.getAuthenticatorAssuranceLevel()]);
+  if(factorsError)throw factorsError;if(assuranceError)throw assuranceError;
+  const verified=(factorsData?.all||[]).filter(f=>f.status==='verified');
+  document.getElementById('account-email').textContent=user.email||'Signed-in account';
+  const email=document.getElementById('email-state');email.textContent=user.email_confirmed_at?'Verified':'Not verified';email.className='metric '+(user.email_confirmed_at?'good':'warn');
+  const mfa=document.getElementById('mfa-state');mfa.textContent=verified.length?verified.length+' verified factor'+(verified.length===1?'':'s'):'Not enabled';mfa.className='metric '+(verified.length?'good':'warn');
+  document.getElementById('mfa-detail').textContent=verified.length?verified.map(f=>f.factor_type==='totp'?'Authenticator app':f.factor_type==='phone'?'Phone verification':f.factor_type==='webauthn'?'Security key':'Additional factor').join(', '):'Add an authenticator factor for stronger sign-in protection.';
+  const session=document.getElementById('session-state');session.textContent=assuranceData.currentLevel==='aal2'?'2-step verified':assuranceData.currentLevel==='aal1'?'Signed in · first factor':'Status unavailable';session.className='metric '+(assuranceData.currentLevel==='aal2'?'good':'warn');
+  document.getElementById('session-detail').textContent=assuranceData.nextLevel==='aal2'&&assuranceData.currentLevel!=='aal2'?'A second factor is available for this account but has not been completed in this session.':'Current session assurance level: '+(assuranceData.currentLevel||'not reported')+'.';
+  const providers=[...new Set((user.identities||[]).map(i=>i.provider).filter(Boolean))];document.getElementById('provider-state').textContent=providers.length?providers.join(', '):'No linked identities reported';
+  document.getElementById('overview-updated').textContent='Status checked '+new Date().toLocaleString()+'.';
+  status.textContent='Your private security overview is up to date.';status.classList.remove('error');content.hidden=false;
+ }
+ document.getElementById('refresh').addEventListener('click',async()=>{const b=document.getElementById('refresh');b.disabled=true;try{await load()}catch(e){say('Could not refresh security status. Please try again.',true)}finally{b.disabled=false}});
+ try{await load()}catch(e){console.warn('Security overview unavailable:',e);say('We could not load your security status. Open Account settings to retry or check your sign-in.',true)}
+ client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)window.location.replace('login.html')});
+})().catch(e=>{const s=document.getElementById('status');s.textContent='Security Centre could not load. Please try again.';s.classList.add('error')});
+</script>
+</body>
+</html>
