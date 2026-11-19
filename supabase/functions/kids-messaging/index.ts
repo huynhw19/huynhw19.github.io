@@ -236,11 +236,13 @@ Deno.serve(async (req: Request) => {
       const { data: child } = await admin.from("family_children")
         .select("id,child_user_id").eq("id", childId).eq("parent_id", user.id).maybeSingle();
       if (!child) return json({ error: "Child profile not found" }, 404);
-      const { data: teacherRecords } = await admin.from("education_students").select("id").eq("user_id", teacherId);
-      const recordIds = (teacherRecords || []).map((row) => row.id);
-      const { data: linked } = recordIds.length ? await admin.from("kids_education_links").select("id")
-        .eq("child_id", child.id).in("education_student_id", recordIds).maybeSingle() : { data: null };
-      if (!linked) return json({ error: "This teacher is no longer linked to the student" }, 403);
+      if (approve) {
+        const { data: teacherRecords } = await admin.from("education_students").select("id").eq("user_id", teacherId);
+        const recordIds = (teacherRecords || []).map((row) => row.id);
+        const { data: linked } = recordIds.length ? await admin.from("kids_education_links").select("id")
+          .eq("child_id", child.id).in("education_student_id", recordIds).maybeSingle() : { data: null };
+        if (!linked) return json({ error: "This teacher is no longer linked to the student" }, 403);
+      }
       const { data: request } = await admin.from("kids_teacher_contacts").select("id")
         .eq("child_id", child.id).eq("teacher_user_id", teacherId).maybeSingle();
       if (!request) return json({ error: "Teacher permission request not found" }, 404);
