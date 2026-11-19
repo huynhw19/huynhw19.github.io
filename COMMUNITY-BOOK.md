@@ -8,7 +8,7 @@ Community Book is a signed-in, curated reading and publishing area for ConfigKit
 - Read chapters in the browser.
 - Save books to a personal favourites/reading list.
 - Leave one rating and review per book.
-- Report books or reviews privately to the ConfigKit administrator.
+- Report books or reviews privately to the ConfigKit administrator. The administrator can hide a reported review or remove a reported book from public view.
 
 ## Author approval
 
@@ -30,6 +30,8 @@ Migrations:
 - `20261119120000_publish_approved_author_profiles.sql`
 - `20261119123000_lock_removed_community_books.sql`
 - `20261119130000_add_review_moderation_and_reports.sql`
+- `20261119133000_gate_author_profile_access.sql`
+- `20261119140000_unpublish_books_when_author_suspended.sql`
 - `20261119133000_gate_author_profile_access.sql`
 - `20261119140000_unpublish_books_when_author_suspended.sql`
 
