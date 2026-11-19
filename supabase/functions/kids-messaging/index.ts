@@ -84,10 +84,15 @@ Deno.serve(async (req: Request) => {
         .eq("child_user_id", user.id).maybeSingle();
       if (!child || !child.messaging_enabled || !child.call_enabled) return json({ allowed: false });
       const { data: friendship } = await admin.from("kids_friendships")
-        .select("id,child_a_id,child_b_id,parent_a_approved,parent_b_approved,teacher_approved_at,status")
+        .select("id,child_a_id,child_b_id,parent_a_approved,parent_b_approved,teacher_approved_at,teacher_approved_by,status")
         .eq("id", friendshipId).maybeSingle();
-      if (!friendship || friendship.status !== "approved" || !friendship.parent_a_approved || !friendship.parent_b_approved || !friendship.teacher_approved_at ||
+      if (!friendship || friendship.status !== "approved" || !friendship.parent_a_approved || !friendship.parent_b_approved || !friendship.teacher_approved_at || !friendship.teacher_approved_by ||
           ![friendship.child_a_id, friendship.child_b_id].includes(child.id)) return json({ allowed: false });
+      const { data: teacherRecords } = await admin.from("education_students").select("id").eq("user_id", friendship.teacher_approved_by);
+      const teacherRecordIds = (teacherRecords || []).map((row) => row.id);
+      const { data: teacherLinks } = teacherRecordIds.length ? await admin.from("kids_education_links").select("child_id")
+        .in("child_id", [friendship.child_a_id, friendship.child_b_id]).in("education_student_id", teacherRecordIds) : { data: [] };
+      if ((teacherLinks || []).length < 2) return json({ allowed: false });
       const otherId = friendship.child_a_id === child.id ? friendship.child_b_id : friendship.child_a_id;
       const { data: other } = await admin.from("family_children").select("call_enabled,messaging_enabled")
         .eq("id", otherId).maybeSingle();
