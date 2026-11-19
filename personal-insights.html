@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="A private personal overview of your ConfigKit planning, habits, notes and saved documents."><title>Personal Insights · ConfigKit</title>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{color-scheme:light;--ink:#17251f;--muted:#66756d;--line:#dce7df;--paper:#f4f8f5;--card:#fff;--green:#176344;--mint:#e4f3e9;--gold:#fff7e8;--red:#9b3030}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(1100px,calc(100% - 32px));margin:auto}header{padding:18px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}header a{font-weight:700;text-decoration:none}main{padding:28px 0 55px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.12;margin:.4rem 0}h2{font-size:1.18rem;margin:0 0 .45rem}.muted{color:var(--muted)}.eyebrow{font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;font-weight:800;color:var(--green)}.status,.panel,.metric,.insight{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px}.status{margin:18px 0}.status.error{border-color:#e9bcbc;color:var(--red)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:18px 0}.metric .value{font-size:2rem;font-weight:850;line-height:1.2;margin:.3rem 0}.metric p,.insight p{margin:.25rem 0;color:var(--muted)}.section{margin:28px 0}.bars{display:grid;grid-template-columns:repeat(30,minmax(3px,1fr));align-items:end;gap:4px;height:130px;margin:20px 0 8px}.bar{min-height:4px;background:#b9ddc8;border-radius:5px 5px 2px 2px;position:relative}.bar.today{background:var(--green)}.bar span{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted)}.legend{font-size:.85rem;color:var(--muted)}.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.insight{margin:10px 0}.insight strong{display:block}.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.links a{display:block;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;font-weight:700}.links a span{display:block;font-size:.88rem;font-weight:400;color:var(--muted)}button{font:inherit;font-weight:700;padding:10px 14px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);cursor:pointer}button:disabled{opacity:.6}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}footer{padding:20px 0 30px;border-top:1px solid var(--line)}[hidden]{display:none!important}@media(max-width:520px){.bars{gap:2px}.metric{padding:14px}.value{font-size:1.7rem}}
+</style></head><body>
+<header><a href="dashboard.html">← ConfigKit Dashboard</a><nav><a href="planner.html">Planner</a> · <a href="habits.html">Habits</a> · <a href="notes.html">Notes</a></nav></header>
+<main><div class="eyebrow">Your personal snapshot</div><h1>Personal Insights</h1><p class="muted">A private overview of your planning, routines and personal workspace. Your information is read from your own signed-in ConfigKit account and stays under the existing account permissions.</p>
+<div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
+<section id="insights" hidden>
+<div class="panel"><div class="eyebrow">Last 30 days</div><h2>Your activity at a glance</h2><div class="grid">
+<article class="metric"><div class="muted">Habit check-ins</div><div class="value" id="habit-total">—</div><p>Completed in the last 30 days</p></article>
+<article class="metric"><div class="muted">Planner tasks completed</div><div class="value" id="tasks-total">—</div><p>Completed in the last 30 days</p></article>
+<article class="metric"><div class="muted">Active habits</div><div class="value" id="active-habits">—</div><p>Habits not archived</p></article>
+<article class="metric"><div class="muted">Achievements</div><div class="value" id="achievement-total">—</div><p>Milestones earned</p></article>
+</div><div class="actions"><button id="refresh" type="button">Refresh insights</button><span class="muted" id="updated" aria-live="polite"></span></div></div>
+<div class="section two">
+<article class="panel"><h2>Habit consistency</h2><p class="muted">Daily check-ins across the last 30 days. Empty days simply mean no check-in was recorded.</p><div class="bars" id="habit-chart" role="img" aria-label="Habit check-ins by day for the last 30 days"></div><p class="legend">Older days ← · → Today</p></article>
+<article class="panel"><h2>Your workspace</h2><div class="grid">
+<div class="metric"><div class="muted">Notes</div><div class="value" id="notes-total">—</div><p>Active notes, excluding trash and archive</p></div>
+<div class="metric"><div class="muted">Saved files</div><div class="value" id="files-total">—</div><p>Non-deleted files in your Drive</p></div>
+<div class="metric"><div class="muted">Planner items</div><div class="value" id="planner-total">—</div><p>Personal items loaded</p></div>
+<div class="metric"><div class="muted">Upcoming items</div><div class="value" id="upcoming-total">—</div><p>Due in the next 7 days</p></div>
+</div></article></div>
+<div class="section"><h2>Personal observations</h2><p class="muted">Simple summaries based on the records currently available. They are descriptive, not predictions or judgements.</p><div id="observations"></div></div>
+<div class="section"><h2>Continue where you left off</h2><div class="links">
+<a href="planner.html">Daily Planner<span>Tasks, events and reminders</span></a>
+<a href="habits.html">Habit Tracker<span>Daily check-ins and weekly goals</span></a>
+<a href="notes.html">Notes &amp; Ideas<span>Private notes, folders and tags</span></a>
+<a href="document-vault.html">Document Vault<span>Receipts, PDFs and personal files</span></a>
+<a href="dashboard.html">Achievements<span>See your ConfigKit milestones</span></a>
+</div></div>
+<p class="muted" style="font-size:.88rem">Privacy: this page reads only summary fields for the signed-in user. It does not read note text, document names, file contents, passwords, recovery codes or private authentication secrets. No data is sent to an analytics provider.</p>
+</section></main><footer><a href="dashboard.html">Dashboard</a> · <a href="privacy.html">Privacy</a></footer>
+<script>
+(async()=>{
+const $=id=>document.getElementById(id),status=$('status'),content=$('insights'),cfg=window.CONFIGKIT_AUTH||{};
+const say=(m,e=false)=>{status.hidden=false;status.textContent=m;status.classList.toggle('error',e)};
+if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient){say('Authentication is not configured. Please try again later.',true);return}
+const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const isoDays=n=>{const a=[];const now=new Date();for(let i=n-1;i>=0;i--){const d=new Date(now);d.setHours(0,0,0,0);d.setDate(d.getDate()-i);a.push(d.toISOString().slice(0,10))}return a};
+async function load(){
+ const {data:sd,error:se}=await client.auth.getSession();if(se)throw se;if(!sd.session){say('Please sign in to view your private Personal Insights. ');const a=document.createElement('a');a.href='login.html?next=personal-insights.html';a.textContent='Sign in';status.append(a);content.hidden=true;return}
+ const {data:ud,error:ue}=await client.auth.getUser();if(ue||!ud.user)throw ue||new Error('Could not verify your account.');
+ const user=ud.user,now=new Date(),today=now.toISOString().slice(0,10),since=new Date(now);since.setDate(since.getDate()-29);since.setHours(0,0,0,0);const sinceDay=since.toISOString().slice(0,10);const nextWeek=new Date(now);nextWeek.setDate(nextWeek.getDate()+7);
+ const queries=await Promise.all([
+ client.from('planner_items').select('id,item_type,status,due_at,completed_at,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(2000),
+ client.from('habits').select('id,archived_at,frequency,target_per_week,created_at').eq('user_id',user.id).limit(1000),
+ client.from('habit_entries').select('id,habit_id,completed_on').eq('user_id',user.id).gte('completed_on',sinceDay).lte('completed_on',today).limit(10000),
+ client.from('configkit_notes').select('id,is_archived,deleted_at').eq('user_id',user.id).limit(2000),
+ client.from('drive_items').select('id,item_type,deleted_at').eq('user_id',user.id).limit(2000),
+ client.from('user_achievements').select('achievement_key').eq('user_id',user.id).limit(500)
+ ]);
+ const labels=['Planner','Habits','Habit check-ins','Notes','Drive files','Achievements'];for(let i=0;i<queries.length;i++)if(queries[i].error)throw new Error(labels[i]+': '+queries[i].error.message);
+ const [plannerQ,habitsQ,entriesQ,notesQ,driveQ,achQ]=queries,planner=plannerQ.data||[],habits=habitsQ.data||[],entries=entriesQ.data||[],notes=notesQ.data||[],files=driveQ.data||[],ach=achQ.data||[];
+ const activeHabits=habits.filter(h=>!h.archived_at),completedTasks=planner.filter(p=>p.status==='completed'&&p.completed_at&&p.completed_at>=since.toISOString()),upcoming=planner.filter(p=>p.status!=='completed'&&p.due_at&&new Date(p.due_at)>=now&&new Date(p.due_at)<=nextWeek),activeNotes=notes.filter(n=>!n.deleted_at&&!n.is_archived),liveFiles=files.filter(f=>!f.deleted_at&&f.item_type==='file');
+ $('habit-total').textContent=entries.length;$('tasks-total').textContent=completedTasks.length;$('active-habits').textContent=activeHabits.length;$('achievement-total').textContent=ach.length;$('notes-total').textContent=activeNotes.length;$('files-total').textContent=liveFiles.length;$('planner-total').textContent=planner.length;$('upcoming-total').textContent=upcoming.length;
+ const days=isoDays(30),counts=new Map(days.map(d=>[d,0]));for(const e of entries)if(counts.has(e.completed_on))counts.set(e.completed_on,counts.get(e.completed_on)+1);
+ const max=Math.max(1,...counts.values());$('habit-chart').replaceChildren();for(const d of days){const n=counts.get(d)||0,bar=document.createElement('div');bar.className='bar'+(d===today?' today':'');bar.style.height=Math.max(4,n/max*100)+'%';bar.title=d+': '+n+' check-in'+(n===1?'':'s');bar.setAttribute('aria-label',bar.title);$('habit-chart').append(bar)}
+ const obs=[];if(!activeHabits.length)obs.push(['Start with one small routine','You have no active habits yet. Add one in Habit Tracker to begin recording check-ins.']);else obs.push(['Your routines','You currently have '+activeHabits.length+' active habit'+(activeHabits.length===1?'':'s')+'. The 30-day chart shows recorded check-ins, not whether you met every target.']);
+ if(completedTasks.length)obs.push(['Planner progress','You completed '+completedTasks.length+' planner item'+(completedTasks.length===1?'':'s')+' during the last 30 days.']);else obs.push(['Planner progress','No completed planner items were recorded in the last 30 days.']);
+ if(upcoming.length)obs.push(['Coming up','You have '+upcoming.length+' incomplete planner item'+(upcoming.length===1?'':'s')+' due within seven days.']);else obs.push(['Coming up','There are no incomplete planner items due in the next seven days.']);
+ obs.push(['Your workspace','You have '+activeNotes.length+' active notes and '+liveFiles.length+' saved files available in your private workspace.']);
+ $('observations').replaceChildren();for(const [title,body] of obs){const box=document.createElement('article');box.className='insight';const strong=document.createElement('strong');strong.textContent=title;const p=document.createElement('p');p.textContent=body;box.append(strong,p);$('observations').append(box)}
+ $('updated').textContent='Updated '+now.toLocaleString();say('Your private insights are up to date.');content.hidden=false;
+}
+$('refresh').addEventListener('click',async()=>{const b=$('refresh');b.disabled=true;try{await load()}catch(e){console.warn('Insights refresh failed:',e);say('Could not refresh your insights. Please try again.',true)}finally{b.disabled=false}});
+try{await load()}catch(e){console.warn('Personal Insights could not load:',e);say('Some personal summaries could not be loaded. Please refresh or check your account access.',true)}
+client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)window.location.replace('login.html')});
+})().catch(e=>{const s=document.getElementById('status');s.textContent='Personal Insights could not load. Please try again.';s.classList.add('error')});
+</script></body></html>
