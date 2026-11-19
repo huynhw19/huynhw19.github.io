@@ -199,8 +199,8 @@ Deno.serve(async (req: Request) => {
       for (const link of (links || [])) {
         const record = byRecord.get(link.education_student_id);
         const { data: child } = await admin.from("family_children")
-          .select("id,child_name,messaging_enabled").eq("id", link.child_id).maybeSingle();
-        if (!child || !child.messaging_enabled || !record) continue;
+          .select("id,child_name,child_user_id,messaging_enabled").eq("id", link.child_id).maybeSingle();
+        if (!child || !child.child_user_id || !child.messaging_enabled || !record) continue;
         const { data: contact } = await admin.from("kids_teacher_contacts")
           .select("requested_at,approved_at").eq("child_id", child.id)
           .eq("teacher_user_id", user.id).maybeSingle();
