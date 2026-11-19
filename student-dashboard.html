@@ -538,7 +538,7 @@
         const studentIds = studentRecords.map(student => student.id);
         const { data: assignments, error: assignmentsError } = await client
           .from('education_assignments')
-          .select('id, student_id, title, instructions, due_date, created_at')
+          .select('id, student_id, title, subject, instructions, due_date, max_marks, created_at')
           .in('student_id', studentIds)
           .eq('status', 'published')
           .order('due_date', { ascending: true, nullsFirst: false });
@@ -554,23 +554,62 @@
           empty.textContent = 'You do not have any published assignments yet.';
           assignmentRecords.append(empty);
         } else {
-          assignments.forEach(assignment => {
+          for (const assignment of assignments) {
             const item = document.createElement('article');
             item.className = 'assignment';
-            const title = document.createElement('h3');
-            title.textContent = assignment.title;
+            const title = document.createElement('h3'); title.textContent = assignment.title;
             const student = studentRecords.find(record => record.id === assignment.student_id);
-            const meta = document.createElement('p');
-            meta.className = 'assignment-meta';
-            meta.textContent = (student?.student_name || 'Your assignment') + ' · Due: ' + (assignment.due_date || 'No due date');
+            const meta = document.createElement('p'); meta.className = 'assignment-meta';
+            meta.textContent = (student?.student_name || 'Your assignment') + ' · ' + (assignment.subject || 'General') + ' · Due: ' + (assignment.due_date || 'No due date') + ' · ' + (assignment.max_marks || 100) + ' marks available';
             item.append(title, meta);
-            if (assignment.instructions) {
-              const instructions = document.createElement('p');
-              instructions.textContent = assignment.instructions;
-              item.append(instructions);
+            if (assignment.instructions) { const instructions = document.createElement('p'); instructions.textContent = assignment.instructions; item.append(instructions); }
+
+            const [submissionResult, reviewResult] = await Promise.all([
+              client.from('education_assignment_submissions').select('id,response_text,status,submitted_at').eq('assignment_id',assignment.id).eq('student_user_id',data.session.user.id).maybeSingle(),
+              client.from('education_assignment_reviews').select('marks_awarded,teacher_feedback,graded_at').eq('submission_id',
+                (await client.from('education_assignment_submissions').select('id').eq('assignment_id',assignment.id).eq('student_user_id',data.session.user.id).maybeSingle()).data?.id || '00000000-0000-0000-0000-000000000000').maybeSingle()
+            ]);
+            if (submissionResult.error) {
+              const warning=document.createElement('p');warning.className='error';warning.textContent='Your submission status could not be loaded.';item.append(warning);
+            } else {
+              const submission=submissionResult.data;
+              const state=document.createElement('p');state.className='assignment-meta';
+              state.textContent=submission ? (submission.status==='submitted'?'Submitted · '+(submission.submitted_at?new Date(submission.submitted_at).toLocaleString():''):submission.status==='returned'?'Returned with teacher feedback':'Draft saved') : 'Not started';
+              item.append(state);
+              if (reviewResult.data) {
+                const review=document.createElement('section');review.className='record';
+                const score=document.createElement('strong');score.textContent='Teacher result: '+reviewResult.data.marks_awarded+' / '+(assignment.max_marks||100);
+                const feedback=document.createElement('p');feedback.textContent=reviewResult.data.teacher_feedback||'No written feedback provided.';
+                review.append(score,feedback);item.append(review);
+              }
+              const responseLabel=document.createElement('label');responseLabel.textContent='Your written response';
+              const response=document.createElement('textarea');response.rows=6;response.maxLength=50000;response.value=submission?.response_text||'';
+              response.setAttribute('aria-label','Your written response for '+assignment.title);
+              const actions=document.createElement('div');actions.className='learning-controls';
+              const save=document.createElement('button');save.type='button';save.textContent='Save draft';
+              const submit=document.createElement('button');submit.type='button';submit.textContent='Submit homework';
+              const locked=submission?.status==='submitted';
+              response.disabled=!!locked;save.disabled=!!locked;submit.disabled=!!locked;
+              async function saveSubmission(nextStatus) {
+                if(!response.value.trim()){state.textContent='Please write your response before saving or submitting.';return;}
+                save.disabled=true;submit.disabled=true;state.textContent=nextStatus==='submitted'?'Submitting your work…':'Saving your draft…';
+                const payload={assignment_id:assignment.id,student_user_id:data.session.user.id,response_text:response.value.trim(),status:nextStatus,submitted_at:nextStatus==='submitted'?new Date().toISOString():null,updated_at:new Date().toISOString()};
+                const result=submission
+                  ? await client.from('education_assignment_submissions').update(payload).eq('id',submission.id)
+                  : await client.from('education_assignment_submissions').insert(payload);
+                if(result.error){save.disabled=false;submit.disabled=false;state.textContent=result.error.message||'Could not save your work.';return;}
+                state.textContent=nextStatus==='submitted'?'Homework submitted successfully.':'Draft saved. You can return and finish it later.';
+                response.disabled=nextStatus==='submitted';save.disabled=nextStatus==='submitted';submit.disabled=nextStatus==='submitted';
+              }
+              save.addEventListener('click',()=>saveSubmission('draft'));
+              submit.addEventListener('click',()=>{
+                if(!window.confirm('Submit this homework to your teacher? You will not be able to edit it unless your teacher returns it.'))return;
+                saveSubmission('submitted');
+              });
+              responseLabel.append(response);actions.append(save,submit);item.append(responseLabel,actions);
             }
             assignmentRecords.append(item);
-          });
+          }
         }
 
         // Load private, published tests assigned to the signed-in student's linked records.
