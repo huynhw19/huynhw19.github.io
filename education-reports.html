@@ -178,10 +178,10 @@ renderInsights({lessons,completedLessons:completions,tests:attempts,assignments,
 const all=[lessonsRes,completionsRes,testsRes,assignmentsRes,practiceRes,achRes,testRes,subRes,reviewsRes];
 if(all.some(x=>x.error))setStatus('Report loaded with some unavailable sections. Refresh to retry.',true);else setStatus('Your learning report is ready.');
 }
-client.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace('login.html')});
+client.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace(mode==='student'?'student-login.html':'login.html')});
 (async()=>{
 const {data,error}=await client.auth.getSession();
-if(error||!data.session){window.location.replace('login.html');return}
+if(error||!data.session){window.location.replace(mode==='student'?'student-login.html':'login.html');return}
 currentUser=data.session.user;
 $('page-title').textContent=mode==='student'?'My Learning Report':'Education Reports & Insights';
 $('comments-label').textContent=mode==='student'?'My reflections / next steps':'Teacher comments / learning notes';
