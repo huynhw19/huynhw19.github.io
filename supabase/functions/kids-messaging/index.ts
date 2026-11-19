@@ -84,9 +84,9 @@ Deno.serve(async (req: Request) => {
         .eq("child_user_id", user.id).maybeSingle();
       if (!child || !child.messaging_enabled || !child.call_enabled) return json({ allowed: false });
       const { data: friendship } = await admin.from("kids_friendships")
-        .select("id,child_a_id,child_b_id,parent_a_approved,parent_b_approved,status")
+        .select("id,child_a_id,child_b_id,parent_a_approved,parent_b_approved,teacher_approved_at,status")
         .eq("id", friendshipId).maybeSingle();
-      if (!friendship || friendship.status !== "approved" || !friendship.parent_a_approved || !friendship.parent_b_approved ||
+      if (!friendship || friendship.status !== "approved" || !friendship.parent_a_approved || !friendship.parent_b_approved || !friendship.teacher_approved_at ||
           ![friendship.child_a_id, friendship.child_b_id].includes(child.id)) return json({ allowed: false });
       const otherId = friendship.child_a_id === child.id ? friendship.child_b_id : friendship.child_a_id;
       const { data: other } = await admin.from("family_children").select("call_enabled,messaging_enabled")
@@ -226,13 +226,49 @@ Deno.serve(async (req: Request) => {
       return json({ contacts });
     }
 
+    if (action === "teacher_friend_requests") {
+      const { data: linkedRows } = await admin.from("education_students")
+        .select("student_user_id").eq("user_id", user.id).not("student_user_id", "is", null);
+      const studentIds = (linkedRows || []).map((row) => row.student_user_id).filter(Boolean);
+      if (!studentIds.length) return json({ requests: [] });
+      const { data: childRows } = await admin.from("family_children")
+        .select("id,child_name,child_user_id").in("child_user_id", studentIds);
+      const children = childRows || [];
+      const childIds = children.map((row) => row.id);
+      if (childIds.length < 2) return json({ requests: [] });
+      const { data: rows, error } = await admin.from("kids_friendships")
+        .select("id,child_a_id,child_b_id,parent_a_approved,parent_b_approved,status")
+        .in("child_a_id", childIds).in("child_b_id", childIds)
+        .eq("status", "pending").eq("parent_a_approved", true).eq("parent_b_approved", true);
+      if (error) return json({ error: "Could not load classmate approval requests" }, 400);
+      const byId = new Map(children.map((row) => [row.id, row.child_name]));
+      return json({ requests: (rows || []).map((row) => ({
+        friendship_id: row.id, child_a_name: byId.get(row.child_a_id) || "Student",
+        child_b_name: byId.get(row.child_b_id) || "Student",
+      })) });
+    }
+
     if (action === "teacher_approve_friendship") {
       const friendshipId = String(body.friendship_id || "");
-      const { data: status, error } = await admin.rpc("kids_teacher_approve_friendship", {
-        p_friendship_id: friendshipId,
-      });
-      if (error) return json({ error: error.message }, 403);
-      return json({ ok: true, status });
+      const { data: f } = await admin.from("kids_friendships")
+        .select("id,child_a_id,child_b_id,parent_a_approved,parent_b_approved,status")
+        .eq("id", friendshipId).maybeSingle();
+      if (!f || f.status !== "pending" || !f.parent_a_approved || !f.parent_b_approved) {
+        return json({ error: "Both families must approve before teacher review" }, 409);
+      }
+      const { data: linkedChildren } = await admin.from("family_children")
+        .select("id,child_user_id").in("id", [f.child_a_id, f.child_b_id]);
+      const userIds = (linkedChildren || []).map((row) => row.child_user_id).filter(Boolean);
+      if (userIds.length !== 2) return json({ error: "Both students need linked ConfigKit child profiles" }, 409);
+      const { data: links } = await admin.from("education_students").select("id")
+        .eq("user_id", user.id).in("student_user_id", userIds);
+      if ((links || []).length < 2) return json({ error: "Only a teacher linked to both students can approve this connection" }, 403);
+      const { error } = await admin.from("kids_friendships").update({
+        teacher_approved_by: user.id, teacher_approved_at: new Date().toISOString(),
+        status: "approved", updated_at: new Date().toISOString(),
+      }).eq("id", friendshipId);
+      if (error) return json({ error: "Could not approve this classmate connection" }, 400);
+      return json({ ok: true, status: "approved" });
     }
 
     if (action === "delete_child_profile") {
