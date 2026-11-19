@@ -379,26 +379,18 @@
     @media(prefers-reduced-motion:reduce) { html{scroll-behavior:auto} *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important} }
 
 
-    /* ConfigKit global weather */
-    .weather-panel{margin-top:2rem}
-    .weather-search{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.7rem;margin:1rem 0}
-    .weather-search input,.weather-controls select{min-height:46px;padding:.7rem .8rem;border:1px solid var(--line);border-radius:.75rem;background:#fff;color:var(--ink);font:inherit}
-    .weather-search button,.weather-controls button{cursor:pointer}
-    .weather-results{display:grid;gap:.45rem;margin:.5rem 0 1rem}
-    .weather-result{width:100%;text-align:left;padding:.7rem .85rem;border:1px solid var(--line);border-radius:.7rem;background:#fff;color:var(--ink);font:inherit;cursor:pointer}
-    .weather-result:hover{border-color:var(--green)}
-    .weather-controls{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center}
-    .weather-current{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.7rem;margin:1rem 0}
-    .weather-stat{padding:.85rem;border:1px solid var(--line);border-radius:.8rem;background:#fbfdfb}
-    .weather-stat strong{display:block;font-size:1.25rem}
-    .weather-stat span{color:var(--muted);font-size:.88rem}
-    .weather-summary{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;padding:1rem;border-radius:1rem;background:var(--mint)}
-    .weather-summary strong{font-size:clamp(2rem,5vw,3rem);line-height:1.1}
-    .weather-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.65rem;margin-top:1rem}
-    .weather-day{padding:.8rem;border:1px solid var(--line);border-radius:.8rem;text-align:center;background:#fff}
-    .weather-day strong,.weather-day span{display:block}
-    .weather-day span{font-size:.9rem;color:var(--muted)}
-    @media(max-width:560px){.weather-search{grid-template-columns:1fr}.weather-search button{width:100%}}
+    /* ConfigKit translation centre */
+    .translation-panel{margin-top:2rem}
+    .translation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin:1rem 0}
+    .translation-field label{display:block;font-weight:650;margin-bottom:.45rem}
+    .translation-field select,.translation-field textarea{width:100%;min-height:48px;padding:.8rem;border:1px solid var(--line);border-radius:.8rem;background:#fff;color:var(--ink);font:inherit}
+    .translation-field textarea{min-height:165px;resize:vertical;line-height:1.55}
+    .translation-field textarea[readonly]{background:#f7faf8}
+    .translation-actions{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center}
+    .translation-actions button{cursor:pointer}
+    .translation-note{font-size:.88rem;color:var(--muted);line-height:1.55}
+    .translation-count{display:flex;justify-content:space-between;gap:.5rem;margin-top:.35rem;font-size:.82rem;color:var(--muted)}
+    @media(max-width:620px){.translation-grid{grid-template-columns:1fr}.translation-field textarea{min-height:135px}.translation-actions button{flex:1 1 100%}}
   </style>
 </head>
 <body>
@@ -449,32 +441,23 @@
       </div>
     </section>
 
-    <section class="panel weather-panel" id="configkit-weather" aria-labelledby="weather-title">
-      <span class="eyebrow">ConfigKit Weather · Worldwide</span>
-      <h2 class="section-title" id="weather-title">Weather for any city or location</h2>
-      <p>Search cities and places around the world, or choose to share your device location for local weather. Location access is optional and only requested when you press the button.</p>
-      <form class="weather-search" id="weather-search-form" role="search">
-        <label class="visually-hidden" for="weather-query">Search city, country, or place</label>
-        <input id="weather-query" type="search" maxlength="120" autocomplete="off" placeholder="Search a city, country, or place (e.g. Tokyo, Japan)" required>
-        <button class="button primary" type="submit" id="weather-search-button">Search locations</button>
-      </form>
-      <div class="weather-results" id="weather-results" aria-live="polite"></div>
-      <div class="weather-controls">
-        <button class="button" type="button" id="weather-geolocate">Use my current location</button>
-        <label for="weather-units">Temperature</label>
-        <select id="weather-units" aria-label="Temperature units"><option value="celsius">Celsius (°C)</option><option value="fahrenheit">Fahrenheit (°F)</option></select>
+    <section class="panel translation-panel" id="configkit-translation" aria-labelledby="translation-title">
+      <span class="eyebrow">ConfigKit Translation Centre · Worldwide</span>
+      <h2 class="section-title" id="translation-title">Translate text between languages</h2>
+      <p>Translate a short message, sentence or paragraph into another language. Choose your languages, enter text and tap Translate.</p>
+      <div class="translation-grid">
+        <div class="translation-field"><label for="translation-source">Translate from</label><select id="translation-source">
+          <option value="autodetect">Auto-detect language</option><option value="en">English</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="pt-BR">Portuguese (Brazil)</option><option value="zh-CN">Chinese (Simplified)</option><option value="zh-TW">Chinese (Traditional)</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="ar">Arabic</option><option value="hi">Hindi</option><option value="bn">Bengali</option><option value="ur">Urdu</option><option value="id">Indonesian</option><option value="ms">Malay</option><option value="vi">Vietnamese</option><option value="th">Thai</option><option value="tl">Filipino</option><option value="ru">Russian</option><option value="uk">Ukrainian</option><option value="nl">Dutch</option><option value="tr">Turkish</option><option value="pl">Polish</option><option value="el">Greek</option><option value="sv">Swedish</option><option value="da">Danish</option><option value="fi">Finnish</option><option value="no">Norwegian</option><option value="he">Hebrew</option><option value="cs">Czech</option><option value="ro">Romanian</option><option value="hu">Hungarian</option><option value="sw">Swahili</option>
+        </select></div>
+        <div class="translation-field"><label for="translation-target">Translate to</label><select id="translation-target">
+          <option value="en">English</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="pt-BR">Portuguese (Brazil)</option><option value="zh-CN">Chinese (Simplified)</option><option value="zh-TW">Chinese (Traditional)</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="ar">Arabic</option><option value="hi">Hindi</option><option value="bn">Bengali</option><option value="ur">Urdu</option><option value="id">Indonesian</option><option value="ms">Malay</option><option value="vi">Vietnamese</option><option value="th">Thai</option><option value="tl">Filipino</option><option value="ru">Russian</option><option value="uk">Ukrainian</option><option value="nl">Dutch</option><option value="tr">Turkish</option><option value="pl">Polish</option><option value="el">Greek</option><option value="sv">Swedish</option><option value="da">Danish</option><option value="fi">Finnish</option><option value="no">Norwegian</option><option value="he">Hebrew</option><option value="cs">Czech</option><option value="ro">Romanian</option><option value="hu">Hungarian</option><option value="sw">Swahili</option>
+        </select></div>
+        <div class="translation-field"><label for="translation-input">Your text</label><textarea id="translation-input" maxlength="450" placeholder="Type or paste the text you want to translate…" spellcheck="true"></textarea><div class="translation-count"><span>Maximum 450 characters per translation</span><span id="translation-count">0 / 450</span></div></div>
+        <div class="translation-field"><label for="translation-output">Translation</label><textarea id="translation-output" readonly placeholder="Your translation will appear here…" aria-live="polite"></textarea><div class="translation-count"><span id="translation-result-note">Ready when you are</span><span id="translation-output-count">0 characters</span></div></div>
       </div>
-      <div class="status" id="weather-status" role="status" aria-live="polite">Search for a place to see its current weather and 7-day forecast.</div>
-      <div id="weather-output" hidden>
-        <div class="weather-summary">
-          <div><span class="muted" id="weather-place"></span><h3 id="weather-description" style="margin:.2rem 0"></h3><span class="muted" id="weather-local-time"></span></div>
-          <strong id="weather-temperature"></strong>
-        </div>
-        <div class="weather-current" id="weather-current"></div>
-        <h3>7-day forecast</h3>
-        <div class="weather-days" id="weather-days"></div>
-        <p class="muted fine-print">For central Melbourne (within 15 km of the station), current conditions use the latest non-stale <a href="https://www.bom.gov.au/products/IDV60901/IDV60901.95936.shtml" target="_blank" rel="noopener noreferrer">Bureau of Meteorology (BOM) Melbourne Olympic Park observation</a>. The station name, distance and observation time are shown; readings older than 75 minutes are not presented as current. Other locations use Open-Meteo model estimates. The 7-day forecast is provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>. A station reading can differ from temperatures in other suburbs. Check official warnings for safety-critical decisions.</p>
-      </div>
+      <div class="translation-actions"><button class="button primary" type="button" id="translate-button">Translate text</button><button class="button" type="button" id="translation-swap">↔ Swap languages</button><button class="button" type="button" id="translation-copy">Copy translation</button><button class="button" type="button" id="translation-clear">Clear</button></div>
+      <div class="status" id="translation-status" role="status" aria-live="polite">Choose your languages and enter some text to get started.</div>
+      <p class="translation-note">Translations are provided by MyMemory. The free anonymous service is limited to 5,000 characters per day and 500 bytes per request. Your text is sent to MyMemory to be translated, so avoid entering passwords, private information or sensitive content. Machine translations may not be perfect; check important or official translations carefully.</p>
     </section>
     <section class="quick-paths" aria-label="Choose your next step">
       <article class="quick-path"><strong>I'm new to profiles</strong><p>Learn what a configuration profile can change before installing one.</p><a href="mobileconfig-guide.html">Read the beginner guide →</a></article>
@@ -639,315 +622,87 @@
   <script>
 
     (() => {
-      const form = document.getElementById('weather-search-form');
-      if (!form) return;
-      const query = document.getElementById('weather-query');
-      const results = document.getElementById('weather-results');
-      const status = document.getElementById('weather-status');
-      const output = document.getElementById('weather-output');
-      const units = document.getElementById('weather-units');
-      const searchButton = document.getElementById('weather-search-button');
-      const geoButton = document.getElementById('weather-geolocate');
-      let selectedPlace = null;
-      let requestNumber = 0;
-      let searchNumber = 0;
-      let activeWeatherController = null;
-      let activeSearchController = null;
-
-      const weatherText = code => {
-        const descriptions = {
-          0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
-          45:'Fog', 48:'Depositing rime fog',
-          51:'Light drizzle', 53:'Moderate drizzle', 55:'Dense drizzle',
-          56:'Light freezing drizzle', 57:'Dense freezing drizzle',
-          61:'Slight rain', 63:'Moderate rain', 65:'Heavy rain',
-          66:'Light freezing rain', 67:'Heavy freezing rain',
-          71:'Slight snow fall', 73:'Moderate snow fall', 75:'Heavy snow fall', 77:'Snow grains',
-          80:'Slight rain showers', 81:'Moderate rain showers', 82:'Violent rain showers',
-          85:'Slight snow showers', 86:'Heavy snow showers',
-          95:'Thunderstorm', 96:'Thunderstorm with slight hail', 99:'Thunderstorm with heavy hail'
-        };
-        return descriptions[Number(code)] || 'Weather conditions unavailable';
-      };
-      const formatNumber = (value, decimals=0) => Number.isFinite(Number(value)) && value !== null && value !== ''
-        ? Number(value).toFixed(decimals) : '—';
-      const showStatus = (message, error=false) => {
-        status.textContent = message;
+      const input = document.getElementById('translation-input');
+      if (!input) return;
+      const source = document.getElementById('translation-source');
+      const target = document.getElementById('translation-target');
+      const output = document.getElementById('translation-output');
+      const button = document.getElementById('translate-button');
+      const status = document.getElementById('translation-status');
+      const resultNote = document.getElementById('translation-result-note');
+      const outputCount = document.getElementById('translation-output-count');
+      const count = document.getElementById('translation-count');
+      const swap = document.getElementById('translation-swap');
+      let requestController = null;
+      let requestId = 0;
+      const setStatus = (message, error = false) => {
         status.className = error ? 'status error' : 'status';
+        status.textContent = message;
       };
-      const displayName = place => [place.name, place.admin1, place.country].filter((v,i,a) => v && a.indexOf(v) === i).join(', ');
-
-      async function fetchJson(url, parentController, timeoutMs=30000) {
-        let lastError;
-        for (let attempt = 0; attempt < 2; attempt++) {
-          if (parentController.signal.aborted) throw new DOMException('Request cancelled', 'AbortError');
-          const requestController = new AbortController();
-          const abortFromParent = () => requestController.abort();
-          parentController.signal.addEventListener('abort', abortFromParent, {once:true});
-          let timedOut = false;
-          const timer = setTimeout(() => {
-            timedOut = true;
-            requestController.abort();
-          }, timeoutMs);
-          try {
-            const response = await fetch(url, {
-              signal:requestController.signal,
-              headers:{Accept:'application/json'},
-              cache:'no-store'
-            });
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok || data.error) {
-              throw new Error(data.reason || data.message || 'Weather service returned an error (' + response.status + ').');
-            }
-            return data;
-          } catch (error) {
-            if (parentController.signal.aborted) throw new DOMException('Request cancelled', 'AbortError');
-            lastError = error;
-            const transient = timedOut || error instanceof TypeError || error.name === 'AbortError';
-            if (!transient || attempt === 1) {
-              if (timedOut) throw new Error('The weather service took too long to respond twice. Please try again in a moment.');
-              throw error;
-            }
-            await new Promise(resolve => setTimeout(resolve, 700));
-          } finally {
-            clearTimeout(timer);
-            parentController.signal.removeEventListener('abort', abortFromParent);
-          }
-        }
-        throw lastError || new Error('Could not load weather. Please try again.');
-      }
-
-      async function loadWeather(place) {
-        const id = ++requestNumber;
-        if (activeWeatherController) activeWeatherController.abort();
-        const controller = new AbortController();
-        activeWeatherController = controller;
-        selectedPlace = place;
-        output.hidden = true;
-        showStatus('Loading weather…');
-        const tempUnit = units.value;
-        const url = new URL('https://api.open-meteo.com/v1/forecast');
-        url.search = new URLSearchParams({
-          latitude: String(place.latitude), longitude: String(place.longitude),
-          current: 'temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation,rain,cloud_cover,is_day,weather_code',
-          daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,uv_index_max',
-          forecast_days: '7', timezone: 'auto', temperature_unit: tempUnit,
-          wind_speed_unit: 'kmh'
-        }).toString();
+      const updateCount = () => {
+        count.textContent = input.value.length + ' / 450';
+        outputCount.textContent = output.value.length + ' characters';
+      };
+      input.addEventListener('input', updateCount);
+      source.addEventListener('change', () => { swap.disabled = source.value === 'autodetect'; });
+      swap.disabled = source.value === 'autodetect';
+      document.getElementById('translation-clear').addEventListener('click', () => {
+        if (requestController) requestController.abort();
+        requestId++;
+        input.value = ''; output.value = '';
+        resultNote.textContent = 'Ready when you are';
+        updateCount(); button.disabled = false;
+        setStatus('Text cleared. Enter something new to translate.');
+      });
+      swap.addEventListener('click', () => {
+        if (source.value === 'autodetect') return;
+        const previous = source.value;
+        source.value = target.value; target.value = previous;
+        const previousText = input.value;
+        input.value = output.value; output.value = previousText;
+        updateCount(); resultNote.textContent = 'Languages swapped';
+        setStatus('Languages swapped. Translate again to check the reverse translation.');
+      });
+      document.getElementById('translation-copy').addEventListener('click', async () => {
+        if (!output.value) { setStatus('There is no translation to copy yet.', true); return; }
         try {
-          if (!Number.isFinite(Number(place.latitude)) || !Number.isFinite(Number(place.longitude))) {
-            throw new Error('This location did not include valid coordinates. Please choose another result.');
-          }
-          const data = await fetchJson(url, controller);
-          if (id !== requestNumber) return;
-          if (!data.current || !data.daily || !Array.isArray(data.daily.time)) {
-            throw new Error('The weather provider returned incomplete data. Please try again.');
-          }
-          let current = data.current;
-          let currentSource = 'Open-Meteo model estimate';
-          let currentValidTime = String(current.time || '').replace('T',' ') + ' · ' + (data.timezone || 'local timezone');
-          let bomObservation = null;
-          const toRadians = value => value * Math.PI / 180;
-          const distanceKm = (lat1, lon1, lat2, lon2) => {
-            const dLat = toRadians(lat2 - lat1);
-            const dLon = toRadians(lon2 - lon1);
-            const a = Math.sin(dLat / 2) ** 2 +
-              Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) ** 2;
-            return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          };
-          const bomStationDistance = distanceKm(Number(place.latitude), Number(place.longitude), -37.8, 145.0);
-          const nearMelbourneOlympicPark = bomStationDistance <= 15;
-          if (nearMelbourneOlympicPark) {
-            try {
-              const bomUrl = 'https://www.bom.gov.au/fwo/IDV60901/IDV60901.95936.json?refresh=' + Date.now();
-              const bomData = await fetchJson(bomUrl, controller, 12000);
-              const rows = bomData?.observations?.data;
-              if (Array.isArray(rows) && rows.length) {
-                const station = rows
-                  .filter(row => row.air_temp !== null && row.air_temp !== '-' && Number.isFinite(Number(row.air_temp)) && /^\d{14}$/.test(String(row.aifstime_utc || '')))
-                  .sort((a,b) => String(b.aifstime_utc).localeCompare(String(a.aifstime_utc)))[0];
-                if (station) {
-                  const utcStamp = String(station.aifstime_utc);
-                  const observedAt = new Date(Date.UTC(
-                    Number(utcStamp.slice(0,4)), Number(utcStamp.slice(4,6)) - 1,
-                    Number(utcStamp.slice(6,8)), Number(utcStamp.slice(8,10)),
-                    Number(utcStamp.slice(10,12)), Number(utcStamp.slice(12,14))
-                  ));
-                  const ageMinutes = (Date.now() - observedAt.getTime()) / 60000;
-                  if (Number.isFinite(ageMinutes) && ageMinutes >= -5 && ageMinutes <= 75) {
-                    bomObservation = station;
-                    current = {
-                      temperature_2m: Number(station.air_temp),
-                      apparent_temperature: station.apparent_t == null || station.apparent_t === '-' ? null : Number(station.apparent_t),
-                      relative_humidity_2m: station.rel_hum == null || station.rel_hum === '-' ? null : Number(station.rel_hum),
-                      wind_speed_10m: station.wind_spd_kmh == null || station.wind_spd_kmh === '-' ? null : Number(station.wind_spd_kmh),
-                      wind_gusts_10m: station.gust_kmh == null || station.gust_kmh === '-' ? null : Number(station.gust_kmh),
-                      wind_direction_10m: station.wind_dir || null,
-                      rain_since_9am: station.rain_trace == null || station.rain_trace === '-' ? null : Number(station.rain_trace),
-                      weather_code: null
-                    };
-                    currentSource = 'Bureau of Meteorology · Melbourne Olympic Park station (' + bomStationDistance.toFixed(1) + ' km away)';
-                    const stamp = String(station.local_date_time_full || '');
-                    currentValidTime = stamp.length === 14
-                      ? stamp.slice(0,4) + '-' + stamp.slice(4,6) + '-' + stamp.slice(6,8) + ' ' + stamp.slice(8,10) + ':' + stamp.slice(10,12) + ' ' + (bomData.observations.header?.[0]?.time_zone || 'local time')
-                      : String(station.local_date_time || 'Latest station reading');
-                  } else {
-                    currentSource = 'Open-Meteo model estimate · BOM station report is stale';
-                  }
-                }
-              }
-            } catch (bomError) {
-              console.warn('BOM observations unavailable; using Open-Meteo instead.', bomError);
-            }
-          }
-          const symbol = tempUnit === 'fahrenheit' ? '°F' : '°C';
-          const displayTemperature = value => value == null || !Number.isFinite(Number(value))
-            ? '—' : formatNumber(tempUnit === 'fahrenheit' && bomObservation ? Number(value) * 9 / 5 + 32 : value, 1);
-          document.getElementById('weather-place').textContent = place.label || displayName(place) || 'Selected location';
-          document.getElementById('weather-description').textContent = bomObservation
-            ? (bomObservation.weather && bomObservation.weather !== '-' ? bomObservation.weather : 'Latest station observation')
-            : weatherText(current.weather_code);
-          document.getElementById('weather-local-time').textContent = currentSource + ' · observed/valid at: ' + currentValidTime;
-          document.getElementById('weather-temperature').textContent = displayTemperature(current.temperature_2m) + symbol;
-
-          const windDirection = value => {
-            if (value == null || value === '' || value === '-') return '—';
-            if (Number.isFinite(Number(value))) {
-              const directions = ['N','NE','E','SE','S','SW','W','NW'];
-              return directions[Math.round(Number(value) / 45) % 8];
-            }
-            return String(value);
-          };
-          const stats = [
-            ['Feels like', displayTemperature(current.apparent_temperature) + symbol],
-            ['Humidity', current.relative_humidity_2m == null ? '—' : formatNumber(current.relative_humidity_2m) + '%'],
-            ['Wind', (current.wind_speed_10m == null ? '—' : formatNumber(current.wind_speed_10m, 1) + ' km/h') + ' ' + windDirection(current.wind_direction_10m)],
-            ['Wind gusts', current.wind_gusts_10m == null ? '—' : formatNumber(current.wind_gusts_10m, 1) + ' km/h'],
-            [bomObservation ? 'Rain since 9 am' : 'Rain (last 15 min)', current.rain_since_9am == null ? (bomObservation ? '—' : formatNumber(current.rain, 1) + ' mm') : formatNumber(current.rain_since_9am, 1) + ' mm'],
-            ...(bomObservation ? [] : [['Precipitation (last 15 min)', formatNumber(current.precipitation, 1) + ' mm']]),
-            ...(!bomObservation ? [['Cloud cover', formatNumber(current.cloud_cover) + '%']] : [])
-          ];
-          const currentContainer = document.getElementById('weather-current');
-          currentContainer.replaceChildren();
-          stats.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'weather-stat';
-            const label = document.createElement('span');
-            label.textContent = item[0];
-            const value = document.createElement('strong');
-            value.textContent = item[1];
-            card.append(label, value);
-            currentContainer.append(card);
-          });
-
-          const daysContainer = document.getElementById('weather-days');
-          daysContainer.replaceChildren();
-          data.daily.time.forEach((day,i) => {
-            const [year, month, dateOfMonth] = day.split('-').map(Number);
-            const date = new Date(year, month - 1, dateOfMonth, 12);
-            const label = date.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
-            const rain = data.daily.precipitation_probability_max?.[i];
-            const rainfall = data.daily.precipitation_sum?.[i];
-            const maxWind = data.daily.wind_speed_10m_max?.[i];
-            const uv = data.daily.uv_index_max?.[i];
-            const card = document.createElement('div');
-            card.className = 'weather-day';
-            const dateNode = document.createElement('strong');
-            dateNode.textContent = label;
-            const description = document.createElement('span');
-            description.textContent = weatherText(data.daily.weather_code?.[i]);
-            const temperatures = document.createElement('strong');
-            temperatures.textContent = formatNumber(data.daily.temperature_2m_max?.[i], 1) + symbol + ' / ' + formatNumber(data.daily.temperature_2m_min?.[i], 1) + symbol;
-            const precipitation = document.createElement('span');
-            precipitation.textContent = 'Rain chance: ' + (rain == null ? '—' : rain + '%') +
-              ' · Rainfall: ' + (rainfall == null ? '—' : formatNumber(rainfall, 1) + ' mm') +
-              ' · Wind: ' + (maxWind == null ? '—' : formatNumber(maxWind, 1) + ' km/h') +
-              ' · UV: ' + (uv == null ? '—' : formatNumber(uv, 1));
-            card.append(dateNode, description, temperatures, precipitation);
-            daysContainer.append(card);
-          });
-          output.hidden = false;
-          showStatus('Weather updated successfully.');
-        } catch (error) {
-          if (id !== requestNumber) return;
-          const message = error.name === 'AbortError'
-            ? 'Weather loading was cancelled because a newer request started. Please wait for the latest result.'
-            : (error.message || 'Could not load weather. Please try again.');
-          showStatus(message, true);
-        } finally {
-          if (id === requestNumber) activeWeatherController = null;
+          await navigator.clipboard.writeText(output.value);
+          setStatus('Translation copied to your clipboard.');
+        } catch {
+          output.focus(); output.select();
+          setStatus('Select the translation and use Copy from your device menu.');
         }
-      }
-
-      form.addEventListener('submit', async event => {
-        event.preventDefault();
-        const term = query.value.trim();
-        if (!term) return;
-        const id = ++searchNumber;
-        if (activeSearchController) activeSearchController.abort();
-        const controller = new AbortController();
-        activeSearchController = controller;
-        searchButton.disabled = true;
-        results.replaceChildren();
-        showStatus('Searching worldwide locations…');
+      });
+      button.addEventListener('click', async () => {
+        const text = input.value.trim();
+        if (!text) { setStatus('Please enter some text first.', true); input.focus(); return; }
+        if (new TextEncoder().encode(text).length > 500) { setStatus('This text is over the service limit of 500 bytes. Please shorten it.', true); return; }
+        if (source.value === target.value) { setStatus('Choose two different languages.', true); return; }
+        const id = ++requestId;
+        if (requestController) requestController.abort();
+        requestController = new AbortController();
+        button.disabled = true; output.value = '';
+        resultNote.textContent = 'Translating…'; updateCount();
+        setStatus('Translating your text…');
         try {
-          const url = new URL('https://geocoding-api.open-meteo.com/v1/search');
-          url.search = new URLSearchParams({name:term,count:'10',language:'en',format:'json'}).toString();
-          const data = await fetchJson(url, controller, 12000);
-          if (id !== searchNumber) return;
-          if (!Array.isArray(data.results) || !data.results.length) {
-            showStatus('No matching locations found. Try another city or include the country.', true);
-            return;
-          }
-          showStatus('Choose the correct location:');
-          data.results.forEach(place => {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'weather-result';
-            button.textContent = displayName(place) || 'Unnamed location';
-            button.addEventListener('click', () => {
-              query.value = displayName(place);
-              results.replaceChildren();
-              loadWeather({...place,label:displayName(place)});
-            });
-            results.append(button);
-          });
-        } catch (error) {
-          if (id !== searchNumber) return;
-          showStatus(error.name === 'AbortError' ? 'Location search timed out. Please try again.' : (error.message || 'Location search failed.'), true);
+          const params = new URLSearchParams({q:text,langpair:source.value+'|'+target.value});
+          const response = await fetch('https://api.mymemory.translated.net/get?'+params.toString(),{headers:{Accept:'application/json'},signal:requestController.signal});
+          if (!response.ok) throw new Error(response.status===429?'The translation service is busy. Please wait and try again.':'The translation service returned an error ('+response.status+').');
+          const data = await response.json();
+          if (id !== requestId) return;
+          if (data.responseStatus !== 200 || !data.responseData?.translatedText || /MYMEMORY WARNING/i.test(data.responseData.translatedText)) throw new Error(data.responseDetails||'No translation was returned. Try another language pair or shorter text.');
+          output.value=data.responseData.translatedText;
+          resultNote.textContent='Translation ready'; updateCount();
+          setStatus('Translation complete. Please review it for context and accuracy.');
+        } catch(error) {
+          if(error.name==='AbortError') return;
+          output.value=''; resultNote.textContent='Translation unavailable'; updateCount();
+          setStatus(error.message||'Could not translate this text. Please try again later.',true);
         } finally {
-          if (id === searchNumber) {
-            searchButton.disabled = false;
-            activeSearchController = null;
-          }
+          if(id===requestId) button.disabled=false;
         }
       });
-
-      geoButton.addEventListener('click', () => {
-        if (!navigator.geolocation) {
-          showStatus('Your browser does not support location access. Search for a city instead.', true);
-          return;
-        }
-        geoButton.disabled = true;
-        showStatus('Waiting for your permission to access device location…');
-        navigator.geolocation.getCurrentPosition(position => {
-          geoButton.disabled = false;
-          const coords = {
-            latitude:position.coords.latitude,
-            longitude:position.coords.longitude,
-            label:'Your current location (' + position.coords.latitude.toFixed(3) + ', ' + position.coords.longitude.toFixed(3) + ')'
-          };
-          loadWeather(coords);
-        }, error => {
-          geoButton.disabled = false;
-          const message = error.code === 1 ? 'Location permission was denied. You can still search for any city or place.' : 'Could not determine your location. Please search for a city instead.';
-          showStatus(message, true);
-        }, {enableHighAccuracy:false,timeout:12000,maximumAge:300000});
-      });
-
-      units.addEventListener('change', () => {
-        if (selectedPlace) loadWeather(selectedPlace);
-      });
+      updateCount();
     })();
 
     const translations = {
