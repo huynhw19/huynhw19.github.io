@@ -40,7 +40,7 @@ jobs:
           import { chromium } from 'playwright';
 
           const base = process.env.SITE_URL;
-          const pages = ['/', '/login.html', '/dashboard.html', '/forms.html', '/account-docs.html', '/Education-dashboard.html', '/student-dashboard.html', '/student-progress.html', '/education-ai.html', '/education-reports.html', '/education-reports.html?view=student'];
+          const pages = ['/', '/login.html', '/dashboard.html', '/money-centre.html', '/finance.html', '/invoices.html', '/insights.html', '/connect.html', '/forms.html', '/account-docs.html', '/Education-dashboard.html', '/student-dashboard.html', '/student-progress.html', '/education-ai.html', '/education-reports.html', '/education-reports.html?view=student'];
           const results = [];
           const browser = await chromium.launch({ headless: true });
 
@@ -70,57 +70,17 @@ jobs:
               await page.close();
             }
 
-            // Exercise the homepage translation UI with a deterministic API response.
+            // The translation page requires a real signed-in session. In this
+            // unauthenticated smoke test, verify its sign-in gate rather than
+            // mocking the retired public translation provider.
             const translationPage = await browser.newPage();
-            await translationPage.route('https://api.mymemory.translated.net/get**', route =>
-              route.fulfill({
-                status: 200,
-                contentType: 'application/json',
-                body: JSON.stringify({
-                  responseStatus: 200,
-                  responseData: {
-                    translatedText: new URL(route.request().url()).searchParams.get('langpair') === 'en|it'
-                      ? 'Ciao'
-                      : 'Hola mundo'
-                  }
-                })
-              })
-            );
-            await translationPage.goto(base + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
-            await translationPage.locator('#translation-source').selectOption('en');
-            await translationPage.locator('#translation-target').selectOption('es');
-            await translationPage.locator('#translation-input').fill('Hello world');
-            await translationPage.locator('#translate-button').click();
-            await translationPage.waitForFunction(() =>
-              document.querySelector('#translation-output')?.value === 'Hola mundo'
-            );
-            const translatedText = await translationPage.locator('#translation-output').inputValue();
-            if (translatedText !== 'Hola mundo') {
-              throw new Error('Translation result was not displayed');
+            await translationPage.goto(base + '/#configkit-translation', { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await translationPage.waitForTimeout(1200);
+            if (!translationPage.url().includes('login.html?next=')) {
+              throw new Error('AI translation did not direct a signed-out visitor to sign in');
             }
-            // Verify the English-to-Italian language code and output path as well.
-            await translationPage.locator('#translation-target').selectOption('it');
-            await translationPage.locator('#translation-input').fill('Hello');
-            await translationPage.locator('#translate-button').click();
-            await translationPage.waitForFunction(() =>
-              document.querySelector('#translation-output')?.value === 'Ciao'
-            );
-            if (await translationPage.locator('#translation-output').inputValue() !== 'Ciao') {
-              throw new Error('English-to-Italian translation result was not displayed');
-            }
-            await translationPage.locator('#translation-target').selectOption('es');
-            await translationPage.locator('#translation-swap').click();
-            if (await translationPage.locator('#translation-source').inputValue() !== 'es' ||
-                await translationPage.locator('#translation-target').inputValue() !== 'en') {
-              throw new Error('Translation language swap did not work');
-            }
-            await translationPage.locator('#translation-clear').click();
-            if (await translationPage.locator('#translation-input').inputValue() !== '' ||
-                await translationPage.locator('#translation-output').inputValue() !== '') {
-              throw new Error('Translation clear action did not work');
-            }
-            console.log('PASS: translation form, output, language swap and clear actions');
-            await translationPage.close();
+            console.log('PASS: AI translation sign-in gate');
+
           } finally {
             await browser.close();
           }
