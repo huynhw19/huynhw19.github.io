@@ -7,7 +7,7 @@ app.setAppUserModelId('com.configkit.desktop');
 function isSafeWebUrl(value) {
   try {
     const url = new URL(value);
-    return url.protocol === 'https:' || url.protocol === 'http:';
+    return url.protocol === 'https:';
   } catch {
     return false;
   }

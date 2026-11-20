@@ -10,14 +10,14 @@ This guide covers packages published from the official ConfigKit GitHub Releases
 The installer is unsigned. Windows SmartScreen may display an unknown-publisher warning. Verify that the file came from the official repository before proceeding.
 
 ## macOS — DMG
-1. Download the macOS DMG matching your Mac's processor (Intel or Apple silicon) from the latest releases page.
+1. Download ConfigKit-macOS-arm64.dmg for Apple silicon or ConfigKit-macOS-x64.dmg for Intel from the [latest releases](https://github.com/huynhw19/huynhw19.github.io/releases/latest).
 2. Open the disk image and drag ConfigKit into Applications.
 3. Eject the disk image and launch ConfigKit from Applications.
 
 The initial app is not signed or notarized. Gatekeeper may block it. Do not bypass macOS security unless you trust the release and have checked the file.
 
 ## Linux — AppImage
-1. Download the x86_64 AppImage from the latest releases page.
+1. Download [ConfigKit-Linux-x64.AppImage](https://github.com/huynhw19/huynhw19.github.io/releases/latest/download/ConfigKit-Linux-x64.AppImage).
 2. Make it executable: chmod +x ConfigKit-Linux-x64.AppImage.
 3. Launch it: ./ConfigKit-Linux-x64.AppImage.
 
@@ -30,7 +30,7 @@ Your distribution may need FUSE support for AppImage.
 4. Return to the installer and tap Install.
 5. Consider turning off the install-unknown-apps permission afterwards.
 
-The APK is a directly distributed debug-signed build, not a Google Play release. Android will show an external-source installation warning.
+The APK is signed with Android's standard debug certificate for direct testing and distribution, not a private production signing key or Google Play. Android will show an external-source installation warning. Do not use this build for high-assurance enterprise deployment.
 
 ## iPhone and iPad — mobileconfig
 ConfigKit does not ship a separate iOS app package in this release. Its iOS workflow creates Apple configuration profiles:

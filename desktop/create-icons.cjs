@@ -8,15 +8,11 @@ async function main() {
   const buildDir = path.join(root, 'build');
   await fs.mkdir(buildDir, { recursive: true });
   const svg = await fs.readFile(path.join(root, 'configkit-oauth-logo.svg'));
-  const pngPath = path.join(buildDir, 'icon.png');
-  const icoPath = path.join(buildDir, 'icon.ico');
-  await sharp(svg).resize(256, 256).png().toFile(pngPath);
-  const ico = await pngToIco(pngPath);
-  await fs.writeFile(icoPath, ico);
-  console.log('Generated ConfigKit Windows app icons.');
+  const macPngPath = path.join(buildDir, 'icon.png');
+  await sharp(svg).resize(1024, 1024).png().toFile(macPngPath);
+  const windowsPng = await sharp(svg).resize(256, 256).png().toBuffer();
+  const ico = await pngToIco([windowsPng]);
+  await fs.writeFile(path.join(buildDir, 'icon.ico'), ico);
+  console.log('Generated 1024px macOS/Linux icon and Windows ICO.');
 }
-
-main().catch(error => {
-  console.error(error);
-  process.exitCode = 1;
-});
+main().catch(error => { console.error(error); process.exitCode = 1; });

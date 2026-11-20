@@ -64,7 +64,8 @@
           ]
         }
       ],
-      "artifactName": "ConfigKit-macOS-${arch}.${ext}"
+      "artifactName": "ConfigKit-macOS-${arch}.${ext}",
+      "icon": "build/icon.png"
     },
     "linux": {
       "target": [
@@ -78,5 +79,6 @@
       "artifactName": "ConfigKit-Linux-${arch}.${ext}",
       "category": "Utility"
     }
-  }
+  },
+  "author": "ConfigKit Project"
 }
