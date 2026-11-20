@@ -87,7 +87,21 @@ jobs:
             echo "Verified package: $file ($(wc -c < "$file") bytes)"
           done
           if [[ "${{ matrix.extension }}" == "dmg" ]]; then for file in "${files[@]}"; do hdiutil verify "$file"; done; fi
-          if [[ "${{ matrix.extension }}" == "AppImage" ]]; then file "${files[0]}"; fi
+          if [[ "${{ matrix.extension }}" == "AppImage" ]]; then
+            file "${files[0]}"
+            "${files[0]}" --appimage-extract >/dev/null
+            test -x squashfs-root/AppRun
+            rm -rf squashfs-root
+          fi
+      - name: Verify Windows executable structure
+        if: matrix.name == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = Get-Item "release/ConfigKit-Windows-Setup.exe"
+          if ($installer.Length -lt 10MB) { throw "Installer unexpectedly small." }
+          $bytes = [System.IO.File]::ReadAllBytes($installer.FullName)
+          if ($bytes[0] -ne 0x4D -or $bytes[1] -ne 0x5A) { throw "Installer is not a Windows PE executable." }
+          Get-FileHash $installer.FullName -Algorithm SHA256
       - name: Upload desktop package
         uses: actions/upload-artifact@v4
         with:
