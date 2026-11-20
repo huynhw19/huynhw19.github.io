@@ -26,6 +26,10 @@ The project is designed to work as a static website with browser-side JavaScript
 
 > **Start here:** Visit [huynhw19.github.io](https://huynhw19.github.io/), create an account if you want to use account-based features, confirm your email when prompted, and open your dashboard.
 
+## 📥 Download ConfigKit
+
+Get the right package from the [ConfigKit Downloads page](https://huynhw19.github.io/downloads.html). Windows, macOS, Linux and Android packages are published as release assets; iPhone and iPad users can generate an Apple mobileconfig profile in the browser. See [platform installation instructions](PLATFORM-INSTALL.md).
+
 ## 🧭 Explore ConfigKit
 
 | Workspace | What you can do |
