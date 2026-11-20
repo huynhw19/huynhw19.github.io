@@ -108,6 +108,7 @@ $('load-url').addEventListener('click',async()=>{
  const dataResponse=await fetch('https://projects.scratch.mit.edu/'+id+'?token='+encodeURIComponent(metadata.project_token));
  if(!dataResponse.ok) throw new Error('Could not download the shared project (HTTP '+dataResponse.status+').');
  await loadProject(await dataResponse.arrayBuffer(),metadata.title||('Scratch project '+id));
+ const projectUrl=new URL(location.href);projectUrl.searchParams.set('project',id);history.replaceState(null,'',projectUrl.toString());
  }catch(error){status('Could not open project: '+(error.message||'Network or project error'),'error');}
  finally{$('load-url').disabled=false;}
 });
@@ -125,6 +126,7 @@ $('make-profile').addEventListener('click',()=>{
  $('profile-status').className='status success';$('profile-status').textContent='Home Screen shortcut profile downloaded. Review it in iPhone Settings before installing.';
 });
 setControls(false);
+const launchId=new URLSearchParams(location.search).get('project');if(launchId){$('project-url').value='https://scratch.mit.edu/projects/'+encodeURIComponent(launchId)+'/';$('load-url').click();}
 })();
 </script>
 </body>
