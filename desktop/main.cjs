@@ -2,8 +2,6 @@ const { app, BrowserWindow, Menu, shell } = require('electron');
 const path = require('node:path');
 
 const CONFIGKIT_URL = 'https://huynhw19.github.io/';
-const CONFIGKIT_HOST = 'huynhw19.github.io';
-
 app.setAppUserModelId('com.configkit.desktop');
 
 function isSafeWebUrl(value) {
