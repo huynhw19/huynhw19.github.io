@@ -40,7 +40,8 @@ async function loadWikiReports(){
   actions.append(save,hide,open);card.append(h,detail,meta,status,note,actions);root.append(card);
  });
 }
-\nasync function loadEditorial(){await Promise.all([loadAuthors(),loadBookReports(),loadWikiReports()])}
+
+async function loadEditorial(){await Promise.all([loadAuthors(),loadBookReports(),loadWikiReports()])}
 
 async function setMode(value){const button=value?$('close'):$('open');button.disabled=true;try{if(value&&!confirm('Enable maintenance mode for public visitors?'))return;const s=await request('POST',{maintenance_mode:value,maintenance_message:$('message').value.trim()});render(s);$('auth-status').textContent='Website setting saved successfully.'}catch(e){$('auth-status').textContent=e.message;$('auth-status').className='status error'}finally{button.disabled=false}}
 $('open').addEventListener('click',()=>setMode(false));$('close').addEventListener('click',()=>setMode(true));$('refresh-authors').addEventListener('click',loadAuthors);$('refresh-book-reports').addEventListener('click',loadBookReports);$('refresh-wiki').addEventListener('click',loadWikiReports);
