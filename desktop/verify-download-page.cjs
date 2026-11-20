@@ -18,6 +18,9 @@ assert.ok(builder.includes('application/x-apple-aspen-config'), 'Profile builder
 assert.ok(builder.includes('URL.createObjectURL'), 'Profile builder local download is missing');
 assert.equal(pkg.build.mac.icon, 'build/icon.png', 'macOS icon must use the high-resolution PNG');
 assert.ok(androidManifest.includes('android.permission.INTERNET'), 'Android app needs internet permission');
+assert.ok(androidManifest.includes('@mipmap/ic_launcher'), 'Android launcher icon is not configured');
+assert.ok(fs.existsSync('android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml'), 'Android adaptive launcher icon is missing');
+assert.ok(fs.existsSync('android/app/src/main/res/drawable/ic_launcher_foreground.xml'), 'Android launcher foreground icon is missing');
 assert.ok(androidSource.includes('saveBase64') && androidSource.includes('ACTION_CREATE_DOCUMENT'), 'Android app must save generated profile downloads');
 assert.ok(androidSource.includes('onShowFileChooser'), 'Android app must support file selection');
 assert.ok(pkg.scripts['dist:win'] && pkg.scripts['dist:mac'] && pkg.scripts['dist:linux'], 'Missing desktop build scripts');

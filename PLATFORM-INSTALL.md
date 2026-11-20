@@ -34,7 +34,7 @@ The APK is signed with Android's standard debug certificate for direct testing a
 
 ## iPhone and iPad — mobileconfig
 ConfigKit does not ship a separate iOS app package in this release. Its iOS workflow creates Apple configuration profiles:
-1. Open https://huynhw19.github.io/mobileconfig-builder.html.
+1. Open https://huynhw19.github.io/mobileconfig-builder.html and sign in to your ConfigKit account.
 2. Create your profile and select Generate & download profile.
 3. Open the downloaded mobileconfig file on the iPhone or iPad.
 4. Review it in Settings → Profile Downloaded, or Settings → General → VPN & Device Management.
