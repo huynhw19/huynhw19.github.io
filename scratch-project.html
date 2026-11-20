@@ -38,6 +38,7 @@
 <div class="stage-actions" style="align-items:center;justify-content:space-between;margin:0 0 .65rem"><div class="stage-actions" style="margin:0"><button class="button secondary" id="pause" type="button" disabled>⏸ Pause</button><button class="button secondary" id="mute" type="button" disabled>🔊 Mute</button></div><label for="volume" style="display:flex;align-items:center;gap:.55rem;font-weight:700;flex-wrap:wrap">Volume <input id="volume" type="range" min="0" max="100" value="100" step="1" style="width:min(34vw,150px);accent-color:#e66b16"><span id="volume-value">100%</span></label></div>
 <div id="stage-shell"><div id="stage" aria-label="Scratch project stage"></div></div>
 <div class="stage-actions"><button class="button" id="green-flag" type="button" disabled>🚩 Green flag</button><button class="button secondary" id="stop" type="button" disabled>⏹ Stop</button><button class="button secondary" id="fullscreen" type="button" disabled>⛶ Full screen</button><button class="button secondary" id="download-copy" type="button" disabled>⬇ Download .sb3 copy</button></div>
+<div id="load-progress-wrap" hidden style="margin-top:.8rem"><div style="display:flex;justify-content:space-between;gap:.7rem;flex-wrap:wrap;font-size:.9rem;font-weight:700"><span id="load-progress-label">Preparing project…</span><span id="load-progress-number">0%</span></div><progress id="load-progress" max="100" value="0" style="width:100%;height:12px;accent-color:#e66b16"></progress></div>
 <div id="runtime-status" class="status" role="status" aria-live="polite">Choose a project to begin. The player engine loads when you first load a project.</div>
 </section>
 <section class="panel" id="account-editor">
@@ -77,6 +78,17 @@ const $=id=>document.getElementById(id);
 const runtimeStatus=$('runtime-status');
 let player=null, loaded=false, paused=false, muted=false, volumeLevel=100, currentBytes=null, currentTitle='Scratch project', db=null, signedInUser=null;
 function status(message,kind=''){runtimeStatus.className='status'+(kind?' '+kind:'');runtimeStatus.textContent=message;}
+function progress(percent,label){const wrap=$('load-progress-wrap'),bar=$('load-progress');wrap.hidden=false;bar.value=Math.max(0,Math.min(100,percent));$('load-progress-number').textContent=Math.round(bar.value)+'%';$('load-progress-label').textContent=label;}
+function hideProgress(){ $('load-progress-wrap').hidden=true; }
+function readFileWithProgress(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onprogress=e=>{if(e.lengthComputable)progress(e.loaded/e.total*25,'Reading project file…');else progress(8,'Reading project file…');};reader.onerror=()=>reject(reader.error||new Error('Could not read this file.'));reader.onabort=()=>reject(new Error('File reading was cancelled.'));reader.onload=()=>{progress(25,'File ready. Preparing Scratch player…');resolve(reader.result);};reader.readAsArrayBuffer(file);});}
+async function responseToArrayBuffer(response,label){
+ const total=Number(response.headers.get('content-length'))||0,reader=response.body?.getReader?.();
+ if(!reader){const data=await response.arrayBuffer();progress(25,label+' downloaded. Preparing player…');return data;}
+ const chunks=[];let received=0;
+ while(true){const part=await reader.read();if(part.done)break;chunks.push(part.value);received+=part.value.byteLength;if(total)progress(25+(received/total*20),label+'… '+Math.round(received/total*100)+'%');else progress(25,label+'… '+(received/1048576).toFixed(1)+' MB');}
+ const result=new Uint8Array(received);let offset=0;for(const chunk of chunks){result.set(chunk,offset);offset+=chunk.byteLength;}
+ progress(45,label+' downloaded. Preparing player…');return result.buffer;
+}
 function setControls(enabled){['green-flag','stop','fullscreen','download-copy','pause','mute'].forEach(id=>$(id).disabled=!enabled);}
 function projectIdFrom(value){
  const input=String(value||'').trim();
@@ -96,18 +108,19 @@ async function setupPlayer(){
  if(window.ScaffoldingAddons?.run){window.ScaffoldingAddons.run(player,{pause:true,gamepad:false,pointerlock:false,specialCloudBehaviors:false,unsafeCloudBehaviors:false});}
  player.setAccentColor?.('#e66b16');
  player.storage.addWebStore([player.storage.AssetType.ImageVector,player.storage.AssetType.ImageBitmap,player.storage.AssetType.Sound],asset=>'https://assets.scratch.mit.edu/internalapi/asset/'+asset.assetId+'.'+asset.dataFormat+'/get/');
+ player.storage.onprogress=(totalAssets,loadedAssets)=>{if(totalAssets>0)progress(45+(loadedAssets/totalAssets*50),'Loading project assets… '+loadedAssets+'/'+totalAssets);};
  player.appendTo($('stage'));
  return player;
 }
 async function loadProject(data,title){
- status('Preparing project…');
- const p=await setupPlayer();
- await p.loadProject(data);
- currentBytes=data instanceof ArrayBuffer?data.slice(0):new Uint8Array(data).slice();
- currentTitle=title||'Scratch project';
- loaded=true;paused=false;$('pause').textContent='⏸ Pause';$('project-title').textContent='Loaded: '+currentTitle;
- applyVolume();
- setControls(true);$('save-drive').disabled=!signedInUser;$('open-editor').disabled=!signedInUser;status('Project ready. Tap the green flag to run it.','success');
+ loaded=false;setControls(false);progress(45,'Loading Scratch project…');status('Loading project into the player. Large projects may take a little while…');
+ try{
+  const p=await setupPlayer();
+  await p.loadProject(data);
+  currentBytes=data instanceof ArrayBuffer?data.slice(0):new Uint8Array(data).slice();
+  currentTitle=title||'Scratch project';loaded=true;paused=false;$('pause').textContent='⏸ Pause';$('project-title').textContent='Loaded: '+currentTitle;
+  applyVolume();setControls(true);$('save-drive').disabled=!signedInUser;$('open-editor').disabled=!signedInUser;progress(100,'Project loaded and ready');status('Project ready. Tap the green flag to run it.','success');
+ }catch(error){loaded=false;setControls(false);throw error;}
 }
 async function exportCurrentProject(){
  if(!player||!loaded)throw new Error('Load a project first.');
@@ -121,8 +134,8 @@ $('load-file').addEventListener('click',async()=>{
  if(!file.name.toLowerCase().endsWith('.sb3')){status('Please choose a Scratch 3 .sb3 file.','error');return;}
  if(file.size>50*1024*1024){status('This file is larger than the 50 MB upload limit for this page.','error');return;}
  $('load-file').disabled=true;
- try{await loadProject(await file.arrayBuffer(),file.name);}
- catch(error){status('Could not load this project: '+(error.message||'Unknown error'),'error');}
+ try{const bytes=await readFileWithProgress(file);await loadProject(bytes,file.name);}
+ catch(error){status('Could not load this project: '+(error.message||'Unknown error'),'error');progress(0,'Load failed');}
  finally{$('load-file').disabled=false;}
 });
 $('load-url').addEventListener('click',async()=>{
@@ -137,13 +150,14 @@ $('load-url').addEventListener('click',async()=>{
  if(!metadata.project_token) throw new Error('Scratch did not provide a public project token.');
  const dataResponse=await fetch('https://projects.scratch.mit.edu/'+id+'?token='+encodeURIComponent(metadata.project_token));
  if(!dataResponse.ok) throw new Error('Could not download the shared project (HTTP '+dataResponse.status+').');
- await loadProject(await dataResponse.arrayBuffer(),metadata.title||('Scratch project '+id));
+ const projectData=await responseToArrayBuffer(dataResponse,'Downloading Scratch project');
+ await loadProject(projectData,metadata.title||('Scratch project '+id));
  const projectUrl=new URL(location.href);projectUrl.searchParams.set('project',id);history.replaceState(null,'',projectUrl.toString());
  }catch(error){status('Could not open project: '+(error.message||'Network or project error'),'error');}
  finally{$('load-url').disabled=false;}
 });
-$('green-flag').addEventListener('click',()=>{if(player&&loaded){player.greenFlag();status('Project is running.','success');}});
-$('stop').addEventListener('click',()=>{if(player&&loaded){player.stopAll();paused=false;$('pause').textContent='⏸ Pause';status('Project stopped.');}});
+$('green-flag').addEventListener('click',()=>{if(!player||!loaded)return;try{player.greenFlag();status('Green flag pressed. Your project is running.','success');}catch(error){status('The project could not start: '+(error.message||'Player error'),'error');}});
+$('stop').addEventListener('click',()=>{if(player&&loaded){try{player.stopAll();paused=false;$('pause').textContent='⏸ Pause';status('Project stopped.');}catch(error){status('Could not stop project: '+(error.message||'Player error'),'error');}}});
 $('pause').addEventListener('click',()=>{if(!player||!loaded)return;try{paused=!paused;if(typeof player.vm.setPaused!=='function')throw new Error('Pause is unavailable in the current player engine.');player.vm.setPaused(paused);$('pause').textContent=paused?'▶ Resume':'⏸ Pause';status(paused?'Project paused.':'Project resumed.','success');}catch(e){paused=false;$('pause').textContent='⏸ Pause';status(e.message||'Pause is unavailable.', 'error');}});
 function applyVolume(){const gain=player?.audioEngine?.inputNode?.gain;if(gain)gain.value=muted?0:volumeLevel/100;$('volume-value').textContent=(muted?0:volumeLevel)+'%';$('mute').textContent=muted?'🔇 Unmute':'🔊 Mute';}
 $('volume').addEventListener('input',()=>{volumeLevel=Number($('volume').value);muted=false;applyVolume();});
@@ -236,8 +250,10 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
    const {error:rowError}=await db.from('drive_items').insert({id,user_id:signedInUser.id,parent_id:null,item_type:'file',name,mime_type:'application/x-scratch-project',size_bytes:blob.size,storage_path:path});
    if(rowError){await db.storage.from(bucket).remove([path]);throw rowError;}
    const {data:signed,error:signedError}=await db.storage.from(bucket).createSignedUrl(path,3600);if(signedError)throw signedError;
+   if(!signed?.signedUrl)throw new Error('ConfigKit could not create a secure project link for TurboWarp.');
    const editorUrl='https://turbowarp.org/editor?project_url='+encodeURIComponent(signed.signedUrl)+'&project_title='+encodeURIComponent(currentTitle);
-   popup.location.href=editorUrl;accountStatus.textContent='Editor opened with a private, time-limited project link. When finished, download the edited .sb3 and upload it here to save the updated copy.';
+   popup.document.title='Opening TurboWarp editor…';popup.document.body.innerHTML='<p style="font:16px system-ui;padding:24px">Your private project copy is ready. Opening TurboWarp editor…</p>';
+   popup.location.replace(editorUrl);accountStatus.textContent='TurboWarp editor opened with a private, time-limited project link. If the editor does not import automatically, download the saved project from ConfigKit Drive and import the .sb3 file in TurboWarp. When finished, download the edited .sb3 and upload it here to save the updated copy.';
    await refreshDriveList();
   }catch(e){popup.close();accountStatus.textContent=e.message||'Could not open the editor.';}
  });
