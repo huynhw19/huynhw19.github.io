@@ -35,7 +35,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(244,248,245,.96);backdro
 <a class="brand" href="index.html">⌘ ConfigKit</a>
 <nav class="header-links" aria-label="Main navigation">
 <a href="index.html">Home</a><a href="mobileconfig-guide.html">Beginner guide</a><a href="dashboard.html">Dashboard</a><a href="account-docs.html">Account help</a><a href="insights.html">Insights</a><a href="notifications.html">Notifications</a>
-      <a href="support.html">Support</a>
+      <a href="support.html">Support</a><a href="community-wiki.html">Community Wiki</a>
 </nav>
 </header>
 <main id="main">
@@ -43,7 +43,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(244,248,245,.96);backdro
 <span class="eyebrow">Documentation · Help · Troubleshooting</span>
 <h1>Find your way around ConfigKit.</h1>
 <p class="lead">Searchable documentation for profile builders, accounts, dashboards, community features, and technical setup. Start with a guide, jump to a feature, or search for the exact problem you are trying to solve.</p>
-<div class="hero-actions"><a class="button primary" href="mobileconfig-guide.html">Start with the beginner guide</a><a class="button" href="index.html#builders">Explore profile builders</a><a class="button" href="support.html">Contact support</a></div>
+<div class="hero-actions"><a class="button primary" href="mobileconfig-guide.html">Start with the beginner guide</a><a class="button" href="index.html#builders">Explore profile builders</a><a class="button" href="support.html">Contact support</a><a class="button" href="community-wiki.html">Explore Community Wiki</a></div>
 </section>
 
 <div class="search-wrap">
@@ -52,7 +52,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(244,248,245,.96);backdro
 <p class="hint" id="result-count" aria-live="polite">Browse all topics or search by feature, task, or problem. Results update as you type.</p>
 </div>
 <nav class="toc" aria-label="Wiki topics">
-<a href="#start">Start here</a><a href="#builders">Profile tools</a><a href="#accounts">Accounts</a><a href="#workspaces">Dashboards</a><a href="#community">Community</a><a href="#safety">Safety &amp; privacy</a><a href="#troubleshooting">Troubleshooting</a><a href="#reference">Technical reference</a>
+<a href="#start">Start here</a><a href="#builders">Profile tools</a><a href="#accounts">Accounts</a><a href="#workspaces">Dashboards</a><a href="#community">Community</a><a href="#community-wiki">Community Wiki</a><a href="#safety">Safety &amp; privacy</a><a href="#troubleshooting">Troubleshooting</a><a href="#reference">Technical reference</a>
 </nav>
 <div class="empty" id="empty-state" role="status">No matching help topics. Try a shorter search term or browse the topic links above.</div>\n<div class="notice"><strong>Quick safety reminder:</strong> ConfigKit can generate and inspect profile files, but it does not certify them as safe. Review settings carefully and never share passwords, recovery codes, private keys, or other secrets.</div>
 
@@ -112,7 +112,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(244,248,245,.96);backdro
 </section>
 
 <section class="section" id="community">
-<div class="section-head"><div><h2>Community and collaboration</h2><p class="section-intro">Community functions rely on authentication and the corresponding Supabase tables, policies, and Storage configuration.</p></div></div>
+<div class="section-head"><div><h2>Community and collaboration</h2><p class="section-intro">Community functions rely on sign-in and access policies. Explore member profiles, discussions, Community Book and the new Community Wiki for member-published knowledge.</p></div></div>
 <div class="grid">
 <article class="card" data-search="groups create join invite code membership rename delete leave owner"><h3>Groups</h3><p>Create a group, share its invite code, join with a code, view memberships, or leave. Group creators can rename or delete their groups. Groups store names and memberships, not profile files.</p><a href="groups.html">Open groups →</a> · <a href="GROUPS-SETUP.md">Setup guide</a></article>
 <article class="card" data-search="builder discussion posts comments shared mobileconfig uploads job listings community"><h3>Builder discussion</h3><p>Signed-in members can start discussions, comment, browse shared profile posts, and view job listings. Sharing accepts unsigned XML profiles up to the configured limit and applies content checks.</p><a href="builder-discussion.html">Open builder discussion →</a> · <a href="BUILDER-DISCUSSION-SETUP.md">Backend setup</a></article>
@@ -121,7 +121,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(244,248,245,.96);backdro
 <div class="notice"><strong>Before sharing:</strong> Treat profile files as potentially sensitive. Do not upload credentials, Wi-Fi passwords, private keys, certificates, access tokens, or personal information. Review the sharing rules and setup notes first.</div>
 </section>
 
-<section class="section" id="safety">
+<section class="section" id="community-wiki"><div class="section-head"><div><h2>Community Wiki</h2><p class="section-intro">Member-written tutorials and knowledge articles complement the official ConfigKit help centre. Published articles are public; writing and managing contributions requires a signed-in account.</p></div></div><div class="grid"><article class="card" data-search="community wiki write publish article member guides tutorials tips"><span class="tag">Community publishing</span><h3>Read and write community articles</h3><p>Browse member guides, search by topic, publish Markdown-style articles, manage your drafts and report content that needs review.</p><a href="community-wiki.html">Open Community Wiki →</a></article><article class="card" data-search="community wiki content guidelines safety moderation copyright misinformation privacy"><h3>Community Wiki guidelines</h3><p>Share original, useful information. Avoid personal data, credentials, recovery codes, unsafe instructions, harassment and copyrighted content you cannot republish. Articles may be hidden after a report and administrator review.</p><a href="community-wiki.html">Read community articles →</a></article></div></section>\n<section class="section" id="safety">
 <div class="section-head"><div><h2>Safety, privacy, and policies</h2><p class="section-intro">Understand what a configuration profile can change and how to protect your account and data.</p></div></div>
 <div class="grid">
 <article class="card" data-search="safety install profile certificates restrictions accounts vpn dns source trust review"><h3>Profile safety</h3><p>Profiles can change device settings, configure network traffic, install certificates, or apply restrictions. Review the payloads and only install profiles from a trusted source.</p><a href="safety.html">Read safety guidance →</a></article>
