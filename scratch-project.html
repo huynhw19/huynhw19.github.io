@@ -103,11 +103,18 @@ async function loadProject(data,title){
  status('Preparing project…');
  const p=await setupPlayer();
  await p.loadProject(data);
- currentBytes=data instanceof ArrayBuffer?data.slice(0):new Uint8Array(data);
+ currentBytes=data instanceof ArrayBuffer?data.slice(0):new Uint8Array(data).slice();
  currentTitle=title||'Scratch project';
  loaded=true;paused=false;$('pause').textContent='⏸ Pause';$('project-title').textContent='Loaded: '+currentTitle;
  applyVolume();
  setControls(true);status('Project ready. Tap the green flag to run it.','success');
+}
+async function exportCurrentProject(){
+ if(!player||!loaded)throw new Error('Load a project first.');
+ if(typeof player.vm?.saveProjectSb3!=='function')throw new Error('Project export is not available in the current player engine.');
+ const exported=await player.vm.saveProjectSb3();
+ currentBytes=exported instanceof ArrayBuffer?exported.slice(0):new Uint8Array(exported).slice();
+ return currentBytes;
 }
 $('load-file').addEventListener('click',async()=>{
  const file=$('project-file').files[0];if(!file){status('Choose an .sb3 file first.','error');return;}
@@ -144,9 +151,8 @@ $('mute').addEventListener('click',()=>{muted=!muted;applyVolume();});
 $('fullscreen').addEventListener('click',async()=>{const shell=$('stage-shell');try{if(!document.fullscreenElement)await shell.requestFullscreen();else await document.exitFullscreen();}catch(_){status('Full screen is not available in this browser.','error');}});
 $('download-copy').addEventListener('click',async()=>{
  try{
-  if(!player||!loaded)throw new Error('Load a project first.');
-  const bytes=await player.vm.saveProjectSb3();
-  currentBytes=bytes;const blob=new Blob([bytes],{type:'application/octet-stream'});
+  const bytes=await exportCurrentProject();
+  const blob=new Blob([bytes],{type:'application/octet-stream'});
   const objectUrl=URL.createObjectURL(blob),link=document.createElement('a');
   link.href=objectUrl;link.download='scratch-project-copy.sb3';document.body.appendChild(link);link.click();link.remove();
   setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
@@ -173,7 +179,7 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
  const saveDriveBytes=async(bytes,title)=>{
   if(!signedInUser)throw new Error('Please sign in to save projects to your private Drive.');
   if(!bytes)throw new Error('Load a project first.');
-  const id=crypto.randomUUID(),path=signedInUser.id+'/'+id;
+  const id=uuid(),path=signedInUser.id+'/'+id;
   const blob=new Blob([bytes],{type:'application/octet-stream'}),name=driveName(title);
   const {error:uploadError}=await db.storage.from(bucket).upload(path,blob,{contentType:'application/octet-stream',upsert:false});
   if(uploadError)throw uploadError;
@@ -199,7 +205,19 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
  };
  db.auth.getSession().then(({data,error})=>{if(error)throw error;return signedIn(data.session)}).catch(e=>{accountStatus.textContent='Could not check sign-in: '+e.message;});
  db.auth.onAuthStateChange((_event,session)=>{void signedIn(session);});
- $('save-drive').addEventListener('click',async()=>{try{await saveDriveBytes(currentBytes,currentTitle); }catch(e){accountStatus.textContent=e.message||'Could not save this project.';}});
+ $('save-drive').addEventListener('click',async()=>{const button=$('save-drive');button.disabled=true;try{const bytes=await exportCurrentProject();await saveDriveBytes(bytes,currentTitle);}catch(e){accountStatus.textContent=e.message||'Could not save this project.';}finally{button.disabled=!signedInUser;}});
+ $('load-drive').addEventListener('click',async()=>{
+  const selected=$('drive-projects').value;if(!selected){accountStatus.textContent='Choose a saved project first.';return;}
+  const button=$('load-drive');button.disabled=true;
+  try{
+   const {data:row,error:rowError}=await db.from('drive_items').select('id,name,storage_path').eq('id',selected).eq('user_id',signedInUser.id).eq('item_type','file').is('deleted_at',null).single();
+   if(rowError)throw rowError;
+   const {data:file,error:fileError}=await db.storage.from(bucket).download(row.storage_path);if(fileError)throw fileError;
+   await loadProject(await file.arrayBuffer(),row.name.replace(/\\.scratch\\.sb3$/i,''));
+   accountStatus.textContent=row.name+' loaded from your private Drive.';
+  }catch(e){accountStatus.textContent='Could not load this Drive project: '+(e.message||'Please try again.');}
+  finally{button.disabled=false;}
+ });
  $('save-edited').addEventListener('click',async()=>{
   const file=$('edited-file').files?.[0];if(!file){accountStatus.textContent='Choose the edited .sb3 file first.';return;}
   if(!file.name.toLowerCase().endsWith('.sb3')||file.size>50*1024*1024){accountStatus.textContent='Choose an .sb3 file no larger than 50 MB.';return;}
@@ -212,7 +230,8 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
   if(!popup){accountStatus.textContent='Allow pop-ups for this site to open the editor.';return;}
   try{
    accountStatus.textContent='Saving a private working copy for the editor…';
-   const id=crypto.randomUUID(),path=signedInUser.id+'/'+id,blob=new Blob([currentBytes],{type:'application/octet-stream'}),name=driveName(currentTitle);
+   const latestBytes=await exportCurrentProject();
+   const id=uuid(),path=signedInUser.id+'/'+id,blob=new Blob([latestBytes],{type:'application/octet-stream'}),name=driveName(currentTitle);
    const {error:uploadError}=await db.storage.from(bucket).upload(path,blob,{contentType:'application/octet-stream',upsert:false});if(uploadError)throw uploadError;
    const {error:rowError}=await db.from('drive_items').insert({id,user_id:signedInUser.id,parent_id:null,item_type:'file',name,mime_type:'application/x-scratch-project',size_bytes:blob.size,storage_path:path});
    if(rowError){await db.storage.from(bucket).remove([path]);throw rowError;}
