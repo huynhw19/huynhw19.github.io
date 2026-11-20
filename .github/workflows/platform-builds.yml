@@ -71,7 +71,7 @@ jobs:
         run: |
           if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then VERSION_NAME="${GITHUB_REF_NAME#v}"; else VERSION_NAME="$(node -p "require('./package.json').version")"; fi
           echo "VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
-          node -e "const fs=require('node:fs');const p=require('./package.json');p.version=process.env.VERSION_NAME;fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\\n');"
+          node -e "const fs=require('node:fs');const p=require('./package.json');p.version=process.argv[1];fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\\n');" "$VERSION_NAME"
       - name: Install desktop dependencies
         run: npm install --no-audit --no-fund
       - name: Build desktop package
@@ -108,8 +108,11 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
-      - name: Install Android SDK packages
-        run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+        with:
+          packages: |
+            platform-tools
+            platforms;android-35
+            build-tools;35.0.0
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
