@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Sign in or create a ConfigKit account using email, GitHub, Bitbucket, Figma, Discord, Slack, GitLab, ChatGPT (coming soon), or passkeys.">
+  <meta name="description" content="Sign in or create a ConfigKit account using email, GitHub, Bitbucket, Figma, Discord, Slack, ChatGPT (coming soon), or passkeys.">
   <title>Log in or Sign up — ConfigKit</title>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8;--shadow:0 12px 32px #17231f12}
@@ -86,7 +86,6 @@
         <button class="provider secondary" id="discord" type="button" disabled>Continue with Discord</button>
         <button class="provider secondary" id="slack" type="button" disabled>Continue with Slack</button>
         <button class="provider coming-soon" id="chatgptComingSoon" type="button" disabled aria-describedby="chatgptComingSoonNote">Continue with ChatGPT <span class="coming-soon-label">· COMING SOON</span></button>
-        <button class="provider secondary" id="gitlab" type="button" disabled>Continue with GitLab</button>
 
       </div>
       <p class="muted fine-print" id="chatgptComingSoonNote">ChatGPT sign-in is planned. It will become available if OpenAI enables OAuth access for this app; this button is not active yet.</p>
@@ -125,7 +124,6 @@
       const figma = document.getElementById('figma');
       const discord = document.getElementById('discord');
       const slack = document.getElementById('slack');
-      const gitlab = document.getElementById('gitlab');
 
       const passkeyLogin = document.getElementById('passkeyLogin');
       const form = document.getElementById('emailForm');
@@ -209,7 +207,7 @@
         return metadata;
       }
       function setBusy(busy) {
-        emailSubmit.disabled = busy; github.disabled = busy; bitbucket.disabled = busy; figma.disabled = busy; discord.disabled = busy; slack.disabled = busy; gitlab.disabled = busy; passkeyLogin.disabled = busy;
+        emailSubmit.disabled = busy; github.disabled = busy; bitbucket.disabled = busy; figma.disabled = busy; discord.disabled = busy; slack.disabled = busy; passkeyLogin.disabled = busy;
         resetPassword.disabled = busy; loginTab.disabled = busy; signupTab.disabled = busy;
       }
       function setStatus(message, isError=false) {
@@ -410,7 +408,7 @@
       }
       async function startOAuth(provider) {
         clearPasskeySession();
-        setStatus(`Connecting to ${{bitbucket:'Bitbucket',figma:'Figma',github:'GitHub',discord:'Discord',slack_oidc:'Slack',gitlab:'GitLab'}[provider] || 'your provider'}…`);
+        setStatus(`Connecting to ${{bitbucket:'Bitbucket',figma:'Figma',github:'GitHub',discord:'Discord',slack_oidc:'Slack'}[provider] || 'your provider'}…`);
         setBusy(true);
         try {
           const type = accountType.value;
@@ -643,7 +641,6 @@
       figma.addEventListener('click', () => startOAuth('figma'));
       discord.addEventListener('click', () => startOAuth('discord'));
       slack.addEventListener('click', () => startOAuth('slack_oidc'));
-      gitlab.addEventListener('click', () => startOAuth('gitlab'));
 
       signout.addEventListener('click', async () => {
         clearPasskeySession();
@@ -653,7 +650,7 @@
         if (error) { setStatus('Could not sign out. Please try again.', true); return; }
         setMode('login'); await renderSession();
       });
-      github.disabled = false; bitbucket.disabled = false; figma.disabled = false; discord.disabled = false; slack.disabled = false; gitlab.disabled = false;
+      github.disabled = false; bitbucket.disabled = false; figma.disabled = false; discord.disabled = false; slack.disabled = false;
       client.auth.onAuthStateChange((event, session) => {
         if (event === 'PASSWORD_RECOVERY') {
           queueMicrotask(showPasswordRecovery);
