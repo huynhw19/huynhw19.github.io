@@ -17,6 +17,7 @@ assert.ok(fs.existsSync('mobileconfig-builder.html'), 'iOS profile builder page 
 assert.ok(builder.includes('application/x-apple-aspen-config'), 'Profile builder MIME type is missing');
 assert.ok(builder.includes('URL.createObjectURL'), 'Profile builder local download is missing');
 assert.equal(pkg.build.mac.icon, 'build/icon.png', 'macOS icon must use the high-resolution PNG');
+assert.equal(pkg.build.linux.artifactName, 'ConfigKit-Linux-x64.${ext}', 'Linux download filename must match the published asset link');
 assert.ok(androidManifest.includes('android.permission.INTERNET'), 'Android app needs internet permission');
 assert.ok(androidManifest.includes('@mipmap/ic_launcher'), 'Android launcher icon is not configured');
 assert.ok(fs.existsSync('android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml'), 'Android adaptive launcher icon is missing');

@@ -76,7 +76,7 @@
           ]
         }
       ],
-      "artifactName": "ConfigKit-Linux-${arch}.${ext}",
+      "artifactName": "ConfigKit-Linux-x64.${ext}",
       "category": "Utility"
     }
   },
