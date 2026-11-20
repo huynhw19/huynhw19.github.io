@@ -1,0 +1,99 @@
+name: ConfigKit platform builds
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths:
+      - 'desktop/**'
+      - 'android/**'
+      - 'package.json'
+      - 'configkit-oauth-logo.svg'
+      - 'downloads.html'
+      - 'PLATFORM-INSTALL.md'
+      - '.github/workflows/platform-builds.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  desktop:
+    name: Build ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            command: npm run dist:win
+            artifact: ConfigKit-Windows
+            files: release/*.exe
+          - name: macOS
+            os: macos-latest
+            command: npm run dist:mac
+            artifact: ConfigKit-macOS
+            files: release/*.dmg
+          - name: Linux
+            os: ubuntu-latest
+            command: npm run dist:linux
+            artifact: ConfigKit-Linux
+            files: release/*.AppImage
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install desktop dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build desktop package
+        run: ${{ matrix.command }}
+      - name: Upload desktop package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.files }}
+          if-no-files-found: error
+          retention-days: 30
+
+  android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build installable APK
+        working-directory: android
+        run: gradle --no-daemon assembleDebug
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk ConfigKit-Android.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ConfigKit-Android
+          path: ConfigKit-Android.apk
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    name: Publish versioned downloads
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [desktop, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          pattern: ConfigKit-*
+          merge-multiple: true
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true
