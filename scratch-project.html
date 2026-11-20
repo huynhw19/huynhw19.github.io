@@ -51,7 +51,7 @@
 <div class="field"><label for="edited-file">Upload your edited .sb3 copy</label><input id="edited-file" type="file" accept=".sb3,application/octet-stream"></div>
 <div class="actions"><button class="button" id="save-edited" type="button">Save edited copy to Drive</button></div>
 <div class="field"><label for="drive-projects">Your saved Scratch projects</label><select id="drive-projects"><option value="">Choose a saved project…</option></select></div>
-<div class="actions"><button class="button secondary" id="load-drive" type="button">Load selected project</button></div>
+<div class="actions"><button class="button secondary" id="load-drive" type="button">Load selected project</button><button class="button secondary" id="download-drive" type="button">⬇ Download selected project</button></div>
 </div>
 <p class="note"><a href="login.html?next=scratch-project.html">Sign in or create a ConfigKit account</a> to unlock private cloud saving and the editor tools.</p>
 </section>
@@ -76,7 +76,7 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const runtimeStatus=$('runtime-status');
-let player=null, loaded=false, paused=false, muted=false, volumeLevel=100, currentBytes=null, currentTitle='Scratch project', db=null, signedInUser=null;
+let player=null, loaded=false, paused=false, muted=false, volumeLevel=100, currentBytes=null, currentTitle='Scratch project', db=null, signedInUser=null, isLoading=false;
 function status(message,kind=''){runtimeStatus.className='status'+(kind?' '+kind:'');runtimeStatus.textContent=message;}
 function progress(percent,label){const wrap=$('load-progress-wrap'),bar=$('load-progress');wrap.hidden=false;bar.value=Math.max(0,Math.min(100,percent));$('load-progress-number').textContent=Math.round(bar.value)+'%';$('load-progress-label').textContent=label;}
 function hideProgress(){ $('load-progress-wrap').hidden=true; }
@@ -102,25 +102,30 @@ function projectIdFrom(value){
 async function setupPlayer(){
  if(player) return player;
  if(!window.Scaffolding||!window.Scaffolding.Scaffolding) throw new Error('The Scratch player engine did not load. Check your connection and reload this page.');
- player=new window.Scaffolding.Scaffolding();
- player.width=480;player.height=360;player.resizeMode='preserve-ratio';player.shouldConnectPeripherals=false;
- player.setup();
- if(window.ScaffoldingAddons?.run){window.ScaffoldingAddons.run(player,{pause:true,gamepad:false,pointerlock:false,specialCloudBehaviors:false,unsafeCloudBehaviors:false});}
- player.setAccentColor?.('#e66b16');
- player.storage.addWebStore([player.storage.AssetType.ImageVector,player.storage.AssetType.ImageBitmap,player.storage.AssetType.Sound],asset=>'https://assets.scratch.mit.edu/internalapi/asset/'+asset.assetId+'.'+asset.dataFormat+'/get/');
- player.storage.onprogress=(totalAssets,loadedAssets)=>{if(totalAssets>0)progress(45+(loadedAssets/totalAssets*50),'Loading project assets… '+loadedAssets+'/'+totalAssets);};
- player.appendTo($('stage'));
- return player;
+ const candidate=new window.Scaffolding.Scaffolding();
+ try{
+  candidate.width=480;candidate.height=360;candidate.resizeMode='preserve-ratio';candidate.shouldConnectPeripherals=false;
+  candidate.setup();
+  if(!candidate.vm||typeof candidate.loadProject!=='function'||typeof candidate.greenFlag!=='function')throw new Error('The Scratch player engine loaded an incompatible version. Reload the page and try again.');
+  if(window.ScaffoldingAddons?.run){window.ScaffoldingAddons.run(candidate,{pause:true,gamepad:false,pointerlock:false,specialCloudBehaviors:false,unsafeCloudBehaviors:false});}
+  candidate.setAccentColor?.('#e66b16');
+  candidate.storage.addWebStore([candidate.storage.AssetType.ImageVector,candidate.storage.AssetType.ImageBitmap,candidate.storage.AssetType.Sound],asset=>'https://assets.scratch.mit.edu/internalapi/asset/'+asset.assetId+'.'+asset.dataFormat+'/get/');
+  candidate.storage.onprogress=(totalAssets,loadedAssets)=>{if(totalAssets>0)progress(45+(loadedAssets/totalAssets*50),'Loading project assets… '+loadedAssets+'/'+totalAssets);};
+  candidate.appendTo($('stage'));player=candidate;return player;
+ }catch(error){try{candidate.stopAll?.();}catch(_){}$('stage').replaceChildren();throw error;}
 }
 async function loadProject(data,title){
- loaded=false;setControls(false);progress(45,'Loading Scratch project…');status('Loading project into the player. Large projects may take a little while…');
+ if(isLoading)throw new Error('A project is already loading. Please wait for it to finish.');
+ isLoading=true;loaded=false;setControls(false);progress(45,'Unpacking project and preparing Scratch…');status('Preparing the Scratch player. Large projects can take a while on phones…');
  try{
   const p=await setupPlayer();
+  progress(48,'Loading sprites, costumes, sounds and scripts…');
   await p.loadProject(data);
   currentBytes=data instanceof ArrayBuffer?data:data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength);
   currentTitle=title||'Scratch project';loaded=true;paused=false;$('pause').textContent='⏸ Pause';$('project-title').textContent='Loaded: '+currentTitle;
-  applyVolume();setControls(true);$('save-drive').disabled=!signedInUser;$('open-editor').disabled=!signedInUser;progress(100,'Project loaded and ready');status('Project ready. Tap the green flag to run it.','success');
- }catch(error){loaded=false;setControls(false);throw error;}
+  applyVolume();setControls(true);$('save-drive').disabled=!signedInUser;$('open-editor').disabled=!signedInUser;
+  progress(96,'Starting project…');p.greenFlag();progress(100,'Project loaded and running');status('Project loaded and started. Use the green flag to restart it or Stop to end it.','success');
+ }catch(error){loaded=false;setControls(false);throw error;}finally{isLoading=false;}
 }
 async function exportCurrentProject(){
  if(!player||!loaded)throw new Error('Load a project first.');
@@ -220,6 +225,11 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
  db.auth.getSession().then(({data,error})=>{if(error)throw error;return signedIn(data.session)}).catch(e=>{accountStatus.textContent='Could not check sign-in: '+e.message;});
  db.auth.onAuthStateChange((_event,session)=>{void signedIn(session);});
  $('save-drive').addEventListener('click',async()=>{const button=$('save-drive');button.disabled=true;try{const bytes=await exportCurrentProject();await saveDriveBytes(bytes,currentTitle);}catch(e){accountStatus.textContent=e.message||'Could not save this project.';}finally{button.disabled=!signedInUser;}});
+ $('download-drive').addEventListener('click',async()=>{
+  const selected=$('drive-projects').value;if(!selected){accountStatus.textContent='Choose a saved project first.';return;}
+  const button=$('download-drive');button.disabled=true;
+  try{const {data:row,error:rowError}=await db.from('drive_items').select('name,storage_path').eq('id',selected).eq('user_id',signedInUser.id).eq('item_type','file').is('deleted_at',null).single();if(rowError)throw rowError;const {data:file,error:fileError}=await db.storage.from(bucket).download(row.storage_path);if(fileError)throw fileError;const objectUrl=URL.createObjectURL(file),link=document.createElement('a');link.href=objectUrl;link.download=row.name.replace(/\.scratch\.sb3$/i,'')+'.sb3';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);accountStatus.textContent='Project downloaded. In TurboWarp choose File → Load from your computer.';}catch(e){accountStatus.textContent='Could not download this Drive project: '+(e.message||'Please try again.');}finally{button.disabled=false;}
+ });
  $('load-drive').addEventListener('click',async()=>{
   const selected=$('drive-projects').value;if(!selected){accountStatus.textContent='Choose a saved project first.';return;}
   const button=$('load-drive');button.disabled=true;
@@ -251,9 +261,10 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
    if(rowError){await db.storage.from(bucket).remove([path]);throw rowError;}
    const {data:signed,error:signedError}=await db.storage.from(bucket).createSignedUrl(path,3600);if(signedError)throw signedError;
    if(!signed?.signedUrl)throw new Error('ConfigKit could not create a secure project link for TurboWarp.');
-   const editorUrl='https://turbowarp.org/editor?project_url='+encodeURIComponent(signed.signedUrl)+'&project_title='+encodeURIComponent(currentTitle);
-   popup.document.title='Opening TurboWarp editor…';popup.document.body.innerHTML='<p style="font:16px system-ui;padding:24px">Your private project copy is ready. Opening TurboWarp editor…</p>';
-   popup.location.replace(editorUrl);accountStatus.textContent='TurboWarp editor opened with a private, time-limited project link. If the editor does not import automatically, download the saved project from ConfigKit Drive and import the .sb3 file in TurboWarp. When finished, download the edited .sb3 and upload it here to save the updated copy.';
+   popup.document.title='Checking TurboWarp import…';popup.document.body.innerHTML='<p style="font:16px system-ui;padding:24px">Checking whether TurboWarp can securely read your private project…</p>';
+   let crossOriginReadable=false;try{const check=await fetch(signed.signedUrl,{method:'HEAD',mode:'cors',cache:'no-store'});crossOriginReadable=check.ok;}catch(_){}
+   if(crossOriginReadable){const editorUrl='https://turbowarp.org/editor?project_url='+encodeURIComponent(signed.signedUrl)+'&project_title='+encodeURIComponent(currentTitle);popup.location.replace(editorUrl);accountStatus.textContent='TurboWarp can reach the time-limited private project link. If import still fails, use Download selected project in Drive and import the .sb3 file manually.';}
+   else{popup.location.replace('https://turbowarp.org/editor/');accountStatus.textContent='Your working copy is saved in ConfigKit Drive, but this browser could not verify cross-site access to the private file. In the editor, use File → Load from your computer after downloading the project with “Download selected project” below. This avoids sending your private project through a third-party proxy.';}
    await refreshDriveList();
   }catch(e){popup.close();accountStatus.textContent=e.message||'Could not open the editor.';}
  });
