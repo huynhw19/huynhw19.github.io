@@ -107,7 +107,7 @@ async function loadProject(data,title){
  currentTitle=title||'Scratch project';
  loaded=true;paused=false;$('pause').textContent='⏸ Pause';$('project-title').textContent='Loaded: '+currentTitle;
  applyVolume();
- setControls(true);status('Project ready. Tap the green flag to run it.','success');
+ setControls(true);$('save-drive').disabled=!signedInUser;$('open-editor').disabled=!signedInUser;status('Project ready. Tap the green flag to run it.','success');
 }
 async function exportCurrentProject(){
  if(!player||!loaded)throw new Error('Load a project first.');
@@ -175,7 +175,7 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
  db=window.supabase.createClient(authConfig.supabaseUrl,authConfig.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
  const editorPanel=$('account-editor'),editorTools=$('editor-tools'),accountStatus=$('editor-account');
  const bucket='configkit-drive-files';
- const driveName=name=>(String(name||'Scratch project').replace(/\\.sb3$/i,'').replace(/[\\/:*?"<>|]+/g,'-').trim().slice(0,110)||'Scratch project')+'.scratch.sb3';
+ const driveName=name=>(String(name||'Scratch project').replace(/\.sb3$/i,'').replace(/[\/:*?"<>|\\]+/g,'-').trim().slice(0,110)||'Scratch project')+'.scratch.sb3';
  const saveDriveBytes=async(bytes,title)=>{
   if(!signedInUser)throw new Error('Please sign in to save projects to your private Drive.');
   if(!bytes)throw new Error('Load a project first.');
@@ -201,7 +201,7 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
   if(!signedInUser){accountStatus.textContent='You are not signed in. Sign in to unlock the editor and private Drive saving.';return;}
   accountStatus.textContent='Signed in. Your Scratch project files are private to your ConfigKit account.';
   try{await refreshDriveList();}catch(e){accountStatus.textContent='Drive could not be loaded: '+(e.message||'Please try again.');}
-  $('save-drive').disabled=false;$('open-editor').disabled=false;
+  $('save-drive').disabled=!loaded;$('open-editor').disabled=!loaded;
  };
  db.auth.getSession().then(({data,error})=>{if(error)throw error;return signedIn(data.session)}).catch(e=>{accountStatus.textContent='Could not check sign-in: '+e.message;});
  db.auth.onAuthStateChange((_event,session)=>{void signedIn(session);});
@@ -213,7 +213,7 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
    const {data:row,error:rowError}=await db.from('drive_items').select('id,name,storage_path').eq('id',selected).eq('user_id',signedInUser.id).eq('item_type','file').is('deleted_at',null).single();
    if(rowError)throw rowError;
    const {data:file,error:fileError}=await db.storage.from(bucket).download(row.storage_path);if(fileError)throw fileError;
-   await loadProject(await file.arrayBuffer(),row.name.replace(/\\.scratch\\.sb3$/i,''));
+   await loadProject(await file.arrayBuffer(),row.name.replace(/\.scratch\.sb3$/i,''));
    accountStatus.textContent=row.name+' loaded from your private Drive.';
   }catch(e){accountStatus.textContent='Could not load this Drive project: '+(e.message||'Please try again.');}
   finally{button.disabled=false;}
