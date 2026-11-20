@@ -35,7 +35,7 @@
 <section class="panel">
 <h2>▶️ Project player</h2><p id="project-title" class="muted">No project loaded yet.</p>
 <div id="stage-shell"><div id="stage" aria-label="Scratch project stage"></div></div>
-<div class="stage-actions"><button class="button" id="green-flag" type="button" disabled>🚩 Green flag</button><button class="button secondary" id="stop" type="button" disabled>⏹ Stop</button><button class="button secondary" id="fullscreen" type="button" disabled>⛶ Full screen</button></div>
+<div class="stage-actions"><button class="button" id="green-flag" type="button" disabled>🚩 Green flag</button><button class="button secondary" id="stop" type="button" disabled>⏹ Stop</button><button class="button secondary" id="fullscreen" type="button" disabled>⛶ Full screen</button><button class="button secondary" id="download-copy" type="button" disabled>⬇ Download .sb3 copy</button></div>
 <div id="runtime-status" class="status" role="status" aria-live="polite">Choose a project to begin. The player engine loads when you first load a project.</div>
 </section>
 <section class="panel">
@@ -59,7 +59,7 @@ const $=id=>document.getElementById(id);
 const runtimeStatus=$('runtime-status');
 let player=null, loaded=false;
 function status(message,kind=''){runtimeStatus.className='status'+(kind?' '+kind:'');runtimeStatus.textContent=message;}
-function setControls(enabled){['green-flag','stop','fullscreen'].forEach(id=>$(id).disabled=!enabled);}
+function setControls(enabled){['green-flag','stop','fullscreen','download-copy'].forEach(id=>$(id).disabled=!enabled);}
 function projectIdFrom(value){
  const input=String(value||'').trim();
  if(/^\d{1,12}$/.test(input)) return input;
@@ -115,6 +115,17 @@ $('load-url').addEventListener('click',async()=>{
 $('green-flag').addEventListener('click',()=>{if(player&&loaded){player.greenFlag();status('Project is running.','success');}});
 $('stop').addEventListener('click',()=>{if(player&&loaded){player.stopAll();status('Project stopped.');}});
 $('fullscreen').addEventListener('click',async()=>{const shell=$('stage-shell');try{if(!document.fullscreenElement)await shell.requestFullscreen();else await document.exitFullscreen();}catch(_){status('Full screen is not available in this browser.','error');}});
+$('download-copy').addEventListener('click',async()=>{
+ try{
+  if(!player||!loaded)throw new Error('Load a project first.');
+  const bytes=await player.vm.saveProjectSb3();
+  const blob=new Blob([bytes],{type:'application/octet-stream'});
+  const objectUrl=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=objectUrl;link.download='scratch-project-copy.sb3';document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
+  status('A copy of your project was downloaded. Keep your original .sb3 file as a backup.','success');
+ }catch(error){status('Could not export project: '+(error.message||'Unknown error'),'error');}
+});
 function uuid(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16);});}
 function xmlEscape(value){return String(value).replace(/[<>&'"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c]));}
 $('make-profile').addEventListener('click',()=>{
