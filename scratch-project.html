@@ -117,7 +117,7 @@ async function loadProject(data,title){
  try{
   const p=await setupPlayer();
   await p.loadProject(data);
-  currentBytes=data instanceof ArrayBuffer?data.slice(0):new Uint8Array(data).slice();
+  currentBytes=data instanceof ArrayBuffer?data:data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength);
   currentTitle=title||'Scratch project';loaded=true;paused=false;$('pause').textContent='⏸ Pause';$('project-title').textContent='Loaded: '+currentTitle;
   applyVolume();setControls(true);$('save-drive').disabled=!signedInUser;$('open-editor').disabled=!signedInUser;progress(100,'Project loaded and ready');status('Project ready. Tap the green flag to run it.','success');
  }catch(error){loaded=false;setControls(false);throw error;}
@@ -126,7 +126,7 @@ async function exportCurrentProject(){
  if(!player||!loaded)throw new Error('Load a project first.');
  if(typeof player.vm?.saveProjectSb3!=='function')throw new Error('Project export is not available in the current player engine.');
  const exported=await player.vm.saveProjectSb3();
- currentBytes=exported instanceof ArrayBuffer?exported.slice(0):new Uint8Array(exported).slice();
+ currentBytes=exported instanceof ArrayBuffer?exported:exported.buffer.slice(exported.byteOffset,exported.byteOffset+exported.byteLength);
  return currentBytes;
 }
 $('load-file').addEventListener('click',async()=>{
