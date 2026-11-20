@@ -1,13 +1,15 @@
 {
   "name": "configkit-windows",
   "version": "1.0.0",
-  "description": "ConfigKit Windows desktop application",
+  "description": "ConfigKit desktop application for Windows, macOS and Linux",
   "private": true,
   "main": "desktop/main.cjs",
   "scripts": {
     "start": "electron .",
     "build:icons": "node desktop/create-icons.cjs",
-    "dist:win": "npm run build:icons && electron-builder --win nsis --x64 --publish never"
+    "dist:win": "npm run build:icons && electron-builder --win nsis --x64 --publish never",
+    "dist:mac": "npm run build:icons && electron-builder --mac dmg --x64 --arm64 --publish never",
+    "dist:linux": "npm run build:icons && electron-builder --linux AppImage --x64 --publish never"
   },
   "devDependencies": {
     "electron": "39.2.7",
@@ -26,7 +28,8 @@
     "files": [
       "desktop/**/*",
       "package.json",
-      "build/icon.png"
+      "build/icon.png",
+      "android/**/*"
     ],
     "win": {
       "target": [
@@ -38,7 +41,7 @@
         }
       ],
       "icon": "build/icon.ico",
-      "artifactName": "ConfigKit-Setup-${version}-${arch}.${ext}"
+      "artifactName": "ConfigKit-Windows-Setup.${ext}"
     },
     "nsis": {
       "oneClick": false,
@@ -50,6 +53,30 @@
       "runAfterFinish": true,
       "deleteAppDataOnUninstall": false
     },
-    "npmRebuild": true
+    "npmRebuild": true,
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "artifactName": "ConfigKit-macOS-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "ConfigKit-Linux-${arch}.${ext}",
+      "category": "Utility"
+    }
   }
 }
