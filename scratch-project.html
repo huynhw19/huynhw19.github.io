@@ -40,7 +40,7 @@
 <div class="stage-actions"><button class="button" id="green-flag" type="button" disabled>🚩 Green flag</button><button class="button secondary" id="stop" type="button" disabled>⏹ Stop</button><button class="button secondary" id="fullscreen" type="button" disabled>⛶ Full screen</button><button class="button secondary" id="download-copy" type="button" disabled>⬇ Download .sb3 copy</button></div>
 <div id="runtime-status" class="status" role="status" aria-live="polite">Choose a project to begin. The player engine loads when you first load a project.</div>
 </section>
-<section class="panel" id="account-editor" hidden>
+<section class="panel" id="account-editor">
 <h2>🧩 Project editor &amp; ConfigKit Drive</h2>
 <p class="note">Signed-in members can save private project files to their ConfigKit Drive and open them in the TurboWarp editor. The editor is provided by TurboWarp, not built into the lightweight player.</p>
 <div id="editor-account" class="status" role="status" aria-live="polite">Checking your ConfigKit sign-in…</div>
@@ -191,7 +191,6 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
  };
  const signedIn=async session=>{
   signedInUser=session?.user||null;
-  editorPanel.hidden=!signedInUser;
   editorTools.hidden=!signedInUser;
   if(!signedInUser){accountStatus.textContent='You are not signed in. Sign in to unlock the editor and private Drive saving.';return;}
   accountStatus.textContent='Signed in. Your Scratch project files are private to your ConfigKit account.';
