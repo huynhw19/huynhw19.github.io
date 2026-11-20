@@ -35,3 +35,10 @@ node_modules/
 release/
 build/icon.ico
 build/icon.png
+
+# Android and multi-platform build outputs
+android/.gradle/
+android/app/build/
+android/build/
+*.apk
+*.aab
