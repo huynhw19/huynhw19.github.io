@@ -17,9 +17,29 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: configkit-platform-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  verify-site:
+    name: Verify download centre and app sources
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify platform links, docs and local profile builder
+        run: node desktop/verify-download-page.cjs
+      - name: Check desktop JavaScript syntax
+        run: |
+          node --check desktop/main.cjs
+          node --check desktop/create-icons.cjs
+
   desktop:
     name: Build ${{ matrix.name }}
+    needs: [verify-site]
     strategy:
       fail-fast: false
       matrix:
@@ -28,65 +48,102 @@ jobs:
             os: windows-latest
             command: npm run dist:win
             artifact: ConfigKit-Windows
-            files: release/*.exe
+            extension: exe
           - name: macOS
             os: macos-latest
             command: npm run dist:mac
             artifact: ConfigKit-macOS
-            files: release/*.dmg
+            extension: dmg
           - name: Linux
             os: ubuntu-latest
             command: npm run dist:linux
             artifact: ConfigKit-Linux
-            files: release/*.AppImage
+            extension: AppImage
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Resolve build version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then VERSION_NAME="${GITHUB_REF_NAME#v}"; else VERSION_NAME="$(node -p "require('./package.json').version")"; fi
+          echo "VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
+          node -e "const fs=require('node:fs');const p=require('./package.json');p.version=process.env.VERSION_NAME;fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\\n');"
       - name: Install desktop dependencies
         run: npm install --no-audit --no-fund
       - name: Build desktop package
         run: ${{ matrix.command }}
+      - name: Verify package file
+        shell: bash
+        run: |
+          shopt -s nullglob
+          files=(release/*.${{ matrix.extension }})
+          test "${#files[@]}" -gt 0
+          for file in "${files[@]}"; do
+            test -s "$file"
+            echo "Verified package: $file ($(wc -c < "$file") bytes)"
+          done
+          if [[ "${{ matrix.extension }}" == "dmg" ]]; then for file in "${files[@]}"; do hdiutil verify "$file"; done; fi
+          if [[ "${{ matrix.extension }}" == "AppImage" ]]; then file "${files[0]}"; fi
       - name: Upload desktop package
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: ${{ matrix.files }}
+          path: release/*.${{ matrix.extension }}
           if-no-files-found: error
           retention-days: 30
 
   android:
-    name: Build Android APK
+    name: Build and verify Android APK
+    needs: [verify-site]
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK packages
+        run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Resolve Android version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then VERSION_NAME="${GITHUB_REF_NAME#v}"; else VERSION_NAME="1.0.0"; fi
+          echo "VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
       - name: Build installable APK
         working-directory: android
-        run: gradle --no-daemon assembleDebug
+        run: gradle --no-daemon assembleDebug -PVERSION_NAME="$VERSION_NAME" -PVERSION_CODE="$VERSION_CODE"
       - name: Rename APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk ConfigKit-Android.apk
+      - name: Verify APK signature
+        shell: bash
+        run: |
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)"
+          test -n "$APKSIGNER"
+          "$APKSIGNER" verify --verbose ConfigKit-Android.apk
+          sha256sum ConfigKit-Android.apk > ConfigKit-Android.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
           name: ConfigKit-Android
-          path: ConfigKit-Android.apk
+          path: |
+            ConfigKit-Android.apk
+            ConfigKit-Android.apk.sha256
           if-no-files-found: error
           retention-days: 30
 
   release:
     name: Publish versioned downloads
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [desktop, android]
+    needs: [desktop, android, verify-site]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -94,6 +151,10 @@ jobs:
           path: release-assets
           pattern: ConfigKit-*
           merge-multiple: true
+      - name: Generate SHA-256 checksums
+        run: |
+          cd release-assets
+          find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
