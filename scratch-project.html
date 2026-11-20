@@ -126,7 +126,7 @@ async function loadProject(data,title){
    // The compressed .sb3 is deliberately not retained after the VM unpacks it; this saves substantial memory on iPhones.
   currentTitle=title||'Scratch project';loaded=true;paused=false;$('pause').textContent='⏸ Pause';$('project-title').textContent='Loaded: '+currentTitle;
   applyVolume();setControls(true);$('save-drive').disabled=!signedInUser;$('open-editor').disabled=!signedInUser;
-  progress(96,'Starting project…');p.greenFlag();progress(100,'Project loaded and running');status('Project loaded and started. Use the green flag to restart it or Stop to end it.','success');
+  progress(96,'Starting project…');p.greenFlag();progress(100,'Project loaded and running');status('Project started. If sound is silent, tap the stage or Green flag once to enable audio in Safari.','success');
  }catch(error){loaded=false;setControls(false);throw error;}finally{isLoading=false;}
 }
 async function exportCurrentProject(){
@@ -161,7 +161,18 @@ $('load-url').addEventListener('click',async()=>{
  }catch(error){status('Could not open project: '+(error.message||'Network or project error'),'error');}
  finally{$('load-url').disabled=false;}
 });
-$('green-flag').addEventListener('click',()=>{if(!player||!loaded)return;try{player.greenFlag();status('Green flag pressed. Your project is running.','success');}catch(error){status('The project could not start: '+(error.message||'Player error'),'error');}});
+function unlockProjectAudio(){
+ try{
+  const audioContext=player?.audioEngine?.inputNode?.context;
+  if(audioContext&&audioContext.state!=='running')audioContext.resume().catch(()=>{});
+ }catch(_){}
+}
+// iOS Safari may keep Web Audio suspended until a real user gesture.
+// Retry from taps/keys, including the first interaction with the stage.
+document.addEventListener('pointerdown',unlockProjectAudio,{passive:true});
+document.addEventListener('keydown',unlockProjectAudio);
+$('stage').addEventListener('touchend',unlockProjectAudio,{passive:true});
+$('green-flag').addEventListener('click',()=>{if(!player||!loaded)return;unlockProjectAudio();try{player.greenFlag();status('Green flag pressed. Your project is running.','success');}catch(error){status('The project could not start: '+(error.message||'Player error'),'error');}});
 $('stop').addEventListener('click',()=>{if(player&&loaded){try{player.stopAll();paused=false;$('pause').textContent='⏸ Pause';status('Project stopped.');}catch(error){status('Could not stop project: '+(error.message||'Player error'),'error');}}});
 $('pause').addEventListener('click',()=>{if(!player||!loaded)return;try{paused=!paused;if(typeof player.vm.setPaused!=='function')throw new Error('Pause is unavailable in the current player engine.');player.vm.setPaused(paused);$('pause').textContent=paused?'▶ Resume':'⏸ Pause';status(paused?'Project paused.':'Project resumed.','success');}catch(e){paused=false;$('pause').textContent='⏸ Pause';status(e.message||'Pause is unavailable.', 'error');}});
 function applyVolume(){const gain=player?.audioEngine?.inputNode?.gain;if(gain)gain.value=muted?0:volumeLevel/100;$('volume-value').textContent=(muted?0:volumeLevel)+'%';$('mute').textContent=muted?'🔇 Unmute':'🔊 Mute';}
