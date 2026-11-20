@@ -193,6 +193,19 @@ Database changes live under `supabase/migrations/`. Review a migration and its a
 
 ---
 
+## 🪟 Windows desktop app
+
+ConfigKit can be packaged as a Windows desktop application using Electron. The desktop app opens the existing live ConfigKit website, so it keeps the same web features, account system and Supabase backend; an internet connection is required.
+
+- Source and build instructions: [WINDOWS-APP.md](WINDOWS-APP.md)
+- Build locally with `npm install` then `npm run dist:win`.
+- GitHub Actions builds a Windows x64 NSIS `.exe` installer. Run the **Windows desktop app** workflow manually from the Actions tab, then download the `ConfigKit-Windows-Installer` artifact.
+- To publish a versioned GitHub Release, push a tag such as `v1.0.0`; the workflow attaches the installer to that release.
+
+The installer is unsigned, so Windows SmartScreen may show an unknown-publisher warning. The app does not bundle a copy of the site or work offline.
+
+---
+
 ## 🧪 Testing and verification
 
 Testing should match the feature being changed:

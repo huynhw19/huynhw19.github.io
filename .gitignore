@@ -29,3 +29,9 @@ game28.dta
 
 # Log files
 warnings.log
+
+# ConfigKit Windows desktop build output
+node_modules/
+release/
+build/icon.ico
+build/icon.png

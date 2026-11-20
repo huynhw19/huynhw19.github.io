@@ -1,0 +1,54 @@
+{
+  "name": "configkit-windows",
+  "version": "1.0.0",
+  "description": "ConfigKit Windows desktop application",
+  "private": true,
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "build:icons": "node desktop/create-icons.cjs",
+    "dist:win": "npm run build:icons && electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "39.2.7",
+    "electron-builder": "26.0.12",
+    "sharp": "0.34.5",
+    "png-to-ico": "2.1.8"
+  },
+  "build": {
+    "appId": "com.configkit.desktop",
+    "productName": "ConfigKit",
+    "asar": true,
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "desktop/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "ConfigKit-Setup-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ConfigKit",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "npmRebuild": true
+  }
+}
