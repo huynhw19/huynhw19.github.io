@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Owner Dashboard — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e1e9e3;--paper:#f5f8f5;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--red:#9b3030}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}header,main{width:min(100% - 32px,1050px);margin:auto}header{padding:1rem 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap}a{color:var(--green)}main{padding:2rem 0 4rem}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:.35rem 0}h2{margin:.1rem 0 .5rem}.eyebrow{font-size:.85rem;color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:.06em}.panel{background:var(--white);border:1px solid var(--line);border-radius:1rem;padding:1.2rem;margin:1rem 0;box-shadow:0 10px 28px #17231f0b}.muted{color:var(--muted)}button,input{font:inherit}button{border:1px solid var(--line);border-radius:.65rem;padding:.6rem .85rem;background:white;color:var(--ink);font-weight:650;cursor:pointer}button.primary{background:var(--dark);color:white;border-color:var(--dark)}button.danger{color:var(--red)}button:disabled{opacity:.55;cursor:wait}.status{padding:.85rem 1rem;border-radius:.7rem;background:var(--mint);margin:1rem 0}.status.error{background:#fff0f0;color:var(--red)}.toolbar{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:1rem 0}.toolbar input,.create-grid input{min-height:42px;border:1px solid var(--line);border-radius:.6rem;padding:.55rem .7rem;max-width:100%}.toolbar input{width:min(100%,340px)}.create-grid{display:grid;grid-template-columns:2fr 1fr auto;gap:.7rem;align-items:end}.field{display:grid;gap:.25rem}.field label{font-weight:650;font-size:.9rem}.promo-list{display:grid;gap:.7rem}.promo{border:1px solid var(--line);border-radius:.8rem;padding:.9rem;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.8rem;align-items:center}.promo code{display:inline-block;background:#f2f5f2;border:1px solid var(--line);padding:.35rem .55rem;border-radius:.45rem;font-size:.95rem;overflow-wrap:anywhere}.promo-actions{display:flex;gap:.45rem;flex-wrap:wrap;justify-content:flex-end}.meta{font-size:.88rem;color:var(--muted)}[hidden]{display:none!important}@media(max-width:650px){.create-grid{grid-template-columns:1fr}.promo{grid-template-columns:1fr}.promo-actions{justify-content:flex-start}}
+</style>
+</head>
+<body>
+<header><a href="dashboard.html"><strong>⌘ ConfigKit</strong></a><nav><a href="dashboard.html">Back to dashboard</a></nav></header>
+<main>
+  <span class="eyebrow">Private administration</span>
+  <h1>Owner Dashboard</h1>
+  <p class="muted">Manage ConfigKit Coins promo codes. Access is checked by the server against the signed-in owner account.</p>
+  <div id="status" class="status" role="status" aria-live="polite">Checking your owner access…</div>
+  <section id="manager" class="panel" hidden>
+    <div class="toolbar"><div><h2>🪙 Promo codes</h2><p class="muted">Codes are encrypted in the database and only decrypted for the verified owner.</p></div><button id="refresh" type="button">Refresh list</button></div>
+    <form id="create-form" class="create-grid">
+      <div class="field"><label for="new-label">Code label</label><input id="new-label" maxlength="60" placeholder="e.g. Community celebration" required></div>
+      <div class="field"><label for="new-reward">Reward (CKC)</label><input id="new-reward" type="number" min="1" max="50000" value="50" required></div>
+      <button class="primary" type="submit">Create code</button>
+    </form>
+    <div class="toolbar"><strong id="count">Loading codes…</strong><input id="filter" type="search" placeholder="Search codes or labels" aria-label="Search promo codes"></div>
+    <div id="promo-list" class="promo-list"><p class="muted">Loading…</p></div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth-config.js"></script>
+<script>
+(() => {
+  const OWNER_ID = "dc7d85d3-e40c-4002-87ea-8df7f904a3ed";
+  const ENDPOINT = "https://gwhqnqzzlgslwgijkkpt.supabase.co/functions/v1/owner-site-control";
+  const $ = id => document.getElementById(id);
+  const status = (message, error=false) => { $("status").textContent=message; $("status").classList.toggle("error",error); };
+  const config = window.CONFIGKIT_AUTH || {};
+  if (!window.supabase?.createClient || !config.supabaseUrl || !config.supabaseAnonKey) { status("ConfigKit authentication is not available. Please refresh.",true); return; }
+  const client = window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  let session = null, promos = [];
+  async function call(action, extra={}) {
+    if (!session?.access_token) throw new Error("Please sign in again.");
+    const response = await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","apikey":config.supabaseAnonKey,"Authorization":"Bearer "+session.access_token},body:JSON.stringify({action,...extra})});
+    const data = await response.json().catch(()=>({}));
+    if (!response.ok) throw new Error(data.error || "The owner request was rejected.");
+    return data;
+  }
+  function render() {
+    const query=$("filter").value.trim().toLowerCase();
+    const filtered=promos.filter(p=>(p.label+" "+p.code).toLowerCase().includes(query));
+    $("count").textContent=promos.length+" promo codes · "+promos.filter(p=>p.active).length+" active";
+    const list=$("promo-list");list.replaceChildren();
+    if(!filtered.length){const p=document.createElement("p");p.className="muted";p.textContent="No matching promo codes.";list.append(p);return;}
+    for(const promo of filtered){
+      const card=document.createElement("article");card.className="promo";
+      const info=document.createElement("div");
+      const title=document.createElement("strong");title.textContent=promo.label;info.append(title,document.createElement("br"));
+      if(promo.code){const code=document.createElement("code");code.textContent=promo.code;info.append(code);}else{const note=document.createElement("span");note.className="meta";note.textContent="Retired legacy code — its original value was not stored.";info.append(note);}
+      const meta=document.createElement("div");meta.className="meta";meta.textContent=promo.reward+" CKC · "+promo.redemptions+" redemptions · "+(promo.active?"Active":"Disabled");info.append(document.createElement("br"),meta);
+      const actions=document.createElement("div");actions.className="promo-actions";
+      if(promo.code){const copy=document.createElement("button");copy.type="button";copy.textContent="Copy code";copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(promo.code);status("Copied "+promo.label+".");}catch(_){status("Clipboard access was blocked by this browser.",true);}});actions.append(copy);}
+      if(promo.code){const toggle=document.createElement("button");toggle.type="button";toggle.textContent=promo.active?"Disable":"Enable";toggle.addEventListener("click",async()=>{toggle.disabled=true;try{await call("promo_set_active",{code_hash:promo.code_hash,active:!promo.active});await load();status("Promo code status updated.");}catch(e){status(e.message,true);toggle.disabled=false;}});actions.append(toggle);}
+      card.append(info,actions);list.append(card);
+    }
+  }
+  async function load() { status("Loading secure promo-code list…");const data=await call("promo_list");promos=data.promos||[];render();status("Owner access verified. You can manage "+promos.length+" promo codes."); }
+  $("filter").addEventListener("input",render);
+  $("refresh").addEventListener("click",()=>load().catch(e=>status(e.message,true)));
+  $("create-form").addEventListener("submit",async event=>{event.preventDefault();const button=event.submitter;button.disabled=true;try{const result=await call("promo_create",{label:$("new-label").value,reward:Number($("new-reward").value)});$("new-label").value="";await load();status("Created "+result.label+". The new code is shown in the list and can be copied.");}catch(e){status(e.message,true);}finally{button.disabled=false;}});
+  client.auth.getSession().then(async({data,error})=>{
+    if(error)throw error;session=data.session;
+    if(!session?.user){status("Please sign in with the owner account to continue.");return;}
+    if(session.user.id!==OWNER_ID){status("Owner access required. This account cannot open the owner dashboard.",true);return;}
+    await load();$("manager").hidden=false;
+  }).catch(e=>status(e.message||"Could not verify your session.",true));
+})();
+</script>
+</body>
+</html>
