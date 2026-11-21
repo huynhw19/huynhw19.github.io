@@ -47,6 +47,19 @@
     .learning-session-meta { color:#56645e; font-size:.92rem; }
     .learning-session-status { margin-top:10px; }
     [hidden] { display: none !important; }
+
+    .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+    .settings-group{border:1px solid #e2ebe6;border-radius:10px;padding:14px;background:#fbfdfc}
+    .settings-group h3{margin:0 0 10px}
+    .settings-group label{display:grid;gap:5px;margin:10px 0;font-weight:600}
+    .settings-group label.check{display:flex;align-items:flex-start;gap:9px;font-weight:500}
+    .settings-group input[type=checkbox]{width:auto;margin-top:4px}
+    .settings-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .danger-zone{border:1px solid #e5b6b6;background:#fff8f8}
+    .danger-zone h3{color:#9b3030}
+    button.secondary{background:#e8efeb;color:#20372d}
+    button.danger{background:#a83232;color:#fff}
+    .settings-note{padding:10px 12px;border-radius:8px;background:#f2f8f5;color:#315443;font-size:.92rem}
   </style>
 </head>
 <body>
@@ -77,6 +90,67 @@
         <li>See the <a href="STUDENT-LOGIN-SETUP.md">student login guide</a> for the Student ID registration process. The database setup is already applied.</li>
       </ol>
       <p class="muted">The site QR code opens ConfigKit for students. Education status is self-declared, and teachers should never ask for or set a student's password. Test with sample data before using real student information.</p>
+    </section>
+
+
+    <section class="card" id="education-settings" aria-labelledby="education-settings-title">
+      <h2 id="education-settings-title">⚙️ Education system settings</h2>
+      <p class="muted">Manage your education dashboard defaults, teaching workflow, student-data handling and preferences. These settings belong to your ConfigKit account.</p>
+      <p id="settings-status" class="status" role="status" aria-live="polite">Settings will load after sign-in.</p>
+      <form id="education-settings-form">
+        <div class="settings-grid">
+          <section class="settings-group">
+            <h3>👤 Account &amp; school</h3>
+            <p class="muted">Signed-in account: <strong id="settings-account-email">Loading…</strong></p>
+            <p class="muted">Account type: <strong id="settings-account-type">—</strong></p>
+            <label>School / organisation name<input id="setting-school-name" maxlength="120" placeholder="Your school or organisation"></label>
+            <label>Default grade / learning level<input id="setting-grade" maxlength="80" placeholder="e.g. Year 5"></label>
+            <label>Default subject<input id="setting-subject" maxlength="100" placeholder="e.g. Mathematics"></label>
+          </section>
+          <section class="settings-group">
+            <h3>📚 Lesson planning</h3>
+            <label>Default lesson duration (minutes)<input id="setting-lesson-duration" type="number" min="5" max="360" step="5" value="45"></label>
+            <label>New lesson visibility<select id="setting-lesson-visibility"><option value="draft">Draft — private until published</option><option value="published">Published — visible to selected students</option></select></label>
+            <label>Default lesson audience<select id="setting-lesson-audience"><option value="all">All linked students</option><option value="choose">Choose a student each time</option></select></label>
+          </section>
+          <section class="settings-group">
+            <h3>📝 Homework &amp; assessments</h3>
+            <label>Default test attempts<select id="setting-attempt-limit"><option value="1">1 attempt</option><option value="2">2 attempts</option><option value="3">3 attempts</option><option value="4">4 attempts</option><option value="5">5 attempts</option></select></label>
+            <label>New test visibility<select id="setting-test-visibility"><option value="draft">Draft — private until published</option><option value="published">Published — visible to the student</option></select></label>
+            <label>Default assessment time limit (minutes)<input id="setting-test-duration" type="number" min="0" max="240" step="1" placeholder="0 = no time limit"></label>
+            <p class="muted">Defaults are applied to new forms. You can change them for each lesson or test.</p>
+          </section>
+          <section class="settings-group">
+            <h3>🔎 Teaching resources</h3>
+            <label>Preferred year level<select id="setting-resource-year"><option value="">No default</option><option>Early Years</option><option>Foundation</option><option>Year 1</option><option>Year 2</option><option>Year 3</option><option>Year 4</option><option>Year 5</option><option>Year 6</option><option>Year 7</option><option>Year 8</option><option>Year 9</option><option>Year 10</option><option>Year 11</option><option>Year 12</option></select></label>
+            <label>Preferred subject<select id="setting-resource-subject"><option value="">No default</option><option>English</option><option>Mathematics</option><option>Science</option><option>Humanities and Social Sciences</option><option>History</option><option>Geography</option><option>Digital Technologies</option><option>Health and Physical Education</option><option>The Arts</option><option>Languages</option><option>Cross-curricular</option></select></label>
+          </section>
+          <section class="settings-group">
+            <h3>🔐 Privacy &amp; student safety</h3>
+            <label class="check"><input id="setting-private-drafts" type="checkbox" checked> Keep new lessons, books, documents and slideshows as private drafts by default</label>
+            <label class="check"><input id="setting-minimise-student-data" type="checkbox" checked> Remind me to collect only the student information I need</label>
+            <p class="muted">Student accounts and passwords are managed by students. Never ask students to share passwords or sensitive personal information.</p>
+          </section>
+          <section class="settings-group">
+            <h3>🔔 Notifications &amp; reminders</h3>
+            <label class="check"><input id="setting-assignment-reminders" type="checkbox"> Show assignment reminder preferences</label>
+            <label class="check"><input id="setting-session-updates" type="checkbox"> Prefer learning-session update notices</label>
+            <p class="muted">These are saved preferences only. Automated email, push and background notifications are not currently provided by this dashboard.</p>
+          </section>
+        </div>
+        <div class="settings-actions"><button id="save-education-settings" type="submit">Save education settings</button><button id="reset-settings-form" class="secondary" type="button">Discard unsaved changes</button></div>
+      </form>
+      <p class="settings-note">Settings sync to your ConfigKit account profile. They do not change existing student records, published work, grades, or account security settings.</p>
+      <section class="settings-group danger-zone" style="margin-top:16px" aria-labelledby="education-danger-title">
+        <h3 id="education-danger-title">‼️ Danger zone</h3>
+        <p>Be careful here. These actions can affect your session or create a local copy of sensitive student information.</p>
+        <div class="settings-actions">
+          <button id="export-education-students" type="button" class="secondary">Export my student records</button>
+          <button id="reset-education-settings" type="button" class="danger">Reset education settings</button>
+          <button id="education-sign-out" type="button" class="danger">Sign out of ConfigKit</button>
+        </div>
+        <p class="muted">Export creates a CSV on this device containing the student records you manage. Store it securely. Reset affects preferences only — it does not delete students, assignments, tests, grades, lessons or files. Account deletion and permanent data removal are not offered here.</p>
+      </section>
     </section>
 
     <section class="card" id="lesson-planner-panel" aria-labelledby="lesson-planner-title">
@@ -392,6 +466,115 @@
 
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      });
+
+
+      const educationSettingsForm = document.getElementById('education-settings-form');
+      const educationSettingsStatus = document.getElementById('settings-status');
+      const educationSettingsDefaults = {
+        schoolName:'', grade:'', subject:'', lessonDuration:45, lessonVisibility:'draft',
+        lessonAudience:'all', attemptLimit:1, testVisibility:'draft', testDuration:0,
+        resourceYear:'', resourceSubject:'', privateDrafts:true, minimiseStudentData:true,
+        assignmentReminders:false, sessionUpdates:false
+      };
+      let educationSettings = {...educationSettingsDefaults};
+      function readEducationSettingsForm(){
+        return {
+          schoolName:document.getElementById('setting-school-name').value.trim(),
+          grade:document.getElementById('setting-grade').value.trim(),
+          subject:document.getElementById('setting-subject').value.trim(),
+          lessonDuration:Number(document.getElementById('setting-lesson-duration').value)||45,
+          lessonVisibility:document.getElementById('setting-lesson-visibility').value,
+          lessonAudience:document.getElementById('setting-lesson-audience').value,
+          attemptLimit:Number(document.getElementById('setting-attempt-limit').value)||1,
+          testVisibility:document.getElementById('setting-test-visibility').value,
+          testDuration:Number(document.getElementById('setting-test-duration').value)||0,
+          resourceYear:document.getElementById('setting-resource-year').value,
+          resourceSubject:document.getElementById('setting-resource-subject').value,
+          privateDrafts:document.getElementById('setting-private-drafts').checked,
+          minimiseStudentData:document.getElementById('setting-minimise-student-data').checked,
+          assignmentReminders:document.getElementById('setting-assignment-reminders').checked,
+          sessionUpdates:document.getElementById('setting-session-updates').checked
+        };
+      }
+      function populateEducationSettings(values){
+        const v={...educationSettingsDefaults,...(values||{})};
+        document.getElementById('setting-school-name').value=v.schoolName;
+        document.getElementById('setting-grade').value=v.grade;
+        document.getElementById('setting-subject').value=v.subject;
+        document.getElementById('setting-lesson-duration').value=v.lessonDuration;
+        document.getElementById('setting-lesson-visibility').value=v.lessonVisibility;
+        document.getElementById('setting-lesson-audience').value=v.lessonAudience;
+        document.getElementById('setting-attempt-limit').value=String(v.attemptLimit);
+        document.getElementById('setting-test-visibility').value=v.testVisibility;
+        document.getElementById('setting-test-duration').value=v.testDuration||'';
+        document.getElementById('setting-resource-year').value=v.resourceYear;
+        document.getElementById('setting-resource-subject').value=v.resourceSubject;
+        document.getElementById('setting-private-drafts').checked=!!v.privateDrafts;
+        document.getElementById('setting-minimise-student-data').checked=!!v.minimiseStudentData;
+        document.getElementById('setting-assignment-reminders').checked=!!v.assignmentReminders;
+        document.getElementById('setting-session-updates').checked=!!v.sessionUpdates;
+      }
+      function setEducationSettingsMessage(message,isError=false){
+        educationSettingsStatus.textContent=message;
+        educationSettingsStatus.className='status'+(isError?' error':'');
+      }
+      async function saveEducationSettings(event){
+        event?.preventDefault();
+        const next=readEducationSettingsForm();
+        if(next.lessonDuration<5||next.lessonDuration>360||next.testDuration<0||next.testDuration>240){
+          setEducationSettingsMessage('Check the lesson duration (5–360 minutes) and assessment duration (0–240 minutes).',true);return;
+        }
+        const {error}=await client.auth.updateUser({data:{configkit_education_settings:next}});
+        if(error){setEducationSettingsMessage(error.message||'Could not save settings.',true);return;}
+        educationSettings=next;
+        applyEducationDefaults();
+        setEducationSettingsMessage('Education settings saved to your ConfigKit account.');
+      }
+      function applyEducationDefaults(){
+        const lessonDuration=document.getElementById('lesson-duration');
+        const lessonStatus=document.getElementById('lesson-status');
+        const testAttemptLimit=document.getElementById('test-attempt-limit');
+        const testStatus=document.getElementById('test-status');
+        const testDuration=document.getElementById('test-duration');
+        if(lessonDuration&&!lessonDuration.dataset.userEdited)lessonDuration.value=String(educationSettings.lessonDuration);
+        if(lessonStatus&&!lessonStatus.dataset.userEdited)lessonStatus.value=educationSettings.lessonVisibility;
+        if(testAttemptLimit&&!testAttemptLimit.dataset.userEdited)testAttemptLimit.value=String(educationSettings.attemptLimit);
+        if(testStatus&&!testStatus.dataset.userEdited)testStatus.value=educationSettings.testVisibility;
+        if(testDuration&&!testDuration.dataset.userEdited)testDuration.value=educationSettings.testDuration?String(educationSettings.testDuration):'';
+        const resourceYear=document.getElementById('resource-year');
+        const resourceSubject=document.getElementById('resource-subject');
+        if(resourceYear&&!resourceYear.dataset.userEdited)resourceYear.value=educationSettings.resourceYear;
+        if(resourceSubject&&!resourceSubject.dataset.userEdited)resourceSubject.value=educationSettings.resourceSubject;
+      }
+      educationSettingsForm.addEventListener('submit',saveEducationSettings);
+      document.getElementById('reset-settings-form').addEventListener('click',()=>{populateEducationSettings(educationSettings);setEducationSettingsMessage('Unsaved changes discarded.')});
+      document.getElementById('reset-education-settings').addEventListener('click',async()=>{
+        if(!window.confirm('Reset all Education Dashboard preferences to their defaults? Your student records and teaching content will not be deleted.'))return;
+        populateEducationSettings(educationSettingsDefaults);
+        await saveEducationSettings();
+      });
+      document.getElementById('export-education-students').addEventListener('click',async()=>{
+        if(!currentUserId){setEducationSettingsMessage('Please sign in again before exporting.',true);return}
+        const button=document.getElementById('export-education-students');button.disabled=true;
+        const {data,error}=await client.from('education_students').select('student_name,student_email,school,grade,student_id,notes,created_at').eq('user_id',currentUserId).order('created_at',{ascending:true});
+        button.disabled=false;
+        if(error){setEducationSettingsMessage(error.message||'Could not export student records.',true);return}
+        const columns=['student_name','student_email','school','grade','student_id','notes','created_at'];
+        const csv=[columns.join(','),...(data||[]).map(row=>columns.map(key=>'"'+String(row[key]??'').replace(/"/g,'""')+'"').join(','))].join('\r\n');
+        const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+        const url=URL.createObjectURL(blob);const link=document.createElement('a');
+        link.href=url;link.download='configkit-education-students.csv';document.body.append(link);link.click();link.remove();URL.revokeObjectURL(url);
+        setEducationSettingsMessage('Export prepared with '+(data||[]).length+' student record(s). Keep the CSV secure.');
+      });
+      document.getElementById('education-sign-out').addEventListener('click',async()=>{
+        if(!window.confirm('Sign out of ConfigKit on this device?'))return;
+        const {error}=await client.auth.signOut();
+        if(error){setEducationSettingsMessage(error.message||'Could not sign out.',true);return}
+        window.location.replace('login.html');
+      });
+      ['lesson-duration','lesson-status','test-attempt-limit','test-status','test-duration','resource-year','resource-subject'].forEach(id=>{
+        const field=document.getElementById(id);field?.addEventListener('change',()=>{field.dataset.userEdited='true'});
       });
 
       let editingLessonPlanId = null;
@@ -1765,6 +1948,11 @@
 
         const metadata = data.session.user.user_metadata || {};
         const accountType = metadata.account_type || 'personal';
+        currentUserId = data.session.user.id;
+        educationSettings = {...educationSettingsDefaults,...(metadata.configkit_education_settings||{})};
+        document.getElementById('settings-account-email').textContent = data.session.user.email || 'Email unavailable';
+        document.getElementById('settings-account-type').textContent = accountType;
+        populateEducationSettings(educationSettings);
         const isOwnerTester = data.session.user.id === 'dc7d85d3-e40c-4002-87ea-8df7f904a3ed';
         accountLabel.textContent = isOwnerTester ? 'Owner testing access · Education tools' : accountType === 'education'
           ? 'Education account active'
@@ -1777,6 +1965,8 @@
 
         gettingStarted.hidden = false;
         showQrButton.hidden = false;
+        document.getElementById("education-settings").hidden = false;
+        applyEducationDefaults();
         await loadStudents();
         await loadLearningSessions();
         await loadAssignmentStudents();
