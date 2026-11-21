@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 30px,850px);margin:auto}header{padding:1rem 0;border-bottom:1px solid var(--line)}a{color:var(--green)}main{padding:1.5rem 0 3rem}h1{font-size:clamp(1.9rem,6vw,2.7rem);line-height:1.15;margin:.4rem 0}h2{font-size:1.2rem;margin:0 0 .5rem}.muted,small{color:var(--muted)}.card{background:var(--white);border:1px solid var(--line);border-radius:1rem;padding:1.1rem;margin:1rem 0}.intro{padding:1.3rem;background:var(--mint);border-radius:1rem}.pill{display:inline-block;padding:.2rem .65rem;border-radius:99px;background:#eef2ef;font-size:.83rem;font-weight:700}.status{padding:.85rem;border-radius:.7rem;background:#f1f4f2;overflow-wrap:anywhere}.status.error{background:#fff0f0;color:var(--red)}.status.good{background:var(--mint);color:var(--dark)}button{font:inherit;font-weight:650;border:1px solid var(--line);border-radius:.7rem;padding:.7rem .95rem;background:var(--green);color:white;cursor:pointer}button.secondary{background:white;color:var(--dark)}button:disabled{opacity:.55}.actions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.8rem}.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}.metric{border:1px solid var(--line);border-radius:.75rem;padding:.8rem;min-width:0}.metric strong{display:block;font-size:1.55rem;font-variant-numeric:tabular-nums}.metric span{font-size:.83rem;color:var(--muted)}.item{padding:.7rem 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.item:last-child{border-bottom:0}.item strong{display:block}.item small{display:block}.empty{color:var(--muted);padding:.6rem 0}footer{padding:1rem 0 2rem;color:var(--muted)}[hidden]{display:none!important}@media(max-width:480px){.metric-grid{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:span 2}}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 30px,850px);margin:auto}header{padding:1rem 0;border-bottom:1px solid var(--line)}a{color:var(--green)}main{padding:1.5rem 0 3rem}h1{font-size:clamp(1.9rem,6vw,2.7rem);line-height:1.15;margin:.4rem 0}h2{font-size:1.2rem;margin:0 0 .5rem}.muted,small{color:var(--muted)}.card{background:var(--white);border:1px solid var(--line);border-radius:1rem;padding:1.1rem;margin:1rem 0}.intro{padding:1.3rem;background:var(--mint);border-radius:1rem}.pill{display:inline-block;padding:.2rem .65rem;border-radius:99px;background:#eef2ef;font-size:.83rem;font-weight:700}.status{padding:.85rem;border-radius:.7rem;background:#f1f4f2;overflow-wrap:anywhere}.status.error{background:#fff0f0;color:var(--red)}.status.good{background:var(--mint);color:var(--dark)}button{font:inherit;font-weight:650;border:1px solid var(--line);border-radius:.7rem;padding:.7rem .95rem;background:var(--green);color:white;cursor:pointer}button.secondary{background:white;color:var(--dark)}button:disabled{opacity:.55}.actions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.8rem}.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}.metric{border:1px solid var(--line);border-radius:.75rem;padding:.8rem;min-width:0}.metric strong{display:block;font-size:1.55rem;font-variant-numeric:tabular-nums}.metric span{font-size:.83rem;color:var(--muted)}.health-banner{padding:1rem;border:1px solid var(--line);border-radius:.8rem;background:#f1f4f2;margin-top:.8rem}.health-banner.good{background:var(--mint);border-color:#c9e3d4;color:var(--dark)}.health-banner.warn{background:var(--gold);border-color:#f0dfbd;color:#72501a}.health-banner strong{display:block;font-size:1.05rem}.check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;margin-top:.8rem}.check-tile{border:1px solid var(--line);border-radius:.7rem;padding:.7rem}.check-tile strong{display:block}.check-tile small{color:var(--muted)}@media(max-width:480px){.check-grid{grid-template-columns:1fr}}.item{padding:.7rem 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.item:last-child{border-bottom:0}.item strong{display:block}.item small{display:block}.empty{color:var(--muted);padding:.6rem 0}footer{padding:1rem 0 2rem;color:var(--muted)}[hidden]{display:none!important}@media(max-width:480px){.metric-grid{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:span 2}}
   </style>
 </head>
 <body>
@@ -19,7 +19,7 @@
   <div class="intro">
     <span class="pill">Private · Read-only</span>
     <h1>ConfigKit AI Control Hub</h1>
-    <p>Use this page as a safe snapshot of your own ConfigKit account. It can inspect basic account details, Drive metadata, forms and achievements. It cannot edit, delete, submit, or access file contents.</p>
+    <p>Use this page as your private ConfigKit Account Health dashboard. It checks your sign-in and email verification, plus your own Drive metadata, forms and achievements. All checks are read-only: this page cannot edit, delete, submit, or access file contents.</p>
   </div>
   <section class="card">
     <h2>Connection status</h2>
@@ -41,6 +41,14 @@
       <div class="metric"><strong id="achievement-count">—</strong><span>Achievements checked</span></div>
     </div>
     <p id="check-summary" class="muted">Sign in to run the read-only checks.</p>
+    <div id="health-overview" class="health-banner" role="status" aria-live="polite">
+      <strong id="health-title">Account health has not been checked yet</strong>
+      <span id="health-detail">Sign in and refresh checks to see your account status.</span>
+    </div>
+    <div class="check-grid" aria-label="Account health checks">
+      <div class="check-tile"><strong id="email-health">Not checked</strong><small>Email verification</small></div>
+      <div class="check-tile"><strong id="data-health">Not checked</strong><small>Account data checks</small></div>
+    </div>
   </section>
   <section class="card">
     <h2>Recent Drive items</h2>
@@ -124,6 +132,14 @@
         achievements: achievements.error ? [] : achievementRows.map(x => ({achievement_key:x.achievement_key,earned_at:x.earned_at})),
         check_errors: errors
       };
+      const emailVerified = !!currentUser.email_confirmed_at;
+      const dataChecksPassed = errors.length === 0;
+      $('email-health').textContent = emailVerified ? 'Verified' : 'Needs verification';
+      $('data-health').textContent = dataChecksPassed ? 'Passed' : 'Needs attention';
+      const overview = $('health-overview');
+      overview.className = 'health-banner ' + (emailVerified && dataChecksPassed ? 'good' : 'warn');
+      $('health-title').textContent = emailVerified && dataChecksPassed ? 'Your account checks look healthy' : 'Your account needs a little attention';
+      $('health-detail').textContent = (emailVerified ? 'Email address verified.' : 'Email address is not verified yet. Check your inbox for the confirmation email.') + ' ' + (dataChecksPassed ? 'All account data checks completed.' : errors.length + ' data check(s) returned an error.');
       $('check-summary').textContent = errors.length ? 'Some checks need attention: ' + errors.join(' | ') : 'All three data checks completed successfully. Only your own metadata was requested.';
       $('copy').disabled = false;
       if (errors.length) setMessage('Signed in, but one or more read-only checks returned an error. See each section below.', true);
@@ -143,7 +159,14 @@
   if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { setMessage('ConfigKit sign-in is not configured on this page.',true); return; }
   client = window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   client.auth.getUser().then(async ({data,error}) => {
-    if (error || !data.user) { setMessage('You are not signed in. Sign in to ConfigKit, then reopen this page.',true); return; }
+    if (error || !data.user) {
+      $('health-overview').className = 'health-banner warn';
+      $('health-title').textContent = 'Sign in to check your account';
+      $('health-detail').textContent = 'Your private health report is only available after signing in.';
+      $('email-health').textContent = 'Not signed in';
+      $('data-health').textContent = 'Not run';
+      setMessage('You are not signed in. Sign in to ConfigKit, then reopen this page.',true); return;
+    }
     currentUser = data.user;
     $('account').hidden = false;
     $('email').textContent = currentUser.email || 'Signed-in ConfigKit account';
