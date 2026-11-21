@@ -127,7 +127,9 @@ alter table public.community_store_coin_files enable row level security;
 revoke all on public.community_store_coin_files from anon,public;
 grant select,insert,update,delete on public.community_store_coin_files to authenticated;
 drop policy if exists "Sellers manage own coin files" on public.community_store_coin_files;
-create policy "Sellers manage own coin files" on public.community_store_coin_files for all to authenticated using(seller_id=(select auth.uid())) with check(seller_id=(select auth.uid()));
+create policy "Sellers manage own coin files" on public.community_store_coin_files for all to authenticated
+using(seller_id=(select auth.uid()) and exists(select 1 from public.community_store_items i where i.id=item_id and i.seller_id=(select auth.uid())))
+with check(seller_id=(select auth.uid()) and exists(select 1 from public.community_store_items i where i.id=item_id and i.seller_id=(select auth.uid())));
 
 create table if not exists public.configkit_coin_purchases (
  id uuid primary key default gen_random_uuid(),buyer_id uuid not null references auth.users(id) on delete cascade,
