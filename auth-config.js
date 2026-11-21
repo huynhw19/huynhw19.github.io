@@ -172,7 +172,7 @@ window.CONFIGKIT_AUTH = {
   }
 })();
 
-// Add Turnstile verification to the email/password auth flows on the login page.
+// Add Turnstile verification to email/password, magic-link, and recovery auth flows on the login page.
 // Supabase validates the token using the secret configured in its Auth dashboard.
 (() => {
   const isLoginPage = () => window.location.pathname.endsWith('/login.html') || window.location.pathname === '/login';
@@ -256,6 +256,12 @@ window.CONFIGKIT_AUTH = {
           };
         }
       );
+    }
+    if (typeof auth.signInWithOtp === 'function') {
+      const original = auth.signInWithOtp.bind(auth);
+      auth.signInWithOtp = withCaptcha(original, args => args[1] || {}, (args, captchaToken, options) => {
+        args[1] = {...options, captchaToken};
+      });
     }
     if (typeof auth.signInWithPassword === 'function') {
       const original = auth.signInWithPassword.bind(auth);
