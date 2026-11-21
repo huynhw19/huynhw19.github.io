@@ -425,7 +425,17 @@
           }
           if (!redirecting) {
             redirecting = true;
-            window.location.replace(completedFamily ? 'family.html' : postLoginDestination);
+            const destination = completedFamily ? 'family.html' : postLoginDestination;
+            const user = data.session.user;
+            const accepted = user.email_confirmed_at &&
+              user.user_metadata?.configkit_terms_acceptance?.version === '2026-11-21';
+            if (destination.startsWith('oauth-consent.html')) {
+              window.location.replace(destination);
+            } else if (user.email_confirmed_at && !accepted) {
+              window.location.replace('welcome.html?next=' + encodeURIComponent(destination));
+            } else {
+              window.location.replace(destination);
+            }
           }
         } else {
           passkeyPrimaryPending = false;
