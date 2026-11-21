@@ -427,13 +427,14 @@
             redirecting = true;
             const destination = completedFamily ? 'family.html' : postLoginDestination;
             const user = data.session.user;
+            const onboardingRequired = user.user_metadata?.configkit_onboarding_required === true;
             const accepted = user.email_confirmed_at &&
               user.user_metadata?.configkit_terms_acceptance?.version === '2026-11-21';
             if (destination.startsWith('oauth-consent.html')) {
               window.location.replace(destination);
-            } else if (user.email_confirmed_at && !accepted) {
+            } else if (user.email_confirmed_at && onboardingRequired && !accepted) {
               window.location.replace('welcome.html?next=' + encodeURIComponent(destination));
-            } else if (user.email_confirmed_at && accepted &&
+            } else if (user.email_confirmed_at && onboardingRequired && accepted &&
                        user.user_metadata?.configkit_onboarding_questions?.completed !== true) {
               window.location.replace('welcome-questions.html?next=' + encodeURIComponent(destination));
             } else {
@@ -462,7 +463,7 @@
           if (type === 'work' && !workplace.value.trim()) throw new Error('Enter your company or workplace name first.');
           if (type === 'organization' && !organizationName.value.trim()) throw new Error('Enter your organization name first.');
           if (mode === 'signup' && familyChoice.value === 'join' && !/^[A-Za-z0-9]{16}$/.test(familyIdInput.value.replace(/\s+/g, ''))) throw new Error('Enter a valid 16-character Family ID first.');
-          const oauthIntent = {...selectedMetadata(), ...(mode === 'signup' ? familySetupMetadata() : {})};
+          const oauthIntent = {...selectedMetadata(), ...(mode === 'signup' ? {...familySetupMetadata(), configkit_onboarding_required:true} : {})};
           sessionStorage.setItem(accountIntentKey, JSON.stringify(oauthIntent));
           const options = {provider, options:{redirectTo:callbackUrl}};
           if (provider === 'azure') options.options.scopes = 'openid email profile';
@@ -581,7 +582,7 @@
         setStatus(mode === 'signup' ? 'Creating your account…' : 'Logging in…');
         try {
           const result = mode === 'signup'
-            ? await client.auth.signUp({email:email.value.trim(), password:password.value, options:{emailRedirectTo:callbackUrl, data:{...selectedMetadata(), ...familySetupMetadata()}}})
+            ? await client.auth.signUp({email:email.value.trim(), password:password.value, options:{emailRedirectTo:callbackUrl, data:{...selectedMetadata(), ...familySetupMetadata(), configkit_onboarding_required:true}}})
             : await client.auth.signInWithPassword({email:email.value.trim(), password:password.value});
           if (result.error) throw result.error;
           // Existing users can opt into the self-declared Developer account label at login.
