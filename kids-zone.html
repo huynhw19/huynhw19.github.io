@@ -123,6 +123,20 @@
   <p id="social-messages-entry" hidden><a id="social-messages-link" href="#">Open parent-approved Kids Messages ✉️</a></p>
 </section>
 
+<section class="storytelling-section" id="creative-game-studio" aria-labelledby="creative-game-heading">
+  <span class="eyebrow">🎨 Imagine • Design • Play</span>
+  <h2 id="creative-game-heading">50,000 Creative Games ✨</h2>
+  <p class="story-small">A collection of imaginative mini-challenges for drawing ideas, designing worlds, inventing characters, building, music and storytelling. Choose a challenge and create your own answer. Your writing stays in this browser session.</p>
+  <div class="story-tools">
+    <div><label for="creative-game-search">Find a creative game</label><input id="creative-game-search" type="search" placeholder="Try dragons, music, space, gardens…"></div>
+    <div><label for="creative-game-age">Age group</label><select id="creative-game-age"><option value="">All ages</option><option value="3-5">Ages 3–5</option><option value="6-8">Ages 6–8</option><option value="9-10">Ages 9–10</option></select></div>
+  </div>
+  <p id="creative-game-count" class="story-meta" aria-live="polite">50,000 creative games ready to explore.</p>
+  <div id="creative-game-list" class="story-card-grid" aria-label="Creative games"></div>
+  <button type="button" id="creative-game-more" class="secondary">Show more creative games</button>
+  <p id="creative-game-feedback" class="story-meta" role="status" aria-live="polite">Pick a challenge, make something imaginative and celebrate your idea!</p>
+</section>
+
 <div class="game-search" role="search">
   <label for="game-search">🔎 Find a game</label>
   <input id="game-search" type="search" placeholder="Search 160,000 games by name or topic…" autocomplete="off">
@@ -290,6 +304,74 @@ function renderActivities(reset=false){if(reset){activityVisible=0;document.getE
 function filterActivities(){const q=document.getElementById('activity-search').value.trim().toLowerCase(),age=document.getElementById('activity-age').value;activityMatches=activityCatalog.filter(a=>(!age||a.age===age)&&(!q||a.search.includes(q)));renderActivities(true);}
 document.getElementById('activity-search').addEventListener('input',filterActivities);document.getElementById('activity-age').addEventListener('change',filterActivities);document.getElementById('activity-load-more').addEventListener('click',()=>renderActivities());document.getElementById('activity-new').addEventListener('click',()=>chooseActivity(activityCatalog[Math.floor(Math.random()*activityCatalog.length)]));
 document.getElementById('activity-complete').addEventListener('click',async()=>{if(!activeActivity)return;const button=document.getElementById('activity-complete');button.disabled=true;const saved=await saveStoryRecord('activity',activeActivity,{completed:true});button.disabled=false;if(saved)button.textContent='✓ Activity finished';});document.getElementById('activity-hint').addEventListener('click',()=>{document.getElementById('activity-hint-text').textContent=activeActivity?activeActivity.hint:'Choose an activity first, then ask for a hint.';});filterActivities();chooseActivity(activityCatalog[0]);
+
+// 50,000 creative mini-games: 10 themes × 10 characters × 10 settings × 10 twists × 5 missions.
+const creativeThemes=[
+ {name:'Creature Creator',verb:'invent',thing:'a friendly creature',age:'3-5'},
+ {name:'Wonder Garden',verb:'design',thing:'a magical garden',age:'3-5'},
+ {name:'Space Builder',verb:'build',thing:'a tiny planet',age:'6-8'},
+ {name:'Robot Workshop',verb:'create',thing:'a helpful robot',age:'6-8'},
+ {name:'Music Maker',verb:'compose',thing:'a happy sound pattern',age:'6-8'},
+ {name:'Story Sparks',verb:'write',thing:'a mini adventure',age:'6-8'},
+ {name:'Invention Island',verb:'invent',thing:'a useful new invention',age:'9-10'},
+ {name:'Art Explorer',verb:'draw',thing:'a picture with a hidden message',age:'3-5'},
+ {name:'Kindness Designer',verb:'plan',thing:'a game that helps everyone feel included',age:'9-10'},
+ {name:'Puzzle Architect',verb:'make',thing:'a fair and fun puzzle',age:'9-10'}
+];
+const creativeCharacters=['a curious koala','a tiny dragon','a brave astronaut','a dancing penguin','a clever robot','a friendly whale','a young inventor','a talking tree','a cloud painter','a time-travelling turtle'];
+const creativePlaces=['a floating library','a rainbow beach','a moon garden','an underwater town','a snowy forest','a sky-high treehouse','a peaceful space station','a colourful village','a secret workshop','a dinosaur museum'];
+const creativeTwists=['that changes colour when someone is kind','that uses only recycled materials','that can help a lost friend','that makes a gentle sound','that has three surprising features','that works with the power of teamwork','that is safe for tiny visitors','that solves an everyday problem','that includes a secret pattern','that makes the world a little brighter'];
+const creativeMissions=[
+ 'Give your creation a name and describe its most special feature.',
+ 'Choose three colours or materials and explain why they fit.',
+ 'Add one friendly challenge and explain how someone can complete it.',
+ 'Imagine a friend tries your idea. What might they enjoy most?',
+ 'Give your creation a title and describe how it could make someone smile.'
+];
+const creativeCatalog=Array.from({length:50000},(_,k)=>{
+ const theme=creativeThemes[k%creativeThemes.length];
+ const character=creativeCharacters[Math.floor(k/10)%creativeCharacters.length];
+ const place=creativePlaces[Math.floor(k/100)%creativePlaces.length];
+ const twist=creativeTwists[Math.floor(k/1000)%creativeTwists.length];
+ const mission=creativeMissions[Math.floor(k/10000)%creativeMissions.length];
+ const age=theme.age;
+ const prompt='In '+place+', help '+character+' '+theme.verb+' '+theme.thing+' '+twist+'. '+mission;
+ return {id:k+1,title:theme.name+' Challenge '+(k+1),theme:theme.name,age,prompt,search:(theme.name+' '+character+' '+place+' '+twist+' '+mission+' '+(k+1)).toLowerCase()};
+});
+let creativeVisible=0,creativeMatches=creativeCatalog;
+function renderCreativeGames(reset=false){
+ const list=document.getElementById('creative-game-list');
+ if(reset){creativeVisible=0;list.replaceChildren();}
+ const batch=creativeMatches.slice(creativeVisible,creativeVisible+12);
+ batch.forEach(game=>{
+  const card=document.createElement('article');card.className='story-card';
+  const heading=document.createElement('h3');heading.textContent='🎨 '+game.title;
+  const meta=document.createElement('p');meta.className='story-meta';meta.textContent=game.theme+' · Ages '+game.age+' · Game '+game.id.toLocaleString();
+  const prompt=document.createElement('p');prompt.textContent=game.prompt;
+  const answer=document.createElement('textarea');answer.rows=3;answer.maxLength=600;answer.placeholder='Draw it on paper, describe your idea, or plan how it works…';answer.setAttribute('aria-label','Your creative idea for '+game.title);answer.style.cssText='width:100%;padding:.7rem;border:1px solid var(--line);border-radius:.65rem;font:inherit;resize:vertical';
+  const done=document.createElement('button');done.type='button';done.textContent='✨ I made it!';
+  const feedback=document.createElement('p');feedback.className='story-meta';feedback.setAttribute('aria-live','polite');
+  done.addEventListener('click',()=>{
+   if(!answer.value.trim()){feedback.textContent='Add a few words about your idea first, or draw it on paper!';return;}
+   feedback.textContent='🌟 Brilliant creativity! Your idea stays in this browser session. Try another challenge when you are ready.';
+   document.getElementById('creative-game-feedback').textContent='You completed '+game.title+' — great imagination!';
+  });
+  card.append(heading,meta,prompt,answer,done,feedback);list.append(card);
+ });
+ creativeVisible+=batch.length;
+ document.getElementById('creative-game-more').hidden=creativeVisible>=creativeMatches.length;
+ document.getElementById('creative-game-count').textContent='Showing '+creativeVisible.toLocaleString()+' of '+creativeMatches.length.toLocaleString()+' matching creative games · 50,000 in the collection.';
+}
+function filterCreativeGames(){
+ const query=document.getElementById('creative-game-search').value.trim().toLowerCase();
+ const age=document.getElementById('creative-game-age').value;
+ creativeMatches=creativeCatalog.filter(game=>(!age||game.age===age)&&(!query||game.search.includes(query)));
+ renderCreativeGames(true);
+}
+document.getElementById('creative-game-search').addEventListener('input',filterCreativeGames);
+document.getElementById('creative-game-age').addEventListener('change',filterCreativeGames);
+document.getElementById('creative-game-more').addEventListener('click',()=>renderCreativeGames());
+filterCreativeGames();
 
 // Build a searchable 160,000-game catalog, adding 50,000 generated games to the existing 110,000, but render cards in small batches
 // so mobile browsers do not need to create 100 DOM nodes at once.
