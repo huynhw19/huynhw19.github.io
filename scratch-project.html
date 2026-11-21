@@ -67,7 +67,7 @@
 <div class="actions"><button class="button secondary" id="apply-runtime" type="button">Apply runtime settings</button><button class="button secondary" id="reset-runtime" type="button">Reset defaults</button></div>
 <div id="runtime-settings-status" class="status" role="status" aria-live="polite">Default settings are ready. Load a project to try them.</div>
 </section>
-<section class="panel">
+<section class="panel" id="project-player-anchor">
 <h2>▶️ Project player</h2><p id="project-title" class="muted">No project loaded yet.</p>
 <div class="stage-actions" style="align-items:center;justify-content:space-between;margin:0 0 .65rem"><div class="stage-actions" style="margin:0"><button class="button secondary" id="pause" type="button" disabled>⏸ Pause</button><button class="button secondary" id="mute" type="button" disabled>🔊 Mute</button></div><label for="volume" style="display:flex;align-items:center;gap:.55rem;font-weight:700;flex-wrap:wrap">Volume <input id="volume" type="range" min="0" max="100" value="100" step="1" style="width:min(34vw,150px);accent-color:#e66b16"><span id="volume-value">100%</span></label></div>
 <div id="stage-shell"><div id="stage" aria-label="Scratch project stage"></div></div>
@@ -405,7 +405,7 @@ function renderExamples(){
 async function loadExampleProjects(){
  const button=$('refresh-examples');button.disabled=true;$('example-status').textContent='Fetching popular and trending public projects from Scratch…';
  try{
-  const endpoints=['https://api.scratch.mit.edu/explore/projects/?mode=popular&limit=40&offset=0','https://api.scratch.mit.edu/explore/projects/?mode=trending&limit=40&offset=0'];
+  const endpoints=['https://api.scratch.mit.edu/explore/projects/?mode=popular&limit=40&offset=0','https://api.scratch.mit.edu/explore/projects/?mode=trending&limit=40&offset=0','https://api.scratch.mit.edu/explore/projects/?mode=popular&limit=40&offset=40'];
   const batches=await Promise.all(endpoints.map(async url=>{const response=await fetch(url,{headers:{Accept:'application/json'}});if(!response.ok)throw new Error('Scratch returned HTTP '+response.status);return response.json();}));
   const unique=new Map();for(const project of [...(batches[0]||[]),...(batches[1]||[])])if(project?.id&&!unique.has(String(project.id)))unique.set(String(project.id),project);
   exampleCache.splice(0,exampleCache.length,...Array.from(unique.values()).slice(0,50));
