@@ -6,25 +6,48 @@
 <title>Secure your account — ConfigKit</title>
 <style>
 :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{width:min(100% - 32px,680px);margin:7vh auto}.card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:clamp(22px,5vw,42px);box-shadow:0 14px 38px #17231f10}.eyebrow{color:var(--green);font-weight:750;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem}h1{font-size:clamp(2rem,7vw,3rem);line-height:1.12;margin:.5rem 0}p{color:var(--muted)}.tip{background:var(--mint);padding:16px;border-radius:12px;margin:22px 0}.actions{display:grid;gap:12px;margin-top:24px}a.action{display:block;text-align:center;text-decoration:none;padding:14px 18px;border-radius:10px;font-weight:750;background:var(--green);color:white}a.secondary{background:white;color:var(--dark);border:1px solid var(--line)}footer{text-align:center;margin:22px;color:var(--muted);font-size:.88rem}a{color:var(--green)}.status{color:var(--muted);font-size:.92rem}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{width:min(100% - 32px,680px);margin:7vh auto}.card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:clamp(22px,5vw,42px);box-shadow:0 14px 38px #17231f10}.eyebrow{color:var(--green);font-weight:750;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem}h1{font-size:clamp(2rem,7vw,3rem);line-height:1.12;margin:.5rem 0}p{color:var(--muted)}.tip{background:var(--mint);padding:16px;border-radius:12px;margin:22px 0}.actions{display:grid;gap:12px;margin-top:24px}a.action{display:block;text-align:center;text-decoration:none;padding:14px 18px;border-radius:10px;font-weight:750;background:var(--green);color:white}a.secondary{background:white;color:var(--dark);border:1px solid var(--line)}footer{text-align:center;margin:22px;color:var(--muted);font-size:.88rem}a{color:var(--green)} .status{color:var(--muted);font-size:.92rem}.security-list{display:grid;gap:12px;margin:22px 0}.security-item{border:1px solid var(--line);border-radius:13px;padding:16px}.security-item h2{font-size:1.08rem;margin:0 0 4px}.security-item p{margin:4px 0 12px}.security-actions{display:flex;flex-wrap:wrap;gap:9px}.security-actions a,.security-actions button{font:inherit;font-weight:700;border-radius:9px;padding:9px 13px;text-decoration:none;cursor:pointer}.setup-link{background:var(--green);color:white}.skip-option{background:white;color:var(--dark);border:1px solid var(--line)}.security-item.is-skipped{background:#f3f6f3;border-style:dashed}.security-item.is-skipped .skip-option{background:var(--mint)}.continue{width:100%;border:0;cursor:pointer;font:inherit;font-weight:750;padding:14px 18px;border-radius:10px;background:var(--green);color:white}.small{font-size:.88rem}
 </style></head>
 <body><main><section class="card">
 <div class="eyebrow">One more step · totally your choice</div>
-<h1>Let's secure your account 🔐</h1>
-<p>Your account is ready. Adding an extra sign-in protection method can help keep it safe, especially if your password is ever exposed.</p>
-<div class="tip"><strong>Recommended:</strong> Set up an authenticator app or a passkey in ConfigKit Account Settings. You can also review your recovery options there.</div>
-<div class="actions">
-<a class="action" href="account-settings.html#security-title">Secure my account</a>
-<a class="action secondary" id="skip" href="dashboard.html">Skip for now ⏭️</a>
+<h1>Choose your security options 🔐</h1>
+<p>Your account is ready. You can set up any of these protections now, skip individual ones, or continue and come back later. Nothing on this page is required to use ConfigKit.</p>
+<div class="security-list">
+ <article class="security-item" id="authenticator-option">
+  <h2>1. Authenticator app · Two-factor authentication</h2>
+  <p>Use an authenticator app to generate a time-based code when you sign in. This adds a second step after your primary sign-in.</p>
+  <div class="security-actions"><a class="setup-link" href="account-settings.html#mfa-settings-title" target="_blank" rel="noopener">Set up authenticator</a><button class="skip-option" type="button" data-skip="authenticator">Skip this for now</button></div>
+ </article>
+ <article class="security-item" id="passkey-option">
+  <h2>2. Passkey · Passwordless sign-in</h2>
+  <p>Use your device's Face ID, Touch ID, Windows Hello, screen lock, or a security key to sign in without typing your password.</p>
+  <div class="security-actions"><a class="setup-link" href="account-settings.html#passkeys-title" target="_blank" rel="noopener">Add a passkey</a><button class="skip-option" type="button" data-skip="passkey">Skip this for now</button></div>
+ </article>
+ <article class="security-item" id="recovery-option">
+  <h2>3. Recovery codes · Backup access</h2>
+  <p>Single-use backup codes can help if you lose access to your authenticator. First set up and verify an authenticator app; recovery codes are not a replacement for it.</p>
+  <div class="security-actions"><a class="setup-link" href="account-settings.html#recovery-codes-title" target="_blank" rel="noopener">View recovery-code setup</a><button class="skip-option" type="button" data-skip="recovery">Skip this for now</button></div>
+ </article>
 </div>
-<p class="status" id="status" role="status" aria-live="polite">You can set this up later from Account Settings.</p>
+<div class="tip"><strong>Good to know:</strong> You can set up, replace, or review these options later in <a href="account-settings.html" target="_blank" rel="noopener">Account Settings</a>. Skipping a method here does not disable a method you already have enabled.</div>
+<button class="continue" id="continue" type="button">Continue to ConfigKit →</button>
+<p class="status" id="status" role="status" aria-live="polite">You can skip any individual option. Your choices here do not change your account's existing security settings.</p>
 </section><footer><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="account-settings.html">Account settings</a></footer></main>
 <script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
 <script>
 (() => {
 const params=new URLSearchParams(location.search), allowed=new Set(['account-settings.html','dashboard.html','student-dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','community-games.html','family.html','connected-apps.html','connect.html','notifications.html']);
 const next=allowed.has(params.get('next'))?params.get('next'):'dashboard.html';
-document.getElementById('skip').href=next;
+document.querySelectorAll('[data-skip]').forEach(button=>{
+ button.addEventListener('click',()=>{
+  const item=button.closest('.security-item');
+  const skipped=item.classList.toggle('is-skipped');
+  button.textContent=skipped?'Skipped — undo':'Skip this for now';
+  item.setAttribute('aria-label',item.querySelector('h2').textContent+(skipped?' — skipped for now':''));
+  document.getElementById('status').textContent='Your choice is noted for this visit. You can still set this up later in Account Settings.';
+ });
+});
+document.getElementById('continue').addEventListener('click',()=>{location.assign(next);});
 const config=window.CONFIGKIT_AUTH||{};
 if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient)return;
 const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
