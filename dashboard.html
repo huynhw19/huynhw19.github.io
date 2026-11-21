@@ -59,6 +59,7 @@
       <a href="account-settings.html">Account settings</a>
       <a href="ai-testing.html">AI Testing Connector</a>
       <a href="ai-control.html">AI Control Hub</a>
+      <a id="owner-dashboard-link" href="owner-dashboard.html" hidden>Owner Dashboard</a>
       <a href="account-docs.html">Account Help</a><br><a href="support.html">Contact Support</a>
       <a id="family-nav-link" href="family-dashboard.html" hidden>Family dashboard</a>
       <button id="signout" type="button" hidden>Sign out</button>
@@ -387,6 +388,7 @@
           const name = metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_username;
           const type = metadata.account_type || 'personal';
           const isOwnerTester = user.id === 'dc7d85d3-e40c-4002-87ea-8df7f904a3ed';
+          document.getElementById('owner-dashboard-link').hidden = !isOwnerTester;
           document.getElementById('welcome-title').textContent = name ? `Welcome, ${name}` : 'Welcome to ConfigKit';
           document.getElementById('account-label').textContent = user.email ? `Signed in as ${user.email}` : 'You are signed in to your ConfigKit account.';
           const badge = document.getElementById('account-type-badge');
