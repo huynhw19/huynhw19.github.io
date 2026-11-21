@@ -273,6 +273,7 @@
       const status = document.getElementById('status');
       const dashboard = document.getElementById('dashboard');
       const signout = document.getElementById('signout');
+      const $ = id => document.getElementById(id);
       const config = window.CONFIGKIT_AUTH || {};
       const setStatus = (message, isError = false) => { status.hidden = false; status.classList.toggle('error', isError); status.textContent = message; };
       if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true); return; }
