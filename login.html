@@ -65,7 +65,7 @@
           </div>
           <small class="muted">Only share your Family ID with people you want to add to your family.</small>
         </section>
-        <div class="form-actions"><button class="provider" id="emailSubmit" type="submit">Log in with email</button></div>
+        <div class="form-actions"><button class="provider" id="emailSubmit" type="submit">Log in with email</button><button class="provider secondary" id="magicLinkSubmit" type="button">Send magic link</button></div>
       </form>
       <section id="password-recovery" class="education-note" hidden aria-labelledby="recovery-title">
         <h2 id="recovery-title">Choose a new password</h2>
@@ -130,6 +130,7 @@
       const email = document.getElementById('email');
       const password = document.getElementById('password');
       const emailSubmit = document.getElementById('emailSubmit');
+      const magicLinkSubmit = document.getElementById('magicLinkSubmit');
       const resetPassword = document.getElementById('resetPassword');
       const recoveryPanel = document.getElementById('password-recovery');
       const recoveryForm = document.getElementById('password-recovery-form');
@@ -207,7 +208,7 @@
         return metadata;
       }
       function setBusy(busy) {
-        emailSubmit.disabled = busy; github.disabled = busy; bitbucket.disabled = busy; figma.disabled = busy; discord.disabled = busy; slack.disabled = busy; passkeyLogin.disabled = busy;
+        emailSubmit.disabled = busy; magicLinkSubmit.disabled = busy; github.disabled = busy; bitbucket.disabled = busy; figma.disabled = busy; discord.disabled = busy; slack.disabled = busy; passkeyLogin.disabled = busy;
         resetPassword.disabled = busy; loginTab.disabled = busy; signupTab.disabled = busy;
       }
       function setStatus(message, isError=false) {
@@ -280,6 +281,7 @@
         password.autocomplete = signingUp ? 'new-password' : 'current-password';
         emailSubmit.textContent = signingUp ? 'Create account' : 'Log in with email';
         resetPassword.hidden = signingUp;
+        magicLinkSubmit.hidden = signingUp;
         familySetup.hidden = !signingUp;
         updateFamilyFields();
         updateStudentFields();
@@ -555,6 +557,24 @@
           }
         } catch (error) { setStatus(error.message || 'Authentication failed. Please try again.', true); }
         finally { setBusy(false); }
+      });
+      magicLinkSubmit.addEventListener('click', async () => {
+        if (mode !== 'login') return;
+        if (!email.value.trim() || !email.checkValidity()) {
+          email.focus(); setStatus('Enter a valid email address first, then choose “Send magic link”.', true); return;
+        }
+        setBusy(true);
+        setStatus('Sending your secure sign-in link…');
+        try {
+          const {error} = await client.auth.signInWithOtp({
+            email:email.value.trim(),
+            options:{emailRedirectTo:callbackUrl, shouldCreateUser:false}
+          });
+          if (error) throw error;
+          setStatus('If an account exists for that email, a sign-in link will be sent. Check your inbox and spam folder. The link will return you to ConfigKit.');
+        } catch (error) {
+          setStatus(error.message || 'Could not send a sign-in link. Please try again.', true);
+        } finally { setBusy(false); }
       });
       recoveryForm.addEventListener('submit', async event => {
         event.preventDefault();
