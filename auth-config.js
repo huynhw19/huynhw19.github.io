@@ -193,8 +193,16 @@ window.CONFIGKIT_AUTH = {
     if (!config.turnstileSiteKey) {
       throw new Error('Email sign-in requires Turnstile setup. Add the site key to auth-config.js and configure CAPTCHA in Supabase.');
     }
-    if (!token) throw new Error('Please complete the human verification challenge and try again.');
-    const captchaToken = token;
+    // Read directly from Turnstile at submit time as well as retaining its callback value.
+    // This avoids relying solely on callback timing on mobile browsers.
+    let liveToken = '';
+    try {
+      if (turnstile && widgetId !== null && typeof turnstile.getResponse === 'function') {
+        liveToken = turnstile.getResponse(widgetId) || '';
+      }
+    } catch (_) { /* Fall back to the success callback token. */ }
+    const captchaToken = liveToken || token;
+    if (!captchaToken) throw new Error('Turnstile shows as incomplete to ConfigKit. Please refresh the challenge and try again.');
     token = '';
     setOptions(args, captchaToken, getOptions(args));
     try {
