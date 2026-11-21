@@ -268,3 +268,20 @@ begin
  download_url:=item_url;file_path:=item_path;delivery_type:=item_delivery;amount_paid:=cost;select coalesce(sum(l.amount),0)::integer into balance from public.configkit_coin_ledger l where l.user_id=uid;return next;
 end;
 $$;
+
+-- Keep coin-priced uploaded apps private until a buyer has a purchase record.
+drop policy if exists "Published app files can be downloaded by signed-in users" on storage.objects;
+create policy "Published app files can be downloaded by signed-in users"
+on storage.objects for select to authenticated
+using (
+ bucket_id='configkit-app-files'
+ and exists(
+  select 1 from public.configkit_apps a
+  where a.file_path=objects.name and a.status='published'
+   and (
+    a.coin_price=0
+    or exists(select 1 from public.configkit_coin_purchases p
+      where p.buyer_id=(select auth.uid()) and p.item_kind='app' and p.item_id=a.id)
+   )
+ )
+);
