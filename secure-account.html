@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Choose whether to secure your ConfigKit account now or continue and do it later.">
+<title>Secure your account — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{width:min(100% - 32px,680px);margin:7vh auto}.card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:clamp(22px,5vw,42px);box-shadow:0 14px 38px #17231f10}.eyebrow{color:var(--green);font-weight:750;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem}h1{font-size:clamp(2rem,7vw,3rem);line-height:1.12;margin:.5rem 0}p{color:var(--muted)}.tip{background:var(--mint);padding:16px;border-radius:12px;margin:22px 0}.actions{display:grid;gap:12px;margin-top:24px}a.action{display:block;text-align:center;text-decoration:none;padding:14px 18px;border-radius:10px;font-weight:750;background:var(--green);color:white}a.secondary{background:white;color:var(--dark);border:1px solid var(--line)}footer{text-align:center;margin:22px;color:var(--muted);font-size:.88rem}a{color:var(--green)}.status{color:var(--muted);font-size:.92rem}
+</style></head>
+<body><main><section class="card">
+<div class="eyebrow">One more step · totally your choice</div>
+<h1>Let's secure your account 🔐</h1>
+<p>Your account is ready. Adding an extra sign-in protection method can help keep it safe, especially if your password is ever exposed.</p>
+<div class="tip"><strong>Recommended:</strong> Set up an authenticator app or a passkey in ConfigKit Account Settings. You can also review your recovery options there.</div>
+<div class="actions">
+<a class="action" href="account-settings.html#security-title">Secure my account</a>
+<a class="action secondary" id="skip" href="dashboard.html">Skip for now ⏭️</a>
+</div>
+<p class="status" id="status" role="status" aria-live="polite">You can set this up later from Account Settings.</p>
+</section><footer><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="account-settings.html">Account settings</a></footer></main>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+<script>
+(() => {
+const params=new URLSearchParams(location.search), allowed=new Set(['account-settings.html','dashboard.html','student-dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','community-games.html','family.html','connected-apps.html','connect.html','notifications.html']);
+const next=allowed.has(params.get('next'))?params.get('next'):'dashboard.html';
+document.getElementById('skip').href=next;
+const config=window.CONFIGKIT_AUTH||{};
+if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient)return;
+const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+client.auth.getUser().then(({data,error})=>{
+ if(error||!data.user){document.getElementById('status').textContent='Your sign-in session could not be found. Please sign in again.';document.getElementById('skip').href='login.html';return;}
+ if(!data.user.email_confirmed_at){document.getElementById('status').textContent='Please verify your email address before continuing.';document.getElementById('skip').href='login.html';return;}
+ if(data.user.user_metadata?.configkit_terms_acceptance?.version!=='2026-11-21'){location.replace('welcome.html?next='+encodeURIComponent(next));return;}
+}).catch(()=>{document.getElementById('status').textContent='We could not verify your sign-in. Please reload this page.';});
+})();
+</script></body></html>
