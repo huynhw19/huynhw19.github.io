@@ -50,6 +50,19 @@
         <input id="email" name="email" type="email" autocomplete="email" required maxlength="254">
         <label for="password">Password</label>
         <input id="password" name="password" type="password" autocomplete="current-password" required minlength="6" maxlength="72">
+        <div id="signupProfileFields" hidden>
+          <label for="dateOfBirth">Date of birth <span class="muted">(optional)</span></label>
+          <input id="dateOfBirth" name="dateOfBirth" type="date" autocomplete="bday">
+          <label for="gender">Gender <span class="muted">(optional)</span></label>
+          <select id="gender" name="gender">
+            <option value="">Prefer not to say</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="non_binary">Non-binary</option>
+            <option value="self_described">I use another term</option>
+          </select>
+          <small class="muted">These profile details are optional. You can leave either field blank.</small>
+        </div>
         <button class="text-button" id="resetPassword" type="button">Forgot password?</button>
         <section id="familySetup" class="education-note" hidden aria-labelledby="family-setup-title">
           <h2 id="family-setup-title">Family ID</h2>
@@ -91,6 +104,12 @@
       <p class="muted fine-print" id="chatgptComingSoonNote">ChatGPT sign-in is planned. It will become available if OpenAI enables OAuth access for this app; this button is not active yet.</p>
       <div class="providers"><button class="provider" id="passkeyLogin" type="button">Sign in / unlock with a passkey</button></div>
       <p class="status" id="status" role="status" aria-live="polite">Checking sign-in configuration…</p>
+      <section id="emailConfirmationReminder" class="education-note" hidden aria-labelledby="email-confirmation-title">
+        <h2 id="email-confirmation-title">One more step: verify your email 📧</h2>
+        <p class="muted">Your account has been created, but your email address is not verified yet. Open the confirmation email from ConfigKit and tap its verification link. Check your spam or junk folder too.</p>
+        <p class="muted fine-print">To send the confirmation again, complete the human-verification challenge above and choose the button below.</p>
+        <button id="resendConfirmation" type="button">Resend confirmation email</button>
+      </section>
       <section id="mfa-challenge" class="education-note" hidden aria-labelledby="mfa-title">
         <h2 id="mfa-title">Two-factor authentication</h2>
         <p class="muted">Enter the current six-digit code from your authenticator app to finish signing in.</p>
@@ -129,6 +148,11 @@
       const form = document.getElementById('emailForm');
       const email = document.getElementById('email');
       const password = document.getElementById('password');
+      const signupProfileFields = document.getElementById('signupProfileFields');
+      const dateOfBirth = document.getElementById('dateOfBirth');
+      const gender = document.getElementById('gender');
+      const emailConfirmationReminder = document.getElementById('emailConfirmationReminder');
+      const resendConfirmation = document.getElementById('resendConfirmation');
       const emailSubmit = document.getElementById('emailSubmit');
       const magicLinkSubmit = document.getElementById('magicLinkSubmit');
       const resetPassword = document.getElementById('resetPassword');
@@ -198,6 +222,8 @@
       function selectedMetadata() {
         const type = accountType.value;
         const metadata = {account_type:type};
+        if (mode === 'signup' && dateOfBirth.value) metadata.date_of_birth = dateOfBirth.value;
+        if (mode === 'signup' && gender.value) metadata.gender = gender.value;
         if (type === 'education' && institution.value.trim()) metadata.institution = institution.value.trim();
         if (mode === 'signup' && type === 'education' && studentSignup.checked) {
           metadata.configkit_student_signup = true;
@@ -282,6 +308,9 @@
         emailSubmit.textContent = signingUp ? 'Create account' : 'Log in with email';
         resetPassword.hidden = signingUp;
         magicLinkSubmit.hidden = signingUp;
+        signupProfileFields.hidden = !signingUp;
+        dateOfBirth.max = new Date().toISOString().slice(0,10);
+        if (!signingUp) emailConfirmationReminder.hidden = true;
         familySetup.hidden = !signingUp;
         updateFamilyFields();
         updateStudentFields();
@@ -548,7 +577,8 @@
             if (metadataError) throw metadataError;
           }
           if (mode === 'signup' && !result.data.session) {
-            setStatus('Account created. Check your email for a confirmation link, then return here to log in.');
+            setStatus('Account created! Please verify your email before logging in. 📧');
+            emailConfirmationReminder.hidden = false;
             form.reset(); updateAccountFields();
           } else {
             setStatus(mode === 'signup' ? 'Account created and signed in.' : 'Logged in successfully.');
@@ -557,6 +587,28 @@
           }
         } catch (error) { setStatus(error.message || 'Authentication failed. Please try again.', true); }
         finally { setBusy(false); }
+      });
+      resendConfirmation.addEventListener('click', async () => {
+        if (!email.value.trim() || !email.checkValidity()) {
+          email.focus(); setStatus('Enter the email address you used to sign up first.', true); return;
+        }
+        setBusy(true);
+        resendConfirmation.disabled = true;
+        setStatus('Sending another confirmation email…');
+        try {
+          const {error} = await client.auth.resend({
+            type:'signup',
+            email:email.value.trim(),
+            options:{emailRedirectTo:callbackUrl}
+          });
+          if (error) throw error;
+          setStatus('If that account is awaiting verification, a new confirmation email has been requested. Check your inbox and spam folder.');
+        } catch (error) {
+          setStatus(error.message || 'Could not resend the confirmation email. Please try again.', true);
+        } finally {
+          setBusy(false);
+          resendConfirmation.disabled = false;
+        }
       });
       magicLinkSubmit.addEventListener('click', async () => {
         if (mode !== 'login') return;
