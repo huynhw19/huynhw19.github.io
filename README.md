@@ -36,10 +36,10 @@ Get the right package from the [ConfigKit Downloads page](https://huynhw19.githu
 |---|---|
 | [Mobileconfig Studio](https://huynhw19.github.io/mobileconfig-builder.html) | Create and review configuration profiles and their payloads. |
 | [Web Clip Builder](https://huynhw19.github.io/webclip-builder.html) | Create a Home Screen web shortcut profile. |
-| [ConfigKit Drive](https://huynhw19.github.io/drive.html) | Store and organise files in your private account workspace. |
+| [ConfigKit Drive](https://huynhw19.github.io/drive.html) | Store and organise private files and folders, with secure one-hour share links for files and folder contents. |
 | [Daily Planner](https://huynhw19.github.io/planner.html) | Organise tasks and upcoming items. |
 | [Notes & Ideas](https://huynhw19.github.io/notes.html) | Keep personal notes and ideas. |
-| [Document Vault](https://huynhw19.github.io/document-vault.html) | Keep documents in your private ConfigKit storage. |
+| [Document Vault](https://huynhw19.github.io/document-vault.html) | Organise private documents and share files or folder contents with expiring links. |
 | [Habit Tracker](https://huynhw19.github.io/habits.html) | Record habits and review consistency. |
 | [Personal Insights](https://huynhw19.github.io/personal-insights.html) | Review activity and workspace summaries. |
 | [Security Centre](https://huynhw19.github.io/security-centre.html) | Review account-protection options and security settings. |
