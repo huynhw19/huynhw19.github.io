@@ -85,7 +85,7 @@
         if (error) throw error;
         window.location.assign(data.signedUrl);
       } else if (action === 'edit') {
-        $('app-id').value=app.id; $('name').value=app.name; $('version').value=app.version || ''; $('coin-price').value=app.coin_price||0; $('description').value=app.description || ''; $('category').value=app.category; $('delivery').value=app.delivery_type; $('redirect-url').value=app.redirect_url || ''; setOS(app.supported_os || []);
+        $('app-id').value=app.id; $('name').value=app.name; $('version').value=app.version || ''; $('coin-price').value=app.coin_price||0; $('description').value=app.description || ''; $('category').value=app.category; $('delivery').value=app.delivery_type; const privateLink=Number(app.coin_price||0)>0&&app.delivery_type==='link'?await client.from('configkit_app_coin_links').select('redirect_url').eq('app_id',app.id).maybeSingle():null; $('redirect-url').value=app.redirect_url || privateLink?.data?.redirect_url || ''; setOS(app.supported_os || []);
         $('form-title').textContent='Edit '+app.name; $('save-app').textContent='Save changes'; $('file-field').classList.toggle('hidden',app.delivery_type!=='file'); $('link-field').classList.toggle('hidden',app.delivery_type!=='link'); $('creator').scrollIntoView({behavior:'smooth'});
       } else if (action === 'status') {
         const next = app.status === 'published' ? 'draft' : 'published';
@@ -126,11 +126,12 @@
         filePath=uploadedPath; fileName=file.name;
       }
       const coinPrice=Number($('coin-price').value); if(!Number.isInteger(coinPrice)||coinPrice<0||coinPrice>100000) throw new Error('Enter a whole CKC price from 0 to 100,000.');
-      const payload={owner_id:user.id,name,description,coin_price:coinPrice,category:$('category').value,supported_os:os,delivery_type:delivery,file_path:delivery==='file'?filePath:null,file_name:delivery==='file'?fileName:null,redirect_url:delivery==='link'?$('redirect-url').value.trim():null,version:$('version').value.trim(),status:existing ? existing.status : 'draft',updated_at:new Date().toISOString()};
+      const payload={owner_id:user.id,name,description,coin_price:coinPrice,category:$('category').value,supported_os:os,delivery_type:delivery,file_path:delivery==='file'?filePath:null,file_name:delivery==='file'?fileName:null,redirect_url:delivery==='link'&&coinPrice===0?$('redirect-url').value.trim():null,version:$('version').value.trim(),status:existing ? existing.status : 'draft',updated_at:new Date().toISOString()};
       let result;
       if(id) result=await client.from('configkit_apps').update(payload).eq('id',id).eq('owner_id',user.id).select('id').single();
       else result=await client.from('configkit_apps').insert(payload).select('id').single();
       if(result.error) throw result.error;
+      if(delivery==='link'&&coinPrice>0){const privateResult=await client.from('configkit_app_coin_links').upsert({app_id:result.data.id,owner_id:user.id,redirect_url:$('redirect-url').value.trim()},{onConflict:'app_id'});if(privateResult.error)throw privateResult.error;}else if(id){const privateResult=await client.from('configkit_app_coin_links').delete().eq('app_id',id).eq('owner_id',user.id);if(privateResult.error)throw privateResult.error;}
       if(existing?.file_path && existing.file_path!==filePath) await client.storage.from('configkit-app-files').remove([existing.file_path]);
       resetForm(); await refresh(); setStatus('App saved. Review it in Your Apps, then publish it when ready.');
     } catch(error) {
