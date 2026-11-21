@@ -124,6 +124,14 @@
           <p class="muted">Loading achievements…</p>
         </div>
       </section>
+      <section class="card" id="configkit-coins" aria-labelledby="coins-title" style="padding:1.2rem;margin:1rem 0 1.5rem">
+        <div class="achievements-summary"><div><span class="eyebrow">Your rewards wallet</span><h2 id="coins-title">🪙 ConfigKit Coins</h2><p class="muted">Earn coins as you explore, achieve milestones and visit regularly. Spend them in the community stores.</p></div><div class="achievement-count"><span id="coin-balance">—</span> CKC</div></div>
+        <p id="coin-visit-status" class="muted" role="status" aria-live="polite">Checking your visit rewards…</p>
+        <form id="coin-promo-form" class="actions" style="margin:.8rem 0"><label for="coin-promo-code">Promo code</label><input id="coin-promo-code" maxlength="80" autocomplete="off" placeholder="Enter a ConfigKit promo code" required style="font:inherit;padding:.65rem;border:1px solid var(--line);border-radius:.65rem;min-width:min(100%,260px)"><button id="coin-redeem" type="submit">Redeem 50 CKC</button></form>
+        <p id="coin-promo-status" class="muted" role="status" aria-live="polite"></p>
+        <div id="coin-history" class="muted" aria-live="polite">Your recent coin activity will appear here.</div>
+        <div class="studio-actions"><a href="configkit-app-store.html">Shop the ConfigKit App Store →</a><a href="community-store.html">Visit the Community Store →</a></div>
+      </section>
       <section class="card" id="activity-centre" aria-labelledby="activity-centre-title" style="padding:1.2rem;margin:1rem 0 1.5rem">
         <div class="achievements-summary"><div><span class="eyebrow">Your workspace</span><h2 id="activity-centre-title">Activity centre</h2><p class="muted">A private timeline of your recent ConfigKit activity, progress and notifications.</p></div><a href="activity-centre.html">Open full activity centre →</a></div>
         <div class="activity-counts" id="activity-counts" aria-live="polite"><span>Loading your activity…</span></div>
@@ -269,6 +277,31 @@
       const setStatus = (message, isError = false) => { status.hidden = false; status.classList.toggle('error', isError); status.textContent = message; };
       if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) { setStatus('Authentication is not configured. Ask the site owner to finish Supabase setup.', true); return; }
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      async function loadConfigKitCoins() {
+        const visit=$('coin-visit-status');
+        try {
+          const {data:rewards,error:visitError}=await client.rpc('configkit_claim_visit_rewards');
+          if(visitError)throw visitError;
+          const earned=(rewards||[]).map(x=>x.reward_type==='daily'?'Daily visit +5 CKC':'Weekly visit +20 CKC');
+          visit.textContent=earned.length?'Earned: '+earned.join(' · '):'You have already collected today’s and this week’s visit rewards. Come back tomorrow!';
+          const {data:balance,error:balanceError}=await client.rpc('configkit_coin_balance');
+          if(balanceError)throw balanceError;
+          $('coin-balance').textContent=Number(balance||0).toLocaleString();
+          const {data:rows,error:historyError}=await client.from('configkit_coin_ledger').select('amount,reason,description,created_at').order('created_at',{ascending:false}).limit(8);
+          if(historyError)throw historyError;
+          const box=$('coin-history');box.replaceChildren();
+          const heading=document.createElement('strong');heading.textContent='Recent activity';box.append(heading);
+          if(!rows?.length){const empty=document.createElement('p');empty.textContent='No coin activity yet. Earn your first coins by visiting daily or completing an achievement!';box.append(empty);}
+          for(const row of rows||[]){const line=document.createElement('p');line.style.margin='.35rem 0';line.textContent=(row.amount>0?'+':'')+row.amount+' CKC · '+row.description+' · '+new Date(row.created_at).toLocaleDateString();box.append(line);}
+        } catch(error) { visit.textContent='Your coin wallet could not be loaded: '+(error.message||'Please refresh.'); }
+      }
+      $('coin-promo-form').addEventListener('submit',async event=>{
+        event.preventDefault();const input=$('coin-promo-code'),button=$('coin-redeem'),message=$('coin-promo-status');
+        const code=input.value.trim();if(!code)return;button.disabled=true;message.textContent='Checking promo code…';
+        try {const {data,error}=await client.rpc('configkit_redeem_coin_code',{p_code:code});if(error)throw error;const award=data?.[0]?.awarded??50;message.textContent='Success! You received '+award+' ConfigKit Coins.';input.value='';await loadConfigKitCoins();}
+        catch(error){message.textContent=error.message||'That code could not be redeemed.';}
+        finally{button.disabled=false;}
+      });
       async function renderSession() {
         try {
           const {data, error} = await client.auth.getSession();
@@ -294,6 +327,7 @@
             return;
           }
           const user = data.session.user;
+          await loadConfigKitCoins();
           const metadata = user.user_metadata || {};
           const achievementDefinitions = [
             ['welcome','🎉','Welcome aboard','Create your ConfigKit account.'],
