@@ -54,6 +54,7 @@ function go(){location.replace('secure-account.html?next='+encodeURIComponent(ne
 client.auth.getUser().then(({data,error})=>{
  if(error||!data.user){$('status').textContent='Please sign in to continue.';setTimeout(()=>location.replace('login.html'),1200);return;}
  user=data.user;
+ if(user.user_metadata?.configkit_onboarding_required!==true){location.replace(next);return;}
  if(!user.email_confirmed_at){$('status').textContent='Please verify your email address before continuing.';return;}
  if(user.user_metadata?.configkit_terms_acceptance?.version!=='2026-11-21'){location.replace('welcome.html?next='+encodeURIComponent(next));return;}
  if(user.user_metadata?.configkit_onboarding_questions?.completed===true){go();return;}
