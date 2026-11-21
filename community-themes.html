@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Explore, share and install themes made by the ConfigKit community.">
+<title>Community Theme Gallery — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px rgba(23,35,31,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(100% - 32px,1120px);margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}header nav{display:flex;gap:1rem;flex-wrap:wrap}.brand{font-weight:800;color:var(--ink);text-decoration:none}main{padding:2rem 0 4rem}.hero,.panel,.theme-card,.preview-panel{background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.hero{padding:clamp(1.3rem,4vw,2.5rem);background:linear-gradient(130deg,#e8f4ed,#fff 70%)}.eyebrow{display:inline-block;background:var(--mint);color:var(--dark);border-radius:99px;padding:.25rem .7rem;font-size:.82rem;font-weight:750}.hero h1{font-size:clamp(2.2rem,6vw,3.7rem);line-height:1.08;margin:.7rem 0}.muted{color:var(--muted)}.panel{padding:1.2rem;margin:1.3rem 0}.panel h2{margin:.1rem 0 .7rem}.button,button{font:inherit;font-weight:650;border:1px solid var(--green);border-radius:9px;padding:.62rem .9rem;background:var(--green);color:white;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}button.secondary,.button.secondary{background:white;color:var(--dark);border-color:var(--line)}button.danger{background:white;color:var(--red);border-color:#e8caca}button:disabled{opacity:.55;cursor:not-allowed}.actions,.filters,.card-actions{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap}.filters{margin:1rem 0}.filters input,.filters select,.field input,.field textarea,.field select{width:100%;font:inherit;padding:.7rem .8rem;border:1px solid #bdcbc3;border-radius:9px;background:white;color:var(--ink)}.filters label{flex:1;min-width:180px}.field{display:grid;gap:.3rem;font-weight:650}.field textarea{min-height:82px;resize:vertical}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.9rem}.theme-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:1rem}.theme-card{padding:1rem;display:flex;flex-direction:column;gap:.65rem;min-width:0}.theme-card h3{margin:0}.theme-card p{margin:0}.mini-preview{border:1px solid var(--line);border-radius:12px;padding:1rem;min-height:105px;display:flex;flex-direction:column;justify-content:space-between;gap:.5rem}.mini-preview strong{font-size:1rem}.mini-preview span{font-size:.85rem}.swatches{display:flex;gap:.35rem}.swatch{width:24px;height:24px;border-radius:50%;border:1px solid #0002;display:inline-block}.card-meta{display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;font-size:.88rem;color:var(--muted)}.card-actions button{font-size:.9rem}.notice{border:1px solid #e6d8ae;background:#fff9e9;border-radius:10px;padding:.9rem 1rem;margin:1rem 0}.status{min-height:1.5rem}.preview-panel{padding:1.2rem;margin:1rem 0;display:none}.preview-panel.visible{display:block}.preview-sample{padding:1.2rem;border-radius:var(--preview-radius,16px);background:var(--preview-surface,#fff);color:var(--preview-ink,#17231f);border:1px solid var(--line)}.preview-sample button{background:var(--preview-accent,#226b51);border-color:var(--preview-accent,#226b51)}.empty{padding:1.4rem;border:1px dashed #bdcbc3;border-radius:12px;text-align:center;color:var(--muted)}footer{padding:1.5rem 0;color:var(--muted);border-top:1px solid var(--line)}@media(max-width:640px){header{align-items:flex-start;padding:1rem 0;flex-direction:column}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="dashboard.html">ConfigKit</a><nav aria-label="Main navigation"><a href="dashboard.html">Dashboard</a><a href="community.html">Community</a><a href="community-store.html">Community Store</a></nav></header>
+<main>
+<section class="hero"><span class="eyebrow">Made by the community</span><h1>🌈 Community Theme Gallery</h1><p class="muted">Discover new looks for ConfigKit. Preview themes, install your favourites, and share designs you've created in Theme Studio.</p><div class="actions"><a class="button" href="#gallery">Explore themes</a><a class="button secondary" href="#publish">Share a theme</a></div></section>
+<section class="panel" id="publish"><h2>✨ Publish one of your themes</h2><p class="muted">Choose a theme you've already saved in Custom Themes Studio. Publishing creates a separate community listing; your private saved theme stays private.</p>
+<div id="auth-note" class="notice">Checking your sign-in…</div>
+<form id="publish-form" hidden>
+<div class="form-grid">
+<label class="field" for="source-theme">Saved theme<select id="source-theme" required><option value="">Choose a saved theme</option></select></label>
+<label class="field" for="publish-title">Gallery title<input id="publish-title" maxlength="60" required placeholder="e.g. Ocean Breeze"></label>
+<label class="field" for="publish-category">Category<select id="publish-category"><option>General</option><option>Minimal</option><option>Dark</option><option>Colourful</option><option>Nature</option><option>Accessibility</option></select></label>
+<label class="field" for="publish-description" style="grid-column:1/-1">Description<textarea id="publish-description" maxlength="500" placeholder="What inspired this theme?"></textarea></label>
+</div><div class="actions" style="margin-top:1rem"><button id="publish-button" type="submit">Publish to gallery</button></div>
+</form><p id="publish-status" class="status muted" role="status" aria-live="polite"></p></section>
+<section class="panel" id="gallery"><h2>🎨 Explore community themes</h2><p class="muted">Only published, visible listings appear here. Sign in to like or install a theme.</p>
+<div class="filters"><label>Search themes<input id="search" type="search" placeholder="Search by name, description or creator"></label><label>Category<select id="category"><option value="">All categories</option><option>General</option><option>Minimal</option><option>Dark</option><option>Colourful</option><option>Nature</option><option>Accessibility</option></select></label><button id="refresh" class="secondary" type="button">Refresh</button></div>
+<p id="gallery-status" class="status muted" role="status" aria-live="polite">Loading community themes…</p><div id="preview-panel" class="preview-panel" aria-live="polite"><div class="card-meta"><strong id="preview-title">Theme preview</strong><button id="close-preview" class="secondary" type="button">Close preview</button></div><div id="preview-sample" class="preview-sample"><strong>ConfigKit preview</strong><p>Your workspace, with a fresh new look.</p><button type="button" tabindex="-1">Example button</button></div></div>
+<div id="theme-grid" class="theme-grid"><div class="empty">Loading themes…</div></div></section>
+</main>
+<footer>ConfigKit Community Theme Gallery · <a href="privacy.html">Privacy</a> · <a href="safety.html">Safety</a></footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=> {
+ const $=id=>document.getElementById(id),cfg=window.CONFIGKIT_AUTH||{};
+ const setStatus=(id,msg)=>{$(id).textContent=msg;};
+ if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient){setStatus('gallery-status','The gallery is not configured. Please contact the site owner.');return;}
+ const db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ let user=null,allThemes=[],myLikes=new Set(),myListings=new Set(),savedThemes=[];
+ const safeColor=(v,f)=>/^#[0-9a-f]{6}$/i.test(v||'')?v:f;
+ const safeRadius=v=>['8px','16px','24px'].includes(v)?v:'16px';
+ const clean=(v,max)=>String(v||'').slice(0,max);
+ async function init(){
+  const {data,error}=await db.auth.getSession();
+  if(error){setStatus('auth-note','Could not check your sign-in: '+error.message);return;}
+  user=data.session?.user||null;
+  if(user){
+   $('auth-note').textContent='Signed in. You can publish saved themes, like gallery listings and install designs to your account.';
+   $('publish-form').hidden=false;
+   const {data:themes,error:themeError}=await db.from('configkit_user_themes').select('id,name,theme_config').order('updated_at',{ascending:false});
+   if(themeError){setStatus('publish-status','Could not load your saved themes: '+themeError.message);}
+   savedThemes=themes||[];
+   const select=$('source-theme');select.replaceChildren(new Option('Choose a saved theme',''));
+   savedThemes.forEach(t=>select.add(new Option(t.name,t.id)));
+   if(!savedThemes.length){setStatus('publish-status','Save a theme in Custom Themes Studio first, then return here to publish it.');$('publish-button').disabled=true;}
+   const {data:likes}=await db.from('community_theme_likes').select('theme_id').eq('user_id',user.id);
+   myLikes=new Set((likes||[]).map(x=>x.theme_id));
+  }else{
+   $('auth-note').textContent='You can browse the gallery while signed out. Sign in to publish, like or install themes.';
+   $('publish-form').hidden=true;
+  }
+  await loadGallery();
+ }
+ async function loadGallery(){
+  setStatus('gallery-status','Loading community themes…');
+  const {data,error}=await db.from('community_themes').select('id,title,description,category,author_id,author_name,theme_config,likes_count,created_at').eq('status','published').eq('moderation_status','visible').order('created_at',{ascending:false}).limit(80);
+  if(error){setStatus('gallery-status','Could not load themes: '+error.message);return;}
+  allThemes=data||[];myListings=new Set(allThemes.filter(t=>user&&t.author_id===user.id).map(t=>t.id));renderGallery();
+ }
+ function renderGallery(){
+  const q=$('search').value.trim().toLowerCase(),cat=$('category').value;
+  const list=allThemes.filter(t=>(!cat||t.category===cat)&&(!q||[t.title,t.description,t.author_name,t.category].join(' ').toLowerCase().includes(q)));
+  const grid=$('theme-grid');grid.replaceChildren();
+  if(!list.length){const empty=document.createElement('div');empty.className='empty';empty.textContent=allThemes.length?'No themes match those filters yet.':'No community themes have been published yet. Be the first to share one!';grid.append(empty);setStatus('gallery-status',allThemes.length?'Showing 0 matching themes.':'The gallery is ready for its first community theme.');return;}
+  setStatus('gallery-status','Showing '+list.length+' community theme'+(list.length===1?'':'s')+'.');
+  list.forEach(t=>{
+   const c=t.theme_config||{},card=document.createElement('article');card.className='theme-card';
+   const h=document.createElement('h3');h.textContent=t.title;
+   const desc=document.createElement('p');desc.className='muted';desc.textContent=t.description||'A community-created ConfigKit theme.';
+   const mini=document.createElement('div');mini.className='mini-preview';mini.style.background=safeColor(c.surface,'#ffffff');mini.style.color=safeColor(c.ink,'#17231f');mini.style.borderRadius=safeRadius(c.radius);
+   const strong=document.createElement('strong');strong.textContent='Your ConfigKit, refreshed';const small=document.createElement('span');small.textContent='A little preview of this colour palette';const sw=document.createElement('div');sw.className='swatches';
+   ['accent','accentDark','page','surface','ink'].forEach(k=>{const dot=document.createElement('span');dot.className='swatch';dot.style.background=safeColor(c[k],'#cccccc');dot.title=k;sw.append(dot);});
+   mini.append(strong,small,sw);
+   const meta=document.createElement('div');meta.className='card-meta';const author=document.createElement('span');author.textContent='By '+clean(t.author_name||'ConfigKit member',80)+' · '+t.category;const likes=document.createElement('span');likes.textContent='♥ '+Number(t.likes_count||0);meta.append(author,likes);
+   const actions=document.createElement('div');actions.className='card-actions';
+   const preview=document.createElement('button');preview.type='button';preview.className='secondary';preview.textContent='Preview';preview.addEventListener('click',()=>showPreview(t));
+   const install=document.createElement('button');install.type='button';install.textContent='Install';install.disabled=!user;install.title=user?'Save this theme to your account':'Sign in to install themes';install.addEventListener('click',()=>installTheme(t));
+   const like=document.createElement('button');like.type='button';like.className='secondary';like.textContent=(myLikes.has(t.id)?'♥ Liked':'♡ Like');like.disabled=!user;like.addEventListener('click',()=>toggleLike(t.id));
+   actions.append(preview,install,like);
+   if(myListings.has(t.id)){const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Remove listing';remove.addEventListener('click',()=>removeListing(t.id));actions.append(remove);}
+   card.append(h,desc,mini,meta,actions);grid.append(card);
+  });
+ }
+ function showPreview(t){
+  const c=t.theme_config||{},panel=$('preview-panel'),sample=$('preview-sample');
+  $('preview-title').textContent=t.title+' · by '+clean(t.author_name||'ConfigKit member',80);
+  sample.style.setProperty('--preview-surface',safeColor(c.surface,'#ffffff'));sample.style.setProperty('--preview-ink',safeColor(c.ink,'#17231f'));sample.style.setProperty('--preview-accent',safeColor(c.accent,'#226b51'));sample.style.setProperty('--preview-radius',safeRadius(c.radius));
+  panel.classList.add('visible');panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+ }
+ async function installTheme(t){
+  if(!user)return;
+  const name=clean(t.title,52)+' (Community)';
+  const {error}=await db.from('configkit_user_themes').insert({user_id:user.id,name,theme_config:t.theme_config,is_default:false});
+  if(error){setStatus('gallery-status','Could not install theme: '+error.message);return;}
+  try{localStorage.setItem('configkit-dashboard-theme-v1',JSON.stringify(t.theme_config));}catch(_){}
+  setStatus('gallery-status','Installed "'+t.title+'". It is saved in your Custom Themes Studio and applied on this browser. Open the dashboard to see it.');
+ }
+ async function toggleLike(id){
+  if(!user)return;
+  if(myLikes.has(id)){
+   const {error}=await db.from('community_theme_likes').delete().eq('theme_id',id).eq('user_id',user.id);
+   if(error){setStatus('gallery-status','Could not remove like: '+error.message);return;}myLikes.delete(id);
+  }else{
+   const {error}=await db.from('community_theme_likes').insert({theme_id:id,user_id:user.id});
+   if(error){setStatus('gallery-status','Could not like theme: '+error.message);return;}myLikes.add(id);
+  }
+  await loadGallery();
+ }
+ async function removeListing(id){
+  if(!user||!window.confirm('Remove this theme from the Community Gallery? Your private saved theme will remain.'))return;
+  const {error}=await db.from('community_themes').delete().eq('id',id).eq('author_id',user.id);
+  if(error){setStatus('gallery-status','Could not remove listing: '+error.message);return;}
+  await loadGallery();
+ }
+ $('publish-form').addEventListener('submit',async e=>{
+  e.preventDefault();if(!user)return;
+  const source=savedThemes.find(t=>t.id===$('source-theme').value);
+  if(!source){setStatus('publish-status','Choose one of your saved themes first.');return;}
+  const title=$('publish-title').value.trim();if(!title){setStatus('publish-status','Enter a gallery title.');return;}
+  $('publish-button').disabled=true;setStatus('publish-status','Publishing your theme…');
+  let authorName='ConfigKit member';
+  const {data:profile}=await db.from('community_profiles').select('display_name').eq('user_id',user.id).maybeSingle();
+  if(profile?.display_name)authorName=clean(profile.display_name,80);
+  const {error}=await db.from('community_themes').insert({author_id:user.id,source_theme_id:source.id,title,description:$('publish-description').value.trim(),category:$('publish-category').value,author_name:authorName,theme_config:source.theme_config,status:'published',moderation_status:'visible'});
+  if(error){setStatus('publish-status','Could not publish theme: '+error.message);}
+  else{$('publish-form').reset();setStatus('publish-status','Your theme is now published in the Community Gallery!');await loadGallery();}
+  $('publish-button').disabled=!savedThemes.length;
+ });
+ $('search').addEventListener('input',renderGallery);$('category').addEventListener('change',renderGallery);$('refresh').addEventListener('click',loadGallery);$('close-preview').addEventListener('click',()=>$('preview-panel').classList.remove('visible'));
+ init().catch(e=>setStatus('gallery-status','Something went wrong: '+(e.message||'Please refresh.')));
+})();
+</script>
+</body></html>
