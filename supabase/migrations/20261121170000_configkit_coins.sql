@@ -202,3 +202,69 @@ end;
 $$;
 revoke all on function public.configkit_purchase_with_coins(text,uuid) from public,anon;
 grant execute on function public.configkit_purchase_with_coins(text,uuid) to authenticated;
+
+-- Enforce verified email and the existing account-security gate in privileged coin RPCs.
+create or replace function public.configkit_claim_visit_rewards()
+returns table(reward_type text,amount integer,balance integer)
+language plpgsql security definer set search_path=''
+as $$
+declare uid uuid:=auth.uid(); today_key text:=to_char(timezone('utc',now()),'YYYY-MM-DD'); week_key text:=to_char(timezone('utc',now()),'IYYY-"W"IW');
+begin
+ if uid is null then raise exception 'Sign in to earn ConfigKit Coins.';end if;
+ if not exists(select 1 from auth.users u where u.id=uid and u.email_confirmed_at is not null) or not private.email_2fa_access_allowed() then raise exception 'Verify your email and complete your account security check first.';end if;
+ insert into public.configkit_coin_ledger(user_id,amount,reason,reference,description) values(uid,5,'daily_visit',today_key,'Daily website visit') on conflict(user_id,reason,reference) do nothing;
+ if found then reward_type:='daily';amount:=5;return next;end if;
+ insert into public.configkit_coin_ledger(user_id,amount,reason,reference,description) values(uid,20,'weekly_visit',week_key,'Weekly website visit') on conflict(user_id,reason,reference) do nothing;
+ if found then reward_type:='weekly';amount:=20;return next;end if;
+ select coalesce(sum(l.amount),0)::integer into balance from public.configkit_coin_ledger l where l.user_id=uid;return;
+end;
+$$;
+create or replace function public.configkit_redeem_coin_code(p_code text)
+returns table(awarded integer,balance integer)
+language plpgsql security definer set search_path=''
+as $$
+declare uid uuid:=auth.uid(); h text; reward_amount integer;
+begin
+ if uid is null then raise exception 'Sign in to redeem a promo code.';end if;
+ if not exists(select 1 from auth.users u where u.id=uid and u.email_confirmed_at is not null) or not private.email_2fa_access_allowed() then raise exception 'Verify your email and complete your account security check first.';end if;
+ if p_code is null or length(btrim(p_code))<4 or length(p_code)>80 then raise exception 'Enter a valid promo code.';end if;
+ h:=encode(extensions.digest(upper(regexp_replace(btrim(p_code),'\\s','','g')),'sha256'),'hex');
+ select c.reward into reward_amount from public.configkit_coin_promo_codes c where c.code_hash=h and c.active;
+ if reward_amount is null then raise exception 'That promo code is invalid or inactive.';end if;
+ insert into public.configkit_coin_redemptions(user_id,code_hash) values(uid,h) on conflict(user_id,code_hash) do nothing;
+ if not found then raise exception 'You have already redeemed this promo code.';end if;
+ insert into public.configkit_coin_ledger(user_id,amount,reason,reference,description) values(uid,reward_amount,'promo_code',h,'Promo code reward');
+ select coalesce(sum(l.amount),0)::integer into balance from public.configkit_coin_ledger l where l.user_id=uid;awarded:=reward_amount;return next;
+end;
+$$;
+create or replace function public.configkit_purchase_with_coins(p_item_kind text,p_item_id uuid)
+returns table(download_url text,file_path text,delivery_type text,amount_paid integer,balance integer)
+language plpgsql security definer set search_path=''
+as $$
+declare uid uuid:=auth.uid(); seller uuid; cost integer; prior public.configkit_coin_purchases%rowtype; item_url text; item_path text; item_delivery text; ref text;
+begin
+ if uid is null then raise exception 'Sign in to shop with ConfigKit Coins.';end if;
+ if not exists(select 1 from auth.users u where u.id=uid and u.email_confirmed_at is not null) or not private.email_2fa_access_allowed() then raise exception 'Verify your email and complete your account security check first.';end if;
+ if p_item_kind not in ('app','store') then raise exception 'Unsupported item type.';end if;
+ perform pg_advisory_xact_lock(hashtextextended(uid::text,0));
+ select * into prior from public.configkit_coin_purchases p where p.buyer_id=uid and p.item_kind=p_item_kind and p.item_id=p_item_id;
+ if found then
+  if p_item_kind='store' then select f.download_url into item_url from public.community_store_coin_files f where f.item_id=p_item_id;
+  else select a.file_path,a.delivery_type,case when a.coin_price>0 and a.delivery_type='link' then l.redirect_url else a.redirect_url end into item_path,item_delivery,item_url from public.configkit_apps a left join public.configkit_app_coin_links l on l.app_id=a.id where a.id=p_item_id and a.status='published';end if;
+  download_url:=item_url;file_path:=item_path;delivery_type:=item_delivery;amount_paid:=prior.amount;select coalesce(sum(l.amount),0)::integer into balance from public.configkit_coin_ledger l where l.user_id=uid;return next;return;
+ end if;
+ if p_item_kind='store' then
+  select i.seller_id,i.coin_price,f.download_url into seller,cost,item_url from public.community_store_items i join public.community_store_coin_files f on f.item_id=i.id where i.id=p_item_id and i.status='published' and i.listing_type='coins';item_delivery:='link';
+ else
+  select a.owner_id,a.coin_price,a.file_path,a.delivery_type,case when a.coin_price>0 and a.delivery_type='link' then l.redirect_url else a.redirect_url end into seller,cost,item_path,item_delivery,item_url from public.configkit_apps a left join public.configkit_app_coin_links l on l.app_id=a.id where a.id=p_item_id and a.status='published';
+ end if;
+ if seller is null or cost is null or cost<1 then raise exception 'This item is not available for ConfigKit Coin purchases.';end if;
+ if seller=uid then raise exception 'You cannot purchase your own listing.';end if;
+ if (select coalesce(sum(l.amount),0) from public.configkit_coin_ledger l where l.user_id=uid)<cost then raise exception 'You do not have enough ConfigKit Coins.';end if;
+ ref:=p_item_kind||':'||p_item_id::text||':'||uid::text;
+ insert into public.configkit_coin_ledger(user_id,amount,reason,reference,description) values(uid,-cost,'purchase',ref,'Purchased a community '||p_item_kind);
+ insert into public.configkit_coin_ledger(user_id,amount,reason,reference,description) values(seller,cost,'sale',ref,'Sold a community '||p_item_kind);
+ insert into public.configkit_coin_purchases(buyer_id,seller_id,item_kind,item_id,amount) values(uid,seller,p_item_kind,p_item_id,cost);
+ download_url:=item_url;file_path:=item_path;delivery_type:=item_delivery;amount_paid:=cost;select coalesce(sum(l.amount),0)::integer into balance from public.configkit_coin_ledger l where l.user_id=uid;return next;
+end;
+$$;
