@@ -1111,6 +1111,7 @@
             if (removeError) console.warn('Previous avatar cleanup was unsuccessful:',removeError);
           }
           setStatus('Profile photo updated.');
+          await notifyAccountSettingChange('Your profile photo');
         } catch (error) {
           if (uploadedPath) {
             const {error:cleanupError} = await client.storage.from('community-avatars').remove([uploadedPath]);
@@ -1228,6 +1229,7 @@
             ? 'Saved. Your profile is discoverable by signed-in ConfigKit members.'
             : 'Saved. Your profile is private and hidden from member discovery.';
           setStatus('Profile visibility saved.');
+          await notifyAccountSettingChange('Your profile visibility');
         } catch (error) {
           visibilityHelp.textContent = 'Could not save visibility. Please try again.';
           setStatus(`Could not save profile visibility: ${error.message || 'Please try again.'}`, true);
