@@ -259,8 +259,10 @@ window.CONFIGKIT_AUTH = {
     }
     if (typeof auth.signInWithOtp === 'function') {
       const original = auth.signInWithOtp.bind(auth);
-      auth.signInWithOtp = withCaptcha(original, args => args[0]?.options || {}, (args, captchaToken, options) => {
-        args[0] = {...args[0], options:{...options, captchaToken}};
+      // signInWithOtp takes CAPTCHA as its SECOND argument, separate from
+      // the email redirect/options object in the first argument.
+      auth.signInWithOtp = withCaptcha(original, args => args[1] || {}, (args, captchaToken, options) => {
+        args[1] = {...options, captchaToken};
       });
     }
     if (typeof auth.signInWithPassword === 'function') {
