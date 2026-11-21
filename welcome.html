@@ -38,7 +38,7 @@ client.auth.getUser().then(({data,error})=>{
  if(error||!data.user){$('status').textContent='Please sign in to continue.';setTimeout(()=>location.replace('login.html'),1200);return;}
  user=data.user;
  if(!user.email_confirmed_at){$('status').textContent='Please verify your email address before continuing. Check your inbox and spam folder.';return;}
- if(user.user_metadata?.configkit_terms_acceptance?.version==='2026-11-21'){location.replace('secure-account.html?next='+encodeURIComponent(next));return;}
+ if(user.user_metadata?.configkit_terms_acceptance?.version==='2026-11-21'){location.replace('welcome-questions.html?next='+encodeURIComponent(next));return;}
  $('status').textContent='Signed in as '+(user.email||'your ConfigKit account')+'. Your agreement is required to continue.';
 }).catch(()=>{$('status').textContent='We could not verify your sign-in. Please reload and try again.';});
 $('agree').addEventListener('change',()=>{$('continue').disabled=!$('agree').checked;});
