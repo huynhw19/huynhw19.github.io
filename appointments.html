@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Create private appointments and invite ConfigKit members.">
+  <title>Appointments — ConfigKit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8;--shadow:0 12px 32px rgba(23,35,31,.07}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(100% - 32px,1080px);margin:0 auto}header{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}.brand{font-weight:800;text-decoration:none;color:var(--ink)}nav{display:flex;gap:1rem;flex-wrap:wrap}main{padding:2rem 0 3rem}.hero,.panel,.appointment,.stat{background:var(--white);border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow)}.hero{padding:1.5rem;margin-bottom:1rem}.eyebrow{display:inline-block;padding:.25rem .7rem;border-radius:999px;background:var(--mint);color:var(--green-dark);font-size:.84rem;font-weight:750}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.12;margin:.55rem 0}h2{margin:.1rem 0 .6rem}.muted,small{color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin:1rem 0}.stat{padding:1rem}.stat strong{display:block;font-size:1.65rem;color:var(--green-dark)}.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);gap:1rem;align-items:start}.panel{padding:1.2rem}.field{display:grid;gap:.3rem;margin:.75rem 0}label{font-weight:650}input,textarea,select{width:100%;font:inherit;padding:.7rem;border:1px solid #cbd6cf;border-radius:.65rem;background:white;color:var(--ink)}textarea{resize:vertical}button{font:inherit;font-weight:650;border:1px solid var(--line);border-radius:.65rem;padding:.6rem .85rem;background:white;color:var(--ink);cursor:pointer}button.primary{background:var(--green);border-color:var(--green);color:white}button.danger{color:var(--red)}button:disabled{opacity:.55;cursor:wait}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}.actions,.tabs,.calendar-head{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}.actions{margin-top:.8rem}.tabs{margin:1rem 0}.tabs button[aria-pressed=true]{background:var(--green-dark);color:white;border-color:var(--green-dark)}.calendar-head{justify-content:space-between;margin:.8rem 0}.month-label{font-weight:800}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.25rem}.weekday{text-align:center;color:var(--muted);font-size:.78rem;font-weight:750;padding:.3rem 0}.day{min-height:45px;padding:.25rem;display:grid;place-items:center;position:relative}.day.muted-day{opacity:.3}.day.today{border-color:var(--green);font-weight:850}.day.selected{background:var(--mint);border:2px solid var(--green)}.day.has-event:after{content:"";position:absolute;bottom:4px;width:5px;height:5px;border-radius:50%;background:var(--green)}.appointment-list{display:grid;gap:.7rem}.appointment{padding:1rem;box-shadow:none}.appointment-top{display:flex;justify-content:space-between;gap:.7rem;align-items:flex-start}.appointment h3{margin:0 0 .25rem}.pill{display:inline-block;border-radius:999px;padding:.15rem .55rem;background:#eef1ef;font-size:.78rem;font-weight:750;white-space:nowrap}.pill.pending{background:#fff3d8;color:#78500a}.pill.accepted{background:var(--mint);color:var(--green-dark)}.pill.declined,.pill.cancelled{background:#fceaea;color:var(--red)}.meta{color:var(--muted);font-size:.9rem;margin:.35rem 0}.empty{padding:1.5rem;text-align:center;border:1px dashed var(--line);border-radius:.8rem;color:var(--muted)}.notice{padding:.8rem 1rem;background:var(--gold);border-radius:.7rem;color:#6b521b;margin:.8rem 0}.success{color:var(--green-dark)}.error{color:var(--red)}footer{padding:1.5rem 0;color:var(--muted)}[hidden]{display:none!important}@media(max-width:760px){.layout{grid-template-columns:1fr}.stats{gap:.5rem}.stat{padding:.75rem}.form-row{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column;padding:.8rem 0}nav{gap:.7rem}}@media(max-width:380px){.day{min-height:38px;padding:.1rem}.calendar{gap:.12rem}}
+  </style>
+</head>
+<body>
+<header><a class="brand" href="dashboard.html">⌘ ConfigKit</a><nav aria-label="Navigation"><a href="dashboard.html">Dashboard</a><a href="planner.html">Planner</a><a href="notifications.html">Notifications</a><a href="account-settings.html">Account settings</a></nav></header>
+<main>
+  <section class="hero">
+    <span class="eyebrow">Plan your time · Meet your people</span>
+    <h1>📅 ConfigKit Appointments</h1>
+    <p class="muted">Create private appointments, invite ConfigKit members, and keep track of everyone's responses in one place.</p>
+    <div class="stats">
+      <div class="stat"><strong id="stat-upcoming">—</strong><span class="muted">Upcoming</span></div>
+      <div class="stat"><strong id="stat-pending">—</strong><span class="muted">Invitations pending</span></div>
+      <div class="stat"><strong id="stat-month">—</strong><span class="muted">This month</span></div>
+    </div>
+  </section>
+  <div id="page-status" class="notice" role="status" aria-live="polite">Checking your sign-in…</div>
+  <div id="app" hidden>
+    <div class="layout">
+      <section class="panel" aria-labelledby="form-title">
+        <span class="eyebrow">Your schedule</span>
+        <h2 id="form-title">Create an appointment</h2>
+        <form id="appointment-form">
+          <div class="field"><label for="title">Appointment title</label><input id="title" maxlength="120" required placeholder="e.g. Project meeting"></div>
+          <div class="field"><label for="description">Description or notes</label><textarea id="description" rows="3" maxlength="3000" placeholder="Add useful details…"></textarea></div>
+          <div class="form-row">
+            <div class="field"><label for="start-at">Starts</label><input id="start-at" type="datetime-local" required></div>
+            <div class="field"><label for="end-at">Ends</label><input id="end-at" type="datetime-local" required></div>
+          </div>
+          <div class="field"><label for="location">Location</label><input id="location" maxlength="300" placeholder="Address, office, or leave blank"></div>
+          <div class="field"><label for="meeting-url">Online meeting link (optional)</label><input id="meeting-url" type="url" maxlength="2000" placeholder="https://…"></div>
+          <div class="form-row">
+            <div class="field"><label for="reminder">Reminder preference</label><select id="reminder"><option value="0">No reminder</option><option value="5">5 minutes before</option><option value="10">10 minutes before</option><option value="15" selected>15 minutes before</option><option value="30">30 minutes before</option><option value="60">1 hour before</option><option value="1440">1 day before</option></select></div>
+            <div class="field"><label for="invite-email">Invite a ConfigKit member</label><input id="invite-email" type="email" maxlength="254" autocomplete="email" placeholder="member@example.com"></div>
+          </div>
+          <p class="muted" style="font-size:.85rem">Your time zone: <strong id="timezone-label"></strong>. Invitations are created for existing ConfigKit accounts. Personal appointments stay private.</p>
+          <div class="actions"><button class="primary" id="save-button" type="submit">＋ Create appointment</button><button id="reset-form" type="button">Clear</button><button id="cancel-edit" type="button" hidden>Stop editing</button></div>
+        </form>
+        <p id="form-status" class="muted" role="status" aria-live="polite"></p>
+      </section>
+      <section class="panel" aria-labelledby="calendar-title">
+        <span class="eyebrow">Your month</span><h2 id="calendar-title">Calendar</h2>
+        <div class="calendar-head"><button type="button" id="month-prev" aria-label="Previous month">←</button><div class="month-label" id="month-label"></div><button type="button" id="month-next" aria-label="Next month">→</button><button type="button" id="month-today">Today</button></div>
+        <div class="calendar" id="calendar" role="group" aria-label="Monthly appointment calendar"></div>
+        <p class="muted" id="selected-day-label">Choose a day to filter your appointments.</p>
+        <button type="button" id="clear-day">Show all dates</button>
+        <div class="notice" style="font-size:.85rem">Reminder preferences are saved with each appointment. Automatic email, push, and background reminders are not enabled yet.</div>
+      </section>
+    </div>
+    <section class="panel" style="margin-top:1rem" aria-labelledby="list-title">
+      <span class="eyebrow">Manage your time</span><h2 id="list-title">Appointments &amp; invitations</h2>
+      <div class="tabs" role="group" aria-label="Filter appointments">
+        <button type="button" data-filter="all" aria-pressed="true">All</button>
+        <button type="button" data-filter="upcoming" aria-pressed="false">Upcoming</button>
+        <button type="button" data-filter="invitations" aria-pressed="false">Invitations</button>
+        <button type="button" data-filter="past" aria-pressed="false">Past</button>
+      </div>
+      <div id="appointment-list" class="appointment-list" aria-live="polite"><div class="empty">Loading your appointments…</div></div>
+    </section>
+  </div>
+</main>
+<footer>ConfigKit Appointments · Keep your schedule organised and your invitations under control.</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth-config.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const status = $('page-status'), app = $('app'), form = $('appointment-form');
+  const config = window.CONFIGKIT_AUTH || {};
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  $('timezone-label').textContent = zone;
+  if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+    status.textContent = 'ConfigKit sign-in is not configured on this page. Please contact support.'; status.classList.add('error'); return;
+  }
+  const db = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  let user = null, owned = [], received = [], sent = [], inviteAppointments = [], editingId = null;
+  let filter = 'all', selectedDay = '', month = new Date(new Date().getFullYear(),new Date().getMonth(),1);
+  const say = (el,msg,error=false) => { el.textContent=msg; el.classList.toggle('error',error); el.classList.toggle('success',!error); };
+  const escapeText = value => String(value ?? '');
+  const fmt = (value,opts={}) => new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeStyle:'short',...opts}).format(new Date(value));
+  const localInput = date => { const d=new Date(date.getTime()-date.getTimezoneOffset()*60000); return d.toISOString().slice(0,16); };
+  const toIso = value => new Date(value).toISOString();
+  const todayKey = d => [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+  const dateKeyFromIso = value => { const d=new Date(value); return todayKey(new Date(d.getFullYear(),d.getMonth(),d.getDate())); };
+  const isPast = item => new Date(item.end_at).getTime() < Date.now() || item.status==='completed';
+  function clearForm(){
+    editingId=null;form.reset();$('reminder').value='15';$('form-title').textContent='Create an appointment';$('save-button').textContent='＋ Create appointment';$('cancel-edit').hidden=true;$('invite-email').disabled=false;
+  }
+  function editAppointment(item){
+    editingId=item.id;$('title').value=item.title;$('description').value=item.description||'';$('start-at').value=localInput(new Date(item.start_at));$('end-at').value=localInput(new Date(item.end_at));$('location').value=item.location||'';$('meeting-url').value=item.meeting_url||'';$('reminder').value=String(item.reminder_minutes??15);$('invite-email').value='';$('invite-email').disabled=true;$('form-title').textContent='Reschedule or edit appointment';$('save-button').textContent='Save changes';$('cancel-edit').hidden=false;form.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  async function loadData(){
+    const [a,r,s] = await Promise.all([
+      db.from('configkit_appointments').select('*').eq('owner_id',user.id).order('start_at',{ascending:true}).limit(250),
+      db.from('configkit_appointment_participants').select('id,appointment_id,user_id,invited_by,invitee_email,response,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(250),
+      db.from('configkit_appointment_participants').select('id,appointment_id,user_id,invited_by,invitee_email,response,created_at').eq('invited_by',user.id).order('created_at',{ascending:false}).limit(500)
+    ]);
+    if(a.error)throw a.error;if(r.error)throw r.error;if(s.error)throw s.error;
+    owned=a.data||[];received=r.data||[];sent=s.data||[];
+    const ids=[...new Set(received.map(x=>x.appointment_id))];
+    if(ids.length){const q=await db.from('configkit_appointments').select('*').in('id',ids);if(q.error)throw q.error;inviteAppointments=q.data||[];}else inviteAppointments=[];
+    updateStats();renderCalendar();renderList();
+  }
+  function updateStats(){
+    const now=new Date(), monthCount=owned.filter(x=>{const d=new Date(x.start_at);return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()&&x.status!=='cancelled'}).length;
+    $('stat-upcoming').textContent=owned.filter(x=>new Date(x.start_at)>now&&x.status==='scheduled').length+received.filter(x=>x.response==='accepted'&&new Date((inviteAppointments.find(a=>a.id===x.appointment_id)||{}).start_at||0)>now).length;
+    $('stat-pending').textContent=received.filter(x=>x.response==='pending').length;
+    $('stat-month').textContent=monthCount;
+  }
+  function renderCalendar(){
+    $('month-label').textContent=month.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+    const root=$('calendar');root.replaceChildren();
+    ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(x=>{const d=document.createElement('div');d.className='weekday';d.textContent=x;root.append(d);});
+    const start=new Date(month.getFullYear(),month.getMonth(),1), offset=start.getDay(), count=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
+    const eventKeys=new Set([...owned,...inviteAppointments].filter(x=>x.status!=='cancelled').map(x=>dateKeyFromIso(x.start_at)));
+    const total=Math.ceil((offset+count)/7)*7;
+    for(let i=0;i<total;i++){
+      const n=i-offset+1, d=document.createElement('button');d.type='button';d.className='day';
+      if(n<1||n>count){d.disabled=true;d.classList.add('muted-day');d.textContent='·';}
+      else{
+        const date=new Date(month.getFullYear(),month.getMonth(),n),key=todayKey(date);d.textContent=String(n);
+        if(key===todayKey(new Date()))d.classList.add('today');if(key===selectedDay)d.classList.add('selected');if(eventKeys.has(key))d.classList.add('has-event');
+        d.setAttribute('aria-pressed',String(key===selectedDay));
+        d.addEventListener('click',()=>{selectedDay=selectedDay===key?'':key;$('selected-day-label').textContent=selectedDay?'Showing appointments on '+date.toLocaleDateString(undefined,{dateStyle:'full'}):'Choose a day to filter your appointments.';renderCalendar();renderList();});
+      }root.append(d);
+    }
+  }
+  function makeCard(item,kind,participant){
+    const article=document.createElement('article');article.className='appointment';
+    const top=document.createElement('div');top.className='appointment-top';
+    const heading=document.createElement('div');const h=document.createElement('h3');h.textContent=escapeText(item.title);heading.append(h);
+    const when=document.createElement('div');when.className='meta';when.textContent=fmt(item.start_at)+' – '+new Date(item.end_at).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});heading.append(when);
+    const pill=document.createElement('span');pill.className='pill';
+    if(kind==='invitation'){pill.textContent=participant.response==='pending'?'Pending response':participant.response==='accepted'?'Accepted':'Declined';pill.classList.add(participant.response);}
+    else{pill.textContent=item.status==='scheduled'?'Scheduled':item.status==='cancelled'?'Cancelled':'Completed';if(item.status==='cancelled')pill.classList.add('cancelled');}
+    top.append(heading,pill);article.append(top);
+    if(item.description){const p=document.createElement('p');p.textContent=item.description;article.append(p);}
+    const details=[];
+    if(item.location)details.push('📍 '+item.location);
+    if(item.meeting_url)details.push('🔗 '+item.meeting_url);
+    if(kind==='invitation')details.push('Invitation from a ConfigKit member');
+    if(kind==='owner'){
+      const invited=sent.filter(x=>x.appointment_id===item.id);
+      if(invited.length)details.push('Invited: '+invited.map(x=>x.invitee_email+' ('+x.response+')').join(', '));
+    }
+    if(details.length){const meta=document.createElement('div');meta.className='meta';meta.textContent=details.join(' · ');article.append(meta);}
+    const actions=document.createElement('div');actions.className='actions';
+    if(kind==='owner'&&item.status==='scheduled'){
+      const edit=document.createElement('button');edit.type='button';edit.textContent='Edit / reschedule';edit.addEventListener('click',()=>editAppointment(item));actions.append(edit);
+      const complete=document.createElement('button');complete.type='button';complete.textContent='Mark completed';complete.addEventListener('click',()=>changeStatus(item.id,'completed'));actions.append(complete);
+      const cancel=document.createElement('button');cancel.type='button';cancel.className='danger';cancel.textContent='Cancel';cancel.addEventListener('click',()=>changeStatus(item.id,'cancelled'));actions.append(cancel);
+    }
+    if(kind==='invitation'&&participant.response==='pending'&&item.status==='scheduled'){
+      const accept=document.createElement('button');accept.type='button';accept.className='primary';accept.textContent='Accept';accept.addEventListener('click',()=>respond(participant.id,'accepted'));actions.append(accept);
+      const decline=document.createElement('button');decline.type='button';decline.className='danger';decline.textContent='Decline';decline.addEventListener('click',()=>respond(participant.id,'declined'));actions.append(decline);
+    }
+    if(actions.childElementCount)article.append(actions);
+    return article;
+  }
+  function renderList(){
+    const root=$('appointment-list');root.replaceChildren();const now=Date.now();let rows=[];
+    owned.forEach(x=>rows.push({item:x,kind:'owner'}));
+    received.forEach(p=>{const item=inviteAppointments.find(a=>a.id===p.appointment_id);if(item)rows.push({item,kind:'invitation',participant:p});});
+    rows=rows.filter(x=>!selectedDay||dateKeyFromIso(x.item.start_at)===selectedDay);
+    if(filter==='upcoming')rows=rows.filter(x=>new Date(x.item.end_at).getTime()>=now&&x.item.status==='scheduled'&&(x.kind!=='invitation'||x.participant.response!=='declined'));
+    if(filter==='past')rows=rows.filter(x=>isPast(x.item));
+    if(filter==='invitations')rows=rows.filter(x=>x.kind==='invitation');
+    rows.sort((a,b)=>new Date(a.item.start_at)-new Date(b.item.start_at));
+    if(!rows.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No appointments match this view yet. Create one or invite a ConfigKit member to get started.';root.append(empty);return;}
+    rows.forEach(x=>root.append(makeCard(x.item,x.kind,x.participant)));
+  }
+  async function changeStatus(id,statusValue){
+    if(statusValue==='cancelled'&&!confirm('Cancel this appointment? Invited members will see the updated status when they refresh.'))return;
+    const {error}=await db.from('configkit_appointments').update({status:statusValue}).eq('id',id).eq('owner_id',user.id);
+    if(error){say($('form-status'),error.message,true);return;}await loadData();
+  }
+  async function respond(id,response){
+    const {error}=await db.rpc('respond_configkit_appointment_invitation',{p_participant_id:id,p_response:response});
+    if(error){say($('form-status'),error.message,true);return;}await loadData();
+  }
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();const start=$('start-at').value,end=$('end-at').value;
+    if(!start||!end||new Date(end)<=new Date(start)){say($('form-status'),'Please choose an end time after the start time.',true);return;}
+    const payload={title:$('title').value.trim(),description:$('description').value.trim(),start_at:toIso(start),end_at:toIso(end),timezone:zone,location:$('location').value.trim(),meeting_url:$('meeting-url').value.trim(),reminder_minutes:Number($('reminder').value)};
+    if(!payload.title){say($('form-status'),'Please enter an appointment title.',true);return;}
+    const button=$('save-button');button.disabled=true;
+    try{
+      let appointmentId=editingId;
+      if(editingId){
+        const {error}=await db.from('configkit_appointments').update(payload).eq('id',editingId).eq('owner_id',user.id);if(error)throw error;
+      }else{
+        const {data,error}=await db.from('configkit_appointments').insert({...payload,owner_id:user.id}).select('id').single();if(error)throw error;appointmentId=data.id;
+        const email=$('invite-email').value.trim();
+        if(email){const invite=await db.rpc('invite_configkit_appointment_member',{p_appointment_id:appointmentId,p_email:email});if(invite.error)throw invite.error;say($('form-status'),invite.data||'Appointment created. '+ 'If that email belongs to a ConfigKit account, an invitation has been created.');}
+        else say($('form-status'),'Your private appointment has been created.');
+      }
+      if(editingId)say($('form-status'),'Appointment updated successfully.');
+      clearForm();await loadData();
+    }catch(error){say($('form-status'),error.message||'Could not save this appointment.',true);}
+    finally{button.disabled=false;}
+  });
+  $('reset-form').addEventListener('click',clearForm);$('cancel-edit').addEventListener('click',clearForm);
+  $('month-prev').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);renderCalendar();});
+  $('month-next').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);renderCalendar();});
+  $('month-today').addEventListener('click',()=>{const d=new Date();month=new Date(d.getFullYear(),d.getMonth(),1);selectedDay=todayKey(d);$('selected-day-label').textContent='Showing appointments on '+d.toLocaleDateString(undefined,{dateStyle:'full'});renderCalendar();renderList();});
+  $('clear-day').addEventListener('click',()=>{selectedDay='';$('selected-day-label').textContent='Choose a day to filter your appointments.';renderCalendar();renderList();});
+  document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{filter=button.dataset.filter;document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));renderList();}));
+  db.auth.getSession().then(async({data,error})=>{
+    if(error)throw error;user=data.session?.user;
+    if(!user){window.location.replace('login.html?next='+encodeURIComponent('appointments.html'));return;}
+    status.hidden=true;app.hidden=false;await loadData();
+  }).catch(error=>{status.textContent=error.message||'Could not load appointments. Please refresh and try again.';status.classList.add('error');});
+  db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session)window.location.replace('login.html');});
+})();
+</script>
+</body>
+</html>
