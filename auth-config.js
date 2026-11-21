@@ -282,6 +282,12 @@ window.CONFIGKIT_AUTH = {
         };
       });
     }
+    if (typeof auth.resend === 'function') {
+      const original = auth.resend.bind(auth);
+      auth.resend = withCaptcha(original, args => args[0]?.options || {}, (args, captchaToken, options) => {
+        args[0] = {...args[0], options:{...options, captchaToken}};
+      });
+    }
     if (typeof auth.resetPasswordForEmail === 'function') {
       const original = auth.resetPasswordForEmail.bind(auth);
       auth.resetPasswordForEmail = withCaptcha(original, args => args[1] || {}, (args, captchaToken, options) => {
