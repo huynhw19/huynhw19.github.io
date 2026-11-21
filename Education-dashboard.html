@@ -542,6 +542,16 @@
         if(testAttemptLimit&&!testAttemptLimit.dataset.userEdited)testAttemptLimit.value=String(educationSettings.attemptLimit);
         if(testStatus&&!testStatus.dataset.userEdited)testStatus.value=educationSettings.testVisibility;
         if(testDuration&&!testDuration.dataset.userEdited)testDuration.value=educationSettings.testDuration?String(educationSettings.testDuration):'';
+        const lessonGrade=document.getElementById('lesson-grade');
+        const lessonSubject=document.getElementById('lesson-subject');
+        const studentSchool=document.getElementById('school');
+        const studentGrade=document.getElementById('grade');
+        if(lessonGrade&&!lessonGrade.dataset.userEdited)lessonGrade.value=educationSettings.grade;
+        if(lessonSubject&&!lessonSubject.dataset.userEdited)lessonSubject.value=educationSettings.subject;
+        if(studentSchool&&!studentSchool.dataset.userEdited)studentSchool.value=educationSettings.schoolName;
+        if(studentGrade&&!studentGrade.dataset.userEdited)studentGrade.value=educationSettings.grade;
+        const lessonAudience=document.getElementById('lesson-student');
+        if(lessonAudience)lessonAudience.required=educationSettings.lessonAudience==='choose';
         const resourceYear=document.getElementById('resource-year');
         const resourceSubject=document.getElementById('resource-subject');
         if(resourceYear&&!resourceYear.dataset.userEdited)resourceYear.value=educationSettings.resourceYear;
@@ -573,7 +583,7 @@
         if(error){setEducationSettingsMessage(error.message||'Could not sign out.',true);return}
         window.location.replace('login.html');
       });
-      ['lesson-duration','lesson-status','test-attempt-limit','test-status','test-duration','resource-year','resource-subject'].forEach(id=>{
+      ['lesson-duration','lesson-status','test-attempt-limit','test-status','test-duration','lesson-grade','lesson-subject','school','grade','resource-year','resource-subject'].forEach(id=>{
         const field=document.getElementById(id);field?.addEventListener('change',()=>{field.dataset.userEdited='true'});
       });
 
@@ -1111,10 +1121,6 @@
         const allOption = document.createElement('option');
         allOption.value = ''; allOption.textContent = 'All linked students';
         documentStudent.append(allOption);
-        const allOption = document.createElement('option');
-        allOption.value = '__all__';
-        allOption.textContent = 'All linked students';
-        assignmentStudent.append(allOption);
         (data || []).forEach(student => {
           const option = document.createElement('option');
           option.value = student.id;
