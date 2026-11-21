@@ -23,6 +23,19 @@
         <p class="muted">A quick view of your signed-in account.</p>
         <div id="account-overview" aria-live="polite" class="provider"></div>
       </section>
+      <section class="card" aria-labelledby="login-username-title">
+        <h2 id="login-username-title">Login username</h2>
+        <p class="muted">Choose a unique username you can use with “Find my email” on the login page. Your username is private to your account.</p>
+        <form id="login-username-form">
+          <div class="field">
+            <label for="login-username-input">Username</label>
+            <input id="login-username-input" name="username" type="text" minlength="3" maxlength="20" pattern="[A-Za-z0-9][A-Za-z0-9_.-]{2,19}" autocapitalize="none" spellcheck="false" autocomplete="username" placeholder="Choose a username" required>
+            <p class="muted">3–20 characters. Use letters, numbers, dots, underscores, or hyphens.</p>
+          </div>
+          <button id="login-username-save" type="submit">Save username</button>
+          <p id="login-username-status" class="muted" role="status" aria-live="polite"></p>
+        </form>
+      </section>
       <section class="card" aria-labelledby="preferences-title">
         <h2 id="preferences-title">Appearance &amp; preferences</h2>
         <p class="muted">These preferences are saved on this browser only. They do not change your account security or other devices.</p>
@@ -291,6 +304,43 @@
       const emailState = user.email_confirmed_at ? 'Email verified' : 'Email not yet verified';
       const created = user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Not available';
       overview.textContent = (user.email || 'Signed-in account') + ' · ' + emailState + ' · Member since ' + created;
+
+      // Username is stored in a private table and managed by a JWT-verified Edge Function.
+      const loginUsernameForm = document.getElementById('login-username-form');
+      const loginUsernameInput = document.getElementById('login-username-input');
+      const loginUsernameSave = document.getElementById('login-username-save');
+      const loginUsernameStatus = document.getElementById('login-username-status');
+      loginUsernameInput.addEventListener('input', () => {
+        loginUsernameInput.value = loginUsernameInput.value.toLowerCase().replace(/[^a-z0-9_.-]/g, '').slice(0, 20);
+      });
+      try {
+        const {data: usernameData, error: usernameLoadError} = await client.functions.invoke('set-login-username', {body:{action:'get'}});
+        if (usernameLoadError) throw usernameLoadError;
+        loginUsernameInput.value = usernameData?.username || '';
+        loginUsernameStatus.textContent = usernameData?.username ? 'Your username is set.' : 'You have not set a username yet.';
+      } catch (_) {
+        loginUsernameStatus.textContent = 'Could not load your username. You can still try saving one.';
+      }
+      loginUsernameForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const username = loginUsernameInput.value.trim().toLowerCase();
+        if (!/^[a-z0-9][a-z0-9_.-]{2,19}$/.test(username)) {
+          loginUsernameStatus.textContent = 'Use 3–20 characters: letters, numbers, dots, underscores, or hyphens.';
+          return;
+        }
+        loginUsernameSave.disabled = true;
+        loginUsernameStatus.textContent = 'Saving username…';
+        try {
+          const {data, error} = await client.functions.invoke('set-login-username', {body:{action:'set', username}});
+          if (error) throw error;
+          loginUsernameInput.value = data.username;
+          loginUsernameStatus.textContent = 'Username saved! You can now use it with Find my email. 😊';
+        } catch (error) {
+          loginUsernameStatus.textContent = error?.context?.error || error.message || 'Could not save username. Please try again.';
+        } finally {
+          loginUsernameSave.disabled = false;
+        }
+      });
 
       // Appearance and display preferences are deliberately device-local.
       const preferenceKey = 'configkit.account.preferences.v1';
