@@ -46,6 +46,11 @@
         <button class="tab" id="signupTab" type="button" role="tab" aria-selected="false">Sign up</button>
       </div>
       <form id="emailForm">
+        <div id="signupUsernameField" hidden>
+          <label for="signupUsername">Username</label>
+          <input id="signupUsername" name="username" type="text" autocomplete="username" minlength="3" maxlength="20" pattern="[A-Za-z0-9][A-Za-z0-9_.-]{2,19}" autocapitalize="none" spellcheck="false" placeholder="Choose a unique username">
+          <small class="muted">3–20 characters. Use letters, numbers, dots, underscores, or hyphens. You can use this later to find your login email.</small>
+        </div>
         <label for="email">Email</label>
         <input id="email" name="email" type="email" autocomplete="email" required maxlength="254">
         <label for="password">Password</label>
@@ -80,6 +85,15 @@
         </section>
         <div class="form-actions"><button class="provider" id="emailSubmit" type="submit">Log in with email</button><button class="provider secondary" id="magicLinkSubmit" type="button">Send magic link</button></div>
       </form>
+      <button class="text-button" id="findEmailToggle" type="button">Find my email 📧</button>
+      <section id="findEmailPanel" class="education-note" hidden aria-labelledby="find-email-title">
+        <h2 id="find-email-title">Find your login email</h2>
+        <p class="muted">Enter the username you chose when creating your ConfigKit account. We’ll show a partially hidden version of the email address.</p>
+        <label for="findEmailUsername">Username</label>
+        <input id="findEmailUsername" name="findEmailUsername" type="text" minlength="3" maxlength="20" pattern="[A-Za-z0-9][A-Za-z0-9_.-]{2,19}" autocapitalize="none" spellcheck="false" autocomplete="username" placeholder="Your ConfigKit username">
+        <button id="findEmailSubmit" class="secondary" type="button">Find login email</button>
+        <p id="findEmailStatus" class="muted" role="status" aria-live="polite"></p>
+      </section>
       <section id="password-recovery" class="education-note" hidden aria-labelledby="recovery-title">
         <h2 id="recovery-title">Choose a new password</h2>
         <p class="muted">Your recovery link has been verified. Choose a new password for your ConfigKit account.</p>
@@ -148,6 +162,13 @@
       const form = document.getElementById('emailForm');
       const email = document.getElementById('email');
       const password = document.getElementById('password');
+      const signupUsernameField = document.getElementById('signupUsernameField');
+      const signupUsername = document.getElementById('signupUsername');
+      const findEmailToggle = document.getElementById('findEmailToggle');
+      const findEmailPanel = document.getElementById('findEmailPanel');
+      const findEmailUsername = document.getElementById('findEmailUsername');
+      const findEmailSubmit = document.getElementById('findEmailSubmit');
+      const findEmailStatus = document.getElementById('findEmailStatus');
       const signupProfileFields = document.getElementById('signupProfileFields');
       const dateOfBirth = document.getElementById('dateOfBirth');
       const gender = document.getElementById('gender');
@@ -309,6 +330,11 @@
         resetPassword.hidden = signingUp;
         magicLinkSubmit.hidden = signingUp;
         signupProfileFields.hidden = !signingUp;
+        signupUsernameField.hidden = !signingUp;
+        signupUsername.required = signingUp;
+        signupUsername.autocomplete = signingUp ? 'username' : 'off';
+        findEmailToggle.hidden = signingUp;
+        findEmailPanel.hidden = true;
         const today = new Date();
         dateOfBirth.max = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0,10);
         if (!signingUp) emailConfirmationReminder.hidden = true;
@@ -573,6 +599,36 @@
       });
       loginTab.addEventListener('click', () => setMode('login'));
       signupTab.addEventListener('click', () => setMode('signup'));
+      signupUsername.addEventListener('input', () => {
+        signupUsername.value = signupUsername.value.toLowerCase().replace(/[^a-z0-9_.-]/g, '').slice(0, 20);
+      });
+      findEmailUsername.addEventListener('input', () => {
+        findEmailUsername.value = findEmailUsername.value.toLowerCase().replace(/[^a-z0-9_.-]/g, '').slice(0, 20);
+      });
+      findEmailToggle.addEventListener('click', () => {
+        findEmailPanel.hidden = !findEmailPanel.hidden;
+        if (!findEmailPanel.hidden) findEmailUsername.focus();
+      });
+      findEmailSubmit.addEventListener('click', async () => {
+        const requestedUsername = findEmailUsername.value.trim().toLowerCase();
+        if (!/^[a-z0-9][a-z0-9_.-]{2,19}$/.test(requestedUsername)) {
+          findEmailStatus.textContent = 'Enter a valid username (3–20 characters).';
+          return;
+        }
+        findEmailSubmit.disabled = true;
+        findEmailStatus.textContent = 'Looking up your login email…';
+        try {
+          const {data, error} = await client.functions.invoke('find-login-email', {body:{username:requestedUsername}});
+          if (error) throw error;
+          findEmailStatus.textContent = data?.found && data?.emailHint
+            ? 'Your login email looks like: ' + data.emailHint
+            : (data?.message || 'We could not find an account with that username.');
+        } catch (_) {
+          findEmailStatus.textContent = 'Email lookup is temporarily unavailable. Please try again later.';
+        } finally {
+          findEmailSubmit.disabled = false;
+        }
+      });
       form.addEventListener('submit', async event => {
         event.preventDefault();
         if (mode === 'signup') updateFamilyFields();
@@ -582,7 +638,7 @@
         setStatus(mode === 'signup' ? 'Creating your account…' : 'Logging in…');
         try {
           const result = mode === 'signup'
-            ? await client.auth.signUp({email:email.value.trim(), password:password.value, options:{emailRedirectTo:callbackUrl, data:{...selectedMetadata(), ...familySetupMetadata(), configkit_onboarding_required:true}}})
+            ? await client.auth.signUp({email:email.value.trim(), password:password.value, options:{emailRedirectTo:callbackUrl, data:{...selectedMetadata(), ...familySetupMetadata(), configkit_username:signupUsername.value.trim().toLowerCase(), configkit_onboarding_required:true}}})
             : await client.auth.signInWithPassword({email:email.value.trim(), password:password.value});
           if (result.error) throw result.error;
           // Existing users can opt into the self-declared Developer account label at login.
@@ -603,7 +659,12 @@
             password.value = '';
             await renderSession();
           }
-        } catch (error) { setStatus(error.message || 'Authentication failed. Please try again.', true); }
+        } catch (error) {
+          const message = error.message || '';
+          setStatus(message.includes('Database error saving new user')
+            ? 'That username may already be taken. Please choose another username and try again.'
+            : (message || 'Authentication failed. Please try again.'), true);
+        }
         finally { setBusy(false); }
       });
       resendConfirmation.addEventListener('click', async () => {
