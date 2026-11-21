@@ -433,6 +433,9 @@
               window.location.replace(destination);
             } else if (user.email_confirmed_at && !accepted) {
               window.location.replace('welcome.html?next=' + encodeURIComponent(destination));
+            } else if (user.email_confirmed_at && accepted &&
+                       user.user_metadata?.configkit_onboarding_questions?.completed !== true) {
+              window.location.replace('welcome-questions.html?next=' + encodeURIComponent(destination));
             } else {
               window.location.replace(destination);
             }
