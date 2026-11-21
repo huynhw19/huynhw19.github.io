@@ -113,6 +113,24 @@ alter table public.community_store_items drop constraint if exists community_sto
 alter table public.community_store_items add constraint community_store_items_coin_price_check check(coin_price between 0 and 100000);
 alter table public.configkit_apps drop constraint if exists configkit_apps_coin_price_check;
 alter table public.configkit_apps add constraint configkit_apps_coin_price_check check(coin_price between 0 and 100000);
+alter table public.configkit_apps drop constraint if exists configkit_apps_delivery_check;
+alter table public.configkit_apps add constraint configkit_apps_delivery_check check(
+ (delivery_type='file' and file_path is not null and file_name is not null and redirect_url is null)
+ or (delivery_type='link' and file_path is null and file_name is null and
+   ((coin_price=0 and redirect_url is not null) or (coin_price>0 and redirect_url is null)))
+);
+create table if not exists public.configkit_app_coin_links(
+ app_id uuid primary key references public.configkit_apps(id) on delete cascade,
+ owner_id uuid not null references auth.users(id) on delete cascade,
+ redirect_url text not null check(redirect_url ~* '^https://')
+);
+alter table public.configkit_app_coin_links enable row level security;
+revoke all on public.configkit_app_coin_links from anon,public;
+grant select,insert,update,delete on public.configkit_app_coin_links to authenticated;
+drop policy if exists "App owners manage private coin links" on public.configkit_app_coin_links;
+create policy "App owners manage private coin links" on public.configkit_app_coin_links for all to authenticated
+using(owner_id=(select auth.uid()) and exists(select 1 from public.configkit_apps a where a.id=app_id and a.owner_id=(select auth.uid())))
+with check(owner_id=(select auth.uid()) and exists(select 1 from public.configkit_apps a where a.id=app_id and a.owner_id=(select auth.uid())));
 alter table public.community_store_items drop constraint if exists community_store_items_listing_type_check;
 alter table public.community_store_items add constraint community_store_items_listing_type_check check(listing_type in ('free','paid','coins'));
 alter table public.community_store_items drop constraint if exists community_store_price_type_check;
@@ -159,7 +177,8 @@ begin
  select * into prior from public.configkit_coin_purchases p where p.buyer_id=uid and p.item_kind=p_item_kind and p.item_id=p_item_id;
  if found then
   if p_item_kind='store' then select f.download_url into item_url from public.community_store_coin_files f where f.item_id=p_item_id;
-  else select a.file_path,a.delivery_type,a.redirect_url into item_path,item_delivery,item_url from public.configkit_apps a where a.id=p_item_id and a.status='published';end if;
+  else select a.file_path,a.delivery_type,case when a.coin_price>0 and a.delivery_type='link' then l.redirect_url else a.redirect_url end
+   into item_path,item_delivery,item_url from public.configkit_apps a left join public.configkit_app_coin_links l on l.app_id=a.id where a.id=p_item_id and a.status='published';end if;
   download_url:=item_url;file_path:=item_path;delivery_type:=item_delivery;amount_paid:=prior.amount;
   select coalesce(sum(l.amount),0)::integer into balance from public.configkit_coin_ledger l where l.user_id=uid;return next;return;
  end if;
@@ -167,7 +186,8 @@ begin
   select i.seller_id,i.coin_price,f.download_url into seller,cost,item_url from public.community_store_items i join public.community_store_coin_files f on f.item_id=i.id where i.id=p_item_id and i.status='published' and i.listing_type='coins';
   item_delivery:='link';
  else
-  select a.owner_id,a.coin_price,a.file_path,a.delivery_type,a.redirect_url into seller,cost,item_path,item_delivery,item_url from public.configkit_apps a where a.id=p_item_id and a.status='published';
+  select a.owner_id,a.coin_price,a.file_path,a.delivery_type,case when a.coin_price>0 and a.delivery_type='link' then l.redirect_url else a.redirect_url end
+  into seller,cost,item_path,item_delivery,item_url from public.configkit_apps a left join public.configkit_app_coin_links l on l.app_id=a.id where a.id=p_item_id and a.status='published';
  end if;
  if seller is null or cost is null or cost<1 then raise exception 'This item is not available for ConfigKit Coin purchases.';end if;
  if seller=uid then raise exception 'You cannot purchase your own listing.';end if;
