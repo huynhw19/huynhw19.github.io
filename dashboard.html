@@ -33,6 +33,19 @@
     .studio-editor{display:grid;gap:.55rem;margin-top:1rem}
     .studio-editor input,.studio-editor textarea{width:100%;font:inherit;padding:.7rem;border:1px solid var(--line);border-radius:.65rem}
     .studio-editor textarea{resize:vertical;line-height:1.55}
+
+    .theme-studio{padding:1.2rem;margin:1rem 0 1.5rem}
+    .theme-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.9rem}
+    .theme-field{display:grid;gap:.35rem}
+    .theme-field input,.theme-field select{width:100%;min-height:42px;border:1px solid var(--line);border-radius:.6rem;padding:.45rem;font:inherit;background:#fff;color:var(--ink)}
+    .theme-field input[type=color]{padding:.2rem;height:44px}
+    .theme-preview{border:1px solid var(--line);border-radius:1rem;padding:1rem;margin:1rem 0;transition:background .2s,color .2s}
+    .theme-preview button{background:var(--preview-accent,#226b51);color:white;border-color:transparent}
+    .theme-list{display:grid;gap:.65rem;margin-top:1rem}
+    .theme-row{display:flex;justify-content:space-between;align-items:center;gap:.75rem;flex-wrap:wrap;border:1px solid var(--line);border-radius:.75rem;padding:.8rem}
+    .theme-row-actions{display:flex;gap:.4rem;flex-wrap:wrap}
+    .theme-row-actions button{padding:.4rem .65rem;font-size:.9rem}
+    .theme-swatch{display:inline-block;width:13px;height:13px;border-radius:50%;border:1px solid #0002;margin-right:.3rem;vertical-align:middle}
   </style>
 </head>
 <body>
@@ -58,6 +71,7 @@
       <a id="notifications-nav-link" href="notifications.html" hidden>Notifications <span id="notifications-unread-count"></span></a>
       <a href="account-settings.html">Account settings</a>
       <a href="rewards-center.html">🏆 Rewards Center</a>
+      <a href="#configkit-theme-studio">🎨 Theme Studio</a>
       <a href="ai-testing.html">AI Testing Connector</a>
       <a href="ai-control.html">AI Control Hub</a>
       <a id="owner-dashboard-link" href="owner-dashboard.html" hidden>Owner Dashboard</a>
@@ -116,6 +130,25 @@
         </section>
         <p id="studio-status" class="muted" role="status" aria-live="polite"></p>
         <p class="muted" style="font-size:.85rem">Drive files are private to your signed-in account and use your existing ConfigKit Drive storage and access policies. Saving creates a separate file; it does not overwrite an existing Drive file.</p>
+      </section>
+      <section class="card theme-studio" id="configkit-theme-studio" aria-labelledby="theme-studio-title">
+        <span class="eyebrow">Make ConfigKit yours</span>
+        <h2 id="theme-studio-title">🎨 Custom Themes Studio</h2>
+        <p class="muted">Create a colour theme, preview it, and save it privately to your ConfigKit account. Apply a saved theme on this device or choose your default.</p>
+        <div class="theme-controls">
+          <label class="theme-field" for="theme-name">Theme name<input id="theme-name" maxlength="60" value="My ConfigKit Theme" placeholder="Name your theme"></label>
+          <label class="theme-field" for="theme-accent">Accent colour<input id="theme-accent" type="color" value="#226b51"></label>
+          <label class="theme-field" for="theme-accent-dark">Dark accent<input id="theme-accent-dark" type="color" value="#174b39"></label>
+          <label class="theme-field" for="theme-page">Page background<input id="theme-page" type="color" value="#f7f9f6"></label>
+          <label class="theme-field" for="theme-surface">Card background<input id="theme-surface" type="color" value="#ffffff"></label>
+          <label class="theme-field" for="theme-ink">Text colour<input id="theme-ink" type="color" value="#17231f"></label>
+          <label class="theme-field" for="theme-radius">Corner style<select id="theme-radius"><option value="8px">Soft</option><option value="16px" selected>Rounded</option><option value="24px">Extra rounded</option></select></label>
+        </div>
+        <div class="theme-preview" id="theme-preview"><strong>Live preview</strong><p>This is how your selected colours and corners will look.</p><button type="button" tabindex="-1">Preview button</button></div>
+        <div class="studio-actions"><button type="button" id="theme-save">Save theme</button><button type="button" id="theme-apply">Apply preview</button><button type="button" id="theme-reset" class="secondary">Reset preview</button></div>
+        <p id="theme-status" class="muted" role="status" aria-live="polite">Your saved themes will appear here.</p>
+        <h3>My saved themes</h3><div id="theme-list" class="theme-list"><p class="muted">Loading your themes…</p></div>
+        <p class="muted" style="font-size:.85rem">Themes are stored in your signed-in Supabase account. Applying a theme changes this dashboard in this browser; it does not change other members' dashboards.</p>
       </section>
       <section class="card" id="achievements" aria-labelledby="achievements-title" style="padding:1.2rem;margin:1rem 0 1.5rem">
         <div class="achievements-summary">
@@ -306,6 +339,101 @@
         catch(error){message.textContent=error.message||'That code could not be redeemed.';}
         finally{button.disabled=false;}
       });
+
+      const themeFields = ['accent','accent-dark','page','surface','ink','radius'];
+      let editingThemeId = null;
+      let userThemes = [];
+      const themeValue = key => $('theme-'+key).value;
+      function currentThemeConfig(){return {accent:themeValue('accent'),accentDark:themeValue('accent-dark'),page:themeValue('page'),surface:themeValue('surface'),ink:themeValue('ink'),radius:themeValue('radius')};}
+      function safeHex(value,fallback){return /^#[0-9a-f]{6}$/i.test(value||'')?value:fallback;}
+      function renderThemePreview(){
+        const c=currentThemeConfig(),p=$('theme-preview');
+        p.style.background=safeHex(c.surface,'#ffffff');p.style.color=safeHex(c.ink,'#17231f');p.style.borderRadius=c.radius;
+        p.style.setProperty('--preview-accent',safeHex(c.accent,'#226b51'));
+      }
+      function applyTheme(c){
+        const root=document.documentElement.style;
+        root.setProperty('--green',safeHex(c.accent,'#226b51'));
+        root.setProperty('--green-dark',safeHex(c.accentDark,'#174b39'));
+        root.setProperty('--paper',safeHex(c.page,'#f7f9f6'));
+        root.setProperty('--white',safeHex(c.surface,'#ffffff'));
+        root.setProperty('--ink',safeHex(c.ink,'#17231f'));
+        document.querySelectorAll('.card,.welcome,.status').forEach(el=>{el.style.borderRadius=c.radius||'16px';});
+        try{localStorage.setItem('configkit-dashboard-theme-v1',JSON.stringify(c));}catch(_){}
+        $('theme-status').textContent='Theme applied to this dashboard in this browser.';
+      }
+      function restoreTheme(){
+        try{const c=JSON.parse(localStorage.getItem('configkit-dashboard-theme-v1')||'null');if(c)applyTheme(c);}catch(_){}
+      }
+      function resetThemeEditor(){
+        $('theme-name').value='My ConfigKit Theme';
+        const defaults={accent:'#226b51','accent-dark':'#174b39',page:'#f7f9f6',surface:'#ffffff',ink:'#17231f',radius:'16px'};
+        Object.entries(defaults).forEach(([k,v])=>$('theme-'+k).value=v);
+        editingThemeId=null;renderThemePreview();
+      }
+      function renderThemeList(){
+        const list=$('theme-list');list.replaceChildren();
+        if(!userThemes.length){const p=document.createElement('p');p.className='muted';p.textContent='No saved themes yet. Create your first one above!';list.append(p);return;}
+        for(const theme of userThemes){
+          const row=document.createElement('div');row.className='theme-row';
+          const info=document.createElement('div');const strong=document.createElement('strong');strong.textContent=theme.name;info.append(strong);
+          if(theme.is_default){const tag=document.createElement('span');tag.className='badge';tag.textContent='Default';info.append(tag);}
+          const colors=document.createElement('div');colors.className='muted';
+          ['accent','page','surface'].forEach(k=>{const sw=document.createElement('span');sw.className='theme-swatch';sw.style.background=safeHex(theme.theme_config?.[k],'#cccccc');sw.title=k;colors.append(sw);});
+          info.append(colors);
+          const actions=document.createElement('div');actions.className='theme-row-actions';
+          const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.addEventListener('click',()=>{
+            editingThemeId=theme.id;$('theme-name').value=theme.name;const c=theme.theme_config||{};
+            const keys={accent:'accent','accent-dark':'accentDark',page:'page',surface:'surface',ink:'ink',radius:'radius'};
+            Object.entries(keys).forEach(([field,key])=>{if(c[key])$('theme-'+field).value=c[key];});
+            renderThemePreview();$('theme-status').textContent='Editing '+theme.name+'. Save to update it.';
+          });
+          const apply=document.createElement('button');apply.type='button';apply.textContent='Apply';apply.addEventListener('click',()=>applyTheme(theme.theme_config||{}));
+          const def=document.createElement('button');def.type='button';def.textContent=theme.is_default?'Default':'Set default';def.disabled=theme.is_default;def.addEventListener('click',()=>setDefaultTheme(theme.id));
+          const del=document.createElement('button');del.type='button';del.textContent='Delete';del.addEventListener('click',()=>deleteTheme(theme.id,theme.name));
+          actions.append(edit,apply,def,del);row.append(info,actions);list.append(row);
+        }
+      }
+      async function loadUserThemes(){
+        const {data,error}=await client.from('configkit_user_themes').select('id,name,theme_config,is_default,updated_at').order('updated_at',{ascending:false});
+        if(error){$('theme-status').textContent='Could not load saved themes: '+error.message;return;}
+        userThemes=data||[];renderThemeList();
+        const defaultTheme=userThemes.find(t=>t.is_default);
+        if(defaultTheme&&!localStorage.getItem('configkit-dashboard-theme-v1'))applyTheme(defaultTheme.theme_config||{});
+      }
+      async function saveUserTheme(){
+        const name=$('theme-name').value.trim();if(!name){$('theme-status').textContent='Please enter a theme name.';return;}
+        const config=currentThemeConfig();const button=$('theme-save');button.disabled=true;
+        try{
+          const payload={name,theme_config:config};let result;
+          if(editingThemeId)result=await client.from('configkit_user_themes').update({...payload,updated_at:new Date().toISOString()}).eq('id',editingThemeId);
+          else result=await client.from('configkit_user_themes').insert({...payload,is_default:userThemes.length===0});
+          if(result.error)throw result.error;
+          $('theme-status').textContent='Saved "'+name+'" to your ConfigKit account.';
+          editingThemeId=null;await loadUserThemes();
+        }catch(e){$('theme-status').textContent='Could not save theme: '+(e.message||'Please try again.');}
+        finally{button.disabled=false;}
+      }
+      async function setDefaultTheme(id){
+        try{
+          const {error:clearError}=await client.from('configkit_user_themes').update({is_default:false}).eq('is_default',true);
+          if(clearError)throw clearError;
+          const {error}=await client.from('configkit_user_themes').update({is_default:true,updated_at:new Date().toISOString()}).eq('id',id);
+          if(error)throw error;
+          await loadUserThemes();const theme=userThemes.find(t=>t.id===id);if(theme)applyTheme(theme.theme_config||{});
+        }catch(e){$('theme-status').textContent='Could not set default theme: '+(e.message||'Please try again.');}
+      }
+      async function deleteTheme(id,name){
+        if(!window.confirm('Delete the saved theme "'+name+'"?'))return;
+        const {error}=await client.from('configkit_user_themes').delete().eq('id',id);
+        if(error){$('theme-status').textContent='Could not delete theme: '+error.message;return;}
+        $('theme-status').textContent='Deleted "'+name+'".';await loadUserThemes();
+      }
+      themeFields.forEach(k=>$('theme-'+k).addEventListener('input',renderThemePreview));
+      $('theme-save').addEventListener('click',saveUserTheme);
+      $('theme-apply').addEventListener('click',()=>applyTheme(currentThemeConfig()));
+      $('theme-reset').addEventListener('click',()=>{resetThemeEditor();$('theme-status').textContent='Editor reset. Your currently applied theme is unchanged.';});
+      renderThemePreview();restoreTheme();
       async function renderSession() {
         try {
           const {data, error} = await client.auth.getSession();
@@ -416,6 +544,7 @@
           // Fail closed: only an approved application returned by Supabase can reveal the link.
           document.getElementById('developer-dashboard-card').hidden = !!developerApprovalError || !developerApproval;
           status.hidden = true; dashboard.hidden = false; signout.hidden = false; document.getElementById('about-nav-link').hidden = false; document.getElementById('notifications-nav-link').hidden = false;
+          await loadUserThemes();
           const {count: unreadNotifications} = await client.from('configkit_notifications').select('id', {count:'exact', head:true}).eq('user_id', user.id).is('read_at', null).is('dismissed_at', null);
           document.getElementById('notifications-unread-count').textContent = unreadNotifications ? '(' + unreadNotifications + ')' : '';
         } catch (error) { setStatus(error.message || 'Could not check your sign-in. Please refresh and try again.', true); }
