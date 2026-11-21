@@ -16,7 +16,10 @@
 <label for="scopes">OpenID Connect scopes</label><select id="scopes" multiple size="4"><option value="openid" selected>OpenID Connect sign-in</option><option value="email">Read email address</option><option value="profile">Read basic profile</option><option value="phone">Read phone number</option></select>
 <label>ConfigKit data permissions (enforced by database policies)</label>
 <div class="grid">
+<label><input class="permission" type="checkbox" value="account:email:read"> Read my ConfigKit account email</label>
 <label><input class="permission" type="checkbox" value="profile:read"> Read my own ConfigKit profile</label>
+<label><input class="permission" type="checkbox" value="forms:read"> Read metadata for my own forms</label>
+<label><input class="permission" type="checkbox" value="achievements:read"> Read my own achievements</label>
 <label><input class="permission" type="checkbox" value="mail:read"> Read my own ConfigKit Mail</label>
 <label><input class="permission" type="checkbox" value="mail:send"> Send ConfigKit Mail as me</label>
 <label><input class="permission" type="checkbox" value="drive:metadata:read"> Read my Drive file metadata</label>
