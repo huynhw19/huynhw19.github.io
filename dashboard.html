@@ -65,6 +65,7 @@
       <a href="community-games.html">Community Games</a>
       <a href="events.html">Community Events</a>
       <a href="community-store.html">Community Store</a>
+      <a href="community-themes.html">🌈 Community Themes</a>
       <a href="community-book.html">Community Book</a>
       <a href="configkit-app-store.html">ConfigKit App Store</a>
       <a id="about-nav-link" href="#about-configkit" hidden>About ConfigKit</a>
@@ -135,6 +136,7 @@
         <span class="eyebrow">Make ConfigKit yours</span>
         <h2 id="theme-studio-title">🎨 Custom Themes Studio</h2>
         <p class="muted">Create a colour theme, preview it, and save it privately to your ConfigKit account. Apply a saved theme on this device or choose your default.</p>
+        <div class="studio-actions"><a href="community-themes.html">🌈 Explore Community Theme Gallery →</a></div>
         <div class="theme-controls">
           <label class="theme-field" for="theme-name">Theme name<input id="theme-name" maxlength="60" value="My ConfigKit Theme" placeholder="Name your theme"></label>
           <label class="theme-field" for="theme-accent">Accent colour<input id="theme-accent" type="color" value="#226b51"></label>
@@ -407,7 +409,7 @@
         try{
           const payload={name,theme_config:config};let result;
           if(editingThemeId)result=await client.from('configkit_user_themes').update({...payload,updated_at:new Date().toISOString()}).eq('id',editingThemeId);
-          else result=await client.from('configkit_user_themes').insert({...payload,is_default:userThemes.length===0});
+          else {const {data:authData,error:authError}=await client.auth.getUser();if(authError)throw authError;if(!authData.user)throw new Error('Please sign in again.');result=await client.from('configkit_user_themes').insert({...payload,user_id:authData.user.id,is_default:userThemes.length===0});}
           if(result.error)throw result.error;
           $('theme-status').textContent='Saved "'+name+'" to your ConfigKit account.';
           editingThemeId=null;await loadUserThemes();
