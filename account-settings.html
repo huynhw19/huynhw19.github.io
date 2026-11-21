@@ -299,6 +299,22 @@
       }
       const user = userData.user;
 
+      // Record successful account-setting changes in the signed-in user's private in-app inbox.
+      async function notifyAccountSettingChange(setting) {
+        try {
+          const agent = navigator.userAgent || '';
+          const device = /iPhone|iPad|Android|Mobile/i.test(agent) ? 'mobile device' : /Macintosh|Windows|Linux/i.test(agent) ? 'desktop device' : 'this device';
+          const stamp = new Date().toLocaleString();
+          const {error} = await client.from('configkit_notifications').insert({
+            user_id:user.id, actor_user_id:user.id, category:'security',
+            event_type:'account_setting.changed', title:'Account settings changed',
+            body:setting+' was successfully changed on '+device+' at '+stamp+'. If this was not you, review your account security and active sessions.',
+            action_url:'security-centre.html'
+          });
+          if (error) console.warn('Could not record account setting notification:', error.message);
+        } catch (error) { console.warn('Could not record account setting notification:', error); }
+      }
+
       // Account overview uses the authenticated user returned by getUser().
       const overview = document.getElementById('account-overview');
       const emailState = user.email_confirmed_at ? 'Email verified' : 'Email not yet verified';
@@ -335,6 +351,7 @@
           if (error) throw error;
           loginUsernameInput.value = data.username;
           loginUsernameStatus.textContent = 'Username saved! You can now use it with Find my email. 😊';
+          await notifyAccountSettingChange('Your login username');
         } catch (error) {
           loginUsernameStatus.textContent = error?.context?.error || error.message || 'Could not save username. Please try again.';
         } finally {
@@ -1151,7 +1168,7 @@
         if (workHoursEnabled.value==='true' && !days.length) { workHoursStatus.textContent='Choose at least one working day, or disable the schedule.'; return; }
         if (workHoursEnabled.value==='true' && workEndTime.value<=workStartTime.value) { workHoursStatus.textContent='End time must be later than start time on the same day.'; return; }
         const saveButton=document.getElementById('save-work-hours'); saveButton.disabled=true; workHoursStatus.textContent='Saving your working hours…';
-        try { const {error}=await client.from('work_hours_settings').upsert({user_id:user.id,enabled:workHoursEnabled.value==='true',work_days:days,start_time:workStartTime.value,end_time:workEndTime.value,time_zone:workTimeZone.value.trim(),updated_at:new Date().toISOString()},{onConflict:'user_id'}); if(error) throw error; workHoursStatus.textContent='Working hours saved.'; setStatus('Working hours saved.'); }
+        try { const {error}=await client.from('work_hours_settings').upsert({user_id:user.id,enabled:workHoursEnabled.value==='true',work_days:days,start_time:workStartTime.value,end_time:workEndTime.value,time_zone:workTimeZone.value.trim(),updated_at:new Date().toISOString()},{onConflict:'user_id'}); if(error) throw error; workHoursStatus.textContent='Working hours saved.'; setStatus('Working hours saved.'); await notifyAccountSettingChange('Your working hours'); }
         catch(error) { workHoursStatus.textContent='Could not save working hours. Please try again.'; setStatus(error.message||'Could not save working hours.',true); }
         finally { saveButton.disabled=false; }
       });
@@ -1316,6 +1333,7 @@
           if (profileError) throw profileError;
           savedCommunityProfile = profileData;
           setStatus('Profile saved.');
+          await notifyAccountSettingChange('Your account profile');
           updateProfileFields();
         } catch (error) {
           setStatus(`Could not save your profile: ${error.message || 'Please try again.'}`, true);
@@ -1372,6 +1390,7 @@
             toggle.textContent = 'Show password';
           });
           setStatus('Your password has been updated.');
+          await notifyAccountSettingChange('Your password');
         } catch (error) {
           setStatus(`Could not update your password: ${error.message || 'Please try again.'}`, true);
         } finally {
