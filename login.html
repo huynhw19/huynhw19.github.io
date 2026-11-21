@@ -309,7 +309,8 @@
         resetPassword.hidden = signingUp;
         magicLinkSubmit.hidden = signingUp;
         signupProfileFields.hidden = !signingUp;
-        dateOfBirth.max = new Date().toISOString().slice(0,10);
+        const today = new Date();
+        dateOfBirth.max = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0,10);
         if (!signingUp) emailConfirmationReminder.hidden = true;
         familySetup.hidden = !signingUp;
         updateFamilyFields();
@@ -579,7 +580,10 @@
           if (mode === 'signup' && !result.data.session) {
             setStatus('Account created! Please verify your email before logging in. 📧');
             emailConfirmationReminder.hidden = false;
-            form.reset(); updateAccountFields();
+            const confirmationEmail = email.value.trim();
+            form.reset();
+            email.value = confirmationEmail;
+            updateAccountFields();
           } else {
             setStatus(mode === 'signup' ? 'Account created and signed in.' : 'Logged in successfully.');
             password.value = '';
