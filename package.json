@@ -1,6 +1,6 @@
 {
   "name": "configkit-windows",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ConfigKit desktop application for Windows, macOS and Linux",
   "private": true,
   "main": "desktop/main.cjs",
