@@ -107,8 +107,12 @@ insert into public.configkit_coin_ledger(user_id,amount,reason,reference,descrip
 select ua.user_id,10,'achievement',ua.achievement_key,'Achievement: '||ua.achievement_key from public.user_achievements ua
 on conflict(user_id,reason,reference) do nothing;
 
-alter table public.community_store_items add column if not exists coin_price integer not null default 0 check(coin_price>=0);
-alter table public.configkit_apps add column if not exists coin_price integer not null default 0 check(coin_price>=0);
+alter table public.community_store_items add column if not exists coin_price integer not null default 0;
+alter table public.configkit_apps add column if not exists coin_price integer not null default 0;
+alter table public.community_store_items drop constraint if exists community_store_items_coin_price_check;
+alter table public.community_store_items add constraint community_store_items_coin_price_check check(coin_price between 0 and 100000);
+alter table public.configkit_apps drop constraint if exists configkit_apps_coin_price_check;
+alter table public.configkit_apps add constraint configkit_apps_coin_price_check check(coin_price between 0 and 100000);
 alter table public.community_store_items drop constraint if exists community_store_items_listing_type_check;
 alter table public.community_store_items add constraint community_store_items_listing_type_check check(listing_type in ('free','paid','coins'));
 alter table public.community_store_items drop constraint if exists community_store_price_type_check;
