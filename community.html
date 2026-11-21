@@ -24,6 +24,18 @@
 <div class="profile-top" style="margin-top:18px"><div id="profile-avatar" class="avatar"></div><div><h2 id="profile-name"></h2><p id="profile-bio" class="muted"></p></div></div>
 <div class="stats"><span><strong id="followers-count">0</strong> followers</span><span><strong id="following-count">0</strong> following</span></div>
 <div id="profile-actions" class="actions"></div>
+<section class="panel" aria-labelledby="shared-heading" style="margin-top:22px">
+<h2 id="shared-heading">Shared by this member</h2><div id="shared-list"><p class="muted">Loading shared posts…</p></div>
+</section>
+<section class="panel" aria-labelledby="profile-comments-heading">
+<h2 id="profile-comments-heading">Comments</h2>
+<div id="profile-comment-list"><p class="muted">Loading comments…</p></div>
+<form id="profile-comment-form" hidden>
+<label for="profile-comment-input">Leave a comment</label><textarea id="profile-comment-input" rows="3" maxlength="2000" required placeholder="Write something kind and helpful…"></textarea>
+<div class="actions"><button type="submit">Post comment</button></div>
+</form>
+<p id="profile-comment-note" class="muted small"></p>
+</section>
 </section>
 <section id="edit-panel" class="panel" hidden>
 <h2>Your community profile</h2><p class="muted">Choose the name and short bio other discoverable members can see. Your email address is never shown.</p>
@@ -95,6 +107,50 @@
   if(p.user_id!==currentUser.id){const follow=document.createElement('button');follow.type='button';follow.textContent=follows.some(x=>x.follower_id===currentUser.id&&x.following_id===p.user_id)?'Following · Unfollow':'Follow';follow.addEventListener('click',()=>toggleFollow(p.user_id,follow));actions.append(follow);}
   article.append(actions);return article;
  }
+ async function loadProfileActivity(id){
+  const shared=document.getElementById('shared-list');
+  const commentList=document.getElementById('profile-comment-list');
+  const commentForm=document.getElementById('profile-comment-form');
+  const commentNote=document.getElementById('profile-comment-note');
+  shared.replaceChildren();commentList.replaceChildren();
+  const [discussions,files,comments]=await Promise.all([
+   client.from('builder_discussions').select('id,title,body,created_at').eq('user_id',id).order('created_at',{ascending:false}).limit(20),
+   client.from('mobileconfig_posts').select('id,title,description,filename,storage_path,file_size,created_at').eq('user_id',id).order('created_at',{ascending:false}).limit(20),
+   client.from('community_profile_comments').select('id,author_user_id,body,created_at').eq('profile_user_id',id).order('created_at',{ascending:false}).limit(50)
+  ]);
+  for(const result of [discussions,files,comments])if(result.error)throw result.error;
+  const items=[
+   ...(discussions.data||[]).map(x=>({...x,kind:'discussion'})),
+   ...(files.data||[]).map(x=>({...x,kind:'file'}))
+  ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  if(!items.length){const empty=document.createElement('p');empty.className='muted';empty.textContent='This member has not shared any posts or files yet.';shared.append(empty);}
+  for(const item of items){
+   const article=document.createElement('article');article.className='member';article.style.margin='10px 0';
+   const title=document.createElement('h3');title.textContent=(item.kind==='file'?'📄 ':'💬 ')+item.title;article.append(title);
+   const body=document.createElement('p');body.textContent=item.kind==='file'?item.description:item.body;article.append(body);
+   const meta=document.createElement('p');meta.className='muted small';meta.textContent=(item.kind==='file'?'Shared file':'Discussion')+' · '+new Date(item.created_at).toLocaleString();article.append(meta);
+   if(item.kind==='file'){
+    const link=document.createElement('a');link.href=client.storage.from('mobileconfig-shares').getPublicUrl(item.storage_path).data.publicUrl;link.target='_blank';link.rel='noopener noreferrer';link.textContent='View shared file';article.append(link);
+   }else{
+    const link=document.createElement('a');link.href='builder-discussion.html';link.textContent='Open Builder discussion';article.append(link);
+   }
+   shared.append(article);
+  }
+  const authorIds=[...new Set((comments.data||[]).map(x=>x.author_user_id))];
+  let authors=[];
+  if(authorIds.length){const authorResult=await client.from('community_profiles').select('user_id,display_name').in('user_id',authorIds);if(authorResult.error)throw authorResult.error;authors=authorResult.data||[];}
+  const authorName=(uid)=>authors.find(x=>x.user_id===uid)?.display_name||'ConfigKit member';
+  if(!(comments.data||[]).length){const empty=document.createElement('p');empty.className='muted';empty.textContent='No comments yet. Be the first to say hello!';commentList.append(empty);}
+  for(const comment of comments.data||[]){
+   const article=document.createElement('article');article.className='comment';article.style.borderTop='1px solid var(--line)';article.style.padding='12px 0';
+   const byline=document.createElement('p');byline.className='muted small';byline.textContent=authorName(comment.author_user_id)+' · '+new Date(comment.created_at).toLocaleString();
+   const body=document.createElement('p');body.textContent=comment.body;article.append(byline,body);
+   if(comment.author_user_id===currentUser.id){const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent='Delete';remove.addEventListener('click',async()=>{if(!confirm('Delete your comment?'))return;remove.disabled=true;const result=await client.from('community_profile_comments').delete().eq('id',comment.id);if(result.error){message(result.error.message,true);remove.disabled=false;return;}await loadProfileActivity(id);});article.append(remove);}
+   commentList.append(article);
+  }
+  commentForm.hidden=id===currentUser.id;
+  commentNote.textContent=id===currentUser.id?'Only other members can comment on your profile.':'Keep comments respectful. Do not post private information or credentials.';
+ }
  async function toggleFollow(id,button){
   button.disabled=true;const existing=follows.some(x=>x.follower_id===currentUser.id&&x.following_id===id);
   const result=existing
@@ -116,6 +172,7 @@
   document.getElementById('followers-count').textContent=follows.filter(x=>x.following_id===id).length;
   document.getElementById('following-count').textContent=follows.filter(x=>x.follower_id===id).length;
   const actions=document.getElementById('profile-actions');actions.replaceChildren();
+  await loadProfileActivity(id);
   if(id!==currentUser.id){
    const b=document.createElement('button');b.textContent=follows.some(x=>x.follower_id===currentUser.id&&x.following_id===id)?'Following · Unfollow':'Follow';b.addEventListener('click',()=>toggleFollow(id,b));actions.append(b);
    // Only the fixed owner identity receives moderation controls. The Edge
@@ -162,6 +219,13 @@
   }
   else{const note=document.createElement('span');note.className='muted';note.textContent='This is how other discoverable members see your profile.';actions.append(note);}
  }
+ document.getElementById('profile-comment-form').addEventListener('submit',async e=>{
+  e.preventDefault();const input=document.getElementById('profile-comment-input');const body=input.value.trim();const profileId=new URLSearchParams(location.search).get('user');
+  if(!profileId||profileId===currentUser.id||!body)return;
+  const button=e.currentTarget.querySelector('button[type="submit"]');button.disabled=true;
+  const result=await client.from('community_profile_comments').insert({profile_user_id:profileId,author_user_id:currentUser.id,body});
+  button.disabled=false;if(result.error){message(result.error.message,true);return;}input.value='';message('Your comment has been posted.');await loadProfileActivity(profileId);
+ });
  document.getElementById('search').addEventListener('input',()=>{if(!new URLSearchParams(location.search).has('user'))renderRoute();});
  document.getElementById('show-my-profile').addEventListener('click',()=>goProfile(currentUser.id));
  document.getElementById('profile-form').addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type="submit"]'),file=document.getElementById('avatar-file').files[0];const record={display_name:document.getElementById('display-name').value.trim(),bio:document.getElementById('bio').value.trim(),is_discoverable:document.getElementById('discoverable').checked,updated_at:new Date().toISOString()};if(!record.display_name){message('Enter a display name.',true);return;}if(file&&(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024)){message('Choose a PNG, JPEG or WebP image smaller than 2 MB.',true);return;}button.disabled=true;try{const own=await client.from('community_profiles').select('avatar_url').eq('user_id',currentUser.id).single();if(own.error)throw own.error;const oldAvatar=own.data.avatar_url; if(file){const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';const path=currentUser.id+'/'+(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36))+'.'+ext;const upload=await client.storage.from('community-avatars').upload(path,file,{contentType:file.type,upsert:false,cacheControl:'3600'});if(upload.error)throw upload.error;record.avatar_url=client.storage.from('community-avatars').getPublicUrl(path).data.publicUrl;}const result=await client.from('community_profiles').update(record).eq('user_id',currentUser.id);if(result.error)throw result.error;if(file&&oldAvatar&&oldAvatar.includes('/storage/v1/object/public/community-avatars/')){const previousPath=oldAvatar.split('/storage/v1/object/public/community-avatars/')[1].split('?')[0];if(previousPath&&previousPath.startsWith(currentUser.id+'/'))await client.storage.from('community-avatars').remove([decodeURIComponent(previousPath)]);}document.getElementById('avatar-file').value='';const refreshed=await client.from('community_profiles').select('user_id,display_name,avatar_url,bio,is_discoverable').eq('user_id',currentUser.id).single();if(refreshed.error)throw refreshed.error;profiles=profiles.filter(x=>x.user_id!==currentUser.id);if(refreshed.data.is_discoverable)profiles.push(refreshed.data);message('Your community profile has been saved.');await renderRoute();}catch(error){message(error.message||'Could not save your profile.',true);}finally{button.disabled=false;}});
