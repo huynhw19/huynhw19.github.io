@@ -392,12 +392,12 @@ window.CONFIGKIT_AUTH = {
                 return;
               }
               const ownerRecoveryState = session.user?.app_metadata?.configkit_mfa_recovery_state;
-              const currentPage = window.location.pathname.split('/').pop();
-              if (ownerRecoveryState === 'enroll' && currentPage !== 'owner-mfa-setup.html') {
+              const ownerCurrentPage = window.location.pathname.split('/').pop();
+              if (ownerRecoveryState === 'enroll' && ownerCurrentPage !== 'owner-mfa-setup.html') {
                 window.location.replace('owner-mfa-setup.html');
                 return;
               }
-              if (ownerRecoveryState === 'verify_new' && currentPage !== 'owner-mfa-setup.html') {
+              if (ownerRecoveryState === 'verify_new' && ownerCurrentPage !== 'owner-mfa-setup.html') {
                 const {data: ownerAssurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
                 if (ownerAssurance?.currentLevel === 'aal2') window.location.replace('owner-mfa-setup.html');
                 else window.location.replace('login.html?next=dashboard.html');
