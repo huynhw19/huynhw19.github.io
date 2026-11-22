@@ -381,15 +381,6 @@ window.CONFIGKIT_AUTH = {
         client.auth.__configKitRecoveryGuardInstalled = true;
         client.auth.onAuthStateChange((event, session) => {
           if (!session) return;
-          const ownerRecoveryState = session.user?.app_metadata?.configkit_mfa_recovery_state;
-          const ownerRecoveryAal2 = session.user?.aal === 'aal2';
-          if (ownerRecoveryState === 'enroll' || (ownerRecoveryState === 'verify_new' && ownerRecoveryAal2)) {
-            const currentPath = window.location.pathname.split('/').pop();
-            if (!['owner-mfa-setup.html','login.html'].includes(currentPath)) {
-              window.location.replace('owner-mfa-setup.html');
-              return;
-            }
-          }
           setTimeout(async () => {
             try {
               const {data:lockState, error:lockStateError} = await client.rpc('is_my_account_locked');
@@ -398,6 +389,18 @@ window.CONFIGKIT_AUTH = {
                 if (!window.location.pathname.endsWith('/account-locked.html')) {
                   window.location.replace('account-locked.html');
                 }
+                return;
+              }
+              const ownerRecoveryState = session.user?.app_metadata?.configkit_mfa_recovery_state;
+              const currentPage = window.location.pathname.split('/').pop();
+              if (ownerRecoveryState === 'enroll' && currentPage !== 'owner-mfa-setup.html') {
+                window.location.replace('owner-mfa-setup.html');
+                return;
+              }
+              if (ownerRecoveryState === 'verify_new' && currentPage !== 'owner-mfa-setup.html') {
+                const {data: ownerAssurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+                if (ownerAssurance?.currentLevel === 'aal2') window.location.replace('owner-mfa-setup.html');
+                else window.location.replace('login.html?next=dashboard.html');
                 return;
               }
               const {data: recovery, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
