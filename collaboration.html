@@ -298,7 +298,7 @@ else{
    .on('broadcast',{event:'workspace-deleted'},()=>{say('This workspace was deleted by its owner.');db.removeChannel(channel).finally(()=>location.href='collaboration.html');})
    .on('presence',{event:'sync'},()=>setPresence(channel.presenceState()))
    .on('presence',{event:'join'},()=>{setPresence(channel.presenceState());loadMembers().catch(()=>{});})
-   .on('presence',{event:'leave'},()=>setPresence(channel.presenceState()));
+   .on('presence',{event:'leave'},()=>{setPresence(channel.presenceState());loadMembers().catch(()=>{});});
   await new Promise((resolve,reject)=>{let settled=false;const timer=setTimeout(()=>{if(!settled){settled=true;reject(new Error('Realtime connection timed out. Check your connection and try again.'));}},20000);channel.subscribe(state=>{if(state==='SUBSCRIBED'){if(!settled){settled=true;clearTimeout(timer);resolve();}else{channel.track({user_id:user.id,display_name:profile.display_name,avatar_url:profile.avatar_url,typing:false}).catch(()=>{});if(role!=='viewer'&&ydoc)channel.send({type:'broadcast',event:'doc-update',payload:{update_b64:base64(Y.encodeStateAsUpdate(ydoc))}}).catch(()=>{});}}else if(['CHANNEL_ERROR','TIMED_OUT'].includes(state)&&!settled){settled=true;clearTimeout(timer);reject(new Error('Could not join the private collaboration channel. Check your access and try again.'));}});});
   const pageSize=500,updates=[];
   for(let offset=0;;offset+=pageSize){const {data,error}=await db.from('configkit_collab_updates').select('update_b64').eq('document_id',id).order('created_at',{ascending:true}).order('id',{ascending:true}).range(offset,offset+pageSize-1);if(error)throw error;updates.push(...(data||[]));if(!data||data.length<pageSize)break;}
