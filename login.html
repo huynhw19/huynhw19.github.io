@@ -132,6 +132,20 @@
           <input id="mfa-recovery-code" name="recoveryCode" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="39" pattern="([0-9A-Fa-f]{32}|([0-9A-Fa-f]{8}-){3}[0-9A-Fa-f]{8})" required>
           <div class="form-actions"><button id="mfa-recovery-submit" type="submit">Use recovery code</button><button id="mfa-recovery-back" class="secondary" type="button">Use authenticator instead</button><button id="mfa-recovery-cancel" class="secondary" type="button">Sign out</button></div>
         </form>
+        <div id="mfa-replacement-panel" hidden>
+          <h3>Set up a replacement authenticator 🔐</h3>
+          <p class="muted">You can use your password sign-in to add a new authenticator without the old app. Scan this QR code with a new authenticator app, verify its code, then remove the lost factor in Account Settings.</p>
+          <div id="mfa-replacement-qr" style="margin:12px 0;max-width:220px"></div>
+          <p class="muted">Manual setup key</p>
+          <p><code id="mfa-replacement-secret" style="overflow-wrap:anywhere"></code></p>
+          <form id="mfa-replacement-form">
+            <label for="mfa-replacement-code">Code from your new authenticator</label>
+            <input id="mfa-replacement-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required>
+            <div class="form-actions"><button id="mfa-replacement-submit" type="submit">Verify new authenticator</button><button id="mfa-replacement-cancel" class="secondary" type="button">Back</button></div>
+          </form>
+          <p id="mfa-replacement-status" class="muted" role="status" aria-live="polite"></p>
+        </div>
+        <button id="mfa-replacement-start" class="secondary" type="button">Lost access? Set up a replacement authenticator</button>
       </section>
       <div class="account" id="account" hidden></div>
       <button class="provider secondary" id="signout" type="button" hidden>Sign out</button>
@@ -378,8 +392,10 @@
             if (factorError) { setStatus('Could not load your authenticator. Please try again.', true); return; }
             const factor = (factorData.totp || []).find(item => item.status === 'verified');
             if (!factor && !recoveryCodes.enabled) {
-              setStatus('Your account requires a verified authenticator app to complete two-factor sign-in. Contact support or use another enrolled factor.', true);
-              return;
+              // The primary credential has been accepted. Keep this restricted
+              // MFA screen open so the user can enroll and verify a replacement
+              // factor; no protected account content is shown at AAL1.
+              pendingMfaFactorId = '';
             }
             pendingMfaFactorId = factor?.id || '';
             form.hidden = true;
@@ -389,15 +405,17 @@
             document.getElementById('mfa-challenge').hidden = false;
             document.getElementById('mfa-title').textContent = 'Two-factor authentication';
             document.getElementById('mfa-form').hidden = !factor;
-            document.getElementById('mfa-recovery-form').hidden = !!factor;
+            document.getElementById('mfa-recovery-form').hidden = !factor || !recoveryCodes.enabled;
             document.getElementById('mfa-use-recovery').hidden = !recoveryCodes.enabled || !factor;
             document.getElementById('mfa-recovery-back').hidden = !factor;
+            document.getElementById('mfa-replacement-panel').hidden = true;
+            document.getElementById('mfa-replacement-start').hidden = false;
             document.querySelector('#mfa-challenge .muted').textContent = factor
-              ? 'Enter the current six-digit code from your authenticator app, or use a one-time recovery code.'
-              : 'Your authenticator is unavailable. Enter one of your unused recovery codes to finish signing in.';
+              ? 'Enter the current six-digit code from your authenticator app, or use a one-time recovery code. If you lost the app, you can enroll a replacement.'
+              : 'Your authenticator is unavailable. You can enroll a replacement authenticator from this restricted recovery screen.';
             document.querySelector('#mfa-form label').textContent = 'Authenticator code';
             setStatus('Your password or provider sign-in was accepted. Complete the second step to continue.');
-            document.getElementById(factor ? 'mfa-code' : 'mfa-recovery-code').focus();
+            if (factor) document.getElementById('mfa-code').focus();
             return;
           }
           document.getElementById('mfa-challenge').hidden = true;
@@ -518,6 +536,89 @@
         document.getElementById('mfa-recovery-code').value = '';
         document.getElementById('mfa-code').focus();
       });
+      let replacementFactorId = '';
+      const replacementStart = document.getElementById('mfa-replacement-start');
+      const replacementPanel = document.getElementById('mfa-replacement-panel');
+      replacementStart.addEventListener('click', async () => {
+        replacementStart.disabled = true;
+        document.getElementById('mfa-replacement-status').textContent = 'Preparing a new authenticator…';
+        try {
+          const {data:factorData,error:factorError} = await client.auth.mfa.listFactors();
+          if (factorError) throw factorError;
+          const activeTotp = (factorData.totp || []).filter(item => item.status === 'verified');
+          if (activeTotp.length >= 10) throw new Error('Your account has reached the authenticator limit. Contact ConfigKit support for a verified recovery review.');
+          const {data,error} = await client.auth.mfa.enroll({factorType:'totp',friendlyName:'ConfigKit replacement authenticator'});
+          if (error) throw error;
+          replacementFactorId = data.id;
+          const qr = document.getElementById('mfa-replacement-qr');
+          qr.replaceChildren();
+          const image = document.createElement('img');
+          image.alt = 'QR code for your replacement authenticator';
+          image.width = 200; image.height = 200;
+          image.style.cssText = 'max-width:100%;background:white';
+          image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(data.totp.qr_code);
+          qr.append(image);
+          document.getElementById('mfa-replacement-secret').textContent = data.totp.secret;
+          document.getElementById('mfa-replacement-code').value = '';
+          document.getElementById('mfa-form').hidden = true;
+          document.getElementById('mfa-recovery-form').hidden = true;
+          replacementPanel.hidden = false;
+          document.getElementById('mfa-replacement-status').textContent = 'Scan the QR code, then enter the six-digit code shown by your new app.';
+          document.getElementById('mfa-replacement-code').focus();
+        } catch (error) {
+          document.getElementById('mfa-replacement-status').textContent = error.message || 'Could not start replacement setup. Please try again.';
+          replacementStart.disabled = false;
+        }
+      });
+      document.getElementById('mfa-replacement-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const input = document.getElementById('mfa-replacement-code');
+        const button = document.getElementById('mfa-replacement-submit');
+        if (!replacementFactorId || !input.reportValidity()) return;
+        button.disabled = true;
+        try {
+          const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:replacementFactorId});
+          if (challengeError) throw challengeError;
+          const {error:verifyError} = await client.auth.mfa.verify({factorId:replacementFactorId,challengeId:challenge.id,code:input.value.trim()});
+          if (verifyError) throw verifyError;
+          let {data:assurance,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+          if (assuranceError) throw assuranceError;
+          if (assurance.currentLevel !== 'aal2') {
+            const {error:refreshError} = await client.auth.refreshSession();
+            if (refreshError) throw refreshError;
+            ({data:assurance,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel());
+            if (assuranceError) throw assuranceError;
+          }
+          if (assurance.currentLevel !== 'aal2') throw new Error('The new authenticator was verified, but the session has not reached AAL2 yet. Please try again.');
+          replacementFactorId = '';
+          document.getElementById('mfa-replacement-secret').textContent = '';
+          document.getElementById('mfa-replacement-qr').replaceChildren();
+          replacementPanel.hidden = true;
+          setStatus('Your new authenticator is verified. Signing you in securely…');
+          await renderSession();
+        } catch (error) {
+          document.getElementById('mfa-replacement-status').textContent = error.message || 'Could not verify the new authenticator. Check the code and try again.';
+          input.select();
+        } finally { button.disabled = false; }
+      });
+      document.getElementById('mfa-replacement-cancel').addEventListener('click', async () => {
+        if (replacementFactorId) {
+          const {error} = await client.auth.mfa.unenroll({factorId:replacementFactorId});
+          if (error) {
+            document.getElementById('mfa-replacement-status').textContent = 'The unfinished setup could not be cancelled. It remains unverified and cannot be used to sign in.';
+            return;
+          }
+        }
+        replacementFactorId = '';
+        replacementPanel.hidden = true;
+        document.getElementById('mfa-replacement-secret').textContent = '';
+        document.getElementById('mfa-replacement-qr').replaceChildren();
+        replacementStart.disabled = false;
+        document.getElementById('mfa-form').hidden = !pendingMfaFactorId;
+        document.getElementById('mfa-recovery-form').hidden = !pendingMfaFactorId || document.getElementById('mfa-use-recovery').hidden;
+        document.getElementById('mfa-replacement-status').textContent = 'Replacement setup cancelled.';
+      });
+
       document.getElementById('mfa-recovery-form').addEventListener('submit', async event => {
         event.preventDefault();
         const input = document.getElementById('mfa-recovery-code');
