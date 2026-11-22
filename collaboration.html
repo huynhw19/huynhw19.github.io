@@ -64,7 +64,8 @@
 </main>
 <footer>ConfigKit Collaboration Studio · Keep invitation links private. Anyone who receives an active link can join with the role shown.</footer>
 <script type="module">
-import * as Y from 'https://esm.sh/yjs@13.6.27';
+let Y;
+try{Y=await import('https://esm.sh/yjs@13.6.27');}catch(error){const el=document.getElementById('status');if(el){el.textContent='The real-time editing library could not be loaded. Check your connection and reload.';el.classList.add('error');}throw error;}
 const $=id=>document.getElementById(id);
 const config=window.CONFIGKIT_AUTH||{};
 const status=$('status');
@@ -80,7 +81,7 @@ else{
  const unbase64=value=>Uint8Array.from(atob(value),c=>c.charCodeAt(0));
  const sha256=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(b=>b.toString(16).padStart(2,'0')).join('');
  const randomToken=()=>{const b=crypto.getRandomValues(new Uint8Array(32));return Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join('')};
- const copy=async value=>{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(value);else{$('invite-url').focus();$('invite-url').select();if(!document.execCommand('copy'))throw new Error('Could not copy the link.')}};
+ const copy=async value=>{if(!value)throw new Error('Create an invitation link first.');if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(value);else{$('invite-url').focus();$('invite-url').select();if(!document.execCommand('copy'))throw new Error('Could not copy the link.')}};
  const safeDate=value=>value?new Date(value).toLocaleString():'';
  function makeInitial(type,title,template){
   let body='',description='';
@@ -107,14 +108,14 @@ else{
  function docTransact(fn){ydoc.transact(fn,'local-edit');}
  function bindText(key,inputId){
   const text=ydoc.getText(key),input=$(inputId);textFields[key]=text;input.value=text.toString();
-  text.observe(event=>{if(!event.transaction.local)input.value=text.toString();});
+  text.observe(event=>{if(!event.transaction.local){const start=input.selectionStart,end=input.selectionEnd;input.value=text.toString();try{input.setSelectionRange(Math.min(start,input.value.length),Math.min(end,input.value.length));}catch{}}});
   input.addEventListener('input',()=>{replaceText(text,input.value);markTyping();});
  }
  function markTyping(){
   if(!channel)return;
-  channel.track({user_id:user.id,display_name:profile.display_name,avatar_url:profile.avatar_url,typing:true}).catch(()=>{});
+  if(!typingTimer)channel.track({user_id:user.id,display_name:profile.display_name,avatar_url:profile.avatar_url,typing:true}).catch(()=>{});
   clearTimeout(typingTimer);
-  typingTimer=setTimeout(()=>channel?.track({user_id:user.id,display_name:profile.display_name,avatar_url:profile.avatar_url,typing:false}).catch(()=>{}),1400);
+  typingTimer=setTimeout(()=>{typingTimer=null;channel?.track({user_id:user.id,display_name:profile.display_name,avatar_url:profile.avatar_url,typing:false}).catch(()=>{});},1400);
  }
  function setPresence(state){
   const people=[];
@@ -236,10 +237,10 @@ else{
   const {data,error}=await db.from('configkit_collab_snapshots').select('id,user_id,label,created_at').eq('document_id',activeDoc.id).order('created_at',{ascending:false}).limit(30);
   if(error)throw error;const root=$('history-list');root.replaceChildren();
   if(!data?.length){root.textContent='No checkpoints yet.';return;}
-  for(const s of data){const item=document.createElement('div');item.className='history-item';const label=document.createElement('strong');label.textContent=s.label;const meta=document.createElement('div');meta.className='meta';meta.textContent=displayName(s.user_id)+' · '+safeDate(s.created_at);const restore=document.createElement('button');restore.type='button';restore.className='secondary';restore.textContent='Restore';restore.addEventListener('click',async()=>{if(!confirm('Restore this checkpoint? Its contents will be merged as a new edit, and the current text will remain in the update history.'))return;const {data:row,error}=await db.from('configkit_collab_snapshots').select('state_b64').eq('id',s.id).single();if(error)throw error;const snap=new Y.Doc();Y.applyUpdate(snap,unbase64(row.state_b64),'history-load');for(const key of ['title','description','body'])replaceText(ydoc.getText(key),snap.getText(key).toString());snap.destroy();say('Checkpoint restored. The changes are syncing…');});item.append(label,meta,restore);root.append(item);}
+  for(const s of data){const item=document.createElement('div');item.className='history-item';const label=document.createElement('strong');label.textContent=s.label;const meta=document.createElement('div');meta.className='meta';meta.textContent=displayName(s.user_id)+' · '+safeDate(s.created_at);const restore=document.createElement('button');restore.type='button';restore.className='secondary';restore.textContent='Restore';restore.disabled=role==='viewer';restore.addEventListener('click',async()=>{if(!confirm('Restore this checkpoint? Its contents will be merged as a new edit, and the current text will remain in the update history.'))return;const {data:row,error}=await db.from('configkit_collab_snapshots').select('state_b64').eq('id',s.id).single();if(error)throw error;const snap=new Y.Doc();Y.applyUpdate(snap,unbase64(row.state_b64),'history-load');for(const key of ['title','description','body'])replaceText(ydoc.getText(key),snap.getText(key).toString());snap.destroy();say('Checkpoint restored. The changes are syncing…');});item.append(label,meta,restore);root.append(item);}
  }
  async function createCheckpoint(){
-  await flushUpdates();
+  await flushUpdates();if(pendingUpdates.length)throw new Error('Your edits are still waiting to save. Retry before creating a checkpoint.');
   const label=prompt('Name this checkpoint','Before major changes');if(label===null)return;
   if(!label.trim())throw new Error('Enter a checkpoint name.');
   const state_b64=base64(Y.encodeStateAsUpdate(ydoc));
@@ -274,7 +275,7 @@ else{
   if(channel&&pendingUpdates.length){await flushUpdates();if(pendingUpdates.length)throw new Error('Your latest edits are still waiting to save. Please retry before switching workspaces.');}
   if(channel){await db.removeChannel(channel);channel=null;}
   if(ydoc){ydoc.destroy();ydoc=null;}
-  pendingUpdates=[];incomingUpdates=[];loadingUpdates=true;textFields={};
+  pendingUpdates=[];incomingUpdates=[];loadingUpdates=true;textFields={};comments=[];members=[];profiles={};
   const {data:doc,error}=await db.from('configkit_collab_documents').select('*').eq('id',id).single();if(error)throw error;
   activeDoc=doc;
   const {data:membership,error:memberError}=await db.from('configkit_collab_members').select('role').eq('document_id',id).eq('user_id',user.id).single();
@@ -298,7 +299,7 @@ else{
    .on('presence',{event:'sync'},()=>setPresence(channel.presenceState()))
    .on('presence',{event:'join'},()=>{setPresence(channel.presenceState());loadMembers().catch(()=>{});})
    .on('presence',{event:'leave'},()=>setPresence(channel.presenceState()));
-  await new Promise((resolve,reject)=>{let settled=false;const timer=setTimeout(()=>{if(!settled){settled=true;reject(new Error('Realtime connection timed out. Check your connection and try again.'));}},20000);channel.subscribe(state=>{if(state==='SUBSCRIBED'&&!settled){settled=true;clearTimeout(timer);resolve();}else if(['CHANNEL_ERROR','TIMED_OUT'].includes(state)&&!settled){settled=true;clearTimeout(timer);reject(new Error('Could not join the private collaboration channel. Check your access and try again.'));}});});
+  await new Promise((resolve,reject)=>{let settled=false;const timer=setTimeout(()=>{if(!settled){settled=true;reject(new Error('Realtime connection timed out. Check your connection and try again.'));}},20000);channel.subscribe(state=>{if(state==='SUBSCRIBED'){if(!settled){settled=true;clearTimeout(timer);resolve();}else{channel.track({user_id:user.id,display_name:profile.display_name,avatar_url:profile.avatar_url,typing:false}).catch(()=>{});if(role!=='viewer'&&ydoc)channel.send({type:'broadcast',event:'doc-update',payload:{update_b64:base64(Y.encodeStateAsUpdate(ydoc))}}).catch(()=>{});}}else if(['CHANNEL_ERROR','TIMED_OUT'].includes(state)&&!settled){settled=true;clearTimeout(timer);reject(new Error('Could not join the private collaboration channel. Check your access and try again.'));}});});
   const pageSize=500,updates=[];
   for(let offset=0;;offset+=pageSize){const {data,error}=await db.from('configkit_collab_updates').select('update_b64').eq('document_id',id).order('created_at',{ascending:true}).order('id',{ascending:true}).range(offset,offset+pageSize-1);if(error)throw error;updates.push(...(data||[]));if(!data||data.length<pageSize)break;}
   for(const row of updates)Y.applyUpdate(ydoc,unbase64(row.update_b64),'history-load');
