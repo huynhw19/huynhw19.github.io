@@ -203,7 +203,7 @@
         return;
       }
 
-      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce',experimental:{passkey:true}}});
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,experimental:{passkey:true}}});
       const loginParams = new URLSearchParams(window.location.search);
       const requestedNext = loginParams.get('next');
       // Only allow known same-site destinations. OAuth consent keeps its authorization id.
