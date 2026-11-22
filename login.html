@@ -132,6 +132,7 @@
           <input id="mfa-recovery-code" name="recoveryCode" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="39" pattern="([0-9A-Fa-f]{32}|([0-9A-Fa-f]{8}-){3}[0-9A-Fa-f]{8})" required>
           <div class="form-actions"><button id="mfa-recovery-submit" type="submit">Use recovery code</button><button id="mfa-recovery-back" class="secondary" type="button">Use authenticator instead</button><button id="mfa-recovery-cancel" class="secondary" type="button">Sign out</button></div>
         </form>
+        <p><a href="login.html?mfaRecovery=1" id="owner-mfa-recovery-link">Lost your authenticator? Recover with your email link.</a></p>
         </section>
       <div class="account" id="account" hidden></div>
       <button class="provider secondary" id="signout" type="button" hidden>Sign out</button>
@@ -608,6 +609,12 @@
           setStatus(error.message || 'That authenticator code could not be verified. Check the code and try again.', true);
           input.select();
         } finally { button.disabled = false; }
+      });
+      document.getElementById('owner-mfa-recovery-link').addEventListener('click', async event => {
+        event.preventDefault();
+        const {error} = await client.auth.signOut({scope:'local'});
+        if (error) { setStatus('Could not safely sign out before email recovery. Please try again.', true); return; }
+        window.location.assign('login.html?mfaRecovery=1');
       });
       document.getElementById('mfa-cancel').addEventListener('click', async () => {
         const {error} = await client.auth.signOut({scope:'local'});
