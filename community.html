@@ -99,7 +99,7 @@
   const row=document.createElement('div');row.className='person';
   const av=document.createElement('div');av.className='avatar';avatar(av,p);
   const title=document.createElement('h2');title.textContent=displayName(p);row.append(av,title);article.append(row);
-  if(p.bio){const bio=document.createElement('p');bio.className='muted';bio.textContent=p.bio;article.append(bio);}
+  if(p.bio){const bio=document.createElement('p');bio.className='muted';bio.textContent=p.bio;article.append(bio);}if(p.current_work){const work=document.createElement('p');work.className='muted';work.textContent='Working on: '+p.current_work;article.append(work);}
   const count=follows.filter(x=>x.following_id===p.user_id).length;
   const stats=document.createElement('p');stats.className='muted';stats.textContent=count+' follower'+(count===1?'':'s');article.append(stats);
   const actions=document.createElement('div');actions.className='actions';
