@@ -12,9 +12,9 @@
     "dist:linux": "npm run build:icons && electron-builder --linux AppImage --x64 --publish never"
   },
   "devDependencies": {
-    "electron": "39.2.7",
+    "electron": "42.11.16",
     "electron-builder": "26.0.12",
-    "sharp": "0.34.5",
+    "sharp": "0.35.5",
     "png-to-ico": "2.1.8"
   },
   "build": {
