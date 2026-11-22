@@ -215,8 +215,8 @@
       </section>
       <section class="card" aria-labelledby="passkeys-title">
         <h2 id="passkeys-title">Passwordless sign-in passkeys</h2>
-        <p class="muted">Use Face ID, Touch ID, Windows Hello, your device PIN, or a security key to sign in to ConfigKit without a password. Add a passkey while signed in, then use it from the login page.</p>
-        <p class="muted">Passkeys are used for passwordless sign-in only.</p>
+        <p class="muted">Use Face ID, Touch ID, Windows Hello, your device PIN, or a security key to sign in to ConfigKit without a password. Add a passkey while your account is securely verified, then use it from the login page.</p>
+        <p class="muted">A passkey is a primary sign-in method, not a replacement for an enabled authenticator-based second factor. For account recovery, sign in with your passkey and enter a saved one-time ConfigKit recovery code when prompted.</p>
         <div class="actions"><button id="add-passkey" type="button">Add a passkey</button></div>
         <div id="passkey-list" aria-live="polite"><p class="muted">Loading passkeys…</p></div>
         <p class="muted">Passkeys are stored by your device or password manager. You can remove a passkey here if you no longer use that device.</p>
@@ -296,17 +296,13 @@
       const {data:userData, error:userError} = await client.auth.getUser();
       if (userError || !userData.user) { setStatus('Could not load your account details. Please sign in again.', true); return; }
 
-      // Match the dashboard's passkey handling: a successful passkey ceremony is
-      // accepted as the primary factor for this tab. This marker is only a UI
-      // routing hint; it is not a server-side AAL2 claim.
-      const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(userData.user.id) === true;
       let recoveryCodeStatusData = {enabled:false,remaining:0,verified:false};
       try { recoveryCodeStatusData = await invokeRecoveryCodes({action:'status'}); }
       catch (error) { console.warn('Recovery-code status unavailable; native authenticator checks remain active.', error); }
       const {data:assuranceData,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
       if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
-      if ((recoveryCodeStatusData.enabled && !recoveryCodeStatusData.verified && !passkeySession && assuranceData.currentLevel !== 'aal2') ||
-          (!recoveryCodeStatusData.verified && !passkeySession && assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2')) {
+      if ((recoveryCodeStatusData.enabled && !recoveryCodeStatusData.verified && assuranceData.currentLevel !== 'aal2') ||
+          (!recoveryCodeStatusData.verified && assuranceData.nextLevel === 'aal2' && assuranceData.currentLevel !== 'aal2')) {
         setStatus('Please complete two-factor authentication before managing account security. Redirecting to sign in…');
         window.location.replace('login.html?next=account-settings.html');
         return;
