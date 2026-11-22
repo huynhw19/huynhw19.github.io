@@ -102,7 +102,7 @@
  }
  $('follow').addEventListener('click',async()=>{if(!user){location.href='login.html?next='+encodeURIComponent('creator-profile.html?user='+id);return;}if(!profile||id===user.id)return;$('follow').disabled=true;try{const wasFollowing=following;const result=wasFollowing?await db.from('user_follows').delete().eq('follower_id',user.id).eq('following_id',id):await db.from('user_follows').insert({follower_id:user.id,following_id:id});if(result.error)throw result.error;following=!wasFollowing;$('follow').textContent=following?'Following · Unfollow':'Follow';const followerCount=$('stats').querySelector('.stat strong');if(followerCount)followerCount.textContent=String(Math.max(0,Number(followerCount.textContent)+(following?1:-1)));setStatus(following?'You are now following this creator.':'You unfollowed this creator.');}catch(error){setStatus(error.message||'Could not update follow status.',true);}finally{$('follow').disabled=false;}});
  $('share').addEventListener('click',async()=>{const url=location.href;try{await navigator.clipboard.writeText(url);setStatus('Creator profile link copied.');}catch(_){setStatus('Copy this creator profile link: '+url);}});
- db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session)location.replace('login.html');});
+ db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'&&user)location.replace('creators.html');});
  init().catch(error=>setStatus(error.message||'Could not load this creator profile.',true));
 })();
 </script>
