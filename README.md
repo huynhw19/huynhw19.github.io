@@ -50,6 +50,7 @@ Get the right package from the [ConfigKit Downloads page](https://huynhw19.githu
 | [Community Wiki](https://huynhw19.github.io/community-wiki.html) | Read, write, publish and report member-authored knowledge articles. |
 | [Community Store](https://huynhw19.github.io/community-store.html) | Browse community listings and review your listing/order history. |
 | [Template Marketplace](https://huynhw19.github.io/template-marketplace.html) | Discover, preview, download and publish reusable templates for documents, slides, mobileconfig profiles and more. |
+| [Creator Profiles](https://huynhw19.github.io/community.html) | Discover ConfigKit creators and open shareable portfolios of their published work and community contributions. |
 | [Money Centre](https://huynhw19.github.io/money-centre.html) | Keep manually entered money records, accounts, bills and activity. |
 | [Kids Zone](https://huynhw19.github.io/kids-zone.html) | Explore age-friendly games, stories, videos and learning resources. |
 | [Kids Messages](https://huynhw19.github.io/kids-messages.html) | Use parent-supervised messaging with approved contacts. |
