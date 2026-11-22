@@ -36,7 +36,7 @@
 <script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
 <script>
 (() => {
-const params=new URLSearchParams(location.search), allowed=new Set(['account-settings.html','dashboard.html','student-dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','community-games.html','family.html','connected-apps.html','connect.html','notifications.html']);
+const params=new URLSearchParams(location.search), allowed=new Set(['account-settings.html','dashboard.html','student-dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','community-games.html','family.html','connected-apps.html','connect.html','collaboration.html','notifications.html']);
 const next=allowed.has(params.get('next'))?params.get('next'):'dashboard.html';
 document.querySelectorAll('[data-skip]').forEach(button=>{
  button.addEventListener('click',()=>{
