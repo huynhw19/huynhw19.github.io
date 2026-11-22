@@ -296,7 +296,7 @@ else{
    .on('broadcast',{event:'member-role-changed'},({payload})=>{if(payload?.user_id===user.id){location.reload();}})
    .on('broadcast',{event:'workspace-deleted'},()=>{say('This workspace was deleted by its owner.');db.removeChannel(channel).finally(()=>location.href='collaboration.html');})
    .on('presence',{event:'sync'},()=>setPresence(channel.presenceState()))
-   .on('presence',{event:'join'},()=>setPresence(channel.presenceState()))
+   .on('presence',{event:'join'},()=>{setPresence(channel.presenceState());loadMembers().catch(()=>{});})
    .on('presence',{event:'leave'},()=>setPresence(channel.presenceState()));
   await new Promise((resolve,reject)=>{let settled=false;const timer=setTimeout(()=>{if(!settled){settled=true;reject(new Error('Realtime connection timed out. Check your connection and try again.'));}},20000);channel.subscribe(state=>{if(state==='SUBSCRIBED'&&!settled){settled=true;clearTimeout(timer);resolve();}else if(['CHANNEL_ERROR','TIMED_OUT'].includes(state)&&!settled){settled=true;clearTimeout(timer);reject(new Error('Could not join the private collaboration channel. Check your access and try again.'));}});});
   const pageSize=500,updates=[];
