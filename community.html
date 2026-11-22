@@ -87,7 +87,7 @@
   document.getElementById('bio').value=own.data.bio||'';
   document.getElementById('discoverable').checked=own.data.is_discoverable;
   const [people,relations]=await Promise.all([
-   client.from('community_profiles').select('user_id,display_name,avatar_url,bio,is_discoverable').eq('is_discoverable',true).order('display_name').limit(200),
+   client.from('community_profiles').select('user_id,display_name,avatar_url,bio,current_work,is_discoverable').eq('is_discoverable',true).order('display_name').limit(200),
    client.from('user_follows').select('follower_id,following_id')
   ]);
   if(people.error)throw people.error;if(relations.error)throw relations.error;
