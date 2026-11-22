@@ -396,14 +396,22 @@ window.CONFIGKIT_AUTH = {
               // A passkey is a primary sign-in credential, not an MFA recovery assertion.
               const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recoveryVerified;
               if (!recoveryNeedsVerification) return;
-              const {data: assurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+              const {data: assurance, error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+              if (assuranceError) throw assuranceError;
               if (assurance?.currentLevel === 'aal2') return;
-              // ConfigKit's selected passwordless policy skips the separate app prompt.
-              const passwordlessMethod = (assurance?.currentAuthenticationMethods || [])
-                .some(item => {
-                  const method = typeof item === 'string' ? item : item?.method;
-                  return ['magiclink','passkey','webauthn'].includes(String(method || '').toLowerCase());
-                });
+              // Read the verified JWT claims as well as the AAL helper. Some
+              // SDK/auth combinations omit newer passwordless methods from the
+              // convenience method list even though the signed JWT contains amr.
+              const {data: claimsData, error:claimsError} = await client.auth.getClaims(session.access_token);
+              if (claimsError) throw claimsError;
+              const authMethods = [
+                ...(assurance?.currentAuthenticationMethods || []),
+                ...(claimsData?.claims?.amr || [])
+              ];
+              const passwordlessMethod = authMethods.some(item => {
+                const method = typeof item === 'string' ? item : item?.method;
+                return ['magiclink','passkey','webauthn'].includes(String(method || '').toLowerCase());
+              });
               if (passwordlessMethod) return;
               const currentPage = window.location.pathname.split('/').pop();
               const destination = ['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','community-games.html','video-studio.html','universal-search.html','profile-library.html','notes.html','tasks.html','contacts.html','invoices.html','projects.html','backup-restore.html','forms.html','roadmap.html'].includes(currentPage) ? currentPage : 'dashboard.html';
