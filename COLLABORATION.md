@@ -51,7 +51,7 @@ The feature uses Supabase tables prefixed with `configkit_collab_`:
 - `configkit_collab_comments`: member discussion.
 - `configkit_collab_snapshots`: named Yjs checkpoints.
 
-Row Level Security is enabled on every table. Access is restricted to authenticated workspace members, with a verified-session gate and an OAuth-client restriction. Editors can append document updates; viewers cannot broadcast document edits. Private Realtime channel policies check membership for presence and editing rights for broadcasts. Comments are delivered through the Realtime publication with member-scoped RLS.
+Row Level Security is enabled on every table. Access is restricted to authenticated workspace members, with a verified-session gate and an OAuth-client restriction. Editors can append document updates; viewers cannot broadcast document edits. Private Realtime channel policies check membership for presence, editor rights for document-update broadcasts, and owner rights for member-management and workspace-control events. Comments are delivered through the Realtime publication with member-scoped RLS.
 
 The update log is append-only so concurrent edits can be replayed when a collaborator joins. It is not automatically compacted yet; long-lived workspaces with heavy editing may accumulate update rows. Checkpoints are restore points, not automatic log compaction.
 
