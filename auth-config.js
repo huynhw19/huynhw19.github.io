@@ -391,18 +391,6 @@ window.CONFIGKIT_AUTH = {
                 }
                 return;
               }
-              const ownerRecoveryState = session.user?.app_metadata?.configkit_mfa_recovery_state;
-              const ownerCurrentPage = window.location.pathname.split('/').pop();
-              if (ownerRecoveryState === 'enroll' && ownerCurrentPage !== 'owner-mfa-setup.html') {
-                window.location.replace('owner-mfa-setup.html');
-                return;
-              }
-              if (ownerRecoveryState === 'verify_new' && ownerCurrentPage !== 'owner-mfa-setup.html') {
-                const {data: ownerAssurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
-                if (ownerAssurance?.currentLevel === 'aal2') window.location.replace('owner-mfa-setup.html');
-                else window.location.replace('login.html?next=dashboard.html');
-                return;
-              }
               const {data: recovery, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
               const recoveryVerified = !recoveryError && recovery?.verified;
               // A passkey is a primary sign-in credential, not an MFA recovery assertion.
