@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Accept your ConfigKit invitation and get started.">
+<title>Accept your invitation — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--mint:#e8f4ed}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{width:min(100% - 32px,620px);margin:9vh auto}.card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:clamp(24px,5vw,42px);box-shadow:0 14px 38px #17231f10}.eyebrow{color:var(--green);font-weight:750;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem}h1{font-size:clamp(2rem,7vw,2.8rem);line-height:1.12;margin:.5rem 0}p{color:var(--muted)}.status{margin-top:20px;padding:14px;background:var(--mint);border-radius:12px}a{color:var(--green)}footer{text-align:center;margin:22px;color:var(--muted);font-size:.88rem}
+</style></head>
+<body><main><section class="card">
+<div class="eyebrow">You're invited 🎉</div>
+<h1>Welcome to ConfigKit!</h1>
+<p>We're checking your invitation securely. Once it's confirmed, we'll guide you through a friendly welcome, the agreement, creating your password, and securing your account.</p>
+<p class="status" id="status" role="status" aria-live="polite">Checking your invitation…</p>
+<p>If this link has expired or has already been used, ask the person who invited you to send a fresh invitation.</p>
+</section><footer><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="login.html">Sign in</a></footer></main>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+<script>
+(async()=>{
+ const status=document.getElementById('status');
+ const params=new URLSearchParams(location.search);
+ const hashParams=new URLSearchParams(location.hash.replace(/^#/,''));
+ const inviteMarker=params.get('type')==='invite'||hashParams.get('type')==='invite';
+ const config=window.CONFIGKIT_AUTH||{};
+ if(!inviteMarker){status.textContent='This link is missing its invitation marker. Please ask the sender to resend the invitation using the ConfigKit invitation link.';return;}
+ if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){status.textContent='Sign-in configuration is unavailable. Please contact ConfigKit support.';return;}
+ try{
+  const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  const {data,error}=await client.auth.getSession();
+  if(error)throw error;
+  if(!data.session){status.textContent='Your invitation could not be verified. It may have expired or already been used. Ask the sender for a new invitation.';return;}
+  const {data:userData,error:userError}=await client.auth.getUser();
+  if(userError||!userData.user)throw userError||new Error('No signed-in account was found.');
+  if(!userData.user.email_confirmed_at)throw new Error('Please verify your email address before continuing.');
+  const {data:updated,error:updateError}=await client.auth.updateUser({data:{
+   configkit_onboarding_required:true,
+   configkit_invitation_pending:true,
+   configkit_invitation_password_set:false,
+   configkit_onboarding_questions:{version:1,completed:true,skipped:true,completed_at:new Date().toISOString()}
+  }});
+  if(updateError)throw updateError;
+  if(updated?.user?.user_metadata?.configkit_invitation_pending!==true)throw new Error('We could not confirm your invitation. Please request a new link.');
+  status.textContent='Invitation confirmed! Taking you to your welcome page…';
+  location.replace('welcome.html?next=dashboard.html');
+ }catch(error){status.textContent=error?.message||'We could not verify this invitation. Please request a new link.';}
+})();
+</script></body></html>
