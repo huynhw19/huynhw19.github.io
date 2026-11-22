@@ -90,7 +90,7 @@
    ['profiles',shared.data||[],'Shared mobileconfig','builder-discussion.html','Open Builder Discussion']
   ];
   let total=0;
-  for(const [rootKey,items,kind,href,label] of sections){const root=$(rootKey);if(!items.length){empty(root,'No published '+kind.toLowerCase()+'s yet.');continue;}total+=items.length;for(const item of items){let target=href;if(rootKey==='store')target='community-store.html?id='+encodeURIComponent(item.id);if(rootKey==='wiki')target='community-wiki.html?article='+encodeURIComponent(item.slug);if(rootKey==='profiles'){const u=safeUrl(db.storage.from('mobileconfig-shares').getPublicUrl(item.storage_path).data.publicUrl);if(u)target=u;}card(root,item,kind,target,label);}}
+  for(const [rootKey,items,kind,href,label] of sections){const root=$(rootKey);if(!items.length){empty(root,'No published '+kind.toLowerCase()+'s yet.');continue;}total+=items.length;for(const item of items){let target=href;if(rootKey==='store')target='community-store.html?id='+encodeURIComponent(item.id);if(rootKey==='wiki')target='community-wiki.html?id='+encodeURIComponent(item.slug);if(rootKey==='profiles'){const u=safeUrl(db.storage.from('mobileconfig-shares').getPublicUrl(item.storage_path).data.publicUrl);if(u)target=u;}card(root,item,kind,target,label);}}
   $('total-work').textContent=total+' published contributions';
   $('profile').classList.remove('hidden');$('portfolio').classList.remove('hidden');$('status').hidden=true;
  }
