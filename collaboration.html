@@ -328,9 +328,9 @@ else{
   await openWorkspace(row.document_id);
  }
  async function start(){
-  const initialParams=new URLSearchParams(location.search),incomingInvite=initialParams.get('invite');
+  const initialParams=new URLSearchParams(location.search),incomingInvite=initialParams.get('invite'),requestedWorkspaceId=initialParams.get('id');
   if(incomingInvite){sessionStorage.setItem('configkit_collab_pending_invite',incomingInvite);history.replaceState({},'',location.pathname);}
-  const {data,error}=await db.auth.getUser();if(error||!data.user){location.href='login.html?next='+encodeURIComponent('collaboration.html');return;}
+  const {data,error}=await db.auth.getUser();if(error||!data.user){if(requestedWorkspaceId)sessionStorage.setItem('configkit_collab_pending_workspace',requestedWorkspaceId);location.href='login.html?next='+encodeURIComponent('collaboration.html');return;}
   user=data.user;
   const {data:own}=await db.from('community_profiles').select('display_name,avatar_url').eq('user_id',user.id).maybeSingle();
   if(own)profile={display_name:own.display_name||profile.display_name,avatar_url:own.avatar_url||null};
@@ -339,8 +339,8 @@ else{
   $('import-drive').addEventListener('click',()=>importDrive().catch(e=>topSay(e.message,true)));
   $('refresh-list').addEventListener('click',()=>loadList().catch(e=>topSay(e.message,true)));
   await Promise.all([loadList(),loadDriveFiles()]);
-  const params=new URLSearchParams(location.search),id=params.get('id'),pendingInvite=sessionStorage.getItem('configkit_collab_pending_invite');
-  if(pendingInvite){sessionStorage.removeItem('configkit_collab_pending_invite');await acceptInvite(pendingInvite);}else if(id)await openWorkspace(id);
+  const params=new URLSearchParams(location.search),id=params.get('id'),pendingInvite=sessionStorage.getItem('configkit_collab_pending_invite'),pendingWorkspace=sessionStorage.getItem('configkit_collab_pending_workspace');
+  if(pendingInvite){sessionStorage.removeItem('configkit_collab_pending_invite');sessionStorage.removeItem('configkit_collab_pending_workspace');await acceptInvite(pendingInvite);}else if(pendingWorkspace){sessionStorage.removeItem('configkit_collab_pending_workspace');await openWorkspace(pendingWorkspace);}else if(id)await openWorkspace(id);
  }
  start().catch(async e=>{if(channel){await db.removeChannel(channel).catch(()=>{});channel=null;}if(ydoc){ydoc.destroy();ydoc=null;}topSay(e.message||'Could not open Collaboration Studio.',true);$('home').hidden=false;$('workspace').hidden=true;});
 }
