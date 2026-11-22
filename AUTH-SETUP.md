@@ -79,3 +79,9 @@ Supabase and the identity providers process authentication data under their own 
 5. Test sign-in and first-time account creation in a private browser window.
 
 The Zoom button is now available on the login/sign-up page, but authentication will only succeed after the Zoom app credentials are configured and the Zoom provider is enabled in Supabase.
+
+## 10. Invited-member onboarding
+
+ConfigKit now has a dedicated invitation acceptance flow. For invitations sent through Supabase Admin Auth, set the per-invitation `redirectTo` URL to `https://huynhw19.github.io/accept-invitation.html?type=invite`. Add that exact URL to Supabase's allowed redirect URLs. The invited member is guided through the welcome and agreement page, password creation, and the optional account-security setup.
+
+See [INVITATION-ONBOARDING-SETUP.md](INVITATION-ONBOARDING-SETUP.md) for the server-side invitation example and the full flow. Invitation sending must happen from a trusted server or Edge Function using the service-role/secret key; never expose that key in browser code.
