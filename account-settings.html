@@ -833,7 +833,7 @@
         const factor = factorPendingRemoval;
         const code = mfaRemoveCode.value.trim();
         if (!factor || !mfaRemoveForm.reportValidity()) return;
-        if (!/^\\d{6}$/.test(code)) {
+        if (!/^\d{6}$/.test(code)) {
           mfaRemoveStatus.textContent = 'Enter the six-digit code from this authenticator.';
           mfaRemoveCode.focus(); return;
         }
