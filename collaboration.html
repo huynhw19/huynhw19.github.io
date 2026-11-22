@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Create and edit documents together in real time with ConfigKit Collaboration Studio.">
+<title>Collaboration Studio — ConfigKit</title>
+<script src="auth-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e1e9e3;--paper:#f6f9f6;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8;--shadow:0 10px 28px #17231f0d}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(1180px,calc(100% - 32px));margin:auto}header{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line)}nav{display:flex;gap:14px;flex-wrap:wrap}main{padding:28px 0 54px}h1{font-size:clamp(2rem,5vw,2.8rem);line-height:1.1;margin:4px 0 8px}h2{font-size:1.2rem;margin:0 0 10px}h3{font-size:1rem;margin:0 0 8px}.muted{color:var(--muted)}.eyebrow{color:var(--green);font-size:.75rem;font-weight:800;letter-spacing:.1em}.hero{margin-bottom:20px}.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-width:0;margin:12px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.toolbar,.actions,.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toolbar{margin:12px 0}.button,button{font:inherit;font-weight:650;border:1px solid var(--green);border-radius:9px;padding:9px 13px;background:var(--green);color:white;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}.secondary{background:#fff!important;color:var(--dark)!important;border-color:var(--line)!important}.danger{background:#fff!important;color:var(--red)!important;border-color:#eccaca!important}button:disabled{opacity:.5;cursor:wait}input,select,textarea{font:inherit;color:var(--ink);background:#fff;border:1px solid #cbd6cf;border-radius:9px;padding:10px;width:100%;min-width:0}textarea{min-height:220px;resize:vertical;line-height:1.55}label{display:grid;gap:5px;font-weight:650;margin:10px 0}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.status{padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;margin:12px 0}.status.error{background:#fff5f5;color:var(--red);border-color:#eccaca}.status.good{background:var(--mint);color:var(--dark);border-color:#d3e8da}.status:empty{display:none}.doc-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff}.doc-card h3{margin:0 0 5px}.doc-card p{margin:3px 0;color:var(--muted);font-size:.9rem}.pill{display:inline-block;border-radius:99px;background:var(--mint);color:var(--dark);font-size:.78rem;font-weight:700;padding:2px 8px}.editor-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}.editor-main{min-width:0}.editor-main textarea{min-height:360px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.sidebar-card{margin:0 0 12px}.member,.comment,.history-item,.invite-item{border-top:1px solid var(--line);padding:10px 0}.member:first-child,.comment:first-child,.history-item:first-child,.invite-item:first-child{border-top:0}.member{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.member-name{flex:1;min-width:80px}.member select{width:auto;max-width:105px;padding:6px}.avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;background:var(--mint)}.presence-list{display:flex;gap:5px;flex-wrap:wrap}.presence-dot{display:inline-flex;align-items:center;gap:5px;background:var(--mint);border-radius:99px;padding:3px 8px;font-size:.8rem}.comment p{margin:4px 0;white-space:pre-wrap;overflow-wrap:anywhere}.comment small,.meta{color:var(--muted);font-size:.82rem}.comment-form{display:grid;gap:8px}.comment-form textarea{min-height:80px}.notice{padding:10px 12px;background:var(--gold);border:1px solid #f0dfbd;border-radius:10px;color:#705321;font-size:.88rem}.hidden{display:none!important}footer{padding:20px 0 34px;color:var(--muted)}[hidden]{display:none!important}@media(max-width:850px){.editor-layout{grid-template-columns:1fr}.field-grid{grid-template-columns:1fr}}@media(max-width:600px){header{padding:10px 0;align-items:flex-start;flex-direction:column}.editor-main textarea{min-height:260px}.card{padding:14px}}
+</style>
+</head>
+<body>
+<header><a href="dashboard.html"><strong>⌘ ConfigKit</strong></a><nav><a href="dashboard.html">Dashboard</a><a href="drive.html">ConfigKit Drive</a><a href="community.html">Community</a><a href="account-settings.html">Account</a></nav></header>
+<main>
+<section class="hero"><div class="eyebrow">CREATE TOGETHER</div><h1>🤝 Collaboration Studio</h1><p class="muted">Write together, see who's here, discuss ideas and keep shared work organised. Changes sync live across collaborators.</p></section>
+<div id="status" class="status" role="status" aria-live="polite">Checking your ConfigKit account…</div>
+<section id="home" hidden>
+  <div class="grid">
+    <section class="card">
+      <h2>Start a shared document</h2>
+      <p class="muted">Create a document or slide deck and invite other ConfigKit members with a secure link.</p>
+      <form id="create-form">
+        <label>Title<input id="new-title" maxlength="180" required placeholder="Project notes or presentation"></label>
+        <div class="field-grid">
+          <label>Workspace type<select id="new-type"><option value="document">Document</option><option value="slides">Slide deck</option></select></label>
+          <label>Start with<select id="new-template"><option value="blank">Blank</option><option value="meeting">Meeting notes</option><option value="project">Project brief</option><option value="lesson">Lesson plan</option></select></label>
+        </div>
+        <button type="submit">＋ Create workspace</button>
+      </form>
+    </section>
+    <section class="card">
+      <h2>Bring in a Drive file</h2>
+      <p class="muted">Import a saved ConfigKit document or presentation to start collaborating on a copy. Your original Drive file stays unchanged.</p>
+      <label>Choose a saved file<select id="drive-file"><option value="">Loading your Drive files…</option></select></label>
+      <button type="button" id="import-drive" class="secondary">Import selected file</button>
+    </section>
+  </div>
+  <section class="card"><div class="row" style="justify-content:space-between"><div><h2>Your shared workspaces</h2><p class="muted">Documents and presentations you've created or been invited to edit.</p></div><button id="refresh-list" type="button" class="secondary">↻ Refresh</button></div><div id="document-list" class="grid"><p class="muted">Loading your workspaces…</p></div></section>
+</section>
+<section id="workspace" hidden>
+  <div class="row" style="justify-content:space-between;margin:8px 0 14px"><div><a href="collaboration.html" id="back-home">← All workspaces</a><div class="eyebrow" id="workspace-type-label">SHARED WORKSPACE</div><h2 id="workspace-heading">Untitled</h2></div><div class="actions"><span class="pill" id="role-pill">Editor</span><button id="export-drive" class="secondary" type="button">Save copy to Drive</button><button id="leave-workspace" class="danger" type="button">Leave</button><button id="delete-workspace" class="danger hidden" type="button">Delete workspace</button></div></div>
+  <div id="workspace-status" class="status" role="status" aria-live="polite">Connecting to collaborators…</div>
+  <div class="editor-layout">
+    <section class="card editor-main">
+      <div class="row" style="justify-content:space-between"><h2 id="editor-kind">Document editor</h2><div class="actions"><button id="checkpoint" type="button" class="secondary">＋ Checkpoint</button><button id="download-copy" type="button" class="secondary">Download JSON</button></div></div>
+      <label>Title<input id="edit-title" maxlength="180"></label>
+      <label id="description-label" hidden>Description<input id="edit-description" maxlength="1000"></label>
+      <label id="body-label">Content<textarea id="edit-body" maxlength="200000" placeholder="Start writing together…"></textarea></label>
+      <p class="meta">Live editing uses Yjs conflict-free text synchronization. Edits from multiple people are merged; your changes are also saved as a private update history.</p>
+      <div class="notice">Everyone with Editor access can change this workspace. Viewers can read, join the live presence list, and comment. Only the owner can manage invitations and member roles.</div>
+    </section>
+    <aside>
+      <section class="card sidebar-card"><h3>🟢 Here now</h3><div id="presence-list" class="presence-list"><span class="muted">Waiting for collaborators…</span></div></section>
+      <section class="card sidebar-card"><h3>People</h3><div id="member-list"><p class="muted">Loading members…</p></div><div id="invite-controls" hidden><label>Invite role<select id="invite-role"><option value="editor">Can edit</option><option value="viewer">Can view and comment</option></select></label><label>Link expiry<select id="invite-expiry"><option value="1">1 day</option><option value="3">3 days</option><option value="7" selected>7 days</option></select></label><button id="create-invite" type="button">Create invitation link</button><input id="invite-url" type="url" readonly placeholder="New invitation link appears here"><button id="copy-invite" type="button" class="secondary">Copy invitation link</button><div id="invite-list"></div></div></section>
+      <section class="card sidebar-card"><h3>💬 Discussion</h3><div id="comments-list"><p class="muted">Loading comments…</p></div><form id="comment-form" class="comment-form"><textarea id="comment-body" maxlength="2000" required placeholder="Add a comment…"></textarea><button type="submit">Post comment</button></form></section>
+      <section class="card sidebar-card"><h3>🕘 Checkpoints</h3><p class="meta">Save named snapshots before major changes and restore one when needed.</p><div id="history-list"><p class="muted">No checkpoints yet.</p></div></section>
+    </aside>
+  </div>
+</section>
+</main>
+<footer>ConfigKit Collaboration Studio · Keep invitation links private. Anyone who receives an active link can join with the role shown.</footer>
+<script type="module">
+import * as Y from 'https://esm.sh/yjs@13.6.27';
+const $=id=>document.getElementById(id);
+const config=window.CONFIGKIT_AUTH||{};
+const status=$('status');
+if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){status.textContent='ConfigKit sign-in is not configured on this page.';status.classList.add('error');}
+else{
+ const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ let user=null,profile={display_name:'ConfigKit member',avatar_url:null},activeDoc=null,role='viewer',ydoc=null,channel=null;
+ let textFields={},pendingUpdates=[],flushTimer=null,typingTimer=null,loadingUpdates=true,incomingUpdates=[],comments=[],members=[],profiles={};
+ const BUCKET='configkit-drive-files';
+ const say=(message,error=false)=>{const el=$('workspace-status');el.textContent=message;el.classList.toggle('error',error);el.classList.toggle('good',!error);};
+ const topSay=(message,error=false)=>{status.textContent=message;status.classList.toggle('error',error);};
+ const base64=bytes=>{let s='';for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(s)};
+ const unbase64=value=>Uint8Array.from(atob(value),c=>c.charCodeAt(0));
+ const sha256=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(b=>b.toString(16).padStart(2,'0')).join('');
+ const randomToken=()=>{const b=crypto.getRandomValues(new Uint8Array(32));return Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join('')};
+ const copy=async value=>{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(value);else{$('invite-url').focus();$('invite-url').select();if(!document.execCommand('copy'))throw new Error('Could not copy the link.')}};
+ const safeDate=value=>value?new Date(value).toLocaleString():'';
+ function makeInitial(type,title,template){
+  let body='',description='';
+  if(template==='meeting')body='# Meeting notes\n\n**Date:**\n**Attendees:**\n\n## Agenda\n- \n\n## Notes\n\n## Actions\n- [ ] ';
+  if(template==='project')body='# Project brief\n\n## Goal\n\n## Scope\n\n## Milestones\n\n## Next steps\n';
+  if(template==='lesson'){title=title||'Lesson plan';description='Learning objectives and activities';body='# Learning objectives\n\n## Materials\n\n## Lesson steps\n\n## Assessment\n';}
+  if(type==='slides'&&!body)body='Welcome\nYour presentation starts here\n---\nKey ideas\nAdd your main points\n---\nNext steps\nWhat happens next?';
+  return {title,description,body};
+ }
+ function createYDoc(content){
+  const doc=new Y.Doc();
+  const values={title:String(content?.title||'Untitled'),description:String(content?.description||''),body:String(content?.body||'')};
+  for(const [key,value] of Object.entries(values)){const t=doc.getText(key);if(value)t.insert(0,value);}
+  return doc;
+ }
+ function replaceText(target,value){
+  value=String(value);
+  const old=target.toString();if(old===value)return;
+  let start=0;while(start<old.length&&start<value.length&&old[start]===value[start])start++;
+  let oldEnd=old.length,newEnd=value.length;
+  while(oldEnd>start&&newEnd>start&&old[oldEnd-1]===value[newEnd-1]){oldEnd--;newEnd--;}
+  docTransact(()=>{if(oldEnd>start)target.delete(start,oldEnd-start);if(newEnd>start)target.insert(start,value.slice(start,newEnd));});
+ }
+ function docTransact(fn){ydoc.transact(fn,'local-edit');}
+ function bindText(key,inputId){
+  const text=ydoc.getText(key),input=$(inputId);textFields[key]=text;input.value=text.toString();
+  text.observe(event=>{if(!event.transaction.local)input.value=text.toString();});
+  input.addEventListener('input',()=>{replaceText(text,input.value);markTyping();});
+ }
+ function markTyping(){
+  if(!channel)return;
+  channel.track({user_id:user.id,display_name:profile.display_name,avatar_url:profile.avatar_url,typing:true}).catch(()=>{});
+  clearTimeout(typingTimer);
+  typingTimer=setTimeout(()=>channel?.track({user_id:user.id,display_name:profile.display_name,avatar_url:profile.avatar_url,typing:false}).catch(()=>{}),1400);
+ }
+ function setPresence(state){
+  const people=[];
+  Object.values(state||{}).flat().forEach(p=>{if(p?.user_id&&!people.some(x=>x.user_id===p.user_id))people.push(p);});
+  $('presence-list').replaceChildren();
+  if(!people.length){$('presence-list').textContent='Only you are here right now.';return;}
+  for(const p of people){const chip=document.createElement('span');chip.className='presence-dot';chip.textContent=(p.display_name||'Member')+(p.typing?' · typing…':'');$('presence-list').append(chip);}
+ }
+ async function flushUpdates(){
+  if(!pendingUpdates.length||!activeDoc||!channel)return;
+  clearTimeout(flushTimer);flushTimer=null;
+  const batch=pendingUpdates.splice(0);
+  const merged=Y.mergeUpdates(batch),encoded=base64(merged);
+  const [sent,saved]=await Promise.all([
+   channel.send({type:'broadcast',event:'doc-update',payload:{update_b64:encoded}}).catch(error=>({status:'error',error})),
+   db.from('configkit_collab_updates').insert({document_id:activeDoc.id,user_id:user.id,update_b64:encoded})
+  ]);
+  if(saved.error){pendingUpdates.unshift(...batch);say('Live update sent, but its saved copy failed: '+saved.error.message,true);return;}
+  const title=textFields.title?.toString().trim()||'Untitled';
+  const {error:titleError}=await db.from('configkit_collab_documents').update({title,updated_at:new Date().toISOString()}).eq('id',activeDoc.id);
+  if(titleError)say('Changes saved, but the workspace title could not be refreshed: '+titleError.message,true);
+  else if(sent.status!=='ok')say('Changes saved. Live delivery is reconnecting; other collaborators will receive them when they reconnect.',true);
+  else say('All changes saved · '+new Date().toLocaleTimeString());
+ }
+ function queueUpdate(update,origin){
+  if(origin==='remote'||origin==='history-load')return;
+  pendingUpdates.push(update);
+  if(!flushTimer)flushTimer=setTimeout(()=>flushUpdates().catch(e=>say(e.message||'Could not save changes.',true)),90);
+  say('Saving your changes…');
+ }
+ function applyRemote(encoded){try{Y.applyUpdate(ydoc,unbase64(encoded),'remote');}catch(e){say('A live update could not be read. Refresh this workspace to resync.',true);}}
+ function renderList(rows){
+  const root=$('document-list');root.replaceChildren();
+  if(!rows.length){const p=document.createElement('p');p.className='muted';p.textContent='No shared workspaces yet. Create one above or open an invitation link.';root.append(p);return;}
+  for(const row of rows){const card=document.createElement('article');card.className='doc-card';const h=document.createElement('h3');h.textContent=row.title;const p=document.createElement('p');p.textContent=(row.document_type==='slides'?'Slide deck':'Document')+' · Updated '+safeDate(row.updated_at);const b=document.createElement('button');b.type='button';b.textContent='Open workspace';b.addEventListener('click',()=>openWorkspace(row.id));card.append(h,p,b);root.append(card);}
+ }
+ async function loadList(){
+  const {data,error}=await db.from('configkit_collab_documents').select('id,title,document_type,owner_id,created_at,updated_at').order('updated_at',{ascending:false}).limit(200);
+  if(error)throw error;renderList(data||[]);
+ }
+ async function loadDriveFiles(){
+  const select=$('drive-file');select.replaceChildren(new Option('Loading…',''));
+  const {data,error}=await db.from('drive_items').select('id,name,storage_path,updated_at').eq('user_id',user.id).eq('item_type','file').is('deleted_at',null).order('updated_at',{ascending:false}).limit(300);
+  if(error){select.replaceChildren(new Option('Could not load Drive files',''));return;}
+  const files=(data||[]).filter(x=>x.name.endsWith('.ckdoc.json')||x.name.endsWith('.ckslides.json'));
+  select.replaceChildren(new Option(files.length?'Choose a saved document or slide deck':'No saved .ckdoc or .ckslides files found',''));
+  for(const file of files)select.add(new Option(file.name,file.id));
+  select.dataset.files=JSON.stringify(files);
+ }
+ async function createWorkspace(title,type,content){
+  const {data,error}=await db.from('configkit_collab_documents').insert({owner_id:user.id,title,document_type:type,content}).select('id').single();
+  if(error)throw error;location.href='collaboration.html?id='+encodeURIComponent(data.id);
+ }
+ async function importDrive(){
+  const id=$('drive-file').value;if(!id)throw new Error('Choose a saved Drive file first.');
+  const files=JSON.parse($('drive-file').dataset.files||'[]'),file=files.find(x=>x.id===id);if(!file)throw new Error('That Drive file is no longer available.');
+  const {data:blob,error}=await db.storage.from(BUCKET).download(file.storage_path);if(error)throw error;
+  const parsed=JSON.parse(await blob.text());let type,content;
+  if(parsed.format==='configkit-doc'&&typeof parsed.content==='string'){type='document';content={title:parsed.title||file.name,description:'',body:parsed.content};}
+  else if(parsed.format==='configkit-slides'&&Array.isArray(parsed.slides)){type='slides';content={title:parsed.title||file.name,description:parsed.description||'',body:parsed.slides.map(s=>typeof s==='string'?s:(s.title||'')+'\n'+(s.content||'')).join('\n---\n')};}
+  else throw new Error('That file is not a supported ConfigKit document or slide deck.');
+  await createWorkspace(String(content.title).slice(0,180),type,content);
+ }
+ async function loadProfiles(ids){
+  profiles={};
+  if(!ids.length)return;
+  const {data}=await db.from('community_profiles').select('user_id,display_name,avatar_url').in('user_id',ids);
+  for(const p of data||[])profiles[p.user_id]=p;
+ }
+ function displayName(id){return profiles[id]?.display_name||(id===user.id?profile.display_name:'ConfigKit member');}
+ async function loadMembers(){
+  const {data,error}=await db.from('configkit_collab_members').select('user_id,role,joined_at').eq('document_id',activeDoc.id).order('joined_at');
+  if(error)throw error;members=data||[];await loadProfiles(members.map(x=>x.user_id));renderMembers();
+ }
+ function renderMembers(){
+  const root=$('member-list');root.replaceChildren();
+  for(const m of members){
+   const row=document.createElement('div');row.className='member';
+   const img=document.createElement('img');img.className='avatar';img.alt='';if(profiles[m.user_id]?.avatar_url)img.src=profiles[m.user_id].avatar_url;
+   const name=document.createElement('span');name.className='member-name';name.textContent=displayName(m.user_id)+(m.user_id===user.id?' (you)':'');
+   const badge=document.createElement('span');badge.className='pill';badge.textContent=m.role;
+   row.append(img,name);
+   if(role==='owner'&&m.role!=='owner'&&m.user_id!==user.id){
+    const sel=document.createElement('select');sel.setAttribute('aria-label','Role for '+displayName(m.user_id));for(const [v,l] of [['editor','Editor'],['viewer','Viewer']])sel.add(new Option(l,v));sel.value=m.role;
+    sel.addEventListener('change',async()=>{const {error}=await db.from('configkit_collab_members').update({role:sel.value}).eq('document_id',activeDoc.id).eq('user_id',m.user_id);if(error){say(error.message,true);sel.value=m.role;}else{m.role=sel.value;badge.textContent=m.role;say('Member role updated.');}});
+    const remove=document.createElement('button');remove.className='danger';remove.type='button';remove.textContent='Remove';remove.addEventListener('click',async()=>{if(!confirm('Remove '+displayName(m.user_id)+' from this workspace?'))return;const {error}=await db.from('configkit_collab_members').delete().eq('document_id',activeDoc.id).eq('user_id',m.user_id);if(error)say(error.message,true);else await loadMembers();});
+    row.append(sel,remove);
+   }else row.append(badge);
+   root.append(row);
+  }
+ }
+ async function loadInvites(){
+  if(role!=='owner')return;
+  $('invite-controls').hidden=false;
+  const {data,error}=await db.from('configkit_collab_invites').select('id,role,created_at,expires_at,accepted_at,revoked_at').eq('document_id',activeDoc.id).order('created_at',{ascending:false}).limit(20);
+  if(error)throw error;
+  const root=$('invite-list');root.replaceChildren();
+  for(const inv of data||[]){
+   const row=document.createElement('div');row.className='invite-item';
+   const label=document.createElement('small');label.textContent=inv.role+' · '+(inv.accepted_at?'Accepted':inv.revoked_at?'Revoked':new Date(inv.expires_at)<new Date()?'Expired':'Pending')+' · expires '+safeDate(inv.expires_at);
+   row.append(label);
+   if(!inv.accepted_at&&!inv.revoked_at&&new Date(inv.expires_at)>new Date()){
+    const revoke=document.createElement('button');revoke.type='button';revoke.className='danger';revoke.textContent='Revoke';revoke.addEventListener('click',async()=>{const {error}=await db.from('configkit_collab_invites').update({revoked_at:new Date().toISOString()}).eq('id',inv.id);if(error)say(error.message,true);else await loadInvites();});row.append(revoke);
+   }
+   root.append(row);
+  }
+ }
+ async function loadComments(){
+  const {data,error}=await db.from('configkit_collab_comments').select('id,user_id,body,created_at').eq('document_id',activeDoc.id).order('created_at',{ascending:true}).limit(300);
+  if(error)throw error;comments=data||[];await loadProfiles([...new Set([...members.map(m=>m.user_id),...comments.map(c=>c.user_id)])]);renderComments();
+ }
+ function renderComments(){
+  const root=$('comments-list');root.replaceChildren();
+  if(!comments.length){const p=document.createElement('p');p.className='muted';p.textContent='No comments yet. Start the discussion.';root.append(p);return;}
+  for(const c of comments){const item=document.createElement('div');item.className='comment';const meta=document.createElement('small');meta.textContent=displayName(c.user_id)+' · '+safeDate(c.created_at);const body=document.createElement('p');body.textContent=c.body;item.append(meta,body);if(c.user_id===user.id||role==='owner'){const del=document.createElement('button');del.className='danger';del.type='button';del.textContent='Delete';del.addEventListener('click',async()=>{const {error}=await db.from('configkit_collab_comments').delete().eq('id',c.id);if(error)say(error.message,true);else{comments=comments.filter(x=>x.id!==c.id);renderComments();}});item.append(del);}root.append(item);}
+ }
+ async function loadSnapshots(){
+  const {data,error}=await db.from('configkit_collab_snapshots').select('id,user_id,label,created_at').eq('document_id',activeDoc.id).order('created_at',{ascending:false}).limit(30);
+  if(error)throw error;const root=$('history-list');root.replaceChildren();
+  if(!data?.length){root.textContent='No checkpoints yet.';return;}
+  for(const s of data){const item=document.createElement('div');item.className='history-item';const label=document.createElement('strong');label.textContent=s.label;const meta=document.createElement('div');meta.className='meta';meta.textContent=displayName(s.user_id)+' · '+safeDate(s.created_at);const restore=document.createElement('button');restore.type='button';restore.className='secondary';restore.textContent='Restore';restore.addEventListener('click',async()=>{if(!confirm('Restore this checkpoint? Its contents will be merged as a new edit, and the current text will remain in the update history.'))return;const {data:row,error}=await db.from('configkit_collab_snapshots').select('state_b64').eq('id',s.id).single();if(error)throw error;const snap=new Y.Doc();Y.applyUpdate(snap,unbase64(row.state_b64),'history-load');for(const key of ['title','description','body'])replaceText(ydoc.getText(key),snap.getText(key).toString());snap.destroy();say('Checkpoint restored. The changes are syncing…');});item.append(label,meta,restore);root.append(item);}
+ }
+ async function createCheckpoint(){
+  await flushUpdates();
+  const label=prompt('Name this checkpoint','Before major changes');if(label===null)return;
+  if(!label.trim())throw new Error('Enter a checkpoint name.');
+  const state_b64=base64(Y.encodeStateAsUpdate(ydoc));
+  const {error}=await db.from('configkit_collab_snapshots').insert({document_id:activeDoc.id,user_id:user.id,label:label.trim().slice(0,100),state_b64});
+  if(error)throw error;await loadSnapshots();say('Checkpoint saved.');
+ }
+ async function createInvite(){
+  const token=randomToken(),token_hash=await sha256(token),days=Number($('invite-expiry').value),expires_at=new Date(Date.now()+days*86400000).toISOString();
+  const {error}=await db.from('configkit_collab_invites').insert({document_id:activeDoc.id,token_hash,role:$('invite-role').value,invited_by:user.id,expires_at});
+  if(error)throw error;
+  const url=new URL('collaboration.html?invite='+token,location.href).href;
+  $('invite-url').value=url;await loadInvites();say('Invitation link created. Copy it and send it to your collaborator.');
+ }
+ async function postComment(){
+  const body=$('comment-body').value.trim();if(!body)return;
+  const {data,error}=await db.from('configkit_collab_comments').insert({document_id:activeDoc.id,user_id:user.id,body}).select('id,user_id,body,created_at').single();
+  if(error)throw error;$('comment-body').value='';comments.push(data);renderComments();
+  await channel?.send({type:'broadcast',event:'comment-added',payload:{comment:data,display_name:profile.display_name}});
+ }
+ async function exportToDrive(){
+  const data=activeDoc.document_type==='document'?{format:'configkit-doc',version:1,title:textFields.title.toString(),content:textFields.body.toString(),updatedAt:new Date().toISOString()}:{format:'configkit-slides',version:1,title:textFields.title.toString(),description:textFields.description.toString(),slides:textFields.body.toString().split(/^---\s*$/m).map(x=>x.trim()).filter(Boolean),updatedAt:new Date().toISOString()};
+  const name=String(data.title||'Shared work').replace(/[\\/:*?"<>|]+/g,'-').trim().slice(0,140)+(activeDoc.document_type==='document'?'.ckdoc.json':'.ckslides.json');
+  const id=crypto.randomUUID(),path=user.id+'/'+id+'/blob',blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const {error:up}=await db.storage.from(BUCKET).upload(path,blob,{contentType:'application/json',upsert:false});if(up)throw up;
+  const {error:ins}=await db.from('drive_items').insert({id,user_id:user.id,parent_id:null,item_type:'file',name,mime_type:'application/json',size_bytes:blob.size,storage_path:path});
+  if(ins){await db.storage.from(BUCKET).remove([path]);throw ins;}say('A copy was saved to your private ConfigKit Drive.');
+ }
+ function downloadJson(){
+  const data=activeDoc.document_type==='document'?{format:'configkit-doc',version:1,title:textFields.title.toString(),content:textFields.body.toString(),updatedAt:new Date().toISOString()}:{format:'configkit-slides',version:1,title:textFields.title.toString(),description:textFields.description.toString(),slides:textFields.body.toString().split(/^---\s*$/m).map(x=>x.trim()).filter(Boolean),updatedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=String(data.title||'shared-work').replace(/[\\/:*?"<>|]+/g,'-')+(activeDoc.document_type==='document'?'.ckdoc.json':'.ckslides.json');document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);
+ }
+ async function openWorkspace(id){
+  if(channel){await db.removeChannel(channel);channel=null;}
+  if(ydoc){ydoc.destroy();ydoc=null;}
+  pendingUpdates=[];incomingUpdates=[];loadingUpdates=true;textFields={};
+  const {data:doc,error}=await db.from('configkit_collab_documents').select('*').eq('id',id).single();if(error)throw error;
+  activeDoc=doc;
+  const {data:membership,error:memberError}=await db.from('configkit_collab_members').select('role').eq('document_id',id).eq('user_id',user.id).single();
+  if(memberError)throw new Error('You do not have access to this workspace. Ask its owner for an invitation.');
+  role=membership.role;
+  $('home').hidden=true;$('workspace').hidden=false;$('workspace-heading').textContent=doc.title;$('workspace-type-label').textContent=doc.document_type==='slides'?'SHARED SLIDE DECK':'SHARED DOCUMENT';$('editor-kind').textContent=doc.document_type==='slides'?'Slide deck editor':'Document editor';$('role-pill').textContent=role;
+  $('description-label').hidden=doc.document_type!=='slides';$('body-label').firstChild.textContent=doc.document_type==='slides'?'Slides (separate sections with a line containing ---)':'Content';
+  $('delete-workspace').classList.toggle('hidden',role!=='owner');$('leave-workspace').classList.toggle('hidden',role==='owner');
+  for(const id of ['edit-title','edit-description','edit-body'])$(id).disabled=role==='viewer';
+  $('checkpoint').disabled=role==='viewer';$('export-drive').disabled=false;
+  ydoc=createYDoc(doc.content||{});
+  await db.realtime.setAuth();
+  const topic='collab:'+doc.id;
+  channel=db.channel(topic,{config:{private:true,presence:{key:user.id+':'+crypto.randomUUID()}}})
+   .on('broadcast',{event:'doc-update'},({payload})=>{if(payload?.update_b64){if(loadingUpdates)incomingUpdates.push(payload.update_b64);else applyRemote(payload.update_b64);}})
+   .on('broadcast',{event:'comment-added'},({payload})=>{if(payload?.comment&&!comments.some(c=>c.id===payload.comment.id)){comments.push(payload.comment);if(payload.display_name)profiles[payload.comment.user_id]={...(profiles[payload.comment.user_id]||{}),display_name:payload.display_name};renderComments();}})
+   .on('presence',{event:'sync'},()=>setPresence(channel.presenceState()))
+   .on('presence',{event:'join'},()=>setPresence(channel.presenceState()))
+   .on('presence',{event:'leave'},()=>setPresence(channel.presenceState()));
+  await new Promise((resolve,reject)=>{let settled=false;const timer=setTimeout(()=>{if(!settled){settled=true;reject(new Error('Realtime connection timed out. Check your connection and try again.'));}},20000);channel.subscribe(state=>{if(state==='SUBSCRIBED'&&!settled){settled=true;clearTimeout(timer);resolve();}else if(['CHANNEL_ERROR','TIMED_OUT'].includes(state)&&!settled){settled=true;clearTimeout(timer);reject(new Error('Could not join the private collaboration channel. Check your access and try again.'));}});});
+  const pageSize=500,updates=[];
+  for(let offset=0;;offset+=pageSize){const {data,error}=await db.from('configkit_collab_updates').select('update_b64').eq('document_id',id).order('created_at',{ascending:true}).order('id',{ascending:true}).range(offset,offset+pageSize-1);if(error)throw error;updates.push(...(data||[]));if(!data||data.length<pageSize)break;}
+  for(const row of updates)Y.applyUpdate(ydoc,unbase64(row.update_b64),'history-load');
+  for(const encoded of incomingUpdates)applyRemote(encoded);
+  incomingUpdates=[];loadingUpdates=false;
+  bindText('title','edit-title');bindText('description','edit-description');bindText('body','edit-body');
+  ydoc.on('update',queueUpdate);
+  await channel.track({user_id:user.id,display_name:profile.display_name,avatar_url:profile.avatar_url,typing:false});
+  await Promise.all([loadMembers(),loadInvites(),loadComments(),loadSnapshots()]);
+  say('Connected · '+role+' access · '+members.length+' member'+(members.length===1?'':'s'));
+  $('create-invite').onclick=()=>createInvite().catch(e=>say(e.message,true));
+  $('copy-invite').onclick=()=>copy($('invite-url').value).then(()=>say('Invitation link copied.')).catch(e=>say(e.message,true));
+  $('checkpoint').onclick=()=>createCheckpoint().catch(e=>say(e.message,true));
+  $('export-drive').onclick=()=>exportToDrive().catch(e=>say(e.message,true));
+  $('download-copy').onclick=downloadJson;
+  $('comment-form').onsubmit=e=>{e.preventDefault();postComment().catch(e=>say(e.message,true));};
+  $('leave-workspace').onclick=async()=>{if(!confirm('Leave this shared workspace? You will need a new invitation to rejoin.'))return;const {error}=await db.from('configkit_collab_members').delete().eq('document_id',doc.id).eq('user_id',user.id);if(error)throw error;location.href='collaboration.html';};
+  $('delete-workspace').onclick=async()=>{if(!confirm('Permanently delete this workspace, its invitations, comments, checkpoints and update history for everyone? This cannot be undone.'))return;const {error}=await db.from('configkit_collab_documents').delete().eq('id',doc.id);if(error)throw error;location.href='collaboration.html';};
+ }
+ async function acceptInvite(token){
+  const token_hash=await sha256(token),{data,error}=await db.rpc('configkit_accept_collab_invite',{p_token_hash:token_hash});
+  if(error)throw new Error(error.message||'Could not accept this invitation.');
+  const row=Array.isArray(data)?data[0]:data;if(!row?.document_id)throw new Error('The invitation response was incomplete.');
+  history.replaceState({},'',location.pathname+'?id='+encodeURIComponent(row.document_id));
+  await openWorkspace(row.document_id);
+ }
+ async function start(){
+  const {data,error}=await db.auth.getUser();if(error||!data.user){const next='collaboration.html'+location.search;location.href='login.html?next='+encodeURIComponent(next);return;}
+  user=data.user;
+  const {data:own}=await db.from('community_profiles').select('display_name,avatar_url').eq('user_id',user.id).maybeSingle();
+  if(own)profile={display_name:own.display_name||profile.display_name,avatar_url:own.avatar_url||null};
+  $('home').hidden=false;status.hidden=true;
+  $('create-form').addEventListener('submit',async e=>{e.preventDefault();const title=$('new-title').value.trim();if(!title)return;const type=$('new-type').value,content=makeInitial(type,title,$('new-template').value);try{await createWorkspace(title,type,content);}catch(err){topSay(err.message,true);}});
+  $('import-drive').addEventListener('click',()=>importDrive().catch(e=>topSay(e.message,true)));
+  $('refresh-list').addEventListener('click',()=>loadList().catch(e=>topSay(e.message,true)));
+  await Promise.all([loadList(),loadDriveFiles()]);
+  const params=new URLSearchParams(location.search),invite=params.get('invite'),id=params.get('id');
+  if(invite)await acceptInvite(invite);else if(id)await openWorkspace(id);
+ }
+ start().catch(e=>{topSay(e.message||'Could not open Collaboration Studio.',true);$('home').hidden=false;});
+}
+</script>
+</body>
+</html>
