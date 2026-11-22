@@ -37,7 +37,6 @@ Get the right package from the [ConfigKit Downloads page](https://huynhw19.githu
 | [Mobileconfig Studio](https://huynhw19.github.io/mobileconfig-builder.html) | Create and review configuration profiles and their payloads. |
 | [Web Clip Builder](https://huynhw19.github.io/webclip-builder.html) | Create a Home Screen web shortcut profile. |
 | [ConfigKit Drive](https://huynhw19.github.io/drive.html) | Store and organise private files and folders, with secure one-hour share links for files and folder contents. |
-| [Collaboration Studio](https://huynhw19.github.io/collaboration.html) | Co-edit documents and slide decks live with Yjs conflict-free syncing, private invitations, presence, comments and checkpoints. |
 | [Daily Planner](https://huynhw19.github.io/planner.html) | Organise tasks and upcoming items. |
 | [Notes & Ideas](https://huynhw19.github.io/notes.html) | Keep personal notes and ideas. |
 | [Document Vault](https://huynhw19.github.io/document-vault.html) | Organise private documents and share files or folder contents with expiring links. |
