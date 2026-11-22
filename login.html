@@ -139,7 +139,7 @@
     </section>
   </main>
   <footer><nav aria-label="Footer"><a href="index.html">Home</a><a href="safety.html">Safety &amp; contact</a><a href="terms.html">Terms</a></nav></footer>
-  <script src="auth-config.js?v=fresh-user-routing-20261122"></script>
+  <script src="auth-config.js?v=amr-string-passkey-20261122"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
   <script>
     (() => {
@@ -362,7 +362,10 @@
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
           const passwordlessMethod = (assurance.currentAuthenticationMethods || [])
-            .some(item => ['magiclink','passkey','webauthn'].includes(String(item?.method || '').toLowerCase()));
+            .some(item => {
+              const method = typeof item === 'string' ? item : item?.method;
+              return ['magiclink','passkey','webauthn'].includes(String(method || '').toLowerCase());
+            });
           if (!passwordlessMethod &&
               !recoveryCodes.verified &&
               assurance.currentLevel !== 'aal2' &&
