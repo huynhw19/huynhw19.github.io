@@ -369,11 +369,16 @@
                 throw new Error(detail || 'Owner authenticator recovery could not be completed.');
               }
               await client.auth.signOut({scope:'local'});
+              window.history.replaceState({}, '', 'login.html');
               form.hidden = true;
               document.querySelector('.tabs').hidden = true;
               document.querySelector('.divider').hidden = true;
               document.querySelectorAll('.providers').forEach(node => node.hidden = true);
               setStatus('Your email link is verified. Your old authenticator remains active for now. Sign in again and ConfigKit will guide you through enrolling and verifying a replacement before removing the old one.');
+              const continueLink = document.createElement('a');
+              continueLink.href = 'login.html';
+              continueLink.textContent = 'Continue to sign in';
+              status.append(document.createTextNode(' '), continueLink);
             } catch (recoveryError) {
               ownerRecoveryHandled = false;
               setStatus(recoveryError.message || 'Recovery could not be completed. Your account has not been intentionally unlocked.', true);
