@@ -71,17 +71,25 @@ const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnon
 client.auth.getUser().then(({data,error})=>{
  if(error||!data.user){canContinue=false;document.getElementById('continue').textContent='Return to sign in';document.getElementById('status').textContent='Your sign-in session could not be found. Choose Return to sign in and try again.';return;}
  if(!data.user.email_confirmed_at){canContinue=false;document.getElementById('continue').textContent='Return to sign in';document.getElementById('status').textContent='Please verify your email address before continuing. Choose Return to sign in when you are ready.';return;}
- invitationPending=data.user.user_metadata?.configkit_invitation_pending===true;
+ const metadata=data.user.user_metadata||{};
+ // This page is only for completing a pending invitation. If a normal account
+ // reaches it through a stale redirect or cached login page, send it onward.
+ if(metadata.configkit_onboarding_required!==true){location.replace(next);return;}
+ invitationPending=metadata.configkit_invitation_pending===true;
  canContinue=true;
- if(data.user.user_metadata?.configkit_onboarding_required===true){
+ if(metadata.configkit_onboarding_required===true){
   if(data.user.user_metadata?.configkit_terms_acceptance?.version!=='2026-11-21'){location.replace('welcome.html?next='+encodeURIComponent(next));return;}
   if(data.user.user_metadata?.configkit_invitation_pending===true &&
      data.user.user_metadata?.configkit_invitation_password_set!==true){
    location.replace('set-password.html?next='+encodeURIComponent(next));return;
   }
-  if(data.user.user_metadata?.configkit_invitation_pending!==true &&
-     data.user.user_metadata?.configkit_onboarding_questions?.completed!==true){
+  if(metadata.configkit_invitation_pending!==true &&
+     metadata.configkit_onboarding_questions?.completed!==true){
    location.replace('welcome-questions.html?next='+encodeURIComponent(next));return;
+  }
+  if(metadata.configkit_invitation_pending!==true &&
+     metadata.configkit_onboarding_questions?.completed===true){
+   location.replace(next);return;
   }
  }
 }).catch(()=>{document.getElementById('status').textContent='We could not verify your sign-in. Please reload this page.';});
