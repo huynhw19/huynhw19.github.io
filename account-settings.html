@@ -1344,6 +1344,55 @@
         }
       });
 
+      // Sensitive Auth changes require a real Supabase AAL2 session.
+      // If the current session is only AAL1, step the user up with an enrolled factor.
+      async function requireAAL2ForSensitiveChange(actionLabel) {
+        const {data:assurance,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (assuranceError) throw assuranceError;
+        if (assurance?.currentLevel === 'aal2') return;
+
+        const {data:factorData,error:factorError} = await client.auth.mfa.listFactors();
+        if (factorError) throw factorError;
+        const verifiedFactors = [
+          ...(factorData.totp || []).filter(factor => factor.status === 'verified').map(factor => ({...factor,kind:'totp'})),
+          ...(factorData.phone || []).filter(factor => factor.status === 'verified').map(factor => ({...factor,kind:'phone'}))
+        ];
+        if (!verifiedFactors.length) {
+          throw new Error('Your session needs AAL2 verification, but no verified authenticator or phone factor is available. Sign in again and complete MFA, or set up a second factor first.');
+        }
+
+        const factor = verifiedFactors[0];
+        const challengeMessage = factor.kind === 'phone'
+          ? 'Supabase is sending a verification code to your enrolled phone. Enter that code to ' + actionLabel + ':'
+          : 'Enter the current code from your authenticator app to ' + actionLabel + ':';
+        const code = window.prompt(challengeMessage);
+        if (code === null) throw new Error('Verification cancelled. No account changes were made.');
+        const normalizedCode = code.trim();
+        if (!/^\\d{6,8}$/.test(normalizedCode)) throw new Error('Enter the valid verification code from your second factor.');
+
+        const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:factor.id});
+        if (challengeError) throw challengeError;
+        const {error:verifyError} = await client.auth.mfa.verify({
+          factorId:factor.id,
+          challengeId:challenge.id,
+          code:normalizedCode
+        });
+        if (verifyError) throw verifyError;
+
+        // Verify that Supabase actually issued an AAL2 session before continuing.
+        const {data:upgraded,error:upgradedError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (upgradedError) throw upgradedError;
+        if (upgraded?.currentLevel !== 'aal2') {
+          const {error:refreshError} = await client.auth.refreshSession();
+          if (refreshError) throw refreshError;
+          const {data:refreshed,error:refreshedError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+          if (refreshedError) throw refreshedError;
+          if (refreshed?.currentLevel !== 'aal2') {
+            throw new Error('Supabase did not upgrade this session to AAL2. Please sign in again and complete MFA before trying this change.');
+          }
+        }
+      }
+
       // Change the email address. Supabase handles the verification flow.
       document.getElementById('change-email-form').addEventListener('submit', async event => {
         event.preventDefault();
@@ -1357,6 +1406,7 @@
         }
         button.disabled = true;
         try {
+          await requireAAL2ForSensitiveChange('change your email address');
           const {error} = await client.auth.updateUser({email:nextEmail});
           if (error) throw error;
           form.reset();
@@ -1383,6 +1433,7 @@
         const button = document.getElementById('change-password-button');
         button.disabled = true;
         try {
+          await requireAAL2ForSensitiveChange('change your password');
           const {error} = await client.auth.updateUser({password});
           if (error) throw error;
           form.reset();
