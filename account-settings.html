@@ -1368,7 +1368,7 @@
         const code = window.prompt(challengeMessage);
         if (code === null) throw new Error('Verification cancelled. No account changes were made.');
         const normalizedCode = code.trim();
-        if (!/^\\d{6,8}$/.test(normalizedCode)) throw new Error('Enter the valid verification code from your second factor.');
+        if (!/^\d{6,8}$/.test(normalizedCode)) throw new Error('Enter the valid verification code from your second factor.');
 
         const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:factor.id});
         if (challengeError) throw challengeError;
