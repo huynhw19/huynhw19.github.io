@@ -457,14 +457,19 @@
           if (!recoveryError && recoveryStatus) recoveryCodeStatus = recoveryStatus;
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) throw assuranceError;
-          // Match the login page and database gate: Supabase may report passkey
-          // authentication in currentAuthenticationMethods even when the
-          // tab-local passkey marker is absent (e.g. after a page reload).
-          const passwordlessMethod = (assurance.currentAuthenticationMethods || [])
-            .some(item => {
-              const method = typeof item === 'string' ? item : item?.method;
-              return ['magiclink','passkey','webauthn'].includes(String(method || '').toLowerCase());
-            });
+          // Check both the AAL helper and the signature-verified JWT claims.
+          // This preserves passkey/magic-link sessions even if the SDK's
+          // convenience method list omits a newer passwordless AMR value.
+          const {data: claimsData, error:claimsError} = await client.auth.getClaims(data.session.access_token);
+          if (claimsError) throw claimsError;
+          const authMethods = [
+            ...(assurance.currentAuthenticationMethods || []),
+            ...(claimsData?.claims?.amr || [])
+          ];
+          const passwordlessMethod = authMethods.some(item => {
+            const method = typeof item === 'string' ? item : item?.method;
+            return ['magiclink','passkey','webauthn'].includes(String(method || '').toLowerCase());
+          });
           const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(data.session.user.id) === true || passwordlessMethod;
           if (recoveryCodeStatus.enabled && !recoveryCodeStatus.verified && !passkeySession && assurance.currentLevel !== 'aal2') {
             window.location.replace('login.html');
