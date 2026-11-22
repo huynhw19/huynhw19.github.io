@@ -442,7 +442,14 @@
           if (!redirecting) {
             redirecting = true;
             const destination = completedFamily ? 'family.html' : postLoginDestination;
-            const user = data.session.user;
+            // OAuth signup intent is saved in this tab before leaving for the provider.
+            // Merge the freshly persisted metadata into the callback session user: the
+            // session snapshot may predate updateUser() above.
+            const sessionUser = data.session.user;
+            const user = {
+              ...sessionUser,
+              user_metadata:{...(sessionUser.user_metadata || {}), ...(oauthMetadata || {})}
+            };
             const onboardingRequired = user.user_metadata?.configkit_onboarding_required === true;
             const accepted = user.email_confirmed_at &&
               user.user_metadata?.configkit_terms_acceptance?.version === '2026-11-21';
