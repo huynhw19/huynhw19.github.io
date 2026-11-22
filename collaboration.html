@@ -200,7 +200,7 @@ else{
    row.append(img,name);
    if(role==='owner'&&m.role!=='owner'&&m.user_id!==user.id){
     const sel=document.createElement('select');sel.setAttribute('aria-label','Role for '+displayName(m.user_id));for(const [v,l] of [['editor','Editor'],['viewer','Viewer']])sel.add(new Option(l,v));sel.value=m.role;
-    sel.addEventListener('change',async()=>{const {error}=await db.from('configkit_collab_members').update({role:sel.value}).eq('document_id',activeDoc.id).eq('user_id',m.user_id);if(error){say(error.message,true);sel.value=m.role;}else{m.role=sel.value;badge.textContent=m.role;say('Member role updated.');}});
+    sel.addEventListener('change',async()=>{const {error}=await db.from('configkit_collab_members').update({role:sel.value}).eq('document_id',activeDoc.id).eq('user_id',m.user_id);if(error){say(error.message,true);sel.value=m.role;}else{m.role=sel.value;badge.textContent=m.role;await channel.send({type:'broadcast',event:'member-role-changed',payload:{user_id:m.user_id}});say('Member role updated.');}});
     const remove=document.createElement('button');remove.className='danger';remove.type='button';remove.textContent='Remove';remove.addEventListener('click',async()=>{if(!confirm('Remove '+displayName(m.user_id)+' from this workspace?'))return;const {error}=await db.from('configkit_collab_members').delete().eq('document_id',activeDoc.id).eq('user_id',m.user_id);if(error)say(error.message,true);else{await channel.send({type:'broadcast',event:'member-removed',payload:{user_id:m.user_id}});await loadMembers();}});
     row.append(sel,remove);
    }else row.append(badge);
@@ -291,8 +291,10 @@ else{
   const topic='collab:'+doc.id;
   channel=db.channel(topic,{config:{private:true,presence:{key:user.id+':'+crypto.randomUUID()}}})
    .on('broadcast',{event:'doc-update'},({payload})=>{if(payload?.update_b64){if(loadingUpdates)incomingUpdates.push(payload.update_b64);else applyRemote(payload.update_b64);}})
-   .on('postgres_changes',{event:'INSERT',schema:'public',table:'configkit_collab_comments',filter:'document_id=eq.'+doc.id},({new:row})=>{if(row&&!comments.some(c=>c.id===row.id)){comments.push(row);renderComments();}})
+   .on('postgres_changes',{event:'INSERT',schema:'public',table:'configkit_collab_comments',filter:'document_id=eq.'+doc.id},async({new:row})=>{if(row&&!comments.some(c=>c.id===row.id)){comments.push(row);if(row.user_id){const {data:p}=await db.from('community_profiles').select('user_id,display_name').eq('user_id',row.user_id).maybeSingle();if(p)profiles[p.user_id]=p;}renderComments();}})
    .on('broadcast',{event:'member-removed'},({payload})=>{if(payload?.user_id===user.id){say('Your access to this workspace was removed.');db.removeChannel(channel).finally(()=>location.href='collaboration.html');}})
+   .on('broadcast',{event:'member-role-changed'},({payload})=>{if(payload?.user_id===user.id){location.reload();}})
+   .on('broadcast',{event:'workspace-deleted'},()=>{say('This workspace was deleted by its owner.');db.removeChannel(channel).finally(()=>location.href='collaboration.html');})
    .on('presence',{event:'sync'},()=>setPresence(channel.presenceState()))
    .on('presence',{event:'join'},()=>setPresence(channel.presenceState()))
    .on('presence',{event:'leave'},()=>setPresence(channel.presenceState()));
@@ -315,7 +317,7 @@ else{
   $('download-copy').onclick=downloadJson;
   $('comment-form').onsubmit=e=>{e.preventDefault();postComment().catch(e=>say(e.message,true));};
   $('leave-workspace').onclick=async()=>{if(!confirm('Leave this shared workspace? You will need a new invitation to rejoin.'))return;const {error}=await db.from('configkit_collab_members').delete().eq('document_id',doc.id).eq('user_id',user.id);if(error)throw error;location.href='collaboration.html';};
-  $('delete-workspace').onclick=async()=>{if(!confirm('Permanently delete this workspace, its invitations, comments, checkpoints and update history for everyone? This cannot be undone.'))return;const {error}=await db.from('configkit_collab_documents').delete().eq('id',doc.id);if(error)throw error;location.href='collaboration.html';};
+  $('delete-workspace').onclick=async()=>{if(!confirm('Permanently delete this workspace, its invitations, comments, checkpoints and update history for everyone? This cannot be undone.'))return;await channel.send({type:'broadcast',event:'workspace-deleted',payload:{}});const {error}=await db.from('configkit_collab_documents').delete().eq('id',doc.id);if(error)throw error;location.href='collaboration.html';};
  }
  async function acceptInvite(token){
   const token_hash=await sha256(token),{data,error}=await db.rpc('configkit_accept_collab_invite',{p_token_hash:token_hash});
