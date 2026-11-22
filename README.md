@@ -42,6 +42,7 @@ Get the right package from the [ConfigKit Downloads page](https://huynhw19.githu
 | [Document Vault](https://huynhw19.github.io/document-vault.html) | Organise private documents and share files or folder contents with expiring links. |
 | [Habit Tracker](https://huynhw19.github.io/habits.html) | Record habits and review consistency. |
 | [Personal Insights](https://huynhw19.github.io/personal-insights.html) | Review activity and workspace summaries. |
+| [Advanced Analytics](https://huynhw19.github.io/advanced-analytics.html) | Explore private activity trends, project and collaboration metrics, creator performance, period comparisons and CSV exports. |
 | [Security Centre](https://huynhw19.github.io/security-centre.html) | Review account-protection options and security settings. |
 | [Scratch Project Studio](https://huynhw19.github.io/scratch-project.html) | Load and run Scratch projects, use the editor workflow and save project files to Drive when signed in. |
 | [Community](https://huynhw19.github.io/community.html) | Set up a community profile and discover other members. |
@@ -62,7 +63,7 @@ Get the right package from the [ConfigKit Downloads page](https://huynhw19.githu
 
 - **Profile tools:** [Profile Library](https://huynhw19.github.io/profile-library.html), [Profile Viewer](https://huynhw19.github.io/profile-viewer.html), [Prepare Profile](https://huynhw19.github.io/prepare-profile.html), [DNS Builder](https://huynhw19.github.io/dns-builder.html).
 - **Work and creation:** [Collaboration Studio](https://huynhw19.github.io/collaboration.html), [Projects](https://huynhw19.github.io/projects.html), [Tool Studio](https://huynhw19.github.io/tool-studio.html), [Video Studio](https://huynhw19.github.io/video-studio.html), [Photo Gallery](https://huynhw19.github.io/photo-gallery.html).
-- **Account and collaboration:** [Account Settings](https://huynhw19.github.io/account-settings.html), [Connected Apps](https://huynhw19.github.io/connected-apps.html), [Universal Search](https://huynhw19.github.io/universal-search.html), [Activity Centre](https://huynhw19.github.io/activity-centre.html).
+- **Account and collaboration:** [Account Settings](https://huynhw19.github.io/account-settings.html), [Connected Apps](https://huynhw19.github.io/connected-apps.html), [Universal Search](https://huynhw19.github.io/universal-search.html), [Activity Centre](https://huynhw19.github.io/activity-centre.html), [Advanced Analytics](https://huynhw19.github.io/advanced-analytics.html).
 - **Help and discovery:** [How-to Guides](https://huynhw19.github.io/how-to.html), [Examples](https://huynhw19.github.io/examples.html), [Roadmap](https://huynhw19.github.io/roadmap.html), [Support](https://huynhw19.github.io/support.html).
 
 For the complete in-app directory, visit the [ConfigKit Wiki](https://huynhw19.github.io/wiki.html).
