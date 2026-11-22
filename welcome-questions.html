@@ -57,6 +57,7 @@ client.auth.getUser().then(({data,error})=>{
  if(user.user_metadata?.configkit_onboarding_required!==true){location.replace(next);return;}
  if(!user.email_confirmed_at){$('status').textContent='Please verify your email address before continuing.';return;}
  if(user.user_metadata?.configkit_terms_acceptance?.version!=='2026-11-21'){location.replace('welcome.html?next='+encodeURIComponent(next));return;}
+ if(user.user_metadata?.configkit_invitation_pending===true){location.replace('set-password.html?next='+encodeURIComponent(next));return;}
  if(user.user_metadata?.configkit_onboarding_questions?.completed===true){go();return;}
 }).catch(()=>{$('status').textContent='We could not verify your sign-in. Please reload and try again.';});
 async function finish(skip){
