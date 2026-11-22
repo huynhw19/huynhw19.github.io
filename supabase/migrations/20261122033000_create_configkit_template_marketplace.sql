@@ -87,7 +87,7 @@ where not exists (select 1 from public.configkit_templates where is_official and
 
 insert into public.configkit_templates
   (creator_name,title,description,category,template_format,file_name,template_content,tags,status,is_official)
-select 'ConfigKit','Web Clip Example','An illustrative Apple Web Clip configuration profile. Review the URL and profile contents before installing it.','Mobileconfig','mobileconfig','web-clip-example.mobileconfig',
+select 'ConfigKit','Web Clip Example','An illustrative Apple Web Clip configuration profile. Replace the example identifiers and UUIDs, review the URL and inspect the profile before installing or distributing it.','Mobileconfig','mobileconfig','web-clip-example.mobileconfig',
 '<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
