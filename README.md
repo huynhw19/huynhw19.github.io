@@ -37,6 +37,7 @@ Get the right package from the [ConfigKit Downloads page](https://huynhw19.githu
 | [Mobileconfig Studio](https://huynhw19.github.io/mobileconfig-builder.html) | Create and review configuration profiles and their payloads. |
 | [Web Clip Builder](https://huynhw19.github.io/webclip-builder.html) | Create a Home Screen web shortcut profile. |
 | [ConfigKit Drive](https://huynhw19.github.io/drive.html) | Store and organise private files and folders, with secure one-hour share links for files and folder contents. |
+| [Collaboration Studio](https://huynhw19.github.io/collaboration.html) | Co-edit documents and slide decks live with Yjs conflict-free syncing, private invitations, presence, comments and checkpoints. |
 | [Daily Planner](https://huynhw19.github.io/planner.html) | Organise tasks and upcoming items. |
 | [Notes & Ideas](https://huynhw19.github.io/notes.html) | Keep personal notes and ideas. |
 | [Document Vault](https://huynhw19.github.io/document-vault.html) | Organise private documents and share files or folder contents with expiring links. |
@@ -60,7 +61,7 @@ Get the right package from the [ConfigKit Downloads page](https://huynhw19.githu
 ### 🧰 More tools
 
 - **Profile tools:** [Profile Library](https://huynhw19.github.io/profile-library.html), [Profile Viewer](https://huynhw19.github.io/profile-viewer.html), [Prepare Profile](https://huynhw19.github.io/prepare-profile.html), [DNS Builder](https://huynhw19.github.io/dns-builder.html).
-- **Work and creation:** [Projects](https://huynhw19.github.io/projects.html), [Tool Studio](https://huynhw19.github.io/tool-studio.html), [Video Studio](https://huynhw19.github.io/video-studio.html), [Photo Gallery](https://huynhw19.github.io/photo-gallery.html).
+- **Work and creation:** [Collaboration Studio](https://huynhw19.github.io/collaboration.html), [Projects](https://huynhw19.github.io/projects.html), [Tool Studio](https://huynhw19.github.io/tool-studio.html), [Video Studio](https://huynhw19.github.io/video-studio.html), [Photo Gallery](https://huynhw19.github.io/photo-gallery.html).
 - **Account and collaboration:** [Account Settings](https://huynhw19.github.io/account-settings.html), [Connected Apps](https://huynhw19.github.io/connected-apps.html), [Universal Search](https://huynhw19.github.io/universal-search.html), [Activity Centre](https://huynhw19.github.io/activity-centre.html).
 - **Help and discovery:** [How-to Guides](https://huynhw19.github.io/how-to.html), [Examples](https://huynhw19.github.io/examples.html), [Roadmap](https://huynhw19.github.io/roadmap.html), [Support](https://huynhw19.github.io/support.html).
 
