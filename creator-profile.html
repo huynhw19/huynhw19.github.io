@@ -62,7 +62,7 @@
   if(p.error)throw p.error;profile=p.data;
   if(!profile||(!profile.is_discoverable&&id!==user?.id)){$('profile').classList.add('hidden');$('privacy-note').classList.remove('hidden');$('status').hidden=true;return;}
   $('name').textContent=profile.display_name||'ConfigKit member';$('bio').textContent=profile.bio||'This creator has not added an introduction yet.';$('current-work').textContent=profile.current_work||'';
-  $('avatar').src=safeUrl(profile.avatar_url)||'';$('avatar').alt=(profile.display_name||'Creator')+' profile photo';$('avatar').onerror=()=>{$('avatar').removeAttribute('src');$('avatar').alt='No profile photo';};
+  const avatarUrl=safeUrl(profile.avatar_url);if(avatarUrl){$('avatar').src=avatarUrl;$('avatar').alt=(profile.display_name||'Creator')+' profile photo';$('avatar').onerror=()=>{const fallback=node('div','avatar',(profile.display_name||'C').trim().charAt(0).toUpperCase());fallback.id='avatar';$('avatar').replaceWith(fallback);};}else{const fallback=node('div','avatar',(profile.display_name||'C').trim().charAt(0).toUpperCase());fallback.id='avatar';$('avatar').replaceWith(fallback);}
   if(user&&id===user.id)$('edit').classList.remove('hidden');
   const social=[['Website',profile.website_url],['GitHub',profile.github_url],['LinkedIn',profile.linkedin_url],['X',profile.x_url],['Instagram',profile.instagram_url],['YouTube',profile.youtube_url],['Facebook',profile.facebook_url]];
   for(const [label,value] of social){const url=safeUrl(value);if(url){const a=node('a','',label);a.href=url;a.target='_blank';a.rel='noopener noreferrer';$('socials').append(a);}}
