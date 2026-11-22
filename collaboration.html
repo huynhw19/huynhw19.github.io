@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Create and edit documents together in real time with ConfigKit Collaboration Studio.">
+<meta name="referrer" content="no-referrer">
 <title>Collaboration Studio — ConfigKit</title>
 <script src="auth-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
@@ -199,7 +200,7 @@ else{
    if(role==='owner'&&m.role!=='owner'&&m.user_id!==user.id){
     const sel=document.createElement('select');sel.setAttribute('aria-label','Role for '+displayName(m.user_id));for(const [v,l] of [['editor','Editor'],['viewer','Viewer']])sel.add(new Option(l,v));sel.value=m.role;
     sel.addEventListener('change',async()=>{const {error}=await db.from('configkit_collab_members').update({role:sel.value}).eq('document_id',activeDoc.id).eq('user_id',m.user_id);if(error){say(error.message,true);sel.value=m.role;}else{m.role=sel.value;badge.textContent=m.role;say('Member role updated.');}});
-    const remove=document.createElement('button');remove.className='danger';remove.type='button';remove.textContent='Remove';remove.addEventListener('click',async()=>{if(!confirm('Remove '+displayName(m.user_id)+' from this workspace?'))return;const {error}=await db.from('configkit_collab_members').delete().eq('document_id',activeDoc.id).eq('user_id',m.user_id);if(error)say(error.message,true);else await loadMembers();});
+    const remove=document.createElement('button');remove.className='danger';remove.type='button';remove.textContent='Remove';remove.addEventListener('click',async()=>{if(!confirm('Remove '+displayName(m.user_id)+' from this workspace?'))return;const {error}=await db.from('configkit_collab_members').delete().eq('document_id',activeDoc.id).eq('user_id',m.user_id);if(error)say(error.message,true);else{await channel.send({type:'broadcast',event:'member-removed',payload:{user_id:m.user_id}});await loadMembers();}});
     row.append(sel,remove);
    }else row.append(badge);
    root.append(row);
@@ -270,6 +271,7 @@ else{
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=String(data.title||'shared-work').replace(/[\\/:*?"<>|]+/g,'-')+(activeDoc.document_type==='document'?'.ckdoc.json':'.ckslides.json');document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);
  }
  async function openWorkspace(id){
+  if(channel&&pendingUpdates.length){await flushUpdates();if(pendingUpdates.length)throw new Error('Your latest edits are still waiting to save. Please retry before switching workspaces.');}
   if(channel){await db.removeChannel(channel);channel=null;}
   if(ydoc){ydoc.destroy();ydoc=null;}
   pendingUpdates=[];incomingUpdates=[];loadingUpdates=true;textFields={};
@@ -289,6 +291,7 @@ else{
   channel=db.channel(topic,{config:{private:true,presence:{key:user.id+':'+crypto.randomUUID()}}})
    .on('broadcast',{event:'doc-update'},({payload})=>{if(payload?.update_b64){if(loadingUpdates)incomingUpdates.push(payload.update_b64);else applyRemote(payload.update_b64);}})
    .on('broadcast',{event:'comment-added'},({payload})=>{if(payload?.comment&&!comments.some(c=>c.id===payload.comment.id)){comments.push(payload.comment);if(payload.display_name)profiles[payload.comment.user_id]={...(profiles[payload.comment.user_id]||{}),display_name:payload.display_name};renderComments();}})
+   .on('broadcast',{event:'member-removed'},({payload})=>{if(payload?.user_id===user.id){say('Your access to this workspace was removed.');db.removeChannel(channel).finally(()=>location.href='collaboration.html');}})
    .on('presence',{event:'sync'},()=>setPresence(channel.presenceState()))
    .on('presence',{event:'join'},()=>setPresence(channel.presenceState()))
    .on('presence',{event:'leave'},()=>setPresence(channel.presenceState()));
@@ -301,7 +304,8 @@ else{
   bindText('title','edit-title');bindText('description','edit-description');bindText('body','edit-body');
   ydoc.on('update',queueUpdate);
   await channel.track({user_id:user.id,display_name:profile.display_name,avatar_url:profile.avatar_url,typing:false});
-  await Promise.all([loadMembers(),loadInvites(),loadComments(),loadSnapshots()]);
+  $('invite-controls').hidden=role!=='owner';
+  await loadMembers();await loadInvites();await loadComments();await loadSnapshots();
   say('Connected · '+role+' access · '+members.length+' member'+(members.length===1?'':'s'));
   $('create-invite').onclick=()=>createInvite().catch(e=>say(e.message,true));
   $('copy-invite').onclick=()=>copy($('invite-url').value).then(()=>say('Invitation link copied.')).catch(e=>say(e.message,true));
@@ -320,7 +324,9 @@ else{
   await openWorkspace(row.document_id);
  }
  async function start(){
-  const {data,error}=await db.auth.getUser();if(error||!data.user){const next='collaboration.html'+location.search;location.href='login.html?next='+encodeURIComponent(next);return;}
+  const initialParams=new URLSearchParams(location.search),incomingInvite=initialParams.get('invite');
+  if(incomingInvite){sessionStorage.setItem('configkit_collab_pending_invite',incomingInvite);history.replaceState({},'',location.pathname);}
+  const {data,error}=await db.auth.getUser();if(error||!data.user){location.href='login.html?next='+encodeURIComponent('collaboration.html');return;}
   user=data.user;
   const {data:own}=await db.from('community_profiles').select('display_name,avatar_url').eq('user_id',user.id).maybeSingle();
   if(own)profile={display_name:own.display_name||profile.display_name,avatar_url:own.avatar_url||null};
@@ -329,8 +335,8 @@ else{
   $('import-drive').addEventListener('click',()=>importDrive().catch(e=>topSay(e.message,true)));
   $('refresh-list').addEventListener('click',()=>loadList().catch(e=>topSay(e.message,true)));
   await Promise.all([loadList(),loadDriveFiles()]);
-  const params=new URLSearchParams(location.search),invite=params.get('invite'),id=params.get('id');
-  if(invite)await acceptInvite(invite);else if(id)await openWorkspace(id);
+  const params=new URLSearchParams(location.search),id=params.get('id'),pendingInvite=sessionStorage.getItem('configkit_collab_pending_invite');
+  if(pendingInvite){sessionStorage.removeItem('configkit_collab_pending_invite');await acceptInvite(pendingInvite);}else if(id)await openWorkspace(id);
  }
  start().catch(e=>{topSay(e.message||'Could not open Collaboration Studio.',true);$('home').hidden=false;});
 }
