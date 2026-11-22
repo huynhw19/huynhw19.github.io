@@ -165,7 +165,8 @@ else{
   select.dataset.files=JSON.stringify(files);
  }
  async function createWorkspace(title,type,content){
-  const {data,error}=await db.from('configkit_collab_documents').insert({owner_id:user.id,title,document_type:type,content}).select('id').single();
+  const initial=createYDoc(content),base_state_b64=base64(Y.encodeStateAsUpdate(initial));initial.destroy();
+  const {data,error}=await db.from('configkit_collab_documents').insert({owner_id:user.id,title,document_type:type,content,base_state_b64}).select('id').single();
   if(error)throw error;location.href='collaboration.html?id='+encodeURIComponent(data.id);
  }
  async function importDrive(){
@@ -284,7 +285,8 @@ else{
   $('delete-workspace').classList.toggle('hidden',role!=='owner');$('leave-workspace').classList.toggle('hidden',role==='owner');
   for(const id of ['edit-title','edit-description','edit-body'])$(id).disabled=role==='viewer';
   $('checkpoint').disabled=role==='viewer';$('export-drive').disabled=false;
-  ydoc=createYDoc(doc.content||{});
+  if(!doc.base_state_b64)throw new Error('This workspace is missing its shared editing state. Re-import the original Drive file into a new workspace.');
+  ydoc=new Y.Doc();Y.applyUpdate(ydoc,unbase64(doc.base_state_b64),'history-load');
   await db.realtime.setAuth();
   const topic='collab:'+doc.id;
   channel=db.channel(topic,{config:{private:true,presence:{key:user.id+':'+crypto.randomUUID()}}})
