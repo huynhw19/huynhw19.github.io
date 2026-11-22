@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Discover public ConfigKit creators and explore their portfolios, templates, themes and community work.">
+<meta name="theme-color" content="#174b39">
+<title>Discover Creators — ConfigKit</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--shadow:0 12px 32px rgba(23,35,31,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(100% - 32px,1100px);margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}header nav{display:flex;gap:1rem;flex-wrap:wrap}.brand{font-weight:800;color:var(--ink);text-decoration:none}main{padding:2rem 0 4rem}.hero,.creator-card{background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.hero{padding:clamp(1.3rem,4vw,2.5rem);background:linear-gradient(130deg,#e8f4ed,#fff 70%)}.eyebrow{display:inline-block;background:var(--mint);color:var(--dark);border-radius:99px;padding:.25rem .7rem;font-size:.82rem;font-weight:750}.hero h1{font-size:clamp(2.2rem,6vw,3.7rem);line-height:1.08;margin:.7rem 0}.muted{color:var(--muted)}.toolbar{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin:1.2rem 0}.toolbar input{flex:1;min-width:220px;font:inherit;padding:.75rem .85rem;border:1px solid #bdcbc3;border-radius:9px;background:white}.button{font:inherit;font-weight:650;border:1px solid var(--green);border-radius:9px;padding:.62rem .9rem;background:var(--green);color:white;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:1rem}.creator-card{padding:1.1rem;display:flex;flex-direction:column;gap:.7rem}.person{display:flex;align-items:center;gap:.85rem}.avatar{width:64px;height:64px;border-radius:50%;object-fit:cover;background:var(--mint);display:grid;place-items:center;color:var(--dark);font-weight:800;font-size:1.35rem;flex:none}.person h2{margin:0;font-size:1.1rem}.creator-card p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.stats{font-size:.85rem;color:var(--muted)}.status{padding:.85rem 1rem;border:1px solid var(--line);background:white;border-radius:10px;margin:1rem 0}.empty{padding:1.5rem;border:1px dashed #bdcbc3;border-radius:12px;color:var(--muted);text-align:center}.notice{border:1px solid #e6d8ae;background:#fff9e9;border-radius:10px;padding:.9rem 1rem;margin:1rem 0}footer{padding:1.5rem 0 2.5rem;color:var(--muted);border-top:1px solid var(--line)}[hidden]{display:none!important}@media(max-width:650px){header{align-items:flex-start;flex-direction:column;padding:1rem 0}header nav{gap:.65rem}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="index.html">⌘ ConfigKit</a><nav aria-label="Main navigation"><a href="community.html">Community</a><a href="template-marketplace.html">Templates</a><a href="community-themes.html">Themes</a><a href="community-store.html">Store</a></nav></header>
+<main>
+<section class="hero"><span class="eyebrow">Made by the community</span><h1>👩‍🎨 Discover ConfigKit Creators</h1><p class="muted">Meet the people building, designing, writing and sharing with ConfigKit. Open a public creator portfolio to explore their published work and links.</p><a class="button" href="#directory">Explore creators</a></section>
+<p id="status" class="status" role="status" aria-live="polite">Loading public creator profiles…</p>
+<section id="directory" hidden><div class="toolbar"><input id="search" type="search" placeholder="Search creators, bios or current projects…" aria-label="Search creators"><span id="count" class="muted"></span></div><div id="grid" class="grid"></div></section>
+<div class="notice"><strong>Privacy:</strong> Only members who enable public discoverability appear here. Their public profile information and published portfolio items may be viewed without signing in. Private drafts, email addresses and account settings are not shown.</div>
+</main>
+<footer>ConfigKit Creator Directory · <a href="privacy.html">Privacy</a> · <a href="safety.html">Safety</a></footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=> {
+ const $=id=>document.getElementById(id),cfg=window.CONFIGKIT_AUTH||{};
+ if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient){$('status').textContent='Creator directory is not configured. Please contact the site owner.';return;}
+ const db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ let creators=[];
+ const node=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
+ const safeUrl=value=>{try{const u=new URL(value);return u.protocol==='https:'?u.href:null;}catch(_){return null;}};
+ function render(){const q=$('search').value.trim().toLowerCase();const list=creators.filter(p=>[p.display_name,p.bio,p.current_work].join(' ').toLowerCase().includes(q));$('count').textContent=list.length+' creator'+(list.length===1?'':'s');const grid=$('grid');grid.replaceChildren();if(!list.length){grid.append(node('div','empty',creators.length?'No creators match your search. Try a different name or keyword.':'No public creator profiles are available yet.'));return;}for(const p of list){const card=node('article','creator-card'),person=node('div','person'),avatar=node('img','avatar');avatar.alt='';avatar.src=safeUrl(p.avatar_url)||'';avatar.onerror=()=>{const fallback=node('div','avatar',(p.display_name||'C').trim().charAt(0).toUpperCase());avatar.replaceWith(fallback);};const identity=node('div','');identity.append(node('h2','',p.display_name||'ConfigKit member'));identity.append(node('span','stats',p.current_work?'Currently working on a project':'ConfigKit community creator'));person.append(avatar,identity);card.append(person);if(p.bio)card.append(node('p','muted',p.bio));if(p.current_work)card.append(node('p','muted','Working on: '+p.current_work));const link=node('a','button','View creator portfolio');link.href='creator-profile.html?user='+encodeURIComponent(p.user_id);card.append(link);grid.append(card);}}
+ async function load(){const {data,error}=await db.from('community_profiles').select('user_id,display_name,avatar_url,bio,is_discoverable,current_work,updated_at').eq('is_discoverable',true).order('display_name',{ascending:true}).limit(500);if(error)throw error;creators=data||[];$('directory').hidden=false;$('status').hidden=true;render();}
+ $('search').addEventListener('input',render);
+ load().catch(error=>{$('status').textContent='Could not load public creators: '+(error.message||'Please refresh and try again.');});
+})();
+</script>
+</body></html>
