@@ -446,8 +446,16 @@
             const onboardingRequired = user.user_metadata?.configkit_onboarding_required === true;
             const accepted = user.email_confirmed_at &&
               user.user_metadata?.configkit_terms_acceptance?.version === '2026-11-21';
+            const invitationPending = user.user_metadata?.configkit_invitation_pending === true;
+            const invitationPasswordSet = user.user_metadata?.configkit_invitation_password_set === true;
             if (destination.startsWith('oauth-consent.html')) {
               window.location.replace(destination);
+            } else if (user.email_confirmed_at && invitationPending && !accepted) {
+              window.location.replace('welcome.html?next=' + encodeURIComponent(destination));
+            } else if (user.email_confirmed_at && invitationPending && accepted && !invitationPasswordSet) {
+              window.location.replace('set-password.html?next=' + encodeURIComponent(destination));
+            } else if (user.email_confirmed_at && invitationPending && accepted && invitationPasswordSet) {
+              window.location.replace('secure-account.html?next=' + encodeURIComponent(destination));
             } else if (user.email_confirmed_at && onboardingRequired && !accepted) {
               window.location.replace('welcome.html?next=' + encodeURIComponent(destination));
             } else if (user.email_confirmed_at && onboardingRequired && accepted &&
