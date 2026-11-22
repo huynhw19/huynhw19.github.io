@@ -207,7 +207,7 @@
       const loginParams = new URLSearchParams(window.location.search);
       const requestedNext = loginParams.get('next');
       // Only allow known same-site destinations. OAuth consent keeps its authorization id.
-      const allowedDestinations = new Set(['account-settings.html','dashboard.html','student-dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','community-games.html','family.html','oauth-consent.html','connected-apps.html','connect.html','notifications.html']);
+      const allowedDestinations = new Set(['account-settings.html','dashboard.html','student-dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','community-games.html','family.html','oauth-consent.html','connected-apps.html','connect.html','collaboration.html','notifications.html']);
       let postLoginDestination = allowedDestinations.has(requestedNext) ? requestedNext : 'dashboard.html';
       if (requestedNext === 'oauth-consent.html') {
         const authorizationId = loginParams.get('authorization_id') || '';
