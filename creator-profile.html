@@ -52,49 +52,55 @@
  async function init(){
   if(!uuid.test(id||'')){setStatus('A valid creator profile link is required.',true);return;}
   const {data:sessionData,error:sessionError}=await db.auth.getSession();if(sessionError)throw sessionError;
-  if(!sessionData.session){location.replace('login.html?next='+encodeURIComponent('creator-profile.html?user='+id));return;}
-  user=sessionData.session.user;
-  const [recoveryFactor,assurance]=await Promise.all([db.functions.invoke('recovery-codes',{body:{action:'status'}}),db.auth.mfa.getAuthenticatorAssuranceLevel()]);
-  if(recoveryFactor.error)throw recoveryFactor.error;if(assurance.error)throw assurance.error;
-  if(recoveryFactor.data?.enabled===true&&recoveryFactor.data?.verified!==true&&assurance.data?.currentLevel!=='aal2'){location.replace('login.html?next='+encodeURIComponent('creator-profile.html?user='+id));return;}
+  user=sessionData.session?.user||null;
+  if(user){
+   const [recoveryFactor,assurance]=await Promise.all([db.functions.invoke('recovery-codes',{body:{action:'status'}}),db.auth.mfa.getAuthenticatorAssuranceLevel()]);
+   if(recoveryFactor.error)throw recoveryFactor.error;if(assurance.error)throw assurance.error;
+   if(recoveryFactor.data?.enabled===true&&recoveryFactor.data?.verified!==true&&assurance.data?.currentLevel!=='aal2'){location.replace('login.html?next='+encodeURIComponent('creator-profile.html?user='+id));return;}
+  }
   const p=await db.from('community_profiles').select('user_id,display_name,avatar_url,bio,is_discoverable,current_work,website_url,github_url,linkedin_url,x_url,instagram_url,youtube_url,facebook_url,updated_at').eq('user_id',id).maybeSingle();
   if(p.error)throw p.error;profile=p.data;
-  if(!profile||(!profile.is_discoverable&&id!==user.id)){$('profile').classList.add('hidden');$('privacy-note').classList.remove('hidden');$('status').hidden=true;return;}
+  if(!profile||(!profile.is_discoverable&&id!==user?.id)){$('profile').classList.add('hidden');$('privacy-note').classList.remove('hidden');$('status').hidden=true;return;}
   $('name').textContent=profile.display_name||'ConfigKit member';$('bio').textContent=profile.bio||'This creator has not added an introduction yet.';$('current-work').textContent=profile.current_work||'';
   $('avatar').src=safeUrl(profile.avatar_url)||'';$('avatar').alt=(profile.display_name||'Creator')+' profile photo';$('avatar').onerror=()=>{$('avatar').removeAttribute('src');$('avatar').alt='No profile photo';};
-  if(id===user.id)$('edit').classList.remove('hidden');
+  if(user&&id===user.id)$('edit').classList.remove('hidden');
   const social=[['Website',profile.website_url],['GitHub',profile.github_url],['LinkedIn',profile.linkedin_url],['X',profile.x_url],['Instagram',profile.instagram_url],['YouTube',profile.youtube_url],['Facebook',profile.facebook_url]];
   for(const [label,value] of social){const url=safeUrl(value);if(url){const a=node('a','',label);a.href=url;a.target='_blank';a.rel='noopener noreferrer';$('socials').append(a);}}
+  const noRows={data:[],error:null};
   const [relations,templates,themes,store,wiki,books,discussions,shared]=await Promise.all([
-   db.from('user_follows').select('follower_id,following_id').or('follower_id.eq.'+id+',following_id.eq.'+id).limit(1000),
+   user?db.from('user_follows').select('follower_id,following_id').or('follower_id.eq.'+id+',following_id.eq.'+id).limit(1000):Promise.resolve(noRows),
    db.from('configkit_templates').select('id,title,description,category,template_format,tags,created_at,creator_id').eq('creator_id',id).eq('status','published').eq('moderation_status','visible').order('created_at',{ascending:false}).limit(100),
    db.from('community_themes').select('id,title,description,category,likes_count,created_at,author_id').eq('author_id',id).eq('status','published').eq('moderation_status','visible').order('created_at',{ascending:false}).limit(100),
    db.from('community_store_items').select('id,title,description,category,listing_type,coin_price,created_at,seller_id').eq('seller_id',id).eq('status','published').order('created_at',{ascending:false}).limit(100),
    db.from('community_wiki_pages').select('id,title,summary,category,slug,published_at,author_id').eq('author_id',id).eq('status','published').eq('moderation_status','visible').order('published_at',{ascending:false}).limit(100),
-   db.from('community_books').select('id,title,summary,genre,cover_url,updated_at,author_id').eq('author_id',id).eq('status','published').order('updated_at',{ascending:false}).limit(100),
-   db.from('builder_discussions').select('id,title,body,created_at,user_id').eq('user_id',id).order('created_at',{ascending:false}).limit(100),
-   db.from('mobileconfig_posts').select('id,title,description,filename,storage_path,file_size,created_at,user_id').eq('user_id',id).order('created_at',{ascending:false}).limit(100)
+   user?db.from('community_books').select('id,title,summary,genre,cover_url,updated_at,author_id').eq('author_id',id).eq('status','published').order('updated_at',{ascending:false}).limit(100):Promise.resolve(noRows),
+   user?db.from('builder_discussions').select('id,title,body,created_at,user_id').eq('user_id',id).order('created_at',{ascending:false}).limit(100):Promise.resolve(noRows),
+   user?db.from('mobileconfig_posts').select('id,title,description,filename,storage_path,file_size,created_at,user_id').eq('user_id',id).order('created_at',{ascending:false}).limit(100):Promise.resolve(noRows)
   ]);
   for(const r of [relations,templates,themes,store,wiki,books,discussions,shared])if(r.error)throw r.error;
-  const rel=relations.data||[];const followers=rel.filter(x=>x.following_id===id).length,followingCount=rel.filter(x=>x.follower_id===id).length;
-  $('stats').append(...[['Followers',followers],['Following',followingCount],['Templates',(templates.data||[]).length],['Themes',(themes.data||[]).length],['Store items',(store.data||[]).length],['Wiki & books',(wiki.data||[]).length+(books.data||[]).length]].map(([label,count])=>{const d=node('div','stat');d.append(node('strong','',String(count)),node('span','meta',label));return d;}));
-  following=rel.some(x=>x.follower_id===user.id&&x.following_id===id);
-  $('follow').hidden=id===user.id;$('follow').textContent=following?'Following · Unfollow':'Follow';
+  const rel=relations.data||[],templateRows=templates.data||[],themeRows=themes.data||[],storeRows=store.data||[],wikiRows=wiki.data||[],bookRows=books.data||[],discussionRows=discussions.data||[],sharedRows=shared.data||[];
+  const followers=rel.filter(x=>x.following_id===id).length,followingCount=rel.filter(x=>x.follower_id===id).length;
+  const stats=[];if(user){stats.push(['Followers',followers],['Following',followingCount]);}
+  stats.push(['Templates',templateRows.length],['Themes',themeRows.length],['Store items',storeRows.length],['Wiki & books',wikiRows.length+bookRows.length]);
+  $('stats').append(...stats.map(([label,count])=>{const d=node('div','stat');d.append(node('strong','',String(count)),node('span','meta',label));return d;}));
+  following=!!user&&rel.some(x=>x.follower_id===user.id&&x.following_id===id);
+  $('follow').hidden=!!user&&id===user.id;$('follow').textContent=user?(following?'Following · Unfollow':'Follow'):'Sign in to follow';
+  if(!user){$('books-section').hidden=true;$('discussions-section').hidden=true;$('profiles-section').hidden=true;}
   const sections=[
-   ['templates',templates.data||[],'Template','template-marketplace.html','Open marketplace'],
-   ['themes',themes.data||[],'Community theme','community-themes.html','Open theme gallery'],
-   ['store',store.data||[],'Store listing','community-store.html','Open community store'],
-   ['wiki',wiki.data||[],'Wiki article','community-wiki.html','Open Community Wiki'],
-   ['books',books.data||[],'Published book','community-book.html','Open Community Book'],
-   ['discussions',discussions.data||[],'Builder discussion','builder-discussion.html','Open Builder Discussion'],
-   ['profiles',shared.data||[],'Shared mobileconfig','builder-discussion.html','Open Builder Discussion']
+   ['templates',templateRows,'Template','template-marketplace.html','Open marketplace'],
+   ['themes',themeRows,'Community theme','community-themes.html','Open theme gallery'],
+   ['store',storeRows,'Store listing','community-store.html','Open community store'],
+   ['wiki',wikiRows,'Wiki article','community-wiki.html','Open Community Wiki'],
+   ['books',bookRows,'Published book','community-book.html','Open Community Book'],
+   ['discussions',discussionRows,'Builder discussion','builder-discussion.html','Open Builder Discussion'],
+   ['profiles',sharedRows,'Shared mobileconfig','builder-discussion.html','Open Builder Discussion']
   ];
   let total=0;
-  for(const [rootKey,items,kind,href,label] of sections){const root=$(rootKey);if(!items.length){empty(root,'No published '+kind.toLowerCase()+'s yet.');continue;}total+=items.length;for(const item of items){let target=href;if(rootKey==='store')target='community-store.html?id='+encodeURIComponent(item.id);if(rootKey==='wiki')target='community-wiki.html?id='+encodeURIComponent(item.slug);if(rootKey==='profiles'){const u=safeUrl(db.storage.from('mobileconfig-shares').getPublicUrl(item.storage_path).data.publicUrl);if(u)target=u;}card(root,item,kind,target,label);}}
+  for(const [rootKey,items,kind,href,label] of sections){const root=$(rootKey);if(!items.length){empty(root,'No published '+kind.toLowerCase()+'s yet.');continue;}total+=items.length;for(const item of items){let target=href;if(rootKey==='store')target='community-store.html?id='+encodeURIComponent(item.id);if(rootKey==='wiki')target='community-wiki.html?id='+encodeURIComponent(item.id);if(rootKey==='profiles'){const u=safeUrl(db.storage.from('mobileconfig-shares').getPublicUrl(item.storage_path).data.publicUrl);if(u)target=u;}card(root,item,kind,target,label);}}
   $('total-work').textContent=total+' published contributions';
   $('profile').classList.remove('hidden');$('portfolio').classList.remove('hidden');$('status').hidden=true;
  }
- $('follow').addEventListener('click',async()=>{if(!user||!profile||id===user.id)return;$('follow').disabled=true;try{const wasFollowing=following;const result=wasFollowing?await db.from('user_follows').delete().eq('follower_id',user.id).eq('following_id',id):await db.from('user_follows').insert({follower_id:user.id,following_id:id});if(result.error)throw result.error;following=!wasFollowing;$('follow').textContent=following?'Following · Unfollow':'Follow';const followerCount=$('stats').querySelector('.stat strong');if(followerCount)followerCount.textContent=String(Math.max(0,Number(followerCount.textContent)+(following?1:-1)));setStatus(following?'You are now following this creator.':'You unfollowed this creator.');}catch(error){setStatus(error.message||'Could not update follow status.',true);}finally{$('follow').disabled=false;}});
+ $('follow').addEventListener('click',async()=>{if(!user){location.href='login.html?next='+encodeURIComponent('creator-profile.html?user='+id);return;}if(!profile||id===user.id)return;$('follow').disabled=true;try{const wasFollowing=following;const result=wasFollowing?await db.from('user_follows').delete().eq('follower_id',user.id).eq('following_id',id):await db.from('user_follows').insert({follower_id:user.id,following_id:id});if(result.error)throw result.error;following=!wasFollowing;$('follow').textContent=following?'Following · Unfollow':'Follow';const followerCount=$('stats').querySelector('.stat strong');if(followerCount)followerCount.textContent=String(Math.max(0,Number(followerCount.textContent)+(following?1:-1)));setStatus(following?'You are now following this creator.':'You unfollowed this creator.');}catch(error){setStatus(error.message||'Could not update follow status.',true);}finally{$('follow').disabled=false;}});
  $('share').addEventListener('click',async()=>{const url=location.href;try{await navigator.clipboard.writeText(url);setStatus('Creator profile link copied.');}catch(_){setStatus('Copy this creator profile link: '+url);}});
  db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session)location.replace('login.html');});
  init().catch(error=>setStatus(error.message||'Could not load this creator profile.',true));
