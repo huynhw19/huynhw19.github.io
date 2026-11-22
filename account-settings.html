@@ -882,13 +882,30 @@
           const state = document.createElement('div'); state.className = 'muted'; state.textContent = 'Enabled · Authenticator app';
           detail.append(name,state);
           const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'danger'; remove.textContent = 'Remove';
-          remove.addEventListener('click', () => {
+          remove.addEventListener('click', async () => {
             factorPendingRemoval = factor;
-            mfaRemovePanel.hidden = false;
-            mfaRemoveCode.value = '';
-            mfaRemoveStatus.textContent = 'You’re removing “' + (factor.friendly_name || 'Authenticator app') + '”. Enter its current code to continue.';
-            mfaRemoveConfirm.disabled = false;
-            mfaRemoveCode.focus();
+            try {
+              const {data:assurance,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+              if (assuranceError) throw assuranceError;
+              if (assurance?.currentLevel === 'aal2') {
+                if (!window.confirm('Remove “' + (factor.friendly_name || 'Authenticator app') + '”? Your current session has already completed second-factor verification.')) return;
+                remove.disabled = true;
+                const {error:removeError} = await client.auth.mfa.unenroll({factorId:factor.id});
+                if (removeError) throw removeError;
+                factorPendingRemoval = null;
+                setStatus('Authenticator removed successfully.');
+                await refreshMfaFactors();
+                await refreshRecoveryCodesStatus();
+                return;
+              }
+              mfaRemovePanel.hidden = false;
+              mfaRemoveCode.value = '';
+              mfaRemoveStatus.textContent = 'You’re removing “' + (factor.friendly_name || 'Authenticator app') + '”. Enter its current code, or sign in with a newly verified replacement authenticator first.';
+              mfaRemoveConfirm.disabled = false;
+              mfaRemoveCode.focus();
+            } catch (error) {
+              setStatus('Could not remove authenticator: ' + (error.message || 'Please complete second-factor verification first.'),true);
+            }
           });
           row.append(detail,remove); mfaFactorList.append(row);
         }
