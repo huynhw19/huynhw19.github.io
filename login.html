@@ -807,6 +807,20 @@
         sessionStorage.removeItem(accountIntentKey);
         setStatus('The identity provider could not complete sign-in. Check the provider setup and try again.', true);
       }
+      const authCheckMessages = {
+        'shared-recovery': 'Diagnostic: the shared account-security check redirected this session. Reference: SHARED_RECOVERY_CHECK.',
+        'dashboard-recovery-enabled': 'Diagnostic: the dashboard recovery-code check redirected this session. Reference: DASHBOARD_RECOVERY_ENABLED.',
+        'dashboard-aal': 'Diagnostic: the dashboard assurance-level check redirected this session. Reference: DASHBOARD_AAL_CHECK.',
+        'dashboard-session-ended': 'Diagnostic: the dashboard detected that the browser sign-in session ended. Reference: DASHBOARD_SESSION_ENDED.'
+      };
+      const authCheckMessage = authCheckMessages[params.get('auth-check')];
+      if (authCheckMessage) {
+        const diagnostic = document.createElement('p');
+        diagnostic.className = 'status error';
+        diagnostic.setAttribute('role', 'status');
+        diagnostic.textContent = authCheckMessage + ' Please tell me the reference shown here; do not share passwords, recovery codes, or tokens.';
+        status.insertAdjacentElement('afterend', diagnostic);
+      }
       updateAccountFields(); updateFamilyFields(); setMode('login'); void renderSession();
     })();
   </script>
