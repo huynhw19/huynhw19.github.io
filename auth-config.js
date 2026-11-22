@@ -381,7 +381,9 @@ window.CONFIGKIT_AUTH = {
         client.auth.__configKitRecoveryGuardInstalled = true;
         client.auth.onAuthStateChange((event, session) => {
           if (!session) return;
-          if (session.user?.app_metadata?.configkit_mfa_reenrollment_required === true) {
+          const ownerRecoveryState = session.user?.app_metadata?.configkit_mfa_recovery_state;
+          const ownerRecoveryAal2 = session.user?.aal === 'aal2';
+          if (ownerRecoveryState === 'enroll' || (ownerRecoveryState === 'verify_new' && ownerRecoveryAal2)) {
             const currentPath = window.location.pathname.split('/').pop();
             if (!['owner-mfa-setup.html','login.html'].includes(currentPath)) {
               window.location.replace('owner-mfa-setup.html');
