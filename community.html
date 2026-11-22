@@ -103,7 +103,7 @@
   const count=follows.filter(x=>x.following_id===p.user_id).length;
   const stats=document.createElement('p');stats.className='muted';stats.textContent=count+' follower'+(count===1?'':'s');article.append(stats);
   const actions=document.createElement('div');actions.className='actions';
-  const visit=document.createElement('button');visit.type='button';visit.className='secondary';visit.textContent='Visit profile';visit.addEventListener('click',()=>goProfile(p.user_id));actions.append(visit);
+  const visit=document.createElement('button');visit.type='button';visit.className='secondary';visit.textContent='Visit profile';visit.addEventListener('click',()=>goProfile(p.user_id));actions.append(visit);const portfolio=document.createElement('a');portfolio.className='button';portfolio.href='creator-profile.html?user='+encodeURIComponent(p.user_id);portfolio.textContent='Creator portfolio';actions.append(portfolio);
   if(p.user_id!==currentUser.id){const follow=document.createElement('button');follow.type='button';follow.textContent=follows.some(x=>x.follower_id===currentUser.id&&x.following_id===p.user_id)?'Following · Unfollow':'Follow';follow.addEventListener('click',()=>toggleFollow(p.user_id,follow));actions.append(follow);}
   article.append(actions);return article;
  }
@@ -173,6 +173,7 @@
   document.getElementById('following-count').textContent=follows.filter(x=>x.follower_id===id).length;
   const actions=document.getElementById('profile-actions');actions.replaceChildren();
   await loadProfileActivity(id);
+  const portfolioLink=document.createElement('a');portfolioLink.className='button secondary';portfolioLink.href='creator-profile.html?user='+encodeURIComponent(id);portfolioLink.textContent='View creator portfolio';actions.append(portfolioLink);
   if(id!==currentUser.id){
    const b=document.createElement('button');b.textContent=follows.some(x=>x.follower_id===currentUser.id&&x.following_id===id)?'Following · Unfollow':'Follow';b.addEventListener('click',()=>toggleFollow(id,b));actions.append(b);
    // Only the fixed owner identity receives moderation controls. The Edge
