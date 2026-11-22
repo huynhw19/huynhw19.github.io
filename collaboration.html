@@ -75,7 +75,7 @@ else{
  let textFields={},pendingUpdates=[],flushTimer=null,typingTimer=null,loadingUpdates=true,incomingUpdates=[],comments=[],members=[],profiles={};
  const BUCKET='configkit-drive-files';
  const say=(message,error=false)=>{const el=$('workspace-status');el.textContent=message;el.classList.toggle('error',error);el.classList.toggle('good',!error);};
- const topSay=(message,error=false)=>{status.textContent=message;status.classList.toggle('error',error);};
+ const topSay=(message,error=false)=>{status.hidden=false;status.textContent=message;status.classList.toggle('error',error);};
  const base64=bytes=>{let s='';for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(s)};
  const unbase64=value=>Uint8Array.from(atob(value),c=>c.charCodeAt(0));
  const sha256=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -256,7 +256,6 @@ else{
   const body=$('comment-body').value.trim();if(!body)return;
   const {data,error}=await db.from('configkit_collab_comments').insert({document_id:activeDoc.id,user_id:user.id,body}).select('id,user_id,body,created_at').single();
   if(error)throw error;$('comment-body').value='';comments.push(data);renderComments();
-  await channel?.send({type:'broadcast',event:'comment-added',payload:{comment:data,display_name:profile.display_name}});
  }
  async function exportToDrive(){
   const data=activeDoc.document_type==='document'?{format:'configkit-doc',version:1,title:textFields.title.toString(),content:textFields.body.toString(),updatedAt:new Date().toISOString()}:{format:'configkit-slides',version:1,title:textFields.title.toString(),description:textFields.description.toString(),slides:textFields.body.toString().split(/^---\s*$/m).map(x=>x.trim()).filter(Boolean),updatedAt:new Date().toISOString()};
@@ -290,7 +289,7 @@ else{
   const topic='collab:'+doc.id;
   channel=db.channel(topic,{config:{private:true,presence:{key:user.id+':'+crypto.randomUUID()}}})
    .on('broadcast',{event:'doc-update'},({payload})=>{if(payload?.update_b64){if(loadingUpdates)incomingUpdates.push(payload.update_b64);else applyRemote(payload.update_b64);}})
-   .on('broadcast',{event:'comment-added'},({payload})=>{if(payload?.comment&&!comments.some(c=>c.id===payload.comment.id)){comments.push(payload.comment);if(payload.display_name)profiles[payload.comment.user_id]={...(profiles[payload.comment.user_id]||{}),display_name:payload.display_name};renderComments();}})
+   .on('postgres_changes',{event:'INSERT',schema:'public',table:'configkit_collab_comments',filter:'document_id=eq.'+doc.id},({new:row})=>{if(row&&!comments.some(c=>c.id===row.id)){comments.push(row);renderComments();}})
    .on('broadcast',{event:'member-removed'},({payload})=>{if(payload?.user_id===user.id){say('Your access to this workspace was removed.');db.removeChannel(channel).finally(()=>location.href='collaboration.html');}})
    .on('presence',{event:'sync'},()=>setPresence(channel.presenceState()))
    .on('presence',{event:'join'},()=>setPresence(channel.presenceState()))
@@ -338,7 +337,7 @@ else{
   const params=new URLSearchParams(location.search),id=params.get('id'),pendingInvite=sessionStorage.getItem('configkit_collab_pending_invite');
   if(pendingInvite){sessionStorage.removeItem('configkit_collab_pending_invite');await acceptInvite(pendingInvite);}else if(id)await openWorkspace(id);
  }
- start().catch(e=>{topSay(e.message||'Could not open Collaboration Studio.',true);$('home').hidden=false;});
+ start().catch(e=>{topSay(e.message||'Could not open Collaboration Studio.',true);$('home').hidden=false;$('workspace').hidden=true;});
 }
 </script>
 </body>
