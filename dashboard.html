@@ -119,17 +119,22 @@
         <section id="studio-doc" class="studio-editor">
           <h3>Document editor</h3><label for="studio-doc-title">Document title</label><input id="studio-doc-title" maxlength="180" placeholder="My document">
           <label for="studio-doc-body">Content (plain text or Markdown)</label><textarea id="studio-doc-body" rows="12" maxlength="200000" placeholder="Start writing…"></textarea>
-          <div class="studio-actions"><button type="button" id="doc-device-save">Save to device</button><button type="button" id="doc-device-load" class="secondary">Load from device</button><button type="button" id="doc-drive-save">Save to Drive</button><button type="button" id="doc-drive-load" class="secondary">Load from Drive</button></div>
+          <div class="studio-actions"><button type="button" id="doc-device-save">Save to device</button><button type="button" id="doc-device-load" class="secondary">Load from device</button><button type="button" id="doc-drive-save">Save to Drive</button><button type="button" id="doc-drive-load" class="secondary">Load from Drive</button><button type="button" id="doc-share" class="secondary">Share document</button></div>
           <input id="doc-file-input" type="file" accept=".md,.txt,.ckdoc,application/json,text/plain,text/markdown" hidden>
         </section>
         <section id="studio-slides" class="studio-editor" hidden>
           <h3>Slide deck editor</h3><label for="studio-slides-title">Presentation title</label><input id="studio-slides-title" maxlength="180" placeholder="My presentation">
           <label for="studio-slides-description">Description</label><input id="studio-slides-description" maxlength="1000" placeholder="Optional description">
           <label for="studio-slides-body">Slides (one slide per section, separated by a line containing ---)</label><textarea id="studio-slides-body" rows="14" maxlength="200000" placeholder="Slide 1&#10;Your first slide content&#10;---&#10;Slide 2&#10;Your second slide content"></textarea>
-          <div class="studio-actions"><button type="button" id="slides-device-save">Save to device</button><button type="button" id="slides-device-load" class="secondary">Load from device</button><button type="button" id="slides-drive-save">Save to Drive</button><button type="button" id="slides-drive-load" class="secondary">Load from Drive</button></div>
+          <div class="studio-actions"><button type="button" id="slides-device-save">Save to device</button><button type="button" id="slides-device-load" class="secondary">Load from device</button><button type="button" id="slides-drive-save">Save to Drive</button><button type="button" id="slides-drive-load" class="secondary">Load from Drive</button><button type="button" id="slides-share" class="secondary">Share slides</button></div>
           <input id="slides-file-input" type="file" accept=".json,.ckslides,application/json,text/plain" hidden>
         </section>
         <p id="studio-status" class="muted" role="status" aria-live="polite"></p>
+        <div id="studio-share-panel" class="studio-editor" hidden>
+          <label for="studio-share-url">Shareable URL <span class="muted">(expires after 1 hour)</span></label>
+          <div class="studio-actions"><input id="studio-share-url" type="url" readonly aria-label="Shareable URL" style="flex:1;min-width:220px"><button type="button" id="studio-share-copy">Copy URL</button></div>
+          <p class="muted" style="font-size:.85rem">Anyone with this link can download the shared file until it expires. The link points to the saved JSON file, not an online editor.</p>
+        </div>
         <p class="muted" style="font-size:.85rem">Drive files are private to your signed-in account and use your existing ConfigKit Drive storage and access policies. Saving creates a separate file; it does not overwrite an existing Drive file.</p>
       </section>
       <section class="card theme-studio" id="configkit-theme-studio" aria-labelledby="theme-studio-title">
@@ -676,6 +681,19 @@
         if(rowError){await db.storage.from(BUCKET).remove([path]);throw rowError;}
         say(name+' saved to your ConfigKit Drive.');
       }
+      async function shareDrive(kind){
+        if(!user)throw new Error('Please sign in again to share files.');
+        const suffix=kind==='doc'?'.ckdoc.json':'.ckslides.json';
+        const {data,error}=await db.from('drive_items').select('id,name,storage_path,updated_at').eq('user_id',user.id).eq('item_type','file').is('deleted_at',null).ilike('name','%'+suffix).order('updated_at',{ascending:false}).limit(1);
+        if(error)throw error;
+        const row=data?.[0];
+        if(!row){say('Save a '+(kind==='doc'?'document':'slide deck')+' to Drive first, then share it.',true);return;}
+        const {data:signed,error:signedError}=await db.storage.from(BUCKET).createSignedUrl(row.storage_path,3600);
+        if(signedError)throw signedError;
+        $('studio-share-url').value=signed.signedUrl;
+        $('studio-share-panel').hidden=false;
+        say('Share link ready for '+row.name+'. It expires in 1 hour.');
+      }
       async function loadDrive(kind){
         if(!user)throw new Error('Please sign in again to use ConfigKit Drive.');
         const suffix=kind==='doc'?'.ckdoc.json':'.ckslides.json';
@@ -701,6 +719,8 @@
       bind('doc-drive-save',()=>saveDrive('doc'));bind('doc-drive-load',()=>loadDrive('doc'));
       bind('slides-device-save',()=>saveDevice('slides'));bind('slides-device-load',()=>loadDevice('slides'));
       bind('slides-drive-save',()=>saveDrive('slides'));bind('slides-drive-load',()=>loadDrive('slides'));
+      bind('doc-share',()=>shareDrive('doc'));bind('slides-share',()=>shareDrive('slides'));
+      bind('studio-share-copy',async()=>{const input=$('studio-share-url');if(!input.value)throw new Error('Generate a share link first.');if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(input.value);else{input.focus();input.select();if(!document.execCommand('copy'))throw new Error('Could not copy the URL.');}say('Share URL copied to your clipboard.');});
       db.auth.getSession().then(({data,error})=>{if(error)throw error;user=data.session?.user||null;if(!user)say('Sign in to save or load files in ConfigKit Drive. Device import and export are available while signed in.');}).catch(e=>say(e.message||'Could not check your Drive session.',true));
     })();
   </script>
