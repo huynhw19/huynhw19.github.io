@@ -225,7 +225,7 @@ else{
  }
  async function loadComments(){
   const {data,error}=await db.from('configkit_collab_comments').select('id,user_id,body,created_at').eq('document_id',activeDoc.id).order('created_at',{ascending:true}).limit(300);
-  if(error)throw error;comments=data||[];await loadProfiles([...new Set([...members.map(m=>m.user_id),...comments.map(c=>c.user_id)])]);renderComments();
+  if(error)throw error;comments=data||[];await loadProfiles([...new Set([...members.map(m=>m.user_id),...comments.map(c=>c.user_id)].filter(Boolean))]);renderComments();
  }
  function renderComments(){
   const root=$('comments-list');root.replaceChildren();
