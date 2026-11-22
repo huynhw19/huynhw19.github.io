@@ -139,7 +139,7 @@
     </section>
   </main>
   <footer><nav aria-label="Footer"><a href="index.html">Home</a><a href="safety.html">Safety &amp; contact</a><a href="terms.html">Terms</a></nav></footer>
-  <script src="auth-config.js?v=passwordless-mfa-skip-20261122"></script>
+  <script src="auth-config.js?v=fresh-user-routing-20261122"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
   <script>
     (() => {
@@ -439,10 +439,18 @@
             // OAuth signup intent is saved in this tab before leaving for the provider.
             // Merge the freshly persisted metadata into the callback session user: the
             // session snapshot may predate updateUser() above.
-            const sessionUser = data.session.user;
+            // Session user metadata can be stale after server-side account changes.
+            // Fetch the authoritative Auth user before routing through onboarding.
+            const {data: freshUserData, error: freshUserError} = await client.auth.getUser();
+            if (freshUserError || !freshUserData?.user) {
+              redirecting = false;
+              setStatus('You are signed in, but ConfigKit could not refresh your account details. Please refresh and try again.', true);
+              return;
+            }
+            const freshUser = freshUserData.user;
             const user = {
-              ...sessionUser,
-              user_metadata:{...(sessionUser.user_metadata || {}), ...(oauthMetadata || {})}
+              ...freshUser,
+              user_metadata:{...(freshUser.user_metadata || {}), ...(oauthMetadata || {})}
             };
             const onboardingRequired = user.user_metadata?.configkit_onboarding_required === true;
             const accepted = user.email_confirmed_at &&
