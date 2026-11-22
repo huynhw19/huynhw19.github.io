@@ -39,7 +39,10 @@ client.auth.getUser().then(({data,error})=>{
  user=data.user;
  if(user.user_metadata?.configkit_onboarding_required!==true){location.replace(next);return;}
  if(!user.email_confirmed_at){$('status').textContent='Please verify your email address before continuing. Check your inbox and spam folder.';return;}
- if(user.user_metadata?.configkit_terms_acceptance?.version==='2026-11-21'){location.replace('welcome-questions.html?next='+encodeURIComponent(next));return;}
+ if(user.user_metadata?.configkit_terms_acceptance?.version==='2026-11-21'){
+  location.replace((user.user_metadata?.configkit_invitation_pending===true
+   ? 'set-password.html' : 'welcome-questions.html')+'?next='+encodeURIComponent(next));return;
+ }
  $('status').textContent='Signed in as '+(user.email||'your ConfigKit account')+'. Your agreement is required to continue.';
 }).catch(()=>{$('status').textContent='We could not verify your sign-in. Please reload and try again.';});
 $('agree').addEventListener('change',()=>{$('continue').disabled=!$('agree').checked;});
@@ -50,7 +53,8 @@ $('continue').addEventListener('click',async()=>{
   const {data,error}=await client.auth.updateUser({data:{configkit_terms_acceptance:{version:'2026-11-21',accepted_at:new Date().toISOString(),privacy_policy:'privacy.html',terms_of_service:'terms.html'}}});
   if(error)throw error;
   if(data?.user?.user_metadata?.configkit_terms_acceptance?.version!=='2026-11-21')throw new Error('The acknowledgement could not be confirmed. Please try again.');
-  location.replace('welcome-questions.html?next='+encodeURIComponent(next));
+  const invited=user.user_metadata?.configkit_invitation_pending===true;
+  location.replace((invited?'set-password.html':'welcome-questions.html')+'?next='+encodeURIComponent(next));
  }catch(error){$('status').textContent=error.message||'Could not save your acknowledgement. Please try again.';$('continue').disabled=false;}
 });
 })();
