@@ -17,7 +17,7 @@ Documents use a plain-text/Markdown editor. Slide decks are edited as text secti
 
 ## How to use it
 
-1. Sign in to ConfigKit and open Collaboration Studio from the dashboard or site navigation.
+1. Sign in to ConfigKit and open Collaboration Studio from the dashboard or site navigation. In Docs & Slides Studio, you can also choose **Collaborate live**; ConfigKit saves a separate Drive copy and opens it as a shared workspace.
 2. Create a document or slide deck, or import a saved `.ckdoc.json` / `.ckslides.json` file from Drive.
 3. Open **People** and create an Editor or Viewer invitation link.
 4. Send the link only to the intended collaborator. The recipient must sign in to ConfigKit to accept it.
