@@ -7,23 +7,6 @@ window.CONFIGKIT_AUTH = {
   turnstileSiteKey: '0x4AAAAAAF0lgF9cPbDl120-'
 };
 
-// Share a short-lived passkey UI hint across same-origin pages and tabs.
-// This is not an AAL2 assertion; Supabase/RLS remains the authorization boundary.
-(() => {
-  const key = 'configkit_passkey_session_user';
-  const ttlMs = 8 * 60 * 60 * 1000;
-  const clear = () => { try { localStorage.removeItem(key); } catch (_) {} try { sessionStorage.removeItem(key); } catch (_) {} };
-  window.CONFIGKIT_PASSKEY_SESSION = {
-    mark(userId) { if (!userId) return; try { localStorage.setItem(key, JSON.stringify({userId, expiresAt:Date.now() + ttlMs})); } catch (_) { try { sessionStorage.setItem(key, userId); } catch (_) {} } },
-    has(userId) {
-      if (!userId) return false;
-      try { const raw = localStorage.getItem(key); if (raw) { const entry = JSON.parse(raw); if (entry?.userId === userId && Number(entry.expiresAt) > Date.now()) return true; localStorage.removeItem(key); } } catch (_) {}
-      try { return sessionStorage.getItem(key) === userId; } catch (_) { return false; }
-    },
-    clear
-  };
-})();
-
 // Brand the OAuth page and expose account links only after sign-in.
 (() => {
   const isLoginPage = () => window.location.pathname.endsWith('/login.html') || window.location.pathname === '/login';
@@ -397,7 +380,7 @@ window.CONFIGKIT_AUTH = {
       if (client?.auth?.onAuthStateChange && !client.auth.__configKitRecoveryGuardInstalled) {
         client.auth.__configKitRecoveryGuardInstalled = true;
         client.auth.onAuthStateChange((event, session) => {
-          if (!session) { if (event === 'SIGNED_OUT') window.CONFIGKIT_PASSKEY_SESSION?.clear(); return; }
+          if (!session) return;
           setTimeout(async () => {
             try {
               const {data:lockState, error:lockStateError} = await client.rpc('is_my_account_locked');
@@ -410,8 +393,8 @@ window.CONFIGKIT_AUTH = {
               }
               const {data: recovery, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
               const recoveryVerified = !recoveryError && recovery?.verified;
-              const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(session.user.id) === true;
-              const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recoveryVerified && !passkeySession;
+              // A passkey is a primary sign-in credential, not an MFA recovery assertion.
+              const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recoveryVerified;
               if (!recoveryNeedsVerification) return;
               const {data: assurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
               if (assurance?.currentLevel === 'aal2') return;
