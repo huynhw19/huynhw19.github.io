@@ -398,6 +398,10 @@ window.CONFIGKIT_AUTH = {
               if (!recoveryNeedsVerification) return;
               const {data: assurance} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
               if (assurance?.currentLevel === 'aal2') return;
+              // ConfigKit's selected passwordless policy skips the separate app prompt.
+              const passwordlessMethod = (assurance?.currentAuthenticationMethods || [])
+                .some(item => ['magiclink','passkey','webauthn'].includes(String(item?.method || '').toLowerCase()));
+              if (passwordlessMethod) return;
               const currentPage = window.location.pathname.split('/').pop();
               const destination = ['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','community-games.html','video-studio.html','universal-search.html','profile-library.html','notes.html','tasks.html','contacts.html','invoices.html','projects.html','backup-restore.html','forms.html','roadmap.html'].includes(currentPage) ? currentPage : 'dashboard.html';
               window.location.replace('login.html?next=' + encodeURIComponent(destination));
