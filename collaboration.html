@@ -150,7 +150,7 @@ else{
  function renderList(rows){
   const root=$('document-list');root.replaceChildren();
   if(!rows.length){const p=document.createElement('p');p.className='muted';p.textContent='No shared workspaces yet. Create one above or open an invitation link.';root.append(p);return;}
-  for(const row of rows){const card=document.createElement('article');card.className='doc-card';const h=document.createElement('h3');h.textContent=row.title;const p=document.createElement('p');p.textContent=(row.document_type==='slides'?'Slide deck':'Document')+' · Updated '+safeDate(row.updated_at);const b=document.createElement('button');b.type='button';b.textContent='Open workspace';b.addEventListener('click',()=>openWorkspace(row.id));card.append(h,p,b);root.append(card);}
+  for(const row of rows){const card=document.createElement('article');card.className='doc-card';const h=document.createElement('h3');h.textContent=row.title;const p=document.createElement('p');p.textContent=(row.document_type==='slides'?'Slide deck':'Document')+' · Updated '+safeDate(row.updated_at);const b=document.createElement('button');b.type='button';b.textContent='Open workspace';b.addEventListener('click',()=>openWorkspace(row.id).catch(e=>topSay(e.message,true)));card.append(h,p,b);root.append(card);}
  }
  async function loadList(){
   const {data,error}=await db.from('configkit_collab_documents').select('id,title,document_type,owner_id,created_at,updated_at').order('updated_at',{ascending:false}).limit(200);
@@ -201,8 +201,8 @@ else{
    row.append(img,name);
    if(role==='owner'&&m.role!=='owner'&&m.user_id!==user.id){
     const sel=document.createElement('select');sel.setAttribute('aria-label','Role for '+displayName(m.user_id));for(const [v,l] of [['editor','Editor'],['viewer','Viewer']])sel.add(new Option(l,v));sel.value=m.role;
-    sel.addEventListener('change',async()=>{const {error}=await db.from('configkit_collab_members').update({role:sel.value}).eq('document_id',activeDoc.id).eq('user_id',m.user_id);if(error){say(error.message,true);sel.value=m.role;}else{m.role=sel.value;badge.textContent=m.role;await channel.send({type:'broadcast',event:'member-role-changed',payload:{user_id:m.user_id}});say('Member role updated.');}});
-    const remove=document.createElement('button');remove.className='danger';remove.type='button';remove.textContent='Remove';remove.addEventListener('click',async()=>{if(!confirm('Remove '+displayName(m.user_id)+' from this workspace?'))return;const {error}=await db.from('configkit_collab_members').delete().eq('document_id',activeDoc.id).eq('user_id',m.user_id);if(error)say(error.message,true);else{await channel.send({type:'broadcast',event:'member-removed',payload:{user_id:m.user_id}});await loadMembers();}});
+    sel.addEventListener('change',async()=>{const {error}=await db.from('configkit_collab_members').update({role:sel.value}).eq('document_id',activeDoc.id).eq('user_id',m.user_id);if(error){say(error.message,true);sel.value=m.role;}else{m.role=sel.value;badge.textContent=m.role;await channel.send({type:'broadcast',event:'member-role-changed',payload:{user_id:m.user_id}}).catch(()=>{});say('Member role updated.');}});
+    const remove=document.createElement('button');remove.className='danger';remove.type='button';remove.textContent='Remove';remove.addEventListener('click',async()=>{if(!confirm('Remove '+displayName(m.user_id)+' from this workspace?'))return;const {error}=await db.from('configkit_collab_members').delete().eq('document_id',activeDoc.id).eq('user_id',m.user_id);if(error)say(error.message,true);else{await channel.send({type:'broadcast',event:'member-removed',payload:{user_id:m.user_id}}).catch(()=>{});await loadMembers();}});
     row.append(sel,remove);
    }else row.append(badge);
    root.append(row);
@@ -237,7 +237,7 @@ else{
   const {data,error}=await db.from('configkit_collab_snapshots').select('id,user_id,label,created_at').eq('document_id',activeDoc.id).order('created_at',{ascending:false}).limit(30);
   if(error)throw error;const root=$('history-list');root.replaceChildren();
   if(!data?.length){root.textContent='No checkpoints yet.';return;}
-  for(const s of data){const item=document.createElement('div');item.className='history-item';const label=document.createElement('strong');label.textContent=s.label;const meta=document.createElement('div');meta.className='meta';meta.textContent=displayName(s.user_id)+' · '+safeDate(s.created_at);const restore=document.createElement('button');restore.type='button';restore.className='secondary';restore.textContent='Restore';restore.disabled=role==='viewer';restore.addEventListener('click',async()=>{if(!confirm('Restore this checkpoint? Its contents will be merged as a new edit, and the current text will remain in the update history.'))return;const {data:row,error}=await db.from('configkit_collab_snapshots').select('state_b64').eq('id',s.id).single();if(error)throw error;const snap=new Y.Doc();Y.applyUpdate(snap,unbase64(row.state_b64),'history-load');for(const key of ['title','description','body'])replaceText(ydoc.getText(key),snap.getText(key).toString());snap.destroy();say('Checkpoint restored. The changes are syncing…');});item.append(label,meta,restore);root.append(item);}
+  for(const s of data){const item=document.createElement('div');item.className='history-item';const label=document.createElement('strong');label.textContent=s.label;const meta=document.createElement('div');meta.className='meta';meta.textContent=displayName(s.user_id)+' · '+safeDate(s.created_at);const restore=document.createElement('button');restore.type='button';restore.className='secondary';restore.textContent='Restore';restore.disabled=role==='viewer';restore.addEventListener('click',async()=>{try{if(!confirm('Restore this checkpoint? Its contents will be merged as a new edit, and the current text will remain in the update history.'))return;const {data:row,error}=await db.from('configkit_collab_snapshots').select('state_b64').eq('id',s.id).single();if(error)throw error;const snap=new Y.Doc();Y.applyUpdate(snap,unbase64(row.state_b64),'history-load');for(const key of ['title','description','body'])replaceText(ydoc.getText(key),snap.getText(key).toString());snap.destroy();say('Checkpoint restored. The changes are syncing…');}catch(e){say(e.message,true);}});item.append(label,meta,restore);root.append(item);}
  }
  async function createCheckpoint(){
   await flushUpdates();if(pendingUpdates.length)throw new Error('Your edits are still waiting to save. Retry before creating a checkpoint.');
@@ -317,8 +317,8 @@ else{
   $('export-drive').onclick=()=>exportToDrive().catch(e=>say(e.message,true));
   $('download-copy').onclick=downloadJson;
   $('comment-form').onsubmit=e=>{e.preventDefault();postComment().catch(e=>say(e.message,true));};
-  $('leave-workspace').onclick=async()=>{if(!confirm('Leave this shared workspace? You will need a new invitation to rejoin.'))return;const {error}=await db.from('configkit_collab_members').delete().eq('document_id',doc.id).eq('user_id',user.id);if(error)throw error;location.href='collaboration.html';};
-  $('delete-workspace').onclick=async()=>{if(!confirm('Permanently delete this workspace, its invitations, comments, checkpoints and update history for everyone? This cannot be undone.'))return;await channel.send({type:'broadcast',event:'workspace-deleted',payload:{}});const {error}=await db.from('configkit_collab_documents').delete().eq('id',doc.id);if(error)throw error;location.href='collaboration.html';};
+  $('leave-workspace').onclick=async()=>{try{if(!confirm('Leave this shared workspace? You will need a new invitation to rejoin.'))return;const {error}=await db.from('configkit_collab_members').delete().eq('document_id',doc.id).eq('user_id',user.id);if(error)throw error;location.href='collaboration.html';}catch(e){say(e.message,true);}};
+  $('delete-workspace').onclick=async()=>{try{if(!confirm('Permanently delete this workspace, its invitations, comments, checkpoints and update history for everyone? This cannot be undone.'))return;await channel.send({type:'broadcast',event:'workspace-deleted',payload:{}}).catch(()=>{});const {error}=await db.from('configkit_collab_documents').delete().eq('id',doc.id);if(error)throw error;location.href='collaboration.html';}catch(e){say(e.message,true);}};
  }
  async function acceptInvite(token){
   const token_hash=await sha256(token),{data,error}=await db.rpc('configkit_accept_collab_invite',{p_token_hash:token_hash});
@@ -342,7 +342,7 @@ else{
   const params=new URLSearchParams(location.search),id=params.get('id'),pendingInvite=sessionStorage.getItem('configkit_collab_pending_invite');
   if(pendingInvite){sessionStorage.removeItem('configkit_collab_pending_invite');await acceptInvite(pendingInvite);}else if(id)await openWorkspace(id);
  }
- start().catch(e=>{topSay(e.message||'Could not open Collaboration Studio.',true);$('home').hidden=false;$('workspace').hidden=true;});
+ start().catch(async e=>{if(channel){await db.removeChannel(channel).catch(()=>{});channel=null;}if(ydoc){ydoc.destroy();ydoc=null;}topSay(e.message||'Could not open Collaboration Studio.',true);$('home').hidden=false;$('workspace').hidden=true;});
 }
 </script>
 </body>
