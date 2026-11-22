@@ -461,7 +461,10 @@
           // authentication in currentAuthenticationMethods even when the
           // tab-local passkey marker is absent (e.g. after a page reload).
           const passwordlessMethod = (assurance.currentAuthenticationMethods || [])
-            .some(item => ['magiclink','passkey','webauthn'].includes(String(item?.method || '').toLowerCase()));
+            .some(item => {
+              const method = typeof item === 'string' ? item : item?.method;
+              return ['magiclink','passkey','webauthn'].includes(String(method || '').toLowerCase());
+            });
           const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(data.session.user.id) === true || passwordlessMethod;
           if (recoveryCodeStatus.enabled && !recoveryCodeStatus.verified && !passkeySession && assurance.currentLevel !== 'aal2') {
             window.location.replace('login.html');
