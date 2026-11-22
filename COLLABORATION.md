@@ -38,7 +38,7 @@ Invitation links are bearer credentials: anyone who receives an active link can 
 | Invite collaborators | Yes | No | No |
 | Change roles / remove members | Yes | No | No |
 | Delete workspace | Yes | No | No |
-| Leave workspace | No (owner must transfer/delete first) | Yes | Yes |
+| Leave workspace | No (the owner must delete the workspace) | Yes | Yes |
 
 ## Security and data model
 
