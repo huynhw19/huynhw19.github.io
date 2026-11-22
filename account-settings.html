@@ -810,16 +810,12 @@
         mfaRemoveConfirm.disabled = true;
         mfaRemoveStatus.textContent = 'Verifying your authenticator…';
         try {
-          const {data:assurance,error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
-          if (assuranceError) throw assuranceError;
-          if (assurance?.currentLevel !== 'aal2') {
-            const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:factor.id});
-            if (challengeError) throw challengeError;
-            const {error:verifyError} = await client.auth.mfa.verify({
-              factorId:factor.id,challengeId:challenge.id,code
-            });
-            if (verifyError) throw verifyError;
-          }
+          const {data:challenge,error:challengeError} = await client.auth.mfa.challenge({factorId:factor.id});
+          if (challengeError) throw challengeError;
+          const {error:verifyError} = await client.auth.mfa.verify({
+            factorId:factor.id,challengeId:challenge.id,code
+          });
+          if (verifyError) throw verifyError;
           const {data:after,error:afterError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (afterError) throw afterError;
           if (after?.currentLevel !== 'aal2') throw new Error('Verification did not upgrade this session to AAL2. Please sign in again and complete MFA.');
