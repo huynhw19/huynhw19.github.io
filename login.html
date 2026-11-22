@@ -405,7 +405,7 @@
             document.getElementById('mfa-challenge').hidden = false;
             document.getElementById('mfa-title').textContent = 'Two-factor authentication';
             document.getElementById('mfa-form').hidden = !factor;
-            document.getElementById('mfa-recovery-form').hidden = !factor || !recoveryCodes.enabled;
+            document.getElementById('mfa-recovery-form').hidden = !recoveryCodes.enabled;
             document.getElementById('mfa-use-recovery').hidden = !recoveryCodes.enabled || !factor;
             document.getElementById('mfa-recovery-back').hidden = !factor;
             document.getElementById('mfa-replacement-panel').hidden = true;
