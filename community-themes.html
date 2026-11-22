@@ -86,7 +86,7 @@
    const preview=document.createElement('button');preview.type='button';preview.className='secondary';preview.textContent='Preview';preview.addEventListener('click',()=>showPreview(t));
    const install=document.createElement('button');install.type='button';install.textContent='Install';install.disabled=!user;install.title=user?'Save this theme to your account':'Sign in to install themes';install.addEventListener('click',()=>installTheme(t));
    const like=document.createElement('button');like.type='button';like.className='secondary';like.textContent=(myLikes.has(t.id)?'♥ Liked':'♡ Like');like.disabled=!user;like.addEventListener('click',()=>toggleLike(t.id));
-   actions.append(preview,install,like);
+   actions.append(preview,install,like);const creator=node('a','button secondary','Creator profile');creator.href='creator-profile.html?user='+encodeURIComponent(t.author_id);actions.append(creator);
    if(myListings.has(t.id)){const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Remove listing';remove.addEventListener('click',()=>removeListing(t.id));actions.append(remove);}
    card.append(h,desc,mini,meta,actions);grid.append(card);
   });
