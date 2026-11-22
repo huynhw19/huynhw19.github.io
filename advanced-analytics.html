@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Private advanced analytics for your ConfigKit productivity, projects, collaboration and creator activity.">
+<title>Advanced Analytics — ConfigKit</title>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+<style>
+:root{color-scheme:light;--ink:#17251f;--muted:#68766e;--line:#dce7df;--paper:#f4f8f5;--card:#fff;--green:#176344;--mint:#e5f3e9;--soft:#edf4ef;--amber:#fff5df;--red:#9b3030}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(1180px,calc(100% - 32px));margin:auto}header{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line)}header a{text-decoration:none;font-weight:700}nav{display:flex;gap:14px;flex-wrap:wrap}main{padding:28px 0 54px}.hero{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:18px}.eyebrow{font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:var(--green);font-weight:850}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;letter-spacing:-.04em;margin:.35rem 0}h2{font-size:1.15rem;margin:0 0 .35rem}.muted{color:var(--muted)}.panel,.metric,.status{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px}.status{margin:16px 0}.status.error{color:var(--red);border-color:#e8bcbc}.toolbar{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap}.controls{display:flex;gap:9px;align-items:end;flex-wrap:wrap}.field{display:flex;flex-direction:column;gap:4px;color:var(--muted);font-size:.83rem}.field select,.field input,button{font:inherit;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:#fff;color:var(--ink);min-height:40px}.field select,.field input{min-width:130px}button{font-weight:700;cursor:pointer}button.primary{background:var(--green);color:#fff;border-color:var(--green)}button:disabled{opacity:.55;cursor:wait}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:11px;margin:16px 0}.metric .label{font-size:.86rem;color:var(--muted)}.metric strong{display:block;font-size:2rem;line-height:1.25;margin:.25rem 0}.metric small{color:var(--muted)}.section{margin:20px 0}.two{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}.chart-wrap{padding-top:14px}.bars{display:grid;grid-template-columns:repeat(30,minmax(0,1fr));align-items:end;gap:5px;height:170px;border-bottom:1px solid var(--line);padding:0 0 4px}.bar{min-height:3px;background:#b8d9c5;border-radius:5px 5px 2px 2px;position:relative}.bar.today{background:var(--green)}.bar:hover{background:#5c9a78}.bar-key{display:flex;justify-content:space-between;color:var(--muted);font-size:.76rem;margin-top:8px}.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin-top:10px}.dot{display:inline-block;width:9px;height:9px;border-radius:3px;background:#b8d9c5;margin-right:5px}.dot.dark{background:var(--green)}.list{display:grid;gap:10px}.rowline{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:8px 0}.rowline:last-child{border-bottom:0}.rowline strong{font-variant-numeric:tabular-nums}.insight{padding:12px 14px;border-radius:11px;background:var(--soft);margin:9px 0}.insight strong{display:block}.insight p{margin:3px 0 0;color:var(--muted)}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:460px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line)}th{font-size:.8rem;color:var(--muted)}td:last-child,th:last-child{text-align:right;font-variant-numeric:tabular-nums}.privacy{background:var(--amber);padding:13px 15px;border-radius:12px;color:#59451e;font-size:.88rem}.links{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px}footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted)}[hidden]{display:none!important}@media(max-width:760px){.two{grid-template-columns:1fr}.bars{gap:2px;height:135px}.metric{padding:13px}.metric strong{font-size:1.7rem}}@media(max-width:430px){header{padding:12px 0}.field{flex:1}.field select,.field input{width:100%}.controls{width:100%}.bars{grid-template-columns:repeat(15,minmax(0,1fr));grid-auto-flow:row;grid-template-rows:repeat(2,1fr)}}
+</style></head>
+<body>
+<header><a href="dashboard.html">← ConfigKit Dashboard</a><nav><a href="personal-insights.html">Personal Insights</a><a href="activity-centre.html">Activity Centre</a><a href="projects.html">Projects</a><a href="collaboration.html">Collaboration</a></nav></header>
+<main>
+<section class="hero"><div><div class="eyebrow">Your data, clearly understood</div><h1>Advanced Analytics</h1><p class="muted">Explore trends across your personal workspace, projects, collaboration and creator activity.</p></div><div class="controls"><label class="field">Reporting period<select id="period"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option><option value="custom">Custom range</option></select></label><label class="field" id="from-wrap" hidden>From<input id="from-date" type="date"></label><label class="field" id="to-wrap" hidden>To<input id="to-date" type="date"></label><button id="refresh" class="primary" type="button">Refresh</button><button id="export" type="button">Export CSV</button></div></section>
+<div id="status" class="status" role="status" aria-live="polite">Checking your ConfigKit account…</div>
+<section id="analytics" hidden>
+<div class="grid">
+<article class="metric"><div class="label">Recorded actions</div><strong id="kpi-actions">—</strong><small id="kpi-actions-note">Across selected workspaces</small></article>
+<article class="metric"><div class="label">Tasks completed</div><strong id="kpi-tasks">—</strong><small id="kpi-tasks-note">In the selected period</small></article>
+<article class="metric"><div class="label">Habit check-ins</div><strong id="kpi-habits">—</strong><small id="kpi-habits-note">In the selected period</small></article>
+<article class="metric"><div class="label">Collaboration edits</div><strong id="kpi-collab">—</strong><small id="kpi-collab-note">Your own saved edits</small></article>
+<article class="metric"><div class="label">Published work</div><strong id="kpi-published">—</strong><small id="kpi-published-note">Your creator contributions</small></article>
+<article class="metric"><div class="label">Active projects</div><strong id="kpi-projects">—</strong><small>Projects not marked complete or archived</small></article>
+</div>
+<div class="two section">
+<article class="panel"><h2>Activity trend</h2><p class="muted">Your recorded actions by day. No content text is collected for this chart.</p><div class="chart-wrap"><div id="activity-chart" class="bars" role="img" aria-label="Daily activity trend"></div><div class="bar-key"><span id="chart-start">Start</span><span>Today</span></div></div><div class="legend"><span><i class="dot"></i>Recorded activity</span><span><i class="dot dark"></i>Today</span></div></article>
+<article class="panel"><h2>Period comparison</h2><p class="muted">Selected period compared with the immediately preceding period of equal length.</p><div id="comparison" class="list"></div><div id="comparison-note" class="muted" style="font-size:.82rem;margin-top:10px"></div></article>
+</div>
+<div class="two section">
+<article class="panel"><h2>Workspace overview</h2><p class="muted">Current totals from your private workspace records.</p><div id="workspace-breakdown" class="list"></div></article>
+<article class="panel"><h2>Creator & community performance</h2><p class="muted">Aggregated performance for your own published work and listings.</p><div id="creator-breakdown" class="list"></div><p class="muted" id="creator-note" style="font-size:.82rem"></p></article>
+</div>
+<article class="panel section"><h2>Project & collaboration snapshot</h2><div class="grid" style="margin-bottom:4px">
+<div class="metric"><div class="label">Projects created</div><strong id="project-created">—</strong></div>
+<div class="metric"><div class="label">Shared workspaces</div><strong id="collab-docs">—</strong></div>
+<div class="metric"><div class="label">Comments you posted</div><strong id="collab-comments">—</strong></div>
+<div class="metric"><div class="label">Checkpoints you saved</div><strong id="collab-snapshots">—</strong></div>
+</div><div id="project-breakdown" class="list"></div></article>
+<article class="panel section"><h2>Insights & next steps</h2><p class="muted">Descriptive observations based on the available records, not predictions or performance scores.</p><div id="insights-list"></div></article>
+<div class="privacy"><strong>Privacy by design:</strong> this dashboard reads only metadata and aggregate counts from records available to your signed-in account. It does not read note text, Drive file contents, shared document text, messages, passwords, recovery codes or financial account details. No third-party analytics tracker is used. Your existing Supabase permissions remain in force.</div>
+<div class="links"><a href="personal-insights.html">Personal Insights</a><a href="activity-centre.html">Activity Centre</a><a href="planner.html">Planner</a><a href="habits.html">Habit Tracker</a><a href="collaboration.html">Collaboration Studio</a><a href="creators.html">Creator Profiles</a></div>
+</section></main><footer><a href="dashboard.html">Dashboard</a> · <a href="privacy.html">Privacy</a> · ConfigKit Advanced Analytics</footer>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),cfg=window.CONFIGKIT_AUTH||{},status=$('status'),content=$('analytics');
+const say=(m,error=false)=>{status.hidden=false;status.textContent=m;status.classList.toggle('error',error)};
+if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient){say('Authentication is not configured. Please try again later.',true);return}
+const db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let user=null,cache=null,loading=false;
+const dateKey=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const startOfDay=d=>{const x=new Date(d);x.setHours(0,0,0,0);return x};
+const period=()=>{const now=startOfDay(new Date()),v=$('period').value;if(v==='custom'){const f=$('from-date').value,t=$('to-date').value;return {from:f?new Date(f+'T00:00:00'):new Date(now.getTime()-29*86400000),to:t?new Date(t+'T23:59:59.999'):new Date(),days:Math.max(1,Math.ceil((new Date(t||dateKey(new Date())).getTime()-new Date(f||dateKey(new Date(now.getTime()-29*86400000))).getTime())/86400000)+1)}}const days=Number(v)||30;return {from:new Date(now.getTime()-(days-1)*86400000),to:new Date(),days}};
+const within=(v,p)=>{if(!v)return false;const d=new Date(v);return !Number.isNaN(d.getTime())&&d>=p.from&&d<=p.to};
+const row=(label,value)=>{const n=document.createElement('div');n.className='rowline';const a=document.createElement('span');a.textContent=label;const b=document.createElement('strong');b.textContent=String(value);n.append(a,b);return n};
+const put=(id,v)=>$(id).textContent=String(v);
+const countPeriod=(rows,field,p)=>rows.filter(r=>within(r[field],p)).length;
+async function own(table,columns,field='user_id',order='created_at',limit=5000){const q= db.from(table).select(columns).eq(field,user.id).limit(limit);if(order)q.order(order,{ascending:false});const {data,error}=await q;if(error)throw new Error(table+': '+error.message);return data||[]}
+async function loadData(){
+ const jobs=[
+ ['planner',()=>own('planner_items','id,item_type,status,created_at,completed_at,updated_at')],
+ ['habits',()=>own('habits','id,archived_at,created_at')],
+ ['entries',()=>own('habit_entries','id,completed_on,created_at')],
+ ['notes',()=>own('configkit_notes','id,is_archived,deleted_at,created_at')],
+ ['drive',()=>own('drive_items','id,item_type,deleted_at,size_bytes,created_at')],
+ ['achievements',()=>own('user_achievements','achievement_key,earned_at','user_id','earned_at')],
+ ['projects',()=>own('configkit_projects','id,status,deleted_at,created_at,updated_at')],
+ ['collabMembers',()=>own('configkit_collab_members','document_id,role,joined_at','user_id','joined_at')],
+ ['collabUpdates',()=>own('configkit_collab_updates','id,document_id,created_at','user_id')],
+ ['collabComments',()=>own('configkit_collab_comments','id,document_id,created_at','user_id')],
+ ['collabSnapshots',()=>own('configkit_collab_snapshots','id,document_id,created_at','user_id')],
+ ['templates',()=>own('configkit_templates','id,status,moderation_status,download_count,created_at','creator_id')],
+ ['themes',()=>own('community_themes','id,status,moderation_status,likes_count,created_at','author_id')],
+ ['wiki',()=>own('community_wiki_pages','id,status,moderation_status,published_at,created_at','author_id')],
+ ['books',()=>own('community_books','id,status,created_at','author_id')],
+ ['store',()=>own('community_store_items','id,status,view_count,created_at','seller_id')]
+ ];
+ const results=await Promise.allSettled(jobs.map(j=>j[1]()));
+ const data={},errors=[];results.forEach((r,i)=>{const k=jobs[i][0];if(r.status==='fulfilled')data[k]=r.value;else{data[k]=[];errors.push(k)}});
+ return {data,errors};
+}
+function render(){
+ const p=period(),d=cache.data,days=[];for(let x=startOfDay(p.from);x<=p.to&&days.length<400;x=new Date(x.getTime()+86400000))days.push(dateKey(x));
+ const tasks=d.planner.filter(x=>x.item_type==='task'&&x.status==='completed'&&within(x.completed_at||x.updated_at,p));
+ const habits=d.entries.filter(x=>within(x.completed_on,p)||within(x.created_at,p));
+ const updates=d.collabUpdates.filter(x=>within(x.created_at,p));
+ const comments=d.collabComments.filter(x=>within(x.created_at,p));
+ const snaps=d.collabSnapshots.filter(x=>within(x.created_at,p));
+ const published=[...d.templates,...d.themes,...d.wiki,...d.books,...d.store].filter(x=>x.status==='published'&&within(x.created_at,p));
+ const actions=tasks.length+habits.length+updates.length+comments.length+snaps.length+
+  countPeriod(d.notes,'created_at',p)+countPeriod(d.drive,'created_at',p)+countPeriod(d.projects,'created_at',p)+
+  countPeriod(d.templates,'created_at',p)+countPeriod(d.themes,'created_at',p)+countPeriod(d.wiki,'created_at',p)+countPeriod(d.books,'created_at',p)+countPeriod(d.store,'created_at',p);
+ const activeProjects=d.projects.filter(x=>!x.deleted_at&&!['completed','complete','archived','cancelled'].includes(String(x.status||'').toLowerCase()));
+ put('kpi-actions',actions);put('kpi-tasks',tasks.length);put('kpi-habits',habits.length);put('kpi-collab',updates.length);put('kpi-published',published.length);put('kpi-projects',activeProjects.length);
+ put('kpi-actions-note',cache.errors.length?'Some sources unavailable':'Across selected workspaces');put('kpi-tasks-note',p.days+' day reporting window');put('kpi-habits-note','Check-ins in selected period');put('kpi-collab-note','Your own saved document updates');put('kpi-published-note','Published items created in period');
+ const series=new Map(days.map(x=>[x,0]));const add=(arr,field)=>arr.forEach(x=>{const v=x[field];if(v){const k=dateKey(v);if(series.has(k))series.set(k,series.get(k)+1)}});
+ add(tasks,'completed_at');add(habits,'completed_on');add(updates,'created_at');add(comments,'created_at');add(snaps,'created_at');add(d.notes.filter(x=>within(x.created_at,p)),'created_at');add(d.drive.filter(x=>within(x.created_at,p)),'created_at');add(d.projects.filter(x=>within(x.created_at,p)),'created_at');add(d.templates.filter(x=>within(x.created_at,p)),'created_at');add(d.themes.filter(x=>within(x.created_at,p)),'created_at');add(d.wiki.filter(x=>within(x.created_at,p)),'created_at');add(d.books.filter(x=>within(x.created_at,p)),'created_at');add(d.store.filter(x=>within(x.created_at,p)),'created_at');
+ const chart=$('activity-chart');chart.replaceChildren();const max=Math.max(1,...series.values());const step=Math.max(1,Math.ceil(days.length/30));const shown=days.filter((x,i)=>i%step===0||i===days.length-1);shown.forEach(k=>{const b=document.createElement('div');b.className='bar'+(k===dateKey(new Date())?' today':'');b.style.height=Math.max(3,(series.get(k)||0)/max*100)+'%';b.title=k+': '+series.get(k)+' action(s)';b.setAttribute('aria-label',b.title);chart.append(b)});put('chart-start',days[0]||'—');
+ const prev={from:new Date(p.from.getTime()-p.days*86400000),to:new Date(p.from.getTime()-1)};
+ const prevTasks=d.planner.filter(x=>x.item_type==='task'&&x.status==='completed'&&within(x.completed_at||x.updated_at,prev)).length;
+ const prevHabits=d.entries.filter(x=>within(x.completed_on,prev)||within(x.created_at,prev)).length;
+ const prevUpdates=d.collabUpdates.filter(x=>within(x.created_at,prev)).length;
+ const prevPublished=[...d.templates,...d.themes,...d.wiki,...d.books,...d.store].filter(x=>x.status==='published'&&within(x.created_at,prev)).length;
+ const comp=$('comparison');comp.replaceChildren();[[ 'Tasks completed',tasks.length,prevTasks],['Habit check-ins',habits.length,prevHabits],['Collaboration edits',updates.length,prevUpdates],['Published work',published.length,prevPublished]].forEach(([l,a,b])=>{const delta=a-b,txt=(delta>0?'+':'')+delta+' vs previous';const n=row(l,a+' · '+txt);comp.append(n)});$('comparison-note').textContent='Previous period: '+prev.from.toLocaleDateString()+' – '+prev.to.toLocaleDateString();
+ const wb=$('workspace-breakdown');wb.replaceChildren();[
+ ['Planner items',d.planner.length],['Active habits',d.habits.filter(x=>!x.archived_at).length],['Habit check-ins (all time)',d.entries.length],['Active notes',d.notes.filter(x=>!x.deleted_at&&!x.is_archived).length],['Drive files',d.drive.filter(x=>!x.deleted_at&&x.item_type==='file').length],['Achievements',d.achievements.length]
+ ].forEach(x=>wb.append(row(...x)));
+ const cb=$('creator-breakdown');cb.replaceChildren();
+ const sum=(arr,k)=>arr.reduce((n,x)=>n+(Number(x[k])||0),0);
+ [['Template downloads',sum(d.templates,'download_count')],['Theme likes',sum(d.themes,'likes_count')],['Store listing views',sum(d.store,'view_count')],['Published Wiki pages',d.wiki.filter(x=>x.status==='published').length],['Published books',d.books.filter(x=>x.status==='published').length]].forEach(x=>cb.append(row(...x)));
+ $('creator-note').textContent='Performance totals reflect counters stored on your own listings; they are not unique visitor counts.';
+ put('project-created',countPeriod(d.projects,'created_at',p));put('collab-docs',d.collabMembers.length);put('collab-comments',d.collabComments.length);put('collab-snapshots',d.collabSnapshots.length);
+ const pb=$('project-breakdown');pb.replaceChildren();const statuses={};d.projects.forEach(x=>{const s=String(x.status||'Unspecified');statuses[s]=(statuses[s]||0)+1});Object.entries(statuses).sort((a,b)=>b[1]-a[1]).forEach(x=>pb.append(row('Projects · '+x[0],x[1])));if(!Object.keys(statuses).length)pb.append(row('Project status','No projects yet'));
+ const ins=$('insights-list');ins.replaceChildren();const notes=[];
+ if(tasks.length)notes.push(['Task momentum','You completed '+tasks.length+' planner task(s) during this reporting period.']);else notes.push(['Task momentum','No completed planner tasks were recorded in this period.']);
+ if(habits.length)notes.push(['Routine activity','You logged '+habits.length+' habit check-in(s). Consistency is best interpreted alongside the goals you set in Habit Tracker.']);
+ if(updates.length)notes.push(['Working together','You saved '+updates.length+' collaboration update(s) in shared workspaces during this period.']);
+ if(published.length)notes.push(['Creator activity','You published '+published.length+' item(s) during this period across supported community workspaces.']);
+ if(cache.errors.length)notes.push(['Partial data','Some data sources were unavailable ('+cache.errors.join(', ')+'). Metrics that use those sources may be understated.']);
+ if(!notes.length)notes.push(['A fresh start','As you use ConfigKit, your activity trends and workspace summaries will appear here.']);
+ notes.forEach(([a,b])=>{const n=document.createElement('div');n.className='insight';const s=document.createElement('strong');s.textContent=a;const t=document.createElement('p');t.textContent=b;n.append(s,t);ins.append(n)});
+}
+async function refresh(){if(loading)return;loading=true;$('refresh').disabled=true;$('refresh').textContent='Loading…';try{cache=await loadData();render();content.hidden=false;say(cache.errors.length?'Analytics loaded with partial data. Some sources were unavailable.':'Your private analytics are up to date.');}catch(e){console.warn('Advanced Analytics failed:',e);say('Could not load analytics. Please refresh or check your account access.',true)}finally{loading=false;$('refresh').disabled=false;$('refresh').textContent='Refresh'}}
+function exportCsv(){if(!cache)return;const p=period(),d=cache.data;const rows=[['Metric','Value','Period'],['Reporting start',dateKey(p.from),''],['Reporting end',dateKey(p.to),''],['Planner tasks completed',d.planner.filter(x=>x.item_type==='task'&&x.status==='completed'&&within(x.completed_at||x.updated_at,p)).length,'Selected period'],['Habit check-ins',d.entries.filter(x=>within(x.completed_on,p)||within(x.created_at,p)).length,'Selected period'],['Collaboration updates',d.collabUpdates.filter(x=>within(x.created_at,p)).length,'Selected period'],['Collaboration comments',d.collabComments.filter(x=>within(x.created_at,p)).length,'Selected period'],['Collaboration checkpoints',d.collabSnapshots.filter(x=>within(x.created_at,p)).length,'Selected period'],['Active projects',d.projects.filter(x=>!x.deleted_at&&!['completed','complete','archived','cancelled'].includes(String(x.status||'').toLowerCase())).length,'Current'],['Active habits',d.habits.filter(x=>!x.archived_at).length,'Current'],['Active notes',d.notes.filter(x=>!x.deleted_at&&!x.is_archived).length,'Current'],['Drive files',d.drive.filter(x=>!x.deleted_at&&x.item_type==='file').length,'Current'],['Template downloads',d.templates.reduce((n,x)=>n+(Number(x.download_count)||0),0),'All time'],['Theme likes',d.themes.reduce((n,x)=>n+(Number(x.likes_count)||0),0),'All time'],['Store listing views',d.store.reduce((n,x)=>n+(Number(x.view_count)||0),0),'All time']];const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='configkit-analytics-'+dateKey(new Date())+'.csv';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url)}
+async function init(){const {data,error}=await db.auth.getSession();if(error)throw error;if(!data.session){say('Please sign in to view your private analytics. ');const a=document.createElement('a');a.href='login.html?next=advanced-analytics.html';a.textContent='Sign in';status.append(a);return}const {data:verified,error:ve}=await db.auth.getUser();if(ve||!verified.user)throw ve||new Error('Could not verify your account.');user=verified.user;await refresh();db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)location.replace('login.html')})}
+$('period').addEventListener('change',()=>{const custom=$('period').value==='custom';$('from-wrap').hidden=!custom;$('to-wrap').hidden=!custom;if(cache)render()});
+['from-date','to-date'].forEach(id=>$(id).addEventListener('change',()=>{if(cache)render()}));
+$('refresh').addEventListener('click',refresh);$('export').addEventListener('click',exportCsv);
+init().catch(e=>{console.warn(e);say('Could not open Advanced Analytics. Please sign in again and try once more.',true)});
+})();
+</script></body></html>
