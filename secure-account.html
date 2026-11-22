@@ -47,14 +47,31 @@ document.querySelectorAll('[data-skip]').forEach(button=>{
   document.getElementById('status').textContent='Your choice is noted for this visit. You can still set this up later in Account Settings.';
  });
 });
-let canContinue=true;
-document.getElementById('continue').addEventListener('click',()=>{location.assign(canContinue?next:'login.html?next='+encodeURIComponent(next));});
+let canContinue=true,invitationPending=false;
+document.getElementById('continue').addEventListener('click',async()=>{
+ const button=document.getElementById('continue');
+ if(!canContinue){location.assign('login.html?next='+encodeURIComponent(next));return;}
+ if(invitationPending){
+  button.disabled=true;document.getElementById('status').textContent='Finishing your invitation setup…';
+  try{
+   const {data,error}=await client.auth.updateUser({data:{configkit_invitation_pending:false,configkit_invitation_completed:true}});
+   if(error)throw error;
+   if(data?.user?.user_metadata?.configkit_invitation_pending!==false)throw new Error('We could not confirm that setup is complete. Please try again.');
+   invitationPending=false;
+  }catch(error){
+   document.getElementById('status').textContent=error.message||'Could not finish setup. Please try again.';
+   button.disabled=false;return;
+  }
+ }
+ location.assign(next);
+});
 const config=window.CONFIGKIT_AUTH||{};
 if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient)return;
 const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 client.auth.getUser().then(({data,error})=>{
  if(error||!data.user){canContinue=false;document.getElementById('continue').textContent='Return to sign in';document.getElementById('status').textContent='Your sign-in session could not be found. Choose Return to sign in and try again.';return;}
  if(!data.user.email_confirmed_at){canContinue=false;document.getElementById('continue').textContent='Return to sign in';document.getElementById('status').textContent='Please verify your email address before continuing. Choose Return to sign in when you are ready.';return;}
+ invitationPending=data.user.user_metadata?.configkit_invitation_pending===true;
  if(data.user.user_metadata?.configkit_onboarding_required===true){
   if(data.user.user_metadata?.configkit_terms_acceptance?.version!=='2026-11-21'){location.replace('welcome.html?next='+encodeURIComponent(next));return;}
   if(data.user.user_metadata?.configkit_invitation_pending===true &&
