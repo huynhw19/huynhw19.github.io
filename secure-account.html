@@ -47,7 +47,7 @@ document.querySelectorAll('[data-skip]').forEach(button=>{
   document.getElementById('status').textContent='Your choice is noted for this visit. You can still set this up later in Account Settings.';
  });
 });
-let canContinue=true,invitationPending=false;
+let canContinue=false,invitationPending=false;
 document.getElementById('continue').addEventListener('click',async()=>{
  const button=document.getElementById('continue');
  if(!canContinue){location.assign('login.html?next='+encodeURIComponent(next));return;}
@@ -72,6 +72,7 @@ client.auth.getUser().then(({data,error})=>{
  if(error||!data.user){canContinue=false;document.getElementById('continue').textContent='Return to sign in';document.getElementById('status').textContent='Your sign-in session could not be found. Choose Return to sign in and try again.';return;}
  if(!data.user.email_confirmed_at){canContinue=false;document.getElementById('continue').textContent='Return to sign in';document.getElementById('status').textContent='Please verify your email address before continuing. Choose Return to sign in when you are ready.';return;}
  invitationPending=data.user.user_metadata?.configkit_invitation_pending===true;
+ canContinue=true;
  if(data.user.user_metadata?.configkit_onboarding_required===true){
   if(data.user.user_metadata?.configkit_terms_acceptance?.version!=='2026-11-21'){location.replace('welcome.html?next='+encodeURIComponent(next));return;}
   if(data.user.user_metadata?.configkit_invitation_pending===true &&
