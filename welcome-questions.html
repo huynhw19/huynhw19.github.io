@@ -50,7 +50,7 @@ const config=window.CONFIGKIT_AUTH||{};
 if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){$('status').textContent='Sign-in configuration is unavailable. Please return and try again.';return;}
 const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let user=null,busy=false;
-function go(){location.replace('secure-account.html?next='+encodeURIComponent(next));}
+function go(){location.replace(next);}
 client.auth.getUser().then(({data,error})=>{
  if(error||!data.user){$('status').textContent='Please sign in to continue.';setTimeout(()=>location.replace('login.html'),1200);return;}
  user=data.user;
