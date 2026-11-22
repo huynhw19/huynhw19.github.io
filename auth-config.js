@@ -381,6 +381,13 @@ window.CONFIGKIT_AUTH = {
         client.auth.__configKitRecoveryGuardInstalled = true;
         client.auth.onAuthStateChange((event, session) => {
           if (!session) return;
+          if (session.user?.app_metadata?.configkit_mfa_reenrollment_required === true) {
+            const currentPath = window.location.pathname.split('/').pop();
+            if (!['owner-mfa-setup.html','login.html'].includes(currentPath)) {
+              window.location.replace('owner-mfa-setup.html');
+              return;
+            }
+          }
           setTimeout(async () => {
             try {
               const {data:lockState, error:lockStateError} = await client.rpc('is_my_account_locked');
