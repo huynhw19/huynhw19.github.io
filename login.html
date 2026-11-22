@@ -78,7 +78,7 @@
           </div>
           <small class="muted">Only share your Family ID with people you want to add to your family.</small>
         </section>
-        <div class="form-actions"><button class="provider" id="emailSubmit" type="submit">Log in with email</button><button class="provider secondary" id="magicLinkSubmit" type="button">Send magic link</button><a class="text-button" href="login.html?mfaRecovery=1" style="display:inline-block;margin:10px 0">Lost your authenticator? Recover it with your email link</a></div>
+        <div class="form-actions"><button class="provider" id="emailSubmit" type="submit">Log in with email</button><button class="provider secondary" id="magicLinkSubmit" type="button">Send magic link</button></div>
       </form>
       <button class="text-button" id="findEmailToggle" type="button">Find my email 📧</button>
       <section id="findEmailPanel" class="education-note" hidden aria-labelledby="find-email-title">
@@ -132,7 +132,6 @@
           <input id="mfa-recovery-code" name="recoveryCode" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="39" pattern="([0-9A-Fa-f]{32}|([0-9A-Fa-f]{8}-){3}[0-9A-Fa-f]{8})" required>
           <div class="form-actions"><button id="mfa-recovery-submit" type="submit">Use recovery code</button><button id="mfa-recovery-back" class="secondary" type="button">Use authenticator instead</button><button id="mfa-recovery-cancel" class="secondary" type="button">Sign out</button></div>
         </form>
-        <p><a href="login.html?mfaRecovery=1" id="owner-mfa-recovery-link">Lost your authenticator? Recover with your email link.</a></p>
         </section>
       <div class="account" id="account" hidden></div>
       <button class="provider secondary" id="signout" type="button" hidden>Sign out</button>
@@ -140,7 +139,7 @@
     </section>
   </main>
   <footer><nav aria-label="Footer"><a href="index.html">Home</a><a href="safety.html">Safety &amp; contact</a><a href="terms.html">Terms</a></nav></footer>
-  <script src="auth-config.js?v=owner-mfa-recovery-20261122"></script>
+  <script src="auth-config.js?v=passkey-recovery-20261122"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
   <script>
     (() => {
@@ -225,7 +224,6 @@
       } else if (postLoginDestination !== 'dashboard.html') {
         callbackUrlObject.searchParams.set('next', postLoginDestination);
       }
-      if (loginParams.get('mfaRecovery') === '1') callbackUrlObject.searchParams.set('mfaRecovery', '1');
       const callbackUrl = callbackUrlObject.href;
       const accountIntentKey = 'configkit_account_oauth_intent';
       const familySetupMetadata = () => ({
@@ -353,53 +351,16 @@
         }
       }
 
-      let ownerRecoveryHandled = false;
       async function renderSessionOnce() {
-        if (passwordRecoveryActive || ownerRecoveryHandled) return;
+        if (passwordRecoveryActive) return;
         const {data, error} = await client.auth.getSession();
         if (error) { setStatus('Could not read the sign-in session. Please try again.', true); return; }
         if (data.session) {
-          if (loginParams.get('mfaRecovery') === '1') {
-            ownerRecoveryHandled = true;
-            setStatus('Verifying your fresh email sign-in and recovering the owner authenticator…');
-            try {
-              const {data: recoveryResult, error: recoveryError} = await client.functions.invoke('owner-mfa-recovery', {body:{action:'recover'}});
-              if (recoveryError || recoveryResult?.error) {
-                let detail = recoveryResult?.error || recoveryError?.message;
-                if (!detail && recoveryError?.context?.json) { try { detail = (await recoveryError.context.json())?.error; } catch (_) {} }
-                throw new Error(detail || 'Owner authenticator recovery could not be completed.');
-              }
-              await client.auth.signOut({scope:'local'});
-              window.history.replaceState({}, '', 'login.html');
-              form.hidden = true;
-              document.querySelector('.tabs').hidden = true;
-              document.querySelector('.divider').hidden = true;
-              document.querySelectorAll('.providers').forEach(node => node.hidden = true);
-              setStatus('Your email link is verified. Your old authenticator remains active for now. Sign in again and ConfigKit will guide you through enrolling and verifying a replacement before removing the old one.');
-              const continueLink = document.createElement('a');
-              continueLink.href = 'login.html';
-              continueLink.textContent = 'Continue to sign in';
-              status.append(document.createTextNode(' '), continueLink);
-            } catch (recoveryError) {
-              ownerRecoveryHandled = false;
-              setStatus(recoveryError.message || 'Recovery could not be completed. Your account has not been intentionally unlocked.', true);
-            }
-            return;
-          }
-          const ownerRecoveryState = data.session.user?.app_metadata?.configkit_mfa_recovery_state;
-          if (ownerRecoveryState === 'enroll') {
-            window.location.replace('owner-mfa-setup.html');
-            return;
-          }
           let recoveryCodes = {enabled:false,verified:false,remaining:0};
           try { recoveryCodes = await invokeRecoveryCodes({action:'status'}); }
           catch (error) { console.warn('Recovery-code status unavailable; authenticator sign-in remains available.', error); }
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
-          if (ownerRecoveryState === 'verify_new' && assurance.currentLevel === 'aal2') {
-            window.location.replace('owner-mfa-setup.html');
-            return;
-          }
           if (!recoveryCodes.verified &&
               assurance.currentLevel !== 'aal2' &&
               (assurance.nextLevel === 'aal2' || recoveryCodes.enabled)) {
@@ -609,12 +570,6 @@
           setStatus(error.message || 'That authenticator code could not be verified. Check the code and try again.', true);
           input.select();
         } finally { button.disabled = false; }
-      });
-      document.getElementById('owner-mfa-recovery-link').addEventListener('click', async event => {
-        event.preventDefault();
-        const {error} = await client.auth.signOut({scope:'local'});
-        if (error) { setStatus('Could not safely sign out before email recovery. Please try again.', true); return; }
-        window.location.assign('login.html?mfaRecovery=1');
       });
       document.getElementById('mfa-cancel').addEventListener('click', async () => {
         const {error} = await client.auth.signOut({scope:'local'});
