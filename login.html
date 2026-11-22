@@ -78,7 +78,7 @@
           </div>
           <small class="muted">Only share your Family ID with people you want to add to your family.</small>
         </section>
-        <div class="form-actions"><button class="provider" id="emailSubmit" type="submit">Log in with email</button><button class="provider secondary" id="magicLinkSubmit" type="button">Send magic link</button></div>
+        <div class="form-actions"><button class="provider" id="emailSubmit" type="submit">Log in with email</button><button class="provider secondary" id="magicLinkSubmit" type="button">Send magic link</button><a class="text-button" href="login.html?mfaRecovery=1" style="display:inline-block;margin:10px 0">Lost your authenticator? Recover it with your email link</a></div>
       </form>
       <button class="text-button" id="findEmailToggle" type="button">Find my email 📧</button>
       <section id="findEmailPanel" class="education-note" hidden aria-labelledby="find-email-title">
@@ -224,6 +224,7 @@
       } else if (postLoginDestination !== 'dashboard.html') {
         callbackUrlObject.searchParams.set('next', postLoginDestination);
       }
+      if (loginParams.get('mfaRecovery') === '1') callbackUrlObject.searchParams.set('mfaRecovery', '1');
       const callbackUrl = callbackUrlObject.href;
       const accountIntentKey = 'configkit_account_oauth_intent';
       const familySetupMetadata = () => ({
@@ -351,11 +352,38 @@
         }
       }
 
+      let ownerRecoveryHandled = false;
       async function renderSessionOnce() {
-        if (passwordRecoveryActive) return;
+        if (passwordRecoveryActive || ownerRecoveryHandled) return;
         const {data, error} = await client.auth.getSession();
         if (error) { setStatus('Could not read the sign-in session. Please try again.', true); return; }
         if (data.session) {
+          if (loginParams.get('mfaRecovery') === '1') {
+            ownerRecoveryHandled = true;
+            setStatus('Verifying your fresh email sign-in and recovering the owner authenticator…');
+            try {
+              const {data: recoveryResult, error: recoveryError} = await client.functions.invoke('owner-mfa-recovery', {body:{action:'recover'}});
+              if (recoveryError || recoveryResult?.error) {
+                let detail = recoveryResult?.error || recoveryError?.message;
+                if (!detail && recoveryError?.context?.json) { try { detail = (await recoveryError.context.json())?.error; } catch (_) {} }
+                throw new Error(detail || 'Owner authenticator recovery could not be completed.');
+              }
+              await client.auth.signOut({scope:'local'});
+              form.hidden = true;
+              document.querySelector('.tabs').hidden = true;
+              document.querySelector('.divider').hidden = true;
+              document.querySelectorAll('.providers').forEach(node => node.hidden = true);
+              setStatus('Your old authenticator has been removed and your previous recovery codes invalidated. Now sign in again with your email link; ConfigKit will take you to the required replacement-authenticator setup before opening your dashboard.');
+            } catch (recoveryError) {
+              ownerRecoveryHandled = false;
+              setStatus(recoveryError.message || 'Recovery could not be completed. Your account has not been intentionally unlocked.', true);
+            }
+            return;
+          }
+          if (data.session.user?.app_metadata?.configkit_mfa_reenrollment_required === true) {
+            window.location.replace('owner-mfa-setup.html');
+            return;
+          }
           let recoveryCodes = {enabled:false,verified:false,remaining:0};
           try { recoveryCodes = await invokeRecoveryCodes({action:'status'}); }
           catch (error) { console.warn('Recovery-code status unavailable; authenticator sign-in remains available.', error); }
