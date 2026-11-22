@@ -52,6 +52,7 @@ Get the right package from the [ConfigKit Downloads page](https://huynhw19.githu
 | [Community Store](https://huynhw19.github.io/community-store.html) | Browse community listings and review your listing/order history. |
 | [Template Marketplace](https://huynhw19.github.io/template-marketplace.html) | Discover, preview, download and publish reusable templates for documents, slides, mobileconfig profiles and more. |
 | [Creator Profiles](https://huynhw19.github.io/creators.html) | Discover ConfigKit creators and open public portfolios of their published work and community contributions. |
+| [Collaboration Studio](https://huynhw19.github.io/collaboration.html) | Co-edit shared documents and slide decks live, invite members, discuss work and save checkpoints. See [COLLABORATION.md](COLLABORATION.md). |
 | [Money Centre](https://huynhw19.github.io/money-centre.html) | Keep manually entered money records, accounts, bills and activity. |
 | [Kids Zone](https://huynhw19.github.io/kids-zone.html) | Explore age-friendly games, stories, videos and learning resources. |
 | [Kids Messages](https://huynhw19.github.io/kids-messages.html) | Use parent-supervised messaging with approved contacts. |
@@ -242,6 +243,7 @@ A code review or syntax check is not the same as a full live-device or multi-acc
 | [docs/KIDS-ZONE.md](docs/KIDS-ZONE.md) | Kids Zone catalogue notes |
 | [docs/EDUCATION-BOOKS.md](docs/EDUCATION-BOOKS.md) | Education book features |
 | [GROUPS-SETUP.md](GROUPS-SETUP.md) | Groups configuration |
+| [COLLABORATION.md](COLLABORATION.md) | Real-time collaboration setup, roles, invitations and security |
 | [EDUCATION-TESTS.md](EDUCATION-TESTS.md) | Education workflow testing |
 
 See the repository's Markdown files for additional setup, troubleshooting and feature notes.
