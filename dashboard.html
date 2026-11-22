@@ -452,14 +452,17 @@
             dashboard.hidden = true; signout.hidden = true; document.getElementById('about-nav-link').hidden = true; setStatus('You are signed out. ');
             const link = document.createElement('a'); link.href = 'login.html'; link.textContent = 'Go to sign in'; status.append(link); return;
           }
-          // A passkey sign-in is accepted as the primary factor for this tab.
-          // The marker is only a UI routing hint; it is not a server-side AAL2 claim.
-          const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(data.session.user.id) === true;
           let recoveryCodeStatus = {enabled:false,verified:false};
           const {data: recoveryStatus, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
           if (!recoveryError && recoveryStatus) recoveryCodeStatus = recoveryStatus;
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) throw assuranceError;
+          // Match the login page and database gate: Supabase may report passkey
+          // authentication in currentAuthenticationMethods even when the
+          // tab-local passkey marker is absent (e.g. after a page reload).
+          const passwordlessMethod = (assurance.currentAuthenticationMethods || [])
+            .some(item => ['magiclink','passkey','webauthn'].includes(String(item?.method || '').toLowerCase()));
+          const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(data.session.user.id) === true || passwordlessMethod;
           if (recoveryCodeStatus.enabled && !recoveryCodeStatus.verified && !passkeySession && assurance.currentLevel !== 'aal2') {
             window.location.replace('login.html');
             return;
