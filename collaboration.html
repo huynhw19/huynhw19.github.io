@@ -77,6 +77,15 @@ else{
  const BUCKET='configkit-drive-files';
  const say=(message,error=false)=>{const el=$('workspace-status');el.textContent=message;el.classList.toggle('error',error);el.classList.toggle('good',!error);};
  const topSay=(message,error=false)=>{status.hidden=false;status.textContent=message;status.classList.toggle('error',error);};
+ const showCreateError=error=>{
+  const message=String(error?.message||'');
+  if(/row-level security policy.*configkit_collab_documents|new row violates row-level security policy/i.test(message)){
+   topSay('Your current sign-in session needs an extra security check before creating a shared workspace. Sign in again and complete the requested second factor or use a ConfigKit recovery code if prompted.',true);
+   const link=document.createElement('a');link.href='login.html?next='+encodeURIComponent('collaboration.html');link.textContent=' Continue to secure sign-in';link.style.display='inline-block';link.style.marginLeft='6px';status.append(link);
+   return;
+  }
+  topSay(message||'Could not create the workspace.',true);
+ };
  const base64=bytes=>{let s='';for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(s)};
  const unbase64=value=>Uint8Array.from(atob(value),c=>c.charCodeAt(0));
  const sha256=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -335,8 +344,8 @@ else{
   const {data:own}=await db.from('community_profiles').select('display_name,avatar_url').eq('user_id',user.id).maybeSingle();
   if(own)profile={display_name:own.display_name||profile.display_name,avatar_url:own.avatar_url||null};
   $('home').hidden=false;status.hidden=true;
-  $('create-form').addEventListener('submit',async e=>{e.preventDefault();const title=$('new-title').value.trim();if(!title)return;const type=$('new-type').value,content=makeInitial(type,title,$('new-template').value);try{await createWorkspace(title,type,content);}catch(err){topSay(err.message,true);}});
-  $('import-drive').addEventListener('click',()=>importDrive().catch(e=>topSay(e.message,true)));
+  $('create-form').addEventListener('submit',async e=>{e.preventDefault();const title=$('new-title').value.trim();if(!title)return;const type=$('new-type').value,content=makeInitial(type,title,$('new-template').value);try{await createWorkspace(title,type,content);}catch(err){showCreateError(err);}});
+  $('import-drive').addEventListener('click',()=>importDrive().catch(showCreateError));
   $('refresh-list').addEventListener('click',()=>loadList().catch(e=>topSay(e.message,true)));
   await Promise.all([loadList(),loadDriveFiles()]);
   const params=new URLSearchParams(location.search),id=params.get('id'),pendingInvite=sessionStorage.getItem('configkit_collab_pending_invite'),pendingWorkspace=sessionStorage.getItem('configkit_collab_pending_workspace'),pendingImport=sessionStorage.getItem('configkit_collab_pending_import'),importKind=requestedImport||pendingImport;
