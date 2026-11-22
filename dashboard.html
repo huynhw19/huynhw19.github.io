@@ -472,11 +472,11 @@
           });
           const passkeySession = window.CONFIGKIT_PASSKEY_SESSION?.has(data.session.user.id) === true || passwordlessMethod;
           if (recoveryCodeStatus.enabled && !recoveryCodeStatus.verified && !passkeySession && assurance.currentLevel !== 'aal2') {
-            window.location.replace('login.html');
+            window.location.replace('login.html?auth-check=dashboard-recovery-enabled');
             return;
           }
           if (!recoveryCodeStatus.verified && !passkeySession && assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
-            window.location.replace('login.html');
+            window.location.replace('login.html?auth-check=dashboard-aal');
             return;
           }
           const user = data.session.user;
@@ -577,7 +577,7 @@
         if (error) { setStatus('Could not sign out. Please try again.', true); return; }
         window.location.replace('login.html');
       });
-      client.auth.onAuthStateChange((event, session) => { if (event === 'SIGNED_OUT' && !session) window.location.replace('login.html'); });
+      client.auth.onAuthStateChange((event, session) => { if (event === 'SIGNED_OUT' && !session) window.location.replace('login.html?auth-check=dashboard-session-ended'); });
       void renderSession();
     })();
   </script>
