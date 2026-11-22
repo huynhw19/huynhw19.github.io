@@ -174,6 +174,11 @@
         <div id="mfa-remove-panel" class="notice" hidden>
           <strong>Confirm it’s you 🔐</strong>
           <p>Enter the current six-digit code from the authenticator you’re removing. We’ll verify it before making any changes.</p>
+          <div class="notice" style="margin-top:12px">
+            <strong>Lost access to your authenticator?</strong>
+            <p id="mfa-recovery-remove-help">If you saved ConfigKit recovery codes, sign out and sign in again. On the MFA screen choose “Use a recovery code”. After signing in with a recovery code, return here to remove the lost authenticator safely.</p>
+            <button id="mfa-recovery-remove" class="danger" type="button" disabled>Remove using verified recovery session</button>
+          </div>
           <form id="mfa-remove-form">
             <div class="field"><label for="mfa-remove-code">Authenticator code</label><input id="mfa-remove-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required></div>
             <div class="actions"><button id="mfa-remove-confirm" class="danger" type="submit">Verify and remove authenticator</button><button id="mfa-remove-cancel" class="secondary" type="button">Cancel</button></div>
@@ -798,6 +803,31 @@
         mfaRemoveStatus.textContent = '';
       }
       document.getElementById('mfa-remove-cancel').addEventListener('click', closeMfaRemovePanel);
+      const mfaRecoveryRemoveButton = document.getElementById('mfa-recovery-remove');
+      const mfaRecoveryRemoveHelp = document.getElementById('mfa-recovery-remove-help');
+      if (recoveryCodeStatusData.verified === true) {
+        mfaRecoveryRemoveButton.disabled = false;
+        mfaRecoveryRemoveHelp.textContent = 'Your one-time recovery code has verified this sign-in session. You can use that recovery session to remove the lost authenticator. Supabase will sign out all active sessions afterward.';
+      }
+      mfaRecoveryRemoveButton.addEventListener('click', async () => {
+        if (!factorPendingRemoval || recoveryCodeStatusData.verified !== true) {
+          mfaRemoveStatus.textContent = 'First sign out, then sign in again and choose “Use a recovery code” on the MFA screen.';
+          return;
+        }
+        if (!window.confirm('Remove this authenticator using your verified recovery session? This will sign out all active sessions. You can set up a new authenticator after signing in again.')) return;
+        mfaRecoveryRemoveButton.disabled = true;
+        mfaRemoveStatus.textContent = 'Checking your recovery session and removing the authenticator…';
+        try {
+          await invokeRecoveryCodes({action:'remove_factor',factorId:factorPendingRemoval.id});
+          factorPendingRemoval = null;
+          mfaRemovePanel.hidden = true;
+          setStatus('Authenticator removed. For your security, all active sessions have been signed out. Sign in again to continue.');
+          window.location.replace('login.html?next=account-settings.html');
+        } catch (error) {
+          mfaRemoveStatus.textContent = error.message || 'Could not remove the authenticator using recovery. Please try again.';
+          mfaRecoveryRemoveButton.disabled = false;
+        }
+      });
       mfaRemoveForm.addEventListener('submit', async event => {
         event.preventDefault();
         const factor = factorPendingRemoval;
