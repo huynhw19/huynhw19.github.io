@@ -399,8 +399,9 @@ window.CONFIGKIT_AUTH = {
               if (pageName === 'events.html') return;
               const {data: recovery, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
               const recoveryVerified = !recoveryError && recovery?.verified;
-              // Passkey sign-in is a primary credential, not proof of the
-              // separately configured recovery-code verification step.
+              // A configured recovery gate is normally required here.
+              // The signed passkey/WebAuthn claim is checked below as the
+              // explicit ConfigKit replacement for the separate code prompt.
               const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recoveryVerified;
               if (!recoveryNeedsVerification) return;
               const {data: assurance, error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
