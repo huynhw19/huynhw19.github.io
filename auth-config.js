@@ -399,26 +399,13 @@ window.CONFIGKIT_AUTH = {
               if (pageName === 'events.html') return;
               const {data: recovery, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
               const recoveryVerified = !recoveryError && recovery?.verified;
-              // A verified passkey is accepted by the matching database RLS
-              // gate, so do not send passkey users through a second 2FA prompt.
+              // Passkey sign-in is a primary credential, not proof of the
+              // separately configured recovery-code verification step.
               const recoveryNeedsVerification = !recoveryError && recovery?.enabled && !recoveryVerified;
               if (!recoveryNeedsVerification) return;
               const {data: assurance, error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
               if (assuranceError) throw assuranceError;
               if (assurance?.currentLevel === 'aal2') return;
-              // Read the signed JWT claims; the SDK convenience list may omit
-              // WebAuthn/passkey methods on some versions.
-              const {data: claimsData, error:claimsError} = await client.auth.getClaims(session.access_token);
-              if (claimsError) throw claimsError;
-              const authMethods = [
-                ...(assurance?.currentAuthenticationMethods || []),
-                ...(claimsData?.claims?.amr || [])
-              ];
-              const passkeyMethod = authMethods.some(item => {
-                const method = typeof item === 'string' ? item : item?.method;
-                return ['passkey','webauthn'].includes(String(method || '').toLowerCase());
-              });
-              if (passkeyMethod) return;
               // A primary passwordless sign-in (OTP/magic link/passkey) does not
               // satisfy the separate recovery-code verification requirement.
               // RLS enforces this independently; redirect here so users see the
