@@ -391,6 +391,9 @@ window.CONFIGKIT_AUTH = {
                 }
                 return;
               }
+              // Events are publicly browsable; RSVP and owner writes remain protected by RLS.
+              const currentPage = window.location.pathname.split('/').pop();
+              if (currentPage === 'events.html') return;
               const {data: recovery, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
               const recoveryVerified = !recoveryError && recovery?.verified;
               // A passkey is a primary sign-in credential, not an MFA recovery assertion.
