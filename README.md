@@ -59,6 +59,28 @@ Get the right package from the [ConfigKit Downloads page](https://huynhw19.githu
 | [Family Dashboard](https://huynhw19.github.io/family-dashboard.html) | Manage family learning, children, resources and safety tools. |
 | [Education Dashboard](https://huynhw19.github.io/Education-dashboard.html) | Access teaching, student, lesson and learning-resource tools. |
 
+## 📱 Mobileconfig Studio: current features and direction
+
+Mobileconfig Studio is the home for creating Apple configuration profiles in ConfigKit.
+
+**Available today:** the signed-in Studio can generate profiles using its supported Wi-Fi, Web Clip and encrypted DNS (DoH) payloads, preview the generated XML, download a `.mobileconfig` file, and save generated profiles to the private Profile Library. The current community-sharing form publishes a title and description only; it does **not** upload or share the generated profile file or its contents.
+
+**Planned direction — free for everyone with no paid tiers:**
+
+- Create new profiles and import/edit existing `.mobileconfig` files.
+- Keep profile generation, editing, validation and downloads free.
+- Let signed-in members save, organise, duplicate and manage profile versions in their library.
+- Add safer profile sharing through shareable links and QR codes, with clear public/private access controls.
+- Expand the payload reference library with explanations, examples and compatibility notes.
+- Add validation and safety guidance before download, sharing or installation.
+- Make ConfigKit AI a helpful guide for profile creation, editing, validation and safe sharing.
+
+Signing in will support personal saving and sharing features; it will not be a paid upgrade. These are roadmap goals, not claims that every capability is already available. Review every profile before installation and never publish credentials, private keys or other secrets.
+
+For updates and community voting, visit the [ConfigKit Roadmap](https://huynhw19.github.io/roadmap.html#mobileconfig-studio-plan) and [Mobileconfig Studio](https://huynhw19.github.io/mobileconfig-builder.html).
+
+---
+
 ### 🧰 More tools
 
 - **Profile tools:** [Profile Library](https://huynhw19.github.io/profile-library.html), [Profile Viewer](https://huynhw19.github.io/profile-viewer.html), [Prepare Profile](https://huynhw19.github.io/prepare-profile.html), [DNS Builder](https://huynhw19.github.io/dns-builder.html).
