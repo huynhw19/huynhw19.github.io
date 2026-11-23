@@ -368,11 +368,20 @@
           catch (error) { console.warn('Recovery-code status unavailable; authenticator sign-in remains available.', error); }
           const {data: assurance, error: assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
           if (assuranceError) { setStatus('Could not check your two-factor authentication status. Please try again.', true); return; }
-          const passwordlessMethod = (assurance.currentAuthenticationMethods || [])
-            .some(item => {
-              const method = typeof item === 'string' ? item : item?.method;
-              return ['magiclink','passkey','webauthn'].includes(String(method || '').toLowerCase());
-            });
+          // Supabase represents email magic-link/OTP authentication as "otp"
+          // in the signed JWT amr claim on some SDK/auth versions. Check both
+          // the convenience method list and the verified token claims.
+          const authMethods = [...(assurance.currentAuthenticationMethods || [])];
+          try {
+            const {data:claimsData} = await client.auth.getClaims(data.session.access_token);
+            authMethods.push(...(claimsData?.claims?.amr || []));
+          } catch (error) {
+            console.warn('Could not read authentication-method claims; continuing with the AAL method list.', error);
+          }
+          const passwordlessMethod = authMethods.some(item => {
+            const method = typeof item === 'string' ? item : item?.method;
+            return ['magiclink','otp','passkey','webauthn'].includes(String(method || '').toLowerCase());
+          });
           if (!passwordlessMethod &&
               !recoveryCodes.verified &&
               assurance.currentLevel !== 'aal2' &&
