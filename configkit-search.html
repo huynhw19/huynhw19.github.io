@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Search the web, local places, images, news and shopping results with ConfigKit Search powered by SerpApi.">
+<title>ConfigKit Search</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e1e9e3;--paper:#f5f8f5;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e7f3eb;--shadow:0 12px 30px #17231f0d}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(1100px,calc(100% - 32px));margin:auto}header{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}header nav{display:flex;gap:1rem;flex-wrap:wrap}.brand{font-weight:850;color:var(--ink);text-decoration:none}main{padding:2rem 0 4rem}.hero,.search-panel,.result-card{background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.hero{padding:clamp(1.4rem,4vw,2.6rem);background:linear-gradient(130deg,#e5f3e9,#fff 72%)}.eyebrow{display:inline-block;background:var(--mint);color:var(--dark);border-radius:99px;padding:.25rem .7rem;font-size:.82rem;font-weight:800}.hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.05;margin:.7rem 0}.muted{color:var(--muted)}.hero p{max-width:760px}.search-panel{padding:1rem;margin:1.2rem 0}.search-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(170px,1fr);gap:.8rem}.field label{display:block;font-weight:750;font-size:.88rem;margin:0 0 .3rem}.field input,.field select{width:100%;min-height:48px;padding:.7rem .8rem;border:1px solid #c5d1ca;border-radius:10px;background:white;color:var(--ink);font:inherit}.search-row{display:flex;gap:.7rem;margin-top:.8rem}.search-row button{min-width:150px}.search-row button,button{font:inherit;font-weight:750;border:1px solid var(--green);border-radius:10px;padding:.7rem 1rem;background:var(--green);color:white;cursor:pointer}.search-row button.secondary,button.secondary{background:white;color:var(--dark);border-color:var(--line)}button:disabled{opacity:.5;cursor:wait}.hint{font-size:.84rem;color:var(--muted);margin:.65rem 0 0}.status{padding:.8rem 1rem;border-radius:10px;background:#f0f7f2;border:1px solid var(--line);margin:1rem 0}.status.error{background:#fff2f2;color:#8c2929}.results-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin:1.5rem 0 .7rem}.results-head h2{margin:0}.results{display:grid;gap:.8rem}.result-card{padding:1rem;min-width:0}.result-card h3{font-size:1.08rem;line-height:1.35;margin:0 0 .35rem}.result-card p{margin:.35rem 0;color:var(--muted)}.result-url{font-size:.82rem;color:#55735f;overflow-wrap:anywhere}.result-meta{font-size:.85rem;color:var(--muted)}.result-card img{max-width:180px;max-height:135px;object-fit:cover;border-radius:10px;float:right;margin:0 0 .5rem .9rem}.results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.8rem}.results-grid .result-card img{float:none;display:block;width:100%;max-width:none;height:150px;margin:0 0 .7rem}.pager{display:flex;justify-content:center;align-items:center;gap:.8rem;margin:1.2rem 0}.pager span{font-weight:700}.fineprint{font-size:.85rem;color:var(--muted);line-height:1.6}footer{border-top:1px solid var(--line);padding:1.5rem 0 2rem;color:var(--muted)}@media(max-width:650px){header{align-items:flex-start;flex-direction:column;padding:1rem 0}.search-grid{grid-template-columns:1fr}.search-row{flex-direction:column}.search-row button{width:100%}.result-card img{max-width:110px;max-height:100px}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="index.html">⌘ ConfigKit</a><nav aria-label="Main navigation"><a href="index.html">Home</a><a href="universal-search.html">Universal Search</a><a href="configkit-video-games.html">Video Games</a></nav></header>
+<main>
+<section class="hero"><span class="eyebrow">ConfigKit Search · Powered by SerpApi</span><h1>Search beyond the ordinary.</h1><p class="muted">Explore web pages, local places, images, news and shopping results from one simple search page. Add a location when you want geographically targeted results.</p></section>
+<section class="search-panel" aria-label="Search settings">
+<div class="search-grid">
+<div class="field"><label for="query">What are you looking for?</label><input id="query" maxlength="180" placeholder="Try: best free coding courses" autocomplete="off"></div>
+<div class="field"><label for="engine">Search category</label><select id="engine"><option value="google">Web search</option><option value="google_maps">Places &amp; businesses</option><option value="google_images">Images</option><option value="google_news">News</option><option value="google_shopping">Shopping</option></select></div>
+<div class="field"><label for="location">Location (optional)</label><input id="location" maxlength="100" placeholder="City, region or country"></div>
+<div class="field"><label for="country">Country</label><select id="country"><option value="au" selected>Australia</option><option value="us">United States</option><option value="gb">United Kingdom</option><option value="ca">Canada</option><option value="nz">New Zealand</option><option value="in">India</option><option value="sg">Singapore</option><option value="jp">Japan</option><option value="de">Germany</option><option value="fr">France</option><option value="global">Global / default</option></select></div>
+</div>
+<div class="search-row"><button id="search-btn" type="button">Search <span aria-hidden="true">⌕</span></button><button class="secondary" id="clear-btn" type="button">Clear</button></div>
+<p class="hint">Tip: use a city such as “Melbourne, Australia” for local results. Searches may use your SerpApi account quota.</p>
+</section>
+<div id="status" class="status" role="status" aria-live="polite">Enter a query and choose a search category to get started.</div>
+<section aria-labelledby="results-title"><div class="results-head"><h2 id="results-title">Search results</h2><span class="muted" id="count"></span></div><div id="results" class="results"></div><div class="pager"><button class="secondary" id="previous" type="button" disabled>Previous</button><span id="page-label">Page 1</span><button class="secondary" id="next" type="button" disabled>Next</button></div></section>
+<section class="search-panel"><span class="eyebrow">About this service</span><h2>Search responsibly</h2><p class="fineprint">ConfigKit Search uses SerpApi to retrieve structured search results. Successful uncached searches may count toward your SerpApi plan quota; SerpApi says cached searches are free. Results vary by search category, location and language. External websites have their own content, terms and privacy practices. ConfigKit does not guarantee third-party result accuracy.</p><p class="fineprint">SerpApi attribution: <a href="https://serpapi.com/" target="_blank" rel="noopener noreferrer">SerpApi</a> · <a href="https://serpapi.com/search-api" target="_blank" rel="noopener noreferrer">API documentation</a>.</p></section>
+</main>
+<footer>ConfigKit Search · Your API key stays on the server, not in this page.</footer>
+<script src="auth-config.js"></script>
+<script>
+(()=> {
+ const config=window.CONFIGKIT_AUTH||{};
+ const endpoint=String(config.supabaseUrl||'').replace(/\/$/,'')+'/functions/v1/configkit-serpapi';
+ const query=document.getElementById('query'),engine=document.getElementById('engine'),locationInput=document.getElementById('location'),country=document.getElementById('country');
+ const results=document.getElementById('results'),status=document.getElementById('status'),count=document.getElementById('count'),previous=document.getElementById('previous'),next=document.getElementById('next');
+ let page=0,lastQuery='',lastEngine='google',busy=false;
+ const fields={google:['organic_results'],google_maps:['local_results','organic_results'],google_images:['images_results'],google_news:['news_results'],google_shopping:['shopping_results']};
+ function setStatus(message,error=false){status.textContent=message;status.className=error?'status error':'status';}
+ function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n;}
+ function safeUrl(value){try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)?u.href:'';}catch(_){return '';}}
+ function linkCard(row,type){
+  const card=el('article','result-card');const title=el('h3','',row.title||row.name||'Untitled result');
+  const href=safeUrl(row.link||row.website||row.product_link||row.original);
+  if(href){const a=el('a','');a.href=href;a.target='_blank';a.rel='noopener noreferrer';a.append(title);card.append(a);}else card.append(title);
+  const imgUrl=safeUrl(row.thumbnail||row.original);
+  if(imgUrl){const img=el('img');img.src=imgUrl;img.alt='';img.loading='lazy';img.referrerPolicy='no-referrer';card.prepend(img);}
+  if(row.displayed_link||row.source)card.append(el('div','result-url',row.displayed_link||row.source));
+  if(row.snippet||row.description)card.append(el('p','',row.snippet||row.description));
+  if(row.address)card.append(el('p','',row.address));
+  const meta=[row.rating?'★ '+row.rating+(row.reviews?' ('+row.reviews+' reviews)':''):'',row.price||'',row.type||'',row.date||''].filter(Boolean).join(' · ');
+  if(meta)card.append(el('div','result-meta',meta));
+  if(row.phone)card.append(el('div','result-meta','Phone: '+row.phone));
+  if(row.website&&safeUrl(row.website)){const a=el('a','result-meta','Website');a.href=safeUrl(row.website);a.target='_blank';a.rel='noopener noreferrer';card.append(a);}
+  return card;
+ }
+ async function search(start=0){
+  const q=query.value.trim();if(!q){setStatus('Enter a search query first.',true);query.focus();return;}
+  if(busy)return;busy=true;document.getElementById('search-btn').disabled=true;
+  lastQuery=q;lastEngine=engine.value;page=start;results.replaceChildren();count.textContent='';previous.disabled=true;next.disabled=true;setStatus('Searching…');
+  try{
+   const url=new URL(endpoint);url.searchParams.set('q',q);url.searchParams.set('engine',lastEngine);url.searchParams.set('gl',country.value==='global'?'us':country.value);url.searchParams.set('hl','en');if(locationInput.value.trim())url.searchParams.set('location',locationInput.value.trim());if(start)url.searchParams.set('start',String(start));
+   if(!config.supabaseUrl||!config.supabaseAnonKey)throw new Error('ConfigKit API configuration is missing.');
+   const response=await fetch(url,{headers:{apikey:config.supabaseAnonKey,Accept:'application/json'}});
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok)throw new Error(data.error||'Search could not be completed.');
+   const keys=fields[lastEngine]||['organic_results'];let rows=[];for(const key of keys){if(Array.isArray(data[key]))rows=rows.concat(data[key].map(r=>({...r,__type:key})));}
+   const gridMode=lastEngine==='google_images'||lastEngine==='google_shopping';results.className=gridMode?'results-grid':'results';
+   if(!rows.length){results.append(el('div','result-card','No results were returned. Try a different query or location.'));}
+   else rows.slice(0,20).forEach(row=>results.append(linkCard(row,row.__type)));
+   const total=data.search_information?.total_results;count.textContent=total?Number(total).toLocaleString()+' results reported':'';
+   const id=data.search_metadata?.id;setStatus('Search complete · '+rows.length+' results shown'+(id?' · Search ID '+id:'')+'.');
+   previous.disabled=lastEngine!=='google'||start===0;next.disabled=lastEngine!=='google'||rows.length<10||start>=90;document.getElementById('page-label').textContent='Page '+(Math.floor(start/10)+1);
+  }catch(error){results.className='results';setStatus(error.message||'Search failed. Please try again.',true);results.append(el('div','result-card','Please check your SerpApi key and account quota, then try again.'));}
+  finally{busy=false;document.getElementById('search-btn').disabled=false;}
+ }
+ document.getElementById('search-btn').addEventListener('click',()=>search(0));
+ query.addEventListener('keydown',e=>{if(e.key==='Enter')search(0);});
+ engine.addEventListener('change',()=>{previous.disabled=true;next.disabled=true;});
+ previous.addEventListener('click',()=>search(Math.max(0,page-10)));
+ next.addEventListener('click',()=>search(Math.min(90,page+10)));
+ document.getElementById('clear-btn').addEventListener('click',()=>{query.value='';locationInput.value='';results.replaceChildren();count.textContent='';page=0;previous.disabled=true;next.disabled=true;setStatus('Search cleared. Enter a new query when you are ready.');query.focus();});
+})();
+</script>
+</body></html>
