@@ -50,7 +50,7 @@
 </section>
 </main>
 <footer>ConfigKit Community · Be respectful and only share information you’re comfortable making visible to other signed-in members.</footer>
-<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth-config.js?v=community-passkey-session-fix-20261123"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
  const status=document.getElementById('status'),directory=document.getElementById('directory'),list=document.getElementById('member-list'),profileView=document.getElementById('profile-view'),editPanel=document.getElementById('edit-panel');
@@ -73,7 +73,19 @@
   if(recoveryFactor.error)throw recoveryFactor.error;
   if(assuranceResult.error)throw assuranceResult.error;
   const recoveryStatus=recoveryFactor.data||{};
-  const factorVerified=recoveryStatus.verified===true||assuranceResult.data?.currentLevel==='aal2';
+  // Match the dashboard's verified passwordless-session handling. Supabase's
+  // assurance helper may omit AMR methods that are present in verified JWT claims.
+  const {data:claimsData,error:claimsError}=await client.auth.getClaims(session.data.session.access_token);
+  if(claimsError)throw claimsError;
+  const authMethods=[
+   ...(assuranceResult.data?.currentAuthenticationMethods||[]),
+   ...(claimsData?.claims?.amr||[])
+  ];
+  const passwordlessMethod=authMethods.some(item=>{
+   const method=typeof item==='string'?item:item?.method;
+   return ['magiclink','passkey','webauthn'].includes(String(method||'').toLowerCase());
+  });
+  const factorVerified=recoveryStatus.verified===true||assuranceResult.data?.currentLevel==='aal2'||passwordlessMethod;
   if(recoveryStatus.enabled===true&&!factorVerified){
    window.location.replace('login.html?next=community.html');
    return;
@@ -231,7 +243,7 @@
  document.getElementById('show-my-profile').addEventListener('click',()=>goProfile(currentUser.id));
  document.getElementById('profile-form').addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type="submit"]'),file=document.getElementById('avatar-file').files[0];const record={display_name:document.getElementById('display-name').value.trim(),bio:document.getElementById('bio').value.trim(),is_discoverable:document.getElementById('discoverable').checked,updated_at:new Date().toISOString()};if(!record.display_name){message('Enter a display name.',true);return;}if(file&&(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024)){message('Choose a PNG, JPEG or WebP image smaller than 2 MB.',true);return;}button.disabled=true;try{const own=await client.from('community_profiles').select('avatar_url').eq('user_id',currentUser.id).single();if(own.error)throw own.error;const oldAvatar=own.data.avatar_url; if(file){const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';const path=currentUser.id+'/'+(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36))+'.'+ext;const upload=await client.storage.from('community-avatars').upload(path,file,{contentType:file.type,upsert:false,cacheControl:'3600'});if(upload.error)throw upload.error;record.avatar_url=client.storage.from('community-avatars').getPublicUrl(path).data.publicUrl;}const result=await client.from('community_profiles').update(record).eq('user_id',currentUser.id);if(result.error)throw result.error;if(file&&oldAvatar&&oldAvatar.includes('/storage/v1/object/public/community-avatars/')){const previousPath=oldAvatar.split('/storage/v1/object/public/community-avatars/')[1].split('?')[0];if(previousPath&&previousPath.startsWith(currentUser.id+'/'))await client.storage.from('community-avatars').remove([decodeURIComponent(previousPath)]);}document.getElementById('avatar-file').value='';const refreshed=await client.from('community_profiles').select('user_id,display_name,avatar_url,bio,is_discoverable').eq('user_id',currentUser.id).single();if(refreshed.error)throw refreshed.error;profiles=profiles.filter(x=>x.user_id!==currentUser.id);if(refreshed.data.is_discoverable)profiles.push(refreshed.data);message('Your community profile has been saved.');await renderRoute();}catch(error){message(error.message||'Could not save your profile.',true);}finally{button.disabled=false;}});
  window.addEventListener('popstate',()=>renderRoute());
- client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session)window.location.replace('login.html');});
+ client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)window.location.replace('login.html');});
  load().catch(e=>message(e.message||'Could not load the community.',true));
 })();
 </script>
