@@ -281,50 +281,6 @@ Deno.serve(async (req: Request) => {
       return json({ contacts });
     }
 
-    if (action === "teacher_friend_requests") {
-      const { data: records } = await admin.from("education_students").select("id").eq("user_id", user.id);
-      const recordIds = (records || []).map((row) => row.id);
-      if (!recordIds.length) return json({ requests: [] });
-      const { data: links } = await admin.from("kids_education_links").select("child_id,education_student_id").in("education_student_id", recordIds);
-      const childIds = (links || []).map((row) => row.child_id);
-      if (childIds.length < 2) return json({ requests: [] });
-      const { data: childRows } = await admin.from("family_children").select("id,child_name").in("id", childIds);
-      const children = childRows || [];
-      const approvedChildIds = children.map((row) => row.id);
-      if (approvedChildIds.length < 2) return json({ requests: [] });
-      const { data: rows, error } = await admin.from("kids_friendships")
-        .select("id,child_a_id,child_b_id,parent_a_approved,parent_b_approved,status")
-        .in("child_a_id", approvedChildIds).in("child_b_id", approvedChildIds)
-        .eq("status", "pending").eq("parent_a_approved", true).eq("parent_b_approved", true);
-      if (error) return json({ error: "Could not load classmate approval requests" }, 400);
-      const byId = new Map(children.map((row) => [row.id, row.child_name]));
-      return json({ requests: (rows || []).map((row) => ({
-        friendship_id: row.id, child_a_name: byId.get(row.child_a_id) || "Student",
-        child_b_name: byId.get(row.child_b_id) || "Student",
-      })) });
-    }
-
-    if (action === "teacher_approve_friendship") {
-      const friendshipId = String(body.friendship_id || "");
-      const { data: f } = await admin.from("kids_friendships")
-        .select("id,child_a_id,child_b_id,parent_a_approved,parent_b_approved,status")
-        .eq("id", friendshipId).maybeSingle();
-      if (!f || f.status !== "pending" || !f.parent_a_approved || !f.parent_b_approved) {
-        return json({ error: "Both families must approve before teacher review" }, 409);
-      }
-      const { data: teacherRecords } = await admin.from("education_students").select("id").eq("user_id", user.id);
-      const recordIds = (teacherRecords || []).map((row) => row.id);
-      const { data: links } = recordIds.length ? await admin.from("kids_education_links").select("child_id")
-        .in("child_id", [f.child_a_id, f.child_b_id]).in("education_student_id", recordIds) : { data: [] };
-      if ((links || []).length < 2) return json({ error: "Only a teacher linked to both students can approve this connection" }, 403);
-      const { error } = await admin.from("kids_friendships").update({
-        teacher_approved_by: user.id, teacher_approved_at: new Date().toISOString(),
-        status: "approved", updated_at: new Date().toISOString(),
-      }).eq("id", friendshipId);
-      if (error) return json({ error: "Could not approve this classmate connection" }, 400);
-      return json({ ok: true, status: "approved" });
-    }
-
     if (action === "delete_child_profile") {
       const childId = String(body.child_id || "");
       const { data: child } = await admin.from("family_children")
