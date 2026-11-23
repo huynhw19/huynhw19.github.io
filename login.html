@@ -388,12 +388,9 @@
           const passkeyMethod = authMethods.some(item =>
             ['passkey','webauthn'].includes(authMethodName(item))
           );
-          // A verified passkey is sufficient for the primary sign-in and
-          // must not be followed by a second authenticator/recovery prompt.
           if (!recoveryCodes.verified &&
               assurance.currentLevel !== 'aal2' &&
-              ((recoveryCodes.enabled && !passkeyMethod) ||
-               (!passwordlessMethod && assurance.nextLevel === 'aal2'))) {
+              (recoveryCodes.enabled || (!passwordlessMethod && assurance.nextLevel === 'aal2'))) {
             const {data: factorData, error: factorError} = await client.auth.mfa.listFactors();
             if (factorError) { setStatus('Could not load your authenticator. Please try again.', true); return; }
             const factor = (factorData.totp || []).find(item => item.status === 'verified');
