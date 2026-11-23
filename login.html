@@ -139,8 +139,8 @@
     </section>
   </main>
   <footer><nav aria-label="Footer"><a href="index.html">Home</a><a href="safety.html">Safety &amp; contact</a><a href="terms.html">Terms</a></nav></footer>
-  <script src="auth-config.js?v=visible-auth-diagnostics-20261122"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+  <script src="auth-config.js?v=auth-config-refresh-20261123b"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2"></script>
   <script>
     (() => {
       const status = document.getElementById('status');
@@ -197,9 +197,16 @@
       let pendingMfaChallengeId = '';
 
       const config = window.CONFIGKIT_AUTH || {};
-      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+      if (!config.supabaseUrl || !config.supabaseAnonKey) {
         setup.hidden = false;
-        status.textContent = 'Authentication is not configured in this page; sign-in is unavailable.';
+        setup.innerHTML = '<strong>Sign-in configuration could not be loaded.</strong> The shared auth-config.js file did not provide the public Supabase URL and key. Please reload the page; if this continues, contact ConfigKit support.';
+        status.textContent = 'Authentication configuration is unavailable; sign-in is paused.';
+        return;
+      }
+      if (!window.supabase?.createClient) {
+        setup.hidden = false;
+        setup.innerHTML = '<strong>Supabase sign-in library did not load.</strong> Your ConfigKit project settings are present, but the browser could not load the authentication library. Check your connection or content blocker, then reload.';
+        status.textContent = 'The sign-in library is unavailable; sign-in is paused.';
         return;
       }
 
