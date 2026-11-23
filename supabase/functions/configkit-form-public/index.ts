@@ -22,18 +22,22 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 function validateAnswers(fields: any[], answers: unknown): string | null {
-  if (!Array.isArray(fields) || fields.length < 1 || fields.length > 50 || !isObject(answers)) return "The response format is invalid.";
+  if (!Array.isArray(fields) || fields.length < 1 || fields.length > 60 || !isObject(answers)) return "The response format is invalid.";
   const ids = new Set<string>();
+  const questions = fields.filter((field) => field?.type !== "page");
+  if (questions.length < 1 || questions.length > 50 || fields.filter((field) => field?.type === "page").length > 9) return "This form has too many questions or pages.";
   for (const field of fields) {
     if (!field || typeof field.id !== "string" || ids.has(field.id) || typeof field.label !== "string") return "This form contains an invalid question.";
     ids.add(field.id);
+    if (field.type === "page" && field.label.length > 200) return "A page title is too long.";
   }
   const keys = Object.keys(answers);
-  if (keys.length > fields.length || keys.some((key) => !ids.has(key))) return "The response contains unexpected fields.";
+  if (keys.length > questions.length || keys.some((key) => !ids.has(key) || fields.some((field) => field.id === key && field.type === "page"))) return "The response contains unexpected fields.";
   if (JSON.stringify(answers).length > 30000) return "Your response is too large.";
   for (const field of fields) {
-    const value = answers[field.id];
     const type = field.type;
+    if (type === "page") continue;
+    const value = answers[field.id];
     const options = Array.isArray(field.options) ? field.options.filter((x: unknown) => typeof x === "string") : [];
     const missing = value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
     if (field.required && (missing || (type === "checkbox" && value !== true))) return "Please complete all required questions.";
@@ -46,12 +50,23 @@ function validateAnswers(fields: any[], answers: unknown): string | null {
       if (typeof value !== "string" || !options.includes(value)) return "A choice answer is invalid.";
     } else if (type === "rating") {
       if (!["1", "2", "3", "4", "5"].includes(String(value))) return "A rating answer is invalid.";
+    } else if (type === "scale") {
+      if (typeof value !== "string" || !/^(?:[1-9]|10)$/.test(value)) return "Choose a value from 1 to 10.";
     } else if (type === "email") {
       if (typeof value !== "string" || value.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Enter a valid email address.";
+    } else if (type === "phone") {
+      if (typeof value !== "string" || value.length > 40 || !/^[+()0-9.\s-]{5,40}$/.test(value)) return "Enter a valid phone number.";
+    } else if (type === "url") {
+      try { const parsed = new URL(String(value)); if (!["http:", "https:"].includes(parsed.protocol) || String(value).length > 2048) return "Enter a valid website URL."; }
+      catch { return "Enter a valid website URL."; }
     } else if (type === "number") {
       if (typeof value !== "string" || value.length > 100 || !Number.isFinite(Number(value))) return "Enter a valid number.";
     } else if (type === "date") {
       if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(Date.parse(value))) return "Enter a valid date.";
+    } else if (type === "time") {
+      if (typeof value !== "string" || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)) return "Enter a valid time.";
+    } else if (type === "datetime") {
+      if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d$/.test(value) || Number.isNaN(Date.parse(value))) return "Enter a valid date and time.";
     } else if (type === "short" || type === "paragraph") {
       const limit = type === "paragraph" ? 3000 : 500;
       if (typeof value !== "string" || value.length > limit) return "A text answer is too long.";
