@@ -418,9 +418,12 @@ window.CONFIGKIT_AUTH = {
                 const method = typeof item === 'string' ? item : item?.method;
                 return ['magiclink','otp','passkey','webauthn'].includes(String(method || '').toLowerCase());
               });
-              if (passwordlessMethod) return;
+              // A primary passwordless sign-in (OTP/magic link/passkey) does not
+              // satisfy the separate recovery-code verification requirement.
+              // RLS enforces this independently; redirect here so users see the
+              // recovery challenge instead of a save-time policy error.
               const currentPage = window.location.pathname.split('/').pop();
-              const destination = ['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','community-games.html','video-studio.html','universal-search.html','profile-library.html','notes.html','tasks.html','contacts.html','invoices.html','projects.html','backup-restore.html','forms.html','roadmap.html','education-ai.html','configkit-ai.html','configkit-app-store.html'].includes(currentPage) ? currentPage : 'dashboard.html';
+              const destination = ['account-settings.html','dashboard.html','organization-dashboard.html','builder-discussion.html','community.html','community-games.html','video-studio.html','universal-search.html','profile-library.html','notes.html','tasks.html','contacts.html','invoices.html','projects.html','backup-restore.html','forms.html','roadmap.html','education-ai.html','configkit-ai.html','configkit-app-store.html','configkit-shortcuts.html'].includes(currentPage) ? currentPage : 'dashboard.html';
               window.location.replace('login.html?auth-check=shared-recovery&next=' + encodeURIComponent(destination));
             } catch (_) {
               // RLS still denies protected data if verification is missing.
