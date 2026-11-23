@@ -13,33 +13,26 @@ declare
   recovery_codes_enabled boolean := false;
   auth_methods jsonb := coalesce(auth.jwt() -> 'amr', '[]'::jsonb);
 begin
-  if current_user_id is null then
-    return false;
-  end if;
+  if current_user_id is null then return false; end if;
 
   select exists (
-    select 1
-      from private.recovery_code_sets r
-     where r.user_id = current_user_id
+    select 1 from private.recovery_code_sets r
+    where r.user_id = current_user_id
   ) into recovery_codes_enabled;
 
-  if not recovery_codes_enabled then
-    return true;
-  end if;
+  if not recovery_codes_enabled then return true; end if;
 
-  -- A Supabase-verified passkey/WebAuthn assertion is an accepted
-  -- phishing-resistant sign-in method for ConfigKit protected data.
+  -- Accept only passkey/WebAuthn methods asserted in the signed Supabase JWT.
   if jsonb_typeof(auth_methods) = 'array' and exists (
     select 1
-      from jsonb_array_elements(auth_methods) as method
-     where lower(coalesce(method ->> 'method', method #>> '{}')) in ('passkey', 'webauthn')
+    from jsonb_array_elements(auth_methods) as methods(value)
+    where lower(coalesce(methods.value ->> 'method', methods.value #>> '{}'))
+      in ('passkey', 'webauthn')
   ) then
     return true;
   end if;
 
-  if coalesce(auth.jwt() ->> 'aal', 'aal1') = 'aal2' then
-    return true;
-  end if;
+  if coalesce(auth.jwt() ->> 'aal', 'aal1') = 'aal2' then return true; end if;
 
   begin
     current_session_id := nullif(auth.jwt() ->> 'session_id', '')::uuid;
@@ -47,16 +40,13 @@ begin
     return false;
   end;
 
-  if current_session_id is null then
-    return false;
-  end if;
+  if current_session_id is null then return false; end if;
 
   return exists (
-    select 1
-      from private.recovery_verified_sessions v
-     where v.session_id = current_session_id
-       and v.user_id = current_user_id
-       and v.expires_at > pg_catalog.now()
+    select 1 from private.recovery_verified_sessions v
+    where v.session_id = current_session_id
+      and v.user_id = current_user_id
+      and v.expires_at > pg_catalog.now()
   );
 end;
 $function$;
