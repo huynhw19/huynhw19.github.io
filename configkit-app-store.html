@@ -145,10 +145,16 @@
       const {data,error}=await client.auth.getSession(); if(error) throw error;
       if(!data.session) { setStatus('Sign in to ConfigKit to download files and create or manage app listings.'); $('my-apps').innerHTML='<div class="empty"><a href="login.html?next=configkit-app-store.html">Sign in or create an account</a> to publish apps and access downloads.</div>'; $('app-form').classList.add('hidden'); await loadApps(); return; }
       user=data.session.user;
-      const passkeySession=window.CONFIGKIT_PASSKEY_SESSION?.has(user.id)===true;
+      let recovery={enabled:false,verified:false};
+      const {data:recoveryData,error:recoveryError}=await client.functions.invoke('recovery-codes',{body:{action:'status'}});
+      if(!recoveryError&&recoveryData) recovery=recoveryData;
       const {data:assurance,error:assuranceError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
       if(assuranceError) throw assuranceError;
-      if(assurance.nextLevel==='aal2' && assurance.currentLevel!=='aal2' && !passkeySession) { window.location.replace('login.html?next=configkit-app-store.html'); return; }
+      const {data:claimsData,error:claimsError}=await client.auth.getClaims(data.session.access_token);
+      if(claimsError) throw claimsError;
+      const authMethods=[...(assurance.currentAuthenticationMethods||[]),...(claimsData?.claims?.amr||[])];
+      const passwordlessMethod=authMethods.some(item=>{const method=typeof item==='string'?item:item?.method;return ['magiclink','passkey','webauthn'].includes(String(method||'').toLowerCase());});
+      if(!passwordlessMethod&&!recovery.verified&&assurance.currentLevel!=='aal2'&&(assurance.nextLevel==='aal2'||recovery.enabled)) { window.location.replace('login.html?next=configkit-app-store.html'); return; }
       await loadApps(); setStatus('Signed in. Browse published apps or manage your own listings.');
     } catch(error) { setStatus(error.message || 'Could not connect to the App Store.',true); }
   }
