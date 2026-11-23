@@ -12,11 +12,11 @@
 <body>
 <header><a href="kids-zone.html">← Kids Zone</a><nav><a href="family-dashboard.html">Family dashboard</a> · <a href="dashboard.html">Dashboard</a></nav></header>
 <main>
-<section class="card"><span class="muted">✉️ ConfigKit Kids</span><h1>Kids Messages</h1><p class="muted">You can message only friends approved by both families AND their linked teacher. You can also message your parent or guardian and teachers approved by your parent. Your parent or guardian can review all your messages, including friend chats. Teachers can only read their own approved student conversations. Photos and documents cannot be sent. Be kind and keep personal information private.</p><div id="status" class="status" role="status" aria-live="polite">Checking this child profile…</div></section>
+<section class="card"><span class="muted">✉️ ConfigKit Kids</span><h1>Kids Messages</h1><p class="muted">You can message friends only after both families approve. You can also message your parent or guardian and teachers approved by your parent. Your parent or guardian can read all your messages, including friend chats. Teachers can only read their own approved student conversations. Photos and documents cannot be sent. Be kind and keep personal information private.</p><div id="status" class="status" role="status" aria-live="polite">Checking this child profile…</div></section>
 <section id="pin-panel" class="card" hidden><h2>Welcome! 🔐</h2><p>Ask your parent or guardian to sign in, then enter the six-digit PIN they set for this profile.</p><form id="pin-form"><label for="pin">Your six-digit PIN</label><input id="pin" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required><button id="pin-submit" type="submit">Unlock Kids Messages</button></form></section>
 <section id="app" hidden>
-<section class="card"><div class="row" style="justify-content:space-between"><h2>Hello, <span id="child-name">friend</span>! 👋</h2><button id="settings-button" type="button" class="secondary" aria-expanded="false">⚙️ Settings</button></div><div id="settings-panel" class="settings-panel" hidden><h3>Chat settings & safety</h3><p class="muted">Your parent or guardian controls whether messaging and calls are allowed. Only friends approved by both families can chat or view shared media.</p><p><a href="family-dashboard.html">Ask a parent to review family permissions →</a></p><p class="media-note">Never upload private information, your school uniform, your home address, or images of someone without permission. If anything worries you, stop and tell a trusted adult.</p></div><p class="muted">Your parent or guardian has enabled messaging. Friend requests need approval from both families before you can chat.</p>
-<form id="friend-form"><label for="friend-code">Add a friend using their family’s friend code</label><div class="row"><input id="friend-code" maxlength="16" placeholder="16-character code" autocomplete="off" required><button type="submit">Send request</button></div></form><p id="friend-result" class="muted" aria-live="polite"></p></section>
+<section class="card"><div class="row" style="justify-content:space-between"><h2>Hello, <span id="child-name">friend</span>! 👋</h2><button id="settings-button" type="button" class="secondary" aria-expanded="false">⚙️ Settings</button></div><div id="settings-panel" class="settings-panel" hidden><h3>Chat settings & safety</h3><p class="muted">Your parent or guardian controls whether messaging and calls are allowed. Only friends approved by both families can chat or view shared media. Teachers are not required to approve friendships.</p><p><a href="family-dashboard.html">Ask a parent to review family permissions →</a></p><p class="media-note">Never upload private information, your school uniform, your home address, or images of someone without permission. If anything worries you, stop and tell a trusted adult.</p></div><p class="muted">Your parent or guardian has enabled messaging. Friend requests need approval from both families before you can chat. This includes friends from other ConfigKit families invited with a family friend code.</p>
+<form id="friend-form"><label for="friend-code">Invite a friend from another ConfigKit family using their parent-shared friend code</label><div class="row"><input id="friend-code" maxlength="16" placeholder="Enter 16-character friend code" autocomplete="off" required><button type="submit">Send request</button></div></form><p id="friend-result" class="muted" aria-live="polite"></p></section>
 <div class="layout">
 <section class="card"><h2>Your friends</h2><div id="friends"><p class="muted">Loading…</p></div></section>
 <section class="card"><h2 id="chat-title">Choose a friend</h2><p id="chat-hint" class="muted">You can chat after both families approve.</p><div id="messages" class="messages" aria-live="polite"></div><form id="message-form" hidden><label for="message">Your message (up to 1,000 characters)</label><textarea id="message" rows="3" maxlength="1000"></textarea><div class="emoji-tools"><button id="emoji-toggle" type="button" class="secondary" aria-expanded="false" aria-controls="emoji-panel">😀 Add emoji</button><span class="emoji-help">Search 1,000+ emojis and tap one to add it to your message.</span><div id="emoji-panel" class="emoji-picker-panel" hidden><emoji-picker locale="en"></emoji-picker></div>
@@ -106,7 +106,7 @@
  document.querySelectorAll('[data-peer-sticker]').forEach(b=>b.addEventListener('click',async()=>{if(!selected)return;const {error}=await child.from('kids_messages').insert({friendship_id:selected.friendship_id,sender_child_id:profile.child_id,body:b.dataset.peerSticker,message_kind:'sticker'});if(error){say('Could not send sticker. Check all approvals.',true);return;}await loadMessages();}));
  document.querySelectorAll('[data-adult-sticker]').forEach(b=>b.addEventListener('click',async()=>{if(!adultConversationId)return;const {error}=await child.from('kids_adult_messages').insert({conversation_id:adultConversationId,sender_user_id:profile.user_id,body:b.dataset.adultSticker,message_kind:'sticker'});if(error){say('Could not send sticker.',true);return;}await loadAdultMessages();}));
  async function loadFriends(){
-   const {data,error}=await child.rpc('kids_my_friends_with_teacher_approval');
+   const {data,error}=await child.rpc('kids_my_friends');
    const holder=document.getElementById('friends');holder.replaceChildren();
    if(error){holder.textContent='Could not load friends. Please refresh.';return;}
    friends=data||[];
@@ -115,16 +115,16 @@
      const b=document.createElement('button');b.type='button';b.className='friend'+(selected?.friendship_id===f.friendship_id?' active':'');
      b.append(document.createTextNode(f.friend_name));
      const small=document.createElement('small');
-     small.textContent=f.status==='approved'&&f.my_parent_approved&&f.friend_parent_approved&&f.teacher_approved?'Approved by both families and the linked teacher':f.status==='pending'?'Waiting for parent and teacher approvals':'Not available to chat';
+     small.textContent=f.status==='approved'&&f.my_parent_approved&&f.friend_parent_approved?'Approved by both families':f.status==='pending'?'Waiting for both family approvals':'Not available to chat';
      b.append(small);
-     if(f.status==='approved'&&f.my_parent_approved&&f.friend_parent_approved&&f.teacher_approved)b.addEventListener('click',()=>openChat(f));
+     if(f.status==='approved'&&f.my_parent_approved&&f.friend_parent_approved)b.addEventListener('click',()=>openChat(f));
      else b.disabled=true;
      holder.append(b);
    });
  }
  async function openChat(friend){
    if(selected&&selected.friendship_id!==friend.friendship_id){await endCall(true);if(callChannel){await child.removeChannel(callChannel);callChannel=null;callChannelReady=false;}}
-   selected=friend;document.getElementById('chat-title').textContent=friend.friend_name;document.getElementById('chat-hint').textContent='You, your approved friend and both parents or guardians can review this conversation. The linked teacher approves the connection but cannot read this chat.';
+   selected=friend;document.getElementById('chat-title').textContent=friend.friend_name;document.getElementById('chat-hint').textContent='You, your approved friend and both parents or guardians can review this conversation. Teachers are not required for friendship approval and cannot read this chat.';
    document.getElementById('message-form').hidden=false;await loadFriends();await loadMessages();await prepareCallControls();
  }
  async function loadMessages(){
