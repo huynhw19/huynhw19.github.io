@@ -82,10 +82,10 @@ else{
   if(/row-level security policy.*configkit_collab_documents|new row violates row-level security policy/i.test(message)){
    let detail='Database session diagnostics unavailable.';
    try{
-    const {data:diagnostic,error:diagnosticError}=await db.rpc('configkit_collab_session_diagnostic');
+    const {data:diagnostic,error:diagnosticError}=await db.rpc('configkit_collab_session_diagnostic',{requested_owner_id:user?.id||null});
     if(!diagnosticError&&diagnostic){
      const compact=value=>typeof value==='string'?value:JSON.stringify(value??null);
-     detail='Database diagnostics: signed_in='+(diagnostic.signed_in?'yes':'no')+'; aal='+compact(diagnostic.aal)+'; amr_type='+compact(diagnostic.amr_type)+'; amr='+compact(diagnostic.amr)+'; amr_methods_type='+compact(diagnostic.amr_methods_type)+'; amr_methods='+compact(diagnostic.amr_methods)+'; email_2fa_allowed='+(diagnostic.email_2fa_allowed?'yes':'no')+'; collaboration_gate_allowed='+(diagnostic.collaboration_gate_allowed?'yes':'no')+'. No token or personal details are displayed.';
+     detail='Database diagnostics: signed_in='+(diagnostic.signed_in?'yes':'no')+'; owner_matches_session='+(diagnostic.owner_matches_session?'yes':'no')+'; aal='+compact(diagnostic.aal)+'; amr_type='+compact(diagnostic.amr_type)+'; amr='+compact(diagnostic.amr)+'; email_2fa_allowed='+(diagnostic.email_2fa_allowed?'yes':'no')+'; collaboration_gate_allowed='+(diagnostic.collaboration_gate_allowed?'yes':'no')+'. No token or personal details are displayed.';
     }else if(diagnosticError){detail='Database diagnostic could not run: '+String(diagnosticError.message||'unknown error').slice(0,160);}
    }catch(_){}
    topSay('Workspace creation was blocked by the database security policy. '+detail+' Please share this detail with ConfigKit support; do not share your access token.',true);
