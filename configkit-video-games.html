@@ -61,10 +61,10 @@
     if (!response.ok) throw new Error(data.error || 'The catalogue is temporarily unavailable.');
     return data;
   }
-  function fillSelect(select, rows) {
+  function fillSelect(select, rows, useSlug = true) {
     rows.forEach(row => {
       const option = document.createElement('option');
-      option.value = row.slug || String(row.id);
+      option.value = useSlug && row.slug ? row.slug : String(row.id);
       option.textContent = row.name;
       select.append(option);
     });
@@ -157,8 +157,8 @@
   previous.addEventListener('click', () => { if (page > 1) { page--; loadGames(); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
   next.addEventListener('click', () => { page++; loadGames(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
   Promise.allSettled([api({ action: 'genres' }), api({ action: 'platforms' })]).then(results => {
-    if (results[0].status === 'fulfilled') fillSelect(genreEl, results[0].value.results || []);
-    if (results[1].status === 'fulfilled') fillSelect(platformEl, results[1].value.results || []);
+    if (results[0].status === 'fulfilled') fillSelect(genreEl, results[0].value.results || [], true);
+    if (results[1].status === 'fulfilled') fillSelect(platformEl, results[1].value.results || [], false);
     loadGames();
   });
 })();
