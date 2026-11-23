@@ -77,11 +77,22 @@ else{
  const BUCKET='configkit-drive-files';
  const say=(message,error=false)=>{const el=$('workspace-status');el.textContent=message;el.classList.toggle('error',error);el.classList.toggle('good',!error);};
  const topSay=(message,error=false)=>{status.hidden=false;status.textContent=message;status.classList.toggle('error',error);};
- const showCreateError=error=>{
+ const showCreateError=async error=>{
   const message=String(error?.message||'');
   if(/row-level security policy.*configkit_collab_documents|new row violates row-level security policy/i.test(message)){
-   topSay('Your current sign-in session needs an extra security check before creating a shared workspace. Sign in again and complete the requested second factor or use a ConfigKit recovery code if prompted.',true);
-   const link=document.createElement('a');link.href='login.html?next='+encodeURIComponent('collaboration.html');link.textContent=' Continue to secure sign-in';link.style.display='inline-block';link.style.marginLeft='6px';status.append(link);
+   let detail='Session diagnostics unavailable.';
+   try{
+    const {data}=await db.auth.getSession();
+    const token=data?.session?.access_token||'';
+    const part=token.split('.')[1];
+    if(part){
+     const payload=JSON.parse(atob(part.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(part.length/4)*4,'=')));
+     const methods=value=>Array.isArray(value)?value.map(item=>typeof item==='string'?item:(item?.method||'unknown')).filter(Boolean).join(', ')||'none':typeof value==='string'?value:'none';
+     detail='Safe session details: assurance='+(payload.aal||'not present')+'; amr='+(methods(payload.amr))+'; amr_methods='+(methods(payload.amr_methods))+'; session ID='+(payload.session_id?'present':'missing')+'. No token or personal details are displayed.';
+    }
+   }catch(_){}
+   topSay('Workspace creation was blocked by the database security policy. '+detail+' Please share this detail with ConfigKit support; do not share your access token.',true);
+   const link=document.createElement('a');link.href='login.html?next='+encodeURIComponent('collaboration.html');link.textContent=' Sign in again';link.style.display='inline-block';link.style.marginLeft='6px';status.append(link);
    return;
   }
   topSay(message||'Could not create the workspace.',true);
