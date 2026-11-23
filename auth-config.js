@@ -393,6 +393,9 @@ window.CONFIGKIT_AUTH = {
               }
               // Events are publicly browsable; RSVP and owner writes remain protected by RLS.
               const pageName = window.location.pathname.split('/').pop();
+              // Shared ConfigKit Shortcut recipes are deliberately public, read-only views.
+              // They contain only the recipe explicitly shared by its owner, not private shortcuts.
+              if (pageName === 'configkit-shortcuts.html' && new URLSearchParams(window.location.search).has('share')) return;
               if (pageName === 'events.html') return;
               const {data: recovery, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
               const recoveryVerified = !recoveryError && recovery?.verified;
