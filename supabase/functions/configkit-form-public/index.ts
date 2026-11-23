@@ -61,14 +61,22 @@ function validateAnswers(fields: any[], answers: unknown): string | null {
       catch { return "Enter a valid website URL."; }
     } else if (type === "number") {
       if (typeof value !== "string" || value.length > 100 || !Number.isFinite(Number(value))) return "Enter a valid number.";
+    } else if (type === "currency") {
+      if (typeof value !== "string" || !/^-?\\d{1,12}(?:\\.\\d{1,2})?$/.test(value) || !Number.isFinite(Number(value))) return "Enter a valid amount with up to two decimal places.";
+    } else if (type === "color") {
+      if (typeof value !== "string" || !/^#[0-9a-fA-F]{6}$/.test(value)) return "Enter a valid six-digit hex colour, such as #176344.";
+    } else if (type === "month") {
+      if (typeof value !== "string" || !/^\\d{4}-(?:0[1-9]|1[0-2])$/.test(value)) return "Choose a valid month.";
+    } else if (type === "week") {
+      if (typeof value !== "string" || !/^\\d{4}-W(?:0[1-9]|[1-4]\\d|5[0-3])$/.test(value)) return "Choose a valid week.";
     } else if (type === "date") {
       if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(Date.parse(value))) return "Enter a valid date.";
     } else if (type === "time") {
       if (typeof value !== "string" || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)) return "Enter a valid time.";
     } else if (type === "datetime") {
       if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d$/.test(value) || Number.isNaN(Date.parse(value))) return "Enter a valid date and time.";
-    } else if (type === "short" || type === "paragraph") {
-      const limit = type === "paragraph" ? 3000 : 500;
+    } else if (type === "short" || type === "paragraph" || type === "address") {
+      const limit = type === "address" ? 2000 : type === "paragraph" ? 3000 : 500;
       if (typeof value !== "string" || value.length > limit) return "A text answer is too long.";
     } else {
       return "This form contains an unsupported question type.";
