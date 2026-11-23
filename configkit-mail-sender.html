@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Send individual emails from ConfigKit using your connected Resend account.">
+<title>ConfigKit Mail Sender</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e1e9e3;--paper:#f5f8f5;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e7f3eb;--red:#9b3030}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}header,main,footer{width:min(900px,calc(100% - 32px));margin:auto}header{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}header a{color:var(--green)}.brand{font-weight:850;color:var(--ink);text-decoration:none}main{padding:2rem 0 4rem}.hero,.panel{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:clamp(1.2rem,4vw,2rem);box-shadow:0 12px 30px #17231f0d}.hero{background:linear-gradient(130deg,#e5f3e9,#fff 72%)}.eyebrow{display:inline-block;background:var(--mint);color:var(--dark);border-radius:99px;padding:.25rem .7rem;font-size:.82rem;font-weight:800}.hero h1{font-size:clamp(2.3rem,6vw,3.7rem);line-height:1.05;margin:.7rem 0}.muted{color:var(--muted)}.panel{margin-top:1.2rem}.field{display:grid;gap:.4rem;margin:1rem 0}.field label{font-weight:750}.field input,.field textarea{width:100%;padding:.8rem .9rem;border:1px solid #c5d1ca;border-radius:10px;background:#fff;color:var(--ink);font:inherit}.field textarea{min-height:210px;resize:vertical}.field input:focus,.field textarea:focus{outline:3px solid #226b5122;outline-offset:1px}.row{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}.button{font:inherit;font-weight:750;border:1px solid var(--green);border-radius:10px;padding:.75rem 1rem;background:var(--green);color:white;cursor:pointer}.button.secondary{background:white;color:var(--dark);border-color:var(--line)}.button:disabled{opacity:.55;cursor:wait}.status{padding:.85rem 1rem;border-radius:10px;background:#f0f7f2;border:1px solid var(--line);margin:1rem 0}.status.error{background:#fff2f2;color:var(--red)}.status:empty{display:none}.notice{padding:.85rem 1rem;border-radius:10px;background:#fff7e8;color:#76500a;margin:1rem 0}.fine{font-size:.88rem;color:var(--muted)}footer{border-top:1px solid var(--line);padding:1.5rem 0 2rem;color:var(--muted)}.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header><a class="brand" href="index.html">⌘ ConfigKit</a><nav><a href="mail.html">Internal Mail</a> · <a href="index.html">Home</a></nav></header>
+<main>
+<section class="hero"><span class="eyebrow">OUTBOUND EMAIL · POWERED BY RESEND</span><h1>Send mail from ConfigKit.</h1><p class="muted">A simple, authenticated email composer for individual messages. Your Resend API key stays on the server.</p></section>
+<section id="loading" class="panel">Checking your ConfigKit sign-in…</section>
+<section id="signed-out" class="panel hidden"><h2>Sign in required</h2><p class="muted">Log in to your ConfigKit account before sending email.</p><a class="button" href="login.html?next=configkit-mail-sender.html">Log in / Sign up</a></section>
+<section id="composer" class="panel hidden">
+<h2>Compose an email</h2>
+<div class="notice" id="setup-note">Checking Resend configuration…</div>
+<form id="email-form">
+<div class="field"><label for="from">From</label><input id="from" readonly aria-describedby="from-help"><span class="fine" id="from-help">Configured securely by the site owner.</span></div>
+<div class="field"><label for="to">To</label><input id="to" type="email" autocomplete="email" maxlength="254" placeholder="recipient@example.com" required></div>
+<div class="field"><label for="subject">Subject</label><input id="subject" maxlength="180" placeholder="Email subject" required></div>
+<div class="field"><label for="message">Message</label><textarea id="message" maxlength="12000" placeholder="Write your message…" required></textarea><span class="fine">Plain-text message. ConfigKit formats it safely for email delivery.</span></div>
+<div class="row"><button class="button" id="send" type="submit">Send email</button><button class="button secondary" id="clear" type="reset">Clear</button></div>
+</form>
+<p id="status" class="status" role="status" aria-live="polite"></p>
+<p class="fine">Only send messages to people who expect to hear from you. Marketing emails require appropriate consent and unsubscribe handling. This page is for individual, user-initiated messages.</p>
+</section>
+</main>
+<footer>ConfigKit Mail Sender · Delivery handled by Resend.</footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+<script>
+(async()=>{
+ const $=id=>document.getElementById(id),hide=id=>$(id).classList.add('hidden'),show=id=>$(id).classList.remove('hidden');
+ const cfg=window.CONFIGKIT_AUTH||{};
+ if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient){$('loading').textContent='ConfigKit authentication is not configured.';return}
+ const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ const {data:{session},error}=await client.auth.getSession();hide('loading');
+ if(error||!session?.user){show('signed-out');return}
+ show('composer');
+ const endpoint=cfg.supabaseUrl.replace(/\/$/,'')+'/functions/v1/configkit-resend';
+ async function call(payload){
+   const {data:{session:active}}=await client.auth.getSession();
+   if(!active?.access_token)throw new Error('Your session expired. Please sign in again.');
+   const response=await fetch(endpoint,{method:payload?'POST':'GET',headers:{apikey:cfg.supabaseAnonKey,Authorization:'Bearer '+active.access_token,'Content-Type':'application/json'},...(payload?{body:JSON.stringify(payload)}:{})});
+   const result=await response.json().catch(()=>({error:'The mail service returned an unreadable response.'}));
+   if(!response.ok)throw new Error(result.error||'The mail request failed ('+response.status+').');
+   return result;
+ }
+ const setup=$('setup-note'),status=$('status'),send=$('send');
+ try{
+   const config=await call(null);
+   $('from').value=config.from||'';
+   if(!config.configured){setup.textContent='Resend is not ready yet. The site owner must add RESEND_API_KEY and RESEND_FROM_EMAIL to Supabase Edge Function secrets, and verify the sender domain in Resend.';}
+   else {setup.textContent='Ready to send from '+config.from+'. Each send is an individual email.';setup.className='status';}
+ }catch(e){setup.textContent=e.message;setup.className='notice';}
+ $('email-form').addEventListener('submit',async e=>{
+   e.preventDefault();if(!window.confirm('Send this email to '+$('to').value.trim()+'?'))return;
+   send.disabled=true;send.textContent='Sending…';status.textContent='';status.className='status';
+   try{const result=await call({to:$('to').value.trim(),subject:$('subject').value.trim(),message:$('message').value});
+     status.textContent='Email accepted by Resend. Reference: '+result.id;status.className='status';
+     $('message').value='';$('subject').value='';
+   }catch(err){status.textContent=err.message;status.className='status error';}
+   finally{send.disabled=false;send.textContent='Send email';}
+ });
+ client.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT')location.replace('login.html')});
+})().catch(e=>{const node=document.getElementById('loading');node.textContent='Could not initialize ConfigKit Mail: '+e.message;node.classList.remove('hidden')});
+</script>
+</body></html>
