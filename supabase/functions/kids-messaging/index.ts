@@ -173,9 +173,6 @@ Deno.serve(async (req: Request) => {
       const { data: currentLink } = await admin.from("kids_education_links").select("education_student_id").eq("child_id", childId).maybeSingle();
       if (currentLink && currentLink.education_student_id !== record.id) {
         await admin.from("kids_teacher_contacts").delete().eq("child_id", childId);
-        await admin.from("kids_friendships").update({
-          status: "pending", teacher_approved_by: null, teacher_approved_at: null, updated_at: new Date().toISOString(),
-        }).in("status", ["approved", "pending"]).in("status", ["approved", "pending"]).or("child_a_id.eq." + childId + ",child_b_id.eq." + childId);
       }
       const { error } = await admin.from("kids_education_links").upsert({ child_id: childId, education_student_id: record.id, linked_by: user.id }, { onConflict: "child_id" });
       if (error) return json({ error: "Could not link the student record" }, 400);
@@ -189,9 +186,6 @@ Deno.serve(async (req: Request) => {
       const { error } = await admin.from("kids_education_links").delete().eq("child_id", childId);
       if (error) return json({ error: "Could not unlink the student record" }, 400);
       await admin.from("kids_teacher_contacts").delete().eq("child_id", childId);
-      await admin.from("kids_friendships").update({
-        status: "pending", teacher_approved_by: null, teacher_approved_at: null, updated_at: new Date().toISOString(),
-      }).in("status", ["approved", "pending"]).or("child_a_id.eq." + childId + ",child_b_id.eq." + childId);
       return json({ ok: true });
     }
 
