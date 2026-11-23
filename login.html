@@ -416,6 +416,25 @@
               : 'Use a saved ConfigKit recovery code to continue. You can then set up a new authenticator in Account settings.';
             document.querySelector('#mfa-form label').textContent = 'Authenticator code';
             setStatus('Your password or provider sign-in was accepted. Complete the second step to continue.');
+            // Temporary read-only diagnostics: expose only non-secret auth metadata.
+            // This does not change the MFA decision or any access-control behavior.
+            const diagnosticMethods = [...new Set(authMethods.map(authMethodName).filter(Boolean))];
+            let authDiagnostic = document.getElementById('configkit-auth-diagnostic');
+            if (!authDiagnostic) {
+              authDiagnostic = document.createElement('p');
+              authDiagnostic.id = 'configkit-auth-diagnostic';
+              authDiagnostic.className = 'status';
+              authDiagnostic.setAttribute('role', 'status');
+              authDiagnostic.style.cssText = 'margin-top:12px;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;overflow-wrap:anywhere;';
+              document.getElementById('mfa-challenge').appendChild(authDiagnostic);
+            }
+            authDiagnostic.textContent =
+              'Temporary sign-in diagnostics (no secrets): methods=' +
+              (diagnosticMethods.join(', ') || 'none reported') +
+              '; assurance=' + String(assurance.currentLevel || 'unknown') +
+              '; next=' + String(assurance.nextLevel || 'none') +
+              '; recovery enabled=' + String(recoveryCodes.enabled === true) +
+              '; recovery verified=' + String(recoveryCodes.verified === true) + '.';
             if (factor) document.getElementById('mfa-code').focus();
             return;
           }
