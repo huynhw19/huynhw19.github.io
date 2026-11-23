@@ -413,7 +413,7 @@ window.CONFIGKIT_AUTH = {
               ];
               const passwordlessMethod = authMethods.some(item => {
                 const method = typeof item === 'string' ? item : item?.method;
-                return ['magiclink','passkey','webauthn'].includes(String(method || '').toLowerCase());
+                return ['magiclink','otp','passkey','webauthn'].includes(String(method || '').toLowerCase());
               });
               if (passwordlessMethod) return;
               const currentPage = window.location.pathname.split('/').pop();
