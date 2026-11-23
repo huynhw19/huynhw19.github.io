@@ -153,7 +153,7 @@
       const {data:claimsData,error:claimsError}=await client.auth.getClaims(data.session.access_token);
       if(claimsError) throw claimsError;
       const authMethods=[...(assurance.currentAuthenticationMethods||[]),...(claimsData?.claims?.amr||[])];
-      const passwordlessMethod=authMethods.some(item=>{const method=typeof item==='string'?item:item?.method;return ['magiclink','passkey','webauthn'].includes(String(method||'').toLowerCase());});
+      const passwordlessMethod=authMethods.some(item=>{const method=typeof item==='string'?item:item?.method;return ['magiclink','otp','passkey','webauthn'].includes(String(method||'').toLowerCase());});
       if(!passwordlessMethod&&!recovery.verified&&assurance.currentLevel!=='aal2'&&(assurance.nextLevel==='aal2'||recovery.enabled)) { window.location.replace('login.html?next=configkit-app-store.html'); return; }
       await loadApps(); setStatus('Signed in. Browse published apps or manage your own listings.');
     } catch(error) { setStatus(error.message || 'Could not connect to the App Store.',true); }
