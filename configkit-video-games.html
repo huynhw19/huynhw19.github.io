@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Explore video games from across platforms with ConfigKit Video Games. Search games, browse genres and platforms, and read game details.">
+<title>ConfigKit Video Games</title>
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e2e9e4;--paper:#f5f8f5;--white:#fff;--green:#226b51;--green2:#174b39;--mint:#e7f3eb;--shadow:0 12px 32px #17231f0c}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(1120px,calc(100% - 32px));margin:auto}header{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}header nav{display:flex;gap:1rem;flex-wrap:wrap}.brand{font-weight:850;color:var(--ink);text-decoration:none}main{padding:2rem 0 4rem}.hero,.toolbar,.detail,.game-card{background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.hero{padding:clamp(1.4rem,4vw,2.7rem);background:linear-gradient(130deg,#e5f3e9,#fff 72%)}.eyebrow{display:inline-block;background:var(--mint);color:var(--green2);border-radius:99px;padding:.25rem .7rem;font-size:.82rem;font-weight:800}.hero h1{font-size:clamp(2.3rem,6vw,4rem);line-height:1.05;margin:.7rem 0}.muted,.meta{color:var(--muted)}.hero p{max-width:760px}.toolbar{padding:1rem;margin:1.2rem 0;display:grid;grid-template-columns:minmax(220px,2fr) repeat(2,minmax(150px,1fr)) auto;gap:.7rem;align-items:end}.field label{display:block;font-size:.86rem;font-weight:750;margin:0 0 .3rem}.field input,.field select{width:100%;font:inherit;padding:.72rem .8rem;border:1px solid #c5d1ca;border-radius:10px;background:white;color:var(--ink)}button,.button{font:inherit;font-weight:700;border:1px solid var(--green);border-radius:10px;padding:.72rem 1rem;background:var(--green);color:#fff;cursor:pointer;text-decoration:none;display:inline-flex;justify-content:center;align-items:center}button.secondary,.button.secondary{background:#fff;color:var(--green2);border-color:var(--line)}button:disabled{opacity:.5;cursor:wait}.results-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin:1.4rem 0 .6rem}.results-head h2{margin:0}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:1rem}.game-card{overflow:hidden;display:flex;flex-direction:column;min-width:0}.cover{width:100%;aspect-ratio:16/10;object-fit:cover;background:#e8eee9}.game-body{padding:.85rem;display:flex;flex-direction:column;gap:.35rem;flex:1}.game-card h3{font-size:1.02rem;line-height:1.25;margin:0}.game-card p{font-size:.84rem;margin:0;color:var(--muted)}.game-card button{margin-top:.45rem;width:100%;padding:.55rem}.meta{font-size:.8rem}.pager{display:flex;justify-content:center;align-items:center;gap:.8rem;margin:1.4rem 0}.status{padding:.9rem 1rem;border:1px solid var(--line);border-radius:12px;background:white;margin:1rem 0}.status.error{color:#922f2f;background:#fff5f5;border-color:#f0dada}.empty{text-align:center;padding:2rem;border:1px dashed #bfcfc5;border-radius:14px;color:var(--muted);grid-column:1/-1}.detail{padding:1.2rem;margin:1.5rem 0;display:grid;grid-template-columns:minmax(200px,320px) 1fr;gap:1.2rem}.detail img{width:100%;border-radius:12px;aspect-ratio:16/10;object-fit:cover;background:#e8eee9}.detail h2{margin:.1rem 0}.detail p{white-space:pre-line}.detail[hidden]{display:none}.attribution{font-size:.88rem;color:var(--muted);margin-top:2rem}footer{border-top:1px solid var(--line);padding:1.5rem 0 2rem;color:var(--muted)}@media(max-width:760px){.toolbar{grid-template-columns:1fr 1fr}.toolbar .search-field{grid-column:1/-1}.detail{grid-template-columns:1fr}}@media(max-width:520px){header{align-items:flex-start;flex-direction:column;padding:1rem 0}.toolbar{grid-template-columns:1fr}.toolbar .search-field{grid-column:auto}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.game-body{padding:.65rem}.game-card h3{font-size:.93rem}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="index.html">⌘ ConfigKit</a><nav aria-label="Main navigation"><a href="index.html">Home</a><a href="community-games.html">Community Games</a><a href="dashboard.html">Dashboard</a></nav></header>
+<main>
+<section class="hero"><span class="eyebrow">Explore · Discover · Learn</span><h1>ConfigKit Video Games</h1><p class="muted">Search a huge catalogue of games across consoles, PC and mobile. Browse by genre or platform, then open a game to learn about its release, rating, developers and more.</p><p><strong>500,000+ games indexed</strong> <span class="meta">· Powered by RAWG</span></p></section>
+<section class="toolbar" aria-label="Game catalogue filters">
+ <div class="field search-field"><label for="search">Search games</label><input id="search" type="search" maxlength="100" placeholder="Try Minecraft, Zelda, Stardew Valley…"></div>
+ <div class="field"><label for="genre">Genre</label><select id="genre"><option value="">All genres</option></select></div>
+ <div class="field"><label for="platform">Platform</label><select id="platform"><option value="">All platforms</option></select></div>
+ <button id="search-btn" type="button">Search</button>
+</section>
+<div id="status" class="status" role="status" aria-live="polite">Loading games…</div>
+<div class="results-head"><h2 id="results-title">Discover games</h2><span id="count" class="meta"></span></div>
+<section id="games" class="grid" aria-label="Video games"></section>
+<div class="pager"><button id="previous" class="secondary" type="button" disabled>← Previous</button><span id="page-label" class="meta">Page 1</span><button id="next" type="button" disabled>Next →</button></div>
+<section id="detail" class="detail" hidden aria-live="polite"><img id="detail-image" alt=""><div><div class="meta" id="detail-meta"></div><h2 id="detail-title"></h2><p id="detail-description"></p><p class="meta" id="detail-extra"></p><a id="detail-rawg" href="https://rawg.io/" target="_blank" rel="noopener noreferrer">View on RAWG ↗</a></div></section>
+<p class="attribution">Game information and images are provided by <a href="https://rawg.io/" target="_blank" rel="noopener noreferrer">RAWG</a>. ConfigKit is an independent project and is not affiliated with RAWG or the game publishers.</p>
+</main>
+<footer>ConfigKit Video Games · Browse the catalogue without downloading the entire database.</footer>
+<script src="auth-config.js"></script>
+<script>
+(() => {
+  const config = window.CONFIGKIT_AUTH || {};
+  const endpoint = String(config.supabaseUrl || '').replace(/\/$/, '') + '/functions/v1/configkit-rawg';
+  const status = document.getElementById('status');
+  const gamesEl = document.getElementById('games');
+  const searchEl = document.getElementById('search');
+  const genreEl = document.getElementById('genre');
+  const platformEl = document.getElementById('platform');
+  const countEl = document.getElementById('count');
+  const previous = document.getElementById('previous');
+  const next = document.getElementById('next');
+  let page = 1, total = 0, requestId = 0, debounce = null;
+
+  function setStatus(message, error = false) {
+    status.textContent = message;
+    status.className = error ? 'status error' : 'status';
+  }
+  function make(tag, className, text) {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text !== undefined) el.textContent = text;
+    return el;
+  }
+  async function api(params) {
+    if (!config.supabaseUrl || !config.supabaseAnonKey) throw new Error('ConfigKit API configuration is missing.');
+    const url = new URL(endpoint);
+    Object.entries(params).forEach(([key, value]) => { if (value !== '' && value != null) url.searchParams.set(key, String(value)); });
+    const response = await fetch(url, { headers: { apikey: config.supabaseAnonKey, Accept: 'application/json' } });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'The catalogue is temporarily unavailable.');
+    return data;
+  }
+  function fillSelect(select, rows) {
+    rows.forEach(row => {
+      const option = document.createElement('option');
+      option.value = row.slug || String(row.id);
+      option.textContent = row.name;
+      select.append(option);
+    });
+  }
+  function renderGames(rows) {
+    gamesEl.replaceChildren();
+    if (!rows.length) {
+      gamesEl.append(make('div', 'empty', 'No games found. Try another search or remove a filter.'));
+      return;
+    }
+    rows.forEach(game => {
+      const card = make('article', 'game-card');
+      if (game.background_image) {
+        const img = make('img', 'cover');
+        img.src = game.background_image;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        card.append(img);
+      }
+      const body = make('div', 'game-body');
+      body.append(make('h3', '', game.name || 'Untitled game'));
+      body.append(make('p', '', game.released ? 'Released ' + game.released : 'Release date unavailable'));
+      const platforms = (game.platforms || []).slice(0, 3).map(p => p.platform?.name).filter(Boolean).join(' · ');
+      if (platforms) body.append(make('p', '', platforms));
+      const rating = game.rating ? '★ ' + Number(game.rating).toFixed(1) + '/5' : 'Not yet rated';
+      body.append(make('span', 'meta', rating));
+      const button = make('button', '', 'Game details');
+      button.type = 'button';
+      button.addEventListener('click', () => loadDetail(game.id));
+      body.append(button);
+      card.append(body);
+      gamesEl.append(card);
+    });
+  }
+  async function loadGames() {
+    const id = ++requestId;
+    setStatus('Loading games…');
+    gamesEl.replaceChildren();
+    try {
+      const data = await api({ action: 'games', page, page_size: 24, search: searchEl.value.trim(), genres: genreEl.value, parent_platforms: platformEl.value, ordering: '-added' });
+      if (id !== requestId) return;
+      total = Number(data.count) || 0;
+      countEl.textContent = total.toLocaleString() + ' games in this result set';
+      document.getElementById('page-label').textContent = 'Page ' + page;
+      previous.disabled = page <= 1;
+      next.disabled = !data.next;
+      renderGames(Array.isArray(data.results) ? data.results : []);
+      setStatus('Showing page ' + page + '. Search and filters load results as you browse, rather than downloading the full catalogue.');
+    } catch (error) {
+      if (id !== requestId) return;
+      setStatus(error.message || 'Could not load games.', true);
+      gamesEl.replaceChildren(make('div', 'empty', 'Please refresh the page or try again in a moment.'));
+      countEl.textContent = '';
+      previous.disabled = true; next.disabled = true;
+    }
+  }
+  async function loadDetail(id) {
+    const panel = document.getElementById('detail');
+    panel.hidden = false;
+    document.getElementById('detail-title').textContent = 'Loading game details…';
+    document.getElementById('detail-description').textContent = '';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    try {
+      const game = await api({ action: 'detail', id });
+      document.getElementById('detail-title').textContent = game.name || 'Game details';
+      const image = document.getElementById('detail-image');
+      image.src = game.background_image || '';
+      image.alt = game.name ? game.name + ' artwork' : 'Game artwork';
+      document.getElementById('detail-meta').textContent = [game.released ? 'Released ' + game.released : '', game.rating ? '★ ' + Number(game.rating).toFixed(1) + '/5' : '', game.metacritic ? 'Metacritic ' + game.metacritic : ''].filter(Boolean).join(' · ');
+      const raw = String(game.description_raw || '').trim();
+      document.getElementById('detail-description').textContent = raw || 'No description is available for this game yet.';
+      const genres = (game.genres || []).map(x => x.name).join(', ');
+      const platforms = (game.platforms || []).map(x => x.platform?.name).filter(Boolean).join(', ');
+      const developers = (game.developers || []).map(x => x.name).join(', ');
+      const publishers = (game.publishers || []).map(x => x.name).join(', ');
+      document.getElementById('detail-extra').textContent = [genres && 'Genres: ' + genres, platforms && 'Platforms: ' + platforms, developers && 'Developers: ' + developers, publishers && 'Publishers: ' + publishers].filter(Boolean).join('\n');
+      const rawg = document.getElementById('detail-rawg');
+      rawg.href = game.slug ? 'https://rawg.io/games/' + encodeURIComponent(game.slug) : 'https://rawg.io/';
+    } catch (error) {
+      document.getElementById('detail-title').textContent = 'Could not load this game';
+      document.getElementById('detail-description').textContent = error.message || 'Please try again.';
+    }
+  }
+  document.getElementById('search-btn').addEventListener('click', () => { page = 1; loadGames(); });
+  searchEl.addEventListener('keydown', event => { if (event.key === 'Enter') { page = 1; loadGames(); } });
+  searchEl.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(() => { page = 1; loadGames(); }, 400); });
+  genreEl.addEventListener('change', () => { page = 1; loadGames(); });
+  platformEl.addEventListener('change', () => { page = 1; loadGames(); });
+  previous.addEventListener('click', () => { if (page > 1) { page--; loadGames(); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
+  next.addEventListener('click', () => { page++; loadGames(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  Promise.allSettled([api({ action: 'genres' }), api({ action: 'platforms' })]).then(results => {
+    if (results[0].status === 'fulfilled') fillSelect(genreEl, results[0].value.results || []);
+    if (results[1].status === 'fulfilled') fillSelect(platformEl, results[1].value.results || []);
+    loadGames();
+  });
+})();
+</script>
+</body>
+</html>
