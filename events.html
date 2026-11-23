@@ -48,24 +48,6 @@
  function resetForm(){editingId=null;form.reset();document.getElementById('form-heading').textContent='Create an event';document.getElementById('save-event').textContent='Publish event';document.getElementById('cancel-edit').hidden=true;}
  async function load(){
   const session=await client.auth.getSession();currentUser=session.data.session?.user||null;
-  if(currentUser){
-   const [recoveryFactor,assuranceResult]=await Promise.all([client.functions.invoke('recovery-codes',{body:{action:'status'}}),client.auth.mfa.getAuthenticatorAssuranceLevel()]);
-   if(recoveryFactor.error)throw recoveryFactor.error;if(assuranceResult.error)throw assuranceResult.error;
-   const recoveryStatus=recoveryFactor.data||{};
-   // Keep Events consistent with Dashboard and accept verified passwordless AMR claims.
-   const {data:claimsData,error:claimsError}=await client.auth.getClaims(session.data.session.access_token);
-   if(claimsError)throw claimsError;
-   const authMethods=[
-    ...(assuranceResult.data?.currentAuthenticationMethods||[]),
-    ...(claimsData?.claims?.amr||[])
-   ];
-   const passwordlessMethod=authMethods.some(item=>{
-    const method=typeof item==='string'?item:item?.method;
-    return ['magiclink','passkey','webauthn'].includes(String(method||'').toLowerCase());
-   });
-   const factorVerified=recoveryStatus.verified===true||assuranceResult.data?.currentLevel==='aal2'||passwordlessMethod;
-   if(recoveryStatus.enabled===true&&!factorVerified){window.location.replace('login.html?next=events.html');return;}
-  }
   ownerPanel.hidden=!currentUser||currentUser.id!==OWNER_ID;
   await refresh();
  }
