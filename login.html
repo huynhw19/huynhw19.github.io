@@ -382,10 +382,9 @@
             const method = typeof item === 'string' ? item : item?.method;
             return ['magiclink','otp','passkey','webauthn'].includes(String(method || '').toLowerCase());
           });
-          if (!passwordlessMethod &&
-              !recoveryCodes.verified &&
+          if (!recoveryCodes.verified &&
               assurance.currentLevel !== 'aal2' &&
-              (assurance.nextLevel === 'aal2' || recoveryCodes.enabled)) {
+              (recoveryCodes.enabled || (!passwordlessMethod && assurance.nextLevel === 'aal2'))) {
             const {data: factorData, error: factorError} = await client.auth.mfa.listFactors();
             if (factorError) { setStatus('Could not load your authenticator. Please try again.', true); return; }
             const factor = (factorData.totp || []).find(item => item.status === 'verified');
