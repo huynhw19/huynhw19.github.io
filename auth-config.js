@@ -406,8 +406,20 @@ window.CONFIGKIT_AUTH = {
               const {data: assurance, error:assuranceError} = await client.auth.mfa.getAuthenticatorAssuranceLevel();
               if (assuranceError) throw assuranceError;
               if (assurance?.currentLevel === 'aal2') return;
-              // A primary passwordless sign-in (OTP/magic link/passkey) does not
-              // satisfy the separate recovery-code verification requirement.
+              // Only a method in Supabase's signed JWT may qualify as passkey sign-in.
+              // Do not trust user metadata or client-provided flags for this decision.
+              const {data: claimsData, error: claimsError} = await client.auth.getClaims(session.access_token);
+              if (claimsError) throw claimsError;
+              const signedMethods = [
+                ...(assurance?.currentAuthenticationMethods || []),
+                ...(claimsData?.claims?.amr || [])
+              ];
+              const verifiedPasskey = signedMethods.some(item => {
+                const method = typeof item === 'string' ? item : item?.method;
+                return ['passkey', 'webauthn'].includes(String(method || '').toLowerCase());
+              });
+              if (verifiedPasskey) return;
+              // Other primary sign-in methods still require the separate recovery verification.
               // RLS enforces this independently; redirect here so users see the
               // recovery challenge instead of a save-time policy error.
               const currentPage = window.location.pathname.split('/').pop();
