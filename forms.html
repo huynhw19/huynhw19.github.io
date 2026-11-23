@@ -119,11 +119,13 @@ async function loadPublic(){
   const answers={};
   for(const f of fields){
    if(f.type==='page')continue;
-   let value;
-   if(f.type==='multi')value=[...form.querySelectorAll('input[name="'+CSS.escape(f.id)+'"]:checked')].map(x=>x.value);
-   else if(f.type==='single')value=form.querySelector('input[name="'+CSS.escape(f.id)+'"]:checked')?.value||'';
-   else if(f.type==='checkbox')value=!!form.querySelector('input[name="'+CSS.escape(f.id)+'"]')?.checked;
-   else value=form.querySelector('[name="'+CSS.escape(f.id)+'"]')?.value?.trim()??'';
+   let value=savedPageValues[f.id];
+   if(!(f.id in savedPageValues)){
+    if(f.type==='multi')value=[...form.querySelectorAll('input[name="'+CSS.escape(f.id)+'"]:checked')].map(x=>x.value);
+    else if(f.type==='single')value=form.querySelector('input[name="'+CSS.escape(f.id)+'"]:checked')?.value||'';
+    else if(f.type==='checkbox')value=!!form.querySelector('input[name="'+CSS.escape(f.id)+'"]')?.checked;
+    else value=form.querySelector('[name="'+CSS.escape(f.id)+'"]')?.value?.trim()??'';
+   }
    if(f.required&&(value===''||(Array.isArray(value)&&!value.length)||(f.type==='checkbox'&&value!==true))){status.textContent='Please complete: '+f.label;return}
    if(f.type==='email'&&value&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)){status.textContent='Enter a valid email address.';return}if(f.type==='url'&&value){try{new URL(value)}catch{status.textContent='Enter a valid website URL.';return}}
    answers[f.id]=value;
