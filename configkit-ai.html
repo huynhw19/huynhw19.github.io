@@ -36,15 +36,15 @@ const config=window.CONFIGKIT_AUTH;if(!config?.supabaseUrl||!config?.supabaseAno
 const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let history=[],busy=false,activeConversationId=null,memoryMode='approval',memoryCache=[],pendingMemory=null;
 const memoryModeNotes={automatic:'Useful details explicitly shared in chat may be saved automatically. You can review or delete them below.',approval:'ConfigKit AI will suggest memories and wait for your approval.',off:'No new memories will be saved or used in AI answers.'};
-function safeMemoryText(value){return String(value||'').trim().replace(/\\s+/g,' ').slice(0,500)}
+function safeMemoryText(value){return String(value||'').trim().replace(/\s+/g,' ').slice(0,500)}
 function memoryCandidateFrom(text){
  const value=safeMemoryText(text);if(value.length<12||value.length>300)return null;
- if(/\\b(password|passcode|api key|secret key|recovery code|private key|credit card|bank account|diagnos(?:is|ed)|medication|religion|political party|sexual orientation)\\b/i.test(value))return null;
+ if(/\b(password|passcode|api key|secret key|recovery code|private key|credit card|bank account|diagnos(?:is|ed)|medication|religion|political party|sexual orientation)\b/i.test(value))return null;
  const patterns=[
-  {re:/^(?:please\\s+)?remember(?: that)?\\s+(.+)$/i,category:'Context'},
-  {re:/^(?:i|we)\\s+(?:prefer|like|love|usually|always|often)\\s+(.+)$/i,category:'Preference'},
-  {re:/^(?:i am|i'm|we are|we're)\\s+(?:working on|building|developing)\\s+(.+)$/i,category:'Project'},
-  {re:/^(?:my|our)\\s+(?:current )?(?:goal|project|plan)\\s+is\\s+(.+)$/i,category:'Goal'}
+  {re:/^(?:please\s+)?remember(?: that)?\s+(.+)$/i,category:'Context'},
+  {re:/^(?:i|we)\s+(?:prefer|like|love|usually|always|often)\s+(.+)$/i,category:'Preference'},
+  {re:/^(?:i am|i'm|we are|we're)\s+(?:working on|building|developing)\s+(.+)$/i,category:'Project'},
+  {re:/^(?:my|our)\s+(?:current )?(?:goal|project|plan)\s+is\s+(.+)$/i,category:'Goal'}
  ];
  for(const item of patterns){const match=value.match(item.re);if(match){const content=match[1].trim();if(content.length<5)return null;return {content:(item.category==='Preference'?'Prefers: ':item.category==='Project'?'Working on: ':item.category==='Goal'?'Goal: ':'')+content,category:item.category}}}
  return null;
