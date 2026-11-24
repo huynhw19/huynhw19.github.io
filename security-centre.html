@@ -91,5 +91,6 @@
  client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)window.location.replace('login.html')});
 })().catch(e=>{const s=document.getElementById('status');s.textContent='Security Centre could not load. Please try again.';s.classList.add('error')});
 </script>
+  <script src="/cookie-consent.js?v=2" defer></script>
 </body>
 </html>
