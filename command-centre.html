@@ -58,7 +58,7 @@
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id),status=$('status'),app=$('app');
-const config=window.CONFIGKIT_AUTH_CONFIG||window.CONFIGKIT_CONFIG||window.SUPABASE_CONFIG||{};
+const config=window.CONFIGKIT_AUTH||{};
 if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){status.textContent='Sign-in is not configured. Please use the main dashboard or contact support.';status.classList.add('error');return}
 const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let user=null,refreshing=false,channel=null;
