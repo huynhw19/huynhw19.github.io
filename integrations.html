@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Manage the services, apps and connectors that work with ConfigKit.">
+<meta name="theme-color" content="#f7f9f6">
+<title>Integrations — ConfigKit</title>
+<link rel="stylesheet" href="brand.css?v=1"><link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+header,main,footer{width:min(1160px,calc(100% - 32px));margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:9px;color:var(--ink);font-weight:800;text-decoration:none}.brand img{width:30px;height:30px}nav{display:flex;gap:14px;flex-wrap:wrap}nav a{font-weight:650;color:var(--green);text-decoration:none}
+main{padding:34px 0 56px}.eyebrow{color:var(--green);font-size:.75rem;font-weight:850;letter-spacing:.11em;text-transform:uppercase}
+h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.08;letter-spacing:-.045em;margin:.3rem 0}h2{font-size:1.2rem;margin:0 0 8px}h3{font-size:1.02rem;margin:0}.muted{color:var(--muted)}
+.hero{display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px}.hero p{max-width:680px;margin:.55rem 0 0}
+.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 26px}.summary-card,.panel,.integration{background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px #17231f08}.summary-card{padding:15px 17px}.summary-card strong{display:block;font-size:1.55rem;letter-spacing:-.04em}.summary-card span{font-size:.85rem;color:var(--muted)}
+.section{margin:28px 0}.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:12px}.section-head p{margin:3px 0 0;color:var(--muted);font-size:.9rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:12px}.integration{padding:17px;display:flex;flex-direction:column;gap:10px;box-shadow:none;min-width:0}.top{display:flex;align-items:flex-start;gap:12px}.ico{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border-radius:12px;background:var(--mint);font-size:1.35rem}.name{flex:1;min-width:0}.name p{margin:2px 0 0;color:var(--muted);font-size:.84rem}.pill{display:inline-flex;align-items:center;gap:6px;width:max-content;max-width:100%;border-radius:99px;padding:3px 9px;background:var(--mint);color:var(--dark);font-size:.76rem;font-weight:750}.pill.warn{background:var(--gold);color:#76551b}.pill.neutral{background:#eef1ef;color:#59665f}.integration p{margin:0;color:var(--muted);font-size:.9rem}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:2px}.link{display:inline-flex;align-items:center;gap:5px;color:var(--green);font-weight:750;text-decoration:none}.link:hover{text-decoration:underline}
+.panel{padding:18px;margin:16px 0}.notice{background:var(--gold);border:1px solid #eee0c3;border-radius:12px;padding:14px 16px}.notice strong{display:block}.notice p{margin:4px 0 0;color:#725b2b;font-size:.9rem}
+.list{display:grid;gap:0}.list-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}.list-row:last-child{border-bottom:0}.list-row strong{display:block}.list-row small{color:var(--muted)}
+footer{padding:18px 0 34px;color:var(--muted);font-size:.85rem}
+@media(max-width:620px){.summary{grid-template-columns:1fr 1fr}.summary-card:last-child{grid-column:1/-1}.list-row{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="dashboard.html"><img src="configkit-symbol.svg" alt=""> ConfigKit</a><nav><a href="dashboard.html">Dashboard</a><a href="command-centre.html">Command Centre</a><a href="account-settings.html">Account settings</a></nav></header>
+<main>
+<section class="hero"><div><div class="eyebrow">Connected ecosystem</div><h1>Integrations</h1><p class="muted">See the services that power ConfigKit, manage app access, and find the connection settings for your tools — all in one place.</p></div></section>
+<section class="summary" aria-label="Integration overview">
+<div class="summary-card"><strong>5</strong><span>Service integrations in ConfigKit features</span></div>
+<div class="summary-card"><strong>2</strong><span>OAuth management areas</span></div>
+<div class="summary-card"><strong>1</strong><span>Personal AI connector</span></div>
+</section>
+<section class="section"><div class="section-head"><div><h2>Services powering ConfigKit</h2><p>These services are already wired into existing ConfigKit features.</p></div></div>
+<div class="grid">
+<article class="integration"><div class="top"><div class="ico">🤖</div><div class="name"><h3>Groq</h3><p>AI model provider</p></div></div><span class="pill">Used by ConfigKit AI</span><p>Powers ConfigKit AI responses through the existing server-side AI function. Credentials stay on the backend, not in this page.</p><div class="actions"><a class="link" href="configkit-ai.html">Open ConfigKit AI →</a></div></article>
+<article class="integration"><div class="top"><div class="ico">🔎</div><div class="name"><h3>Tavily</h3><p>Web search API</p></div></div><span class="pill">Used by Search &amp; AI</span><p>Provides web search for ConfigKit Search and optional research inside ConfigKit AI.</p><div class="actions"><a class="link" href="configkit-search.html">Open ConfigKit Search →</a><a class="link" href="configkit-ai.html">Open AI →</a></div></article>
+<article class="integration"><div class="top"><div class="ico">🌦️</div><div class="name"><h3>Open-Meteo</h3><p>Weather data</p></div></div><span class="pill">Used by ConfigKit AI</span><p>Supplies weather and forecast information. Location access is requested by the browser only when needed.</p><div class="actions"><a class="link" href="configkit-ai.html">Open ConfigKit AI →</a></div></article>
+<article class="integration"><div class="top"><div class="ico">🎮</div><div class="name"><h3>RAWG</h3><p>Video game catalogue</p></div></div><span class="pill">Used by Video Games</span><p>Connects the game discovery catalogue to the RAWG API. This catalogue is separate from playable community games.</p><div class="actions"><a class="link" href="configkit-video-games.html">Open Video Games →</a></div></article>
+<article class="integration"><div class="top"><div class="ico">✉️</div><div class="name"><h3>Resend</h3><p>Email delivery service</p></div></div><span class="pill warn">Coming soon</span><p>The server function exists, but ConfigKit Mail sending is not active. A verified sending domain is still required.</p><div class="actions"><a class="link" href="configkit-mail-sender.html">View ConfigKit Mail →</a></div></article>
+</div></section>
+<section class="section"><div class="section-head"><div><h2>Connectors &amp; app access</h2><p>Manage how other applications and AI clients work with your ConfigKit account.</p></div></div>
+<div class="grid">
+<article class="integration"><div class="top"><div class="ico">🧠</div><div class="name"><h3>ConfigKit AI Connector</h3><p>Personal MCP connection</p></div></div><span class="pill">Available</span><p>Create and revoke personal connector tokens for compatible AI assistants. Tokens are shown once and can be revoked from the connector page.</p><div class="actions"><a class="link" href="configkit-ai-connector.html">Manage AI connector →</a></div></article>
+<article class="integration"><div class="top"><div class="ico">🔐</div><div class="name"><h3>OAuth Apps</h3><p>ConfigKit as an identity provider</p></div></div><span class="pill warn">Provider setup required</span><p>Register apps that want users to sign in with ConfigKit. The OAuth 2.1 server and access-token hook require project-level setup before live sign-in works.</p><div class="actions"><a class="link" href="oauth-apps.html">Manage OAuth apps →</a><a class="link" href="oauth-developer-guide.html">Setup guide →</a></div></article>
+<article class="integration"><div class="top"><div class="ico">🔗</div><div class="name"><h3>Connected Apps</h3><p>Third-party grants to your account</p></div></div><span class="pill">Grant management</span><p>Review the applications you have authorized and revoke their access. This manages apps accessing ConfigKit; it is not a list of services connected from ConfigKit.</p><div class="actions"><a class="link" href="connected-apps.html">Review app access →</a></div></article>
+</div></section>
+<section class="section"><div class="section-head"><div><h2>ConfigKit services</h2><p>Built-in services that work together without a separate external account connection.</p></div></div>
+<div class="panel list">
+<div class="list-row"><div><strong>ConfigKit Drive</strong><small>Private file storage</small></div><a class="link" href="drive.html">Open Drive →</a></div>
+<div class="list-row"><div><strong>ConfigKit Mail</strong><small>Internal mailbox and messaging</small></div><a class="link" href="mail.html">Open Mail →</a></div>
+<div class="list-row"><div><strong>Automations</strong><small>Scheduled workflows across ConfigKit</small></div><a class="link" href="automations.html">Open Automations →</a></div>
+<div class="list-row"><div><strong>Shortcuts</strong><small>Personal quick links and Apple Shortcut recipes</small></div><a class="link" href="configkit-shortcuts.html">Open Shortcuts →</a></div>
+</div></section>
+<section class="panel"><h2>External account connections</h2><div class="notice"><strong>Connection framework is the next step</strong><p>This project has OAuth app registration for other apps to connect to ConfigKit, but it does not yet have the separate outbound OAuth flow needed for ConfigKit to connect to Google, Microsoft, GitHub, Slack or other services. I’ve kept those providers clearly unconnected rather than showing fake “Connected” switches. Each provider needs its own OAuth client configuration, secure token storage, scopes and disconnect/revoke handling.</p></div><p class="muted" style="margin:12px 0 0;font-size:.9rem">No external account credentials or access tokens are stored in this page.</p></section>
+</main>
+<footer>ConfigKit Integrations · <a href="privacy.html">Privacy</a> · <a href="safety.html">Safety &amp; support</a></footer>
+<script src="cookie-consent.js?v=2" defer></script>
+</body></html>
