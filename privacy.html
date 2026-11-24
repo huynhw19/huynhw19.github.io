@@ -85,8 +85,8 @@
 
     <h2 id="cookies">10. Cookies, browser storage and logs</h2>
     <p>Authentication and site features may use cookies, local storage or similar browser technologies to maintain sessions, remember settings and support security. Your browser may also retain cached pages or downloaded files. Hosting and service providers may create operational and security logs. You can manage browser storage through your browser settings, but clearing it may sign you out or affect site functionality.</p>
-    <p><strong>Homepage consent choices:</strong> The ConfigKit homepage displays a consent panel for optional browser preferences and external media. A small essential local-storage record (<code>configkit-cookie-consent-v1</code>) remembers your choice. Essential storage is always active. If you allow the optional preferences category, the homepage can remember your language choice in local storage. If you allow external media, the homepage loads its YouTube tutorial embed from YouTube's privacy-enhanced domain and its family-dashboard QR image from the QR image provider. Until you allow external media, those third-party resources are not requested by the homepage. You can change your choice at any time using “Cookie settings” in the homepage footer, or clear the site's browser storage. Rejecting optional categories does not prevent use of the local profile builder.</p>
-    <p>The homepage does not currently use advertising or analytics cookies. Third-party providers may process technical information, such as your IP address and browser details, when you choose to load their content. Their own privacy policies apply to that processing.</p>
+    <p><strong>Site-wide consent choices:</strong> ConfigKit displays a consent panel across its HTML pages for optional browser preferences and external media. A small essential local-storage record remembers your choice. Essential storage is always active. If you allow optional preferences, pages that support it may remember choices such as language. If you allow external media, embedded third-party content such as videos and maps may load. External iframe content is held back until you allow that category. You can change your choice at any time using the “Cookie settings” control shown on ConfigKit pages, or clear the site's browser storage. Rejecting optional categories does not prevent use of core site features.</p>
+    <p>ConfigKit does not currently use advertising or analytics cookies. Third-party providers may process technical information, such as your IP address and browser details, when you choose to load their content. Their own privacy policies apply to that processing.</p>
 
     <h2>11. Security and retention</h2>
     <p>We and our service providers use technical and organisational measures intended to protect information. No internet transmission or storage system can be guaranteed completely secure. Information is retained for as long as reasonably needed for the purpose for which it was collected, to maintain security and records, or to meet legal requirements. Actual retention periods may also depend on provider settings, backups and logs.</p>
@@ -107,5 +107,6 @@
     <p class="muted">This policy describes intended site practices and is not legal advice. The actual operation of third-party services is also governed by their own terms and privacy policies.</p>
   </main>
   <footer><a href="terms.html">Terms of Service</a> · <a href="index.html">Return to ConfigKit</a></footer>
+  <script src="/cookie-consent.js?v=2" defer></script>
 </body>
 </html>
