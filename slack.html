@@ -34,7 +34,8 @@
 <script>
 (async()=>{
 const $=id=>document.getElementById(id),status=$('status'),endpoint='https://gwhqnqzzlgslwgijkkpt.supabase.co/functions/v1/configkit-slack',cfg=window.CONFIGKIT_AUTH||{};
-let client,session,connections=[];\n$('copy-redirect').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('redirect-uri').value);say('Slack redirect URL copied.')}catch{ $('redirect-uri').select();say('Select and copy the redirect URL above.','warn')}});
+let client,session,connections=[];
+$('copy-redirect').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('redirect-uri').value);say('Slack redirect URL copied.')}catch{ $('redirect-uri').select();say('Select and copy the redirect URL above.','warn')}});
 function say(message,type=''){status.textContent=message;status.className='status'+(type?' '+type:'')}
 async function api(payload){const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.supabaseAnonKey,'Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||'Slack request failed.');return data}
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
