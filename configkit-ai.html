@@ -24,9 +24,10 @@ const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,
 let history=[],busy=false;
 
 async function weatherContextFor(questionText){
- const weatherIntent=/\\b(weather|forecast|temperature|rain(?:ing)?|sunny|wind(?:y)?|humidity)\\b/i.test(questionText);
+ const weatherIntent=/\b(weather|forecast|temperature|rain(?:ing)?|sunny|wind(?:y)?|humidity)\b/i.test(questionText);
  if(!weatherIntent)return '';
- const wantsCurrentLocation=/\\b(my location|current location|where i am|right here)\\b/i.test(questionText);\n const cityMatch=wantsCurrentLocation?null:questionText.match(/\\b(?:in|for|around|near)\\s+([\\p{L}][\\p{L} .'-]{1,55}?)(?=\\s+(?:today|tomorrow|tonight|this\\s+week|right\\s+now)\\b|[?.!,]|$)/iu);
+ const wantsCurrentLocation=/\b(my location|current location|where i am|right here)\b/i.test(questionText);
+ const cityMatch=wantsCurrentLocation?null:questionText.match(/\b(?:in|for|around|near)\s+([\p{L}][\p{L} .'-]{1,55}?)(?=\s+(?:today|tomorrow|tonight|this\s+week|right\s+now)\b|[?.!,]|$)/iu);
  let latitude,longitude,place='';
  if(cityMatch){
    const city=cityMatch[1].trim();
@@ -50,7 +51,7 @@ async function weatherContextFor(questionText){
  if(day(0))lines.push('Today ('+day(0)+'): high '+(daily.temperature_2m_max?.[0]??'—')+'°C, low '+(daily.temperature_2m_min?.[0]??'—')+'°C, precipitation probability '+(daily.precipitation_probability_max?.[0]??'—')+'%.');
  if(day(1))lines.push('Tomorrow ('+day(1)+'): high '+(daily.temperature_2m_max?.[1]??'—')+'°C, low '+(daily.temperature_2m_min?.[1]??'—')+'°C, precipitation probability '+(daily.precipitation_probability_max?.[1]??'—')+'%.');
  lines.push('Use these live values to answer the user clearly and mention the location and local forecast date. Do not invent additional weather details.');
- return lines.join('\\n');
+ return lines.join('\n');
 }
 
 function bubble(text,role){const el=document.createElement('div');el.className='bubble '+(role==='user'?'user':'assistant');el.textContent=text;messages.append(el);messages.scrollTop=messages.scrollHeight;return el}
