@@ -14,6 +14,16 @@
 <label class="consent"><input id="web-search" type="checkbox"><span>Search the web for current information and include source links. Optional; only runs when checked.</span></label>
 </div></section>
 <aside class="card"><h2>My saved conversations</h2><div class="actions"><button id="load-saved" type="button" class="secondary">Refresh saved list</button></div><div id="saved-list" class="side-note">Your saved chats will appear here.</div>
+<section class="memory-card" aria-labelledby="ai-controls-title"><h2 id="ai-controls-title">🤖 AI Control Centre</h2>
+<p class="side-note">Personalise how ConfigKit AI responds. Your choices are saved to your account.</p>
+<label for="ai-style"><strong>Response style</strong></label><select id="ai-style"><option value="friendly">Friendly</option><option value="professional">Professional</option><option value="concise">Concise</option><option value="detailed">Detailed and explanatory</option></select>
+<label for="ai-length" style="display:block;margin-top:10px"><strong>Answer length</strong></label><select id="ai-length"><option value="short">Short</option><option value="balanced">Balanced</option><option value="thorough">Thorough</option></select>
+<label for="ai-level" style="display:block;margin-top:10px"><strong>Expertise level</strong></label><select id="ai-level"><option value="beginner">Beginner — explain the basics</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced — use technical detail</option></select>
+<label for="ai-web-default" style="display:block;margin-top:10px"><strong>Web research default</strong></label><select id="ai-web-default"><option value="off">Off by default</option><option value="optional">Optional — I choose each time</option><option value="preferred">Preferred — enable by default</option></select>
+<label class="consent" style="margin-top:12px"><input id="ai-use-memories" type="checkbox" checked><span>Use my saved memories to personalise answers (also respects Memory Centre being switched off).</span></label>
+<label for="ai-custom" style="display:block;margin-top:10px"><strong>Custom instructions</strong></label><textarea id="ai-custom" maxlength="1000" rows="3" placeholder="Tell ConfigKit AI how you'd like it to respond…"></textarea>
+<div class="actions"><button id="ai-controls-save" type="button">Save AI preferences</button><span id="ai-controls-status" class="side-note" aria-live="polite"></span></div>
+</section>
 <section class="memory-card" aria-labelledby="memory-title"><h2 id="memory-title">🧠 Memory Centre</h2>
 <p class="side-note">Choose how ConfigKit AI remembers useful details. Memory is separate from saved conversations.</p>
 <label for="memory-mode"><strong>Memory preference</strong></label>
@@ -34,7 +44,7 @@
 const $=id=>document.getElementById(id),status=$('status'),messages=$('messages'),form=$('chat-form'),question=$('question'),send=$('send'),contextConsent=$('use-context');
 const config=window.CONFIGKIT_AUTH;if(!config?.supabaseUrl||!config?.supabaseAnonKey||!window.supabase?.createClient){status.textContent='Sign-in is not configured.';status.classList.add('error');return}
 const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-let history=[],busy=false,activeConversationId=null,memoryMode='approval',memoryCache=[],pendingMemory=null;
+let history=[],busy=false,activeConversationId=null,memoryMode='approval',memoryCache=[],pendingMemory=null;\nlet aiPreferences={response_style:'friendly',answer_length:'balanced',expertise_level:'intermediate',web_search_default:'optional',use_memories:true,custom_instructions:''};
 const memoryModeNotes={automatic:'Useful details explicitly shared in chat may be saved automatically. You can review or delete them below.',approval:'ConfigKit AI will suggest memories and wait for your approval.',off:'No new memories will be saved or used in AI answers.'};
 function safeMemoryText(value){return String(value||'').trim().replace(/\s+/g,' ').slice(0,500)}
 function memoryCandidateFrom(text){
@@ -48,6 +58,24 @@ function memoryCandidateFrom(text){
  ];
  for(const item of patterns){const match=value.match(item.re);if(match){const content=match[1].trim();if(content.length<5)return null;return {content:(item.category==='Preference'?'Prefers: ':item.category==='Project'?'Working on: ':item.category==='Goal'?'Goal: ':'')+content,category:item.category}}}
  return null;
+}
+async function loadAIPreferences(){
+ const status=$('ai-controls-status');
+ const {data,error}=await db.from('configkit_ai_preferences').select('response_style,answer_length,expertise_level,web_search_default,use_memories,custom_instructions').maybeSingle();
+ if(error){status.textContent='Could not load preferences: '+error.message;return}
+ if(data)aiPreferences={...aiPreferences,...data};
+ $('ai-style').value=aiPreferences.response_style;$('ai-length').value=aiPreferences.answer_length;$('ai-level').value=aiPreferences.expertise_level;$('ai-web-default').value=aiPreferences.web_search_default;$('ai-use-memories').checked=aiPreferences.use_memories;$('ai-custom').value=aiPreferences.custom_instructions||'';
+ $('web-search').checked=aiPreferences.web_search_default==='preferred';
+}
+async function saveAIPreferences(){
+ const status=$('ai-controls-status');status.textContent='Saving…';
+ const {data:userData,error:userError}=await db.auth.getUser();
+ if(userError||!userData?.user?.id){status.textContent='Please sign in again.';return}
+ const next={user_id:userData.user.id,response_style:$('ai-style').value,answer_length:$('ai-length').value,expertise_level:$('ai-level').value,web_search_default:$('ai-web-default').value,use_memories:$('ai-use-memories').checked,custom_instructions:$('ai-custom').value.trim().slice(0,1000),updated_at:new Date().toISOString()};
+ const {error}=await db.from('configkit_ai_preferences').upsert(next,{onConflict:'user_id'});
+ if(error){status.textContent='Could not save: '+error.message;return}
+ aiPreferences={...next};if(aiPreferences.web_search_default==='preferred')$('web-search').checked=true;else if(aiPreferences.web_search_default==='off')$('web-search').checked=false;
+ status.textContent='Preferences saved ✓';
 }
 async function loadMemoryCentre(){
  const modeSelect=$('memory-mode'),list=$('memory-list');
@@ -193,11 +221,11 @@ const {data:claimsData,error:claimsError}=await db.auth.getClaims(data.session.a
 const authMethods=[...(aal.currentAuthenticationMethods||[]),...(claimsData?.claims?.amr||[])];
 const passwordlessMethod=authMethods.some(item=>{const method=typeof item==='string'?item:item?.method;return ['magiclink','otp','passkey','webauthn'].includes(String(method||'').toLowerCase());});
 if(!passwordlessMethod&&!recovery.verified&&aal.currentLevel!=='aal2'&&(aal.nextLevel==='aal2'||recovery.enabled)){location.replace('login.html?next=configkit-ai.html');return}
-status.hidden=true;$('app').hidden=false;await refreshSaved();await loadMemoryCentre()}
-form.addEventListener('submit',async e=>{e.preventDefault();const q=question.value.trim();if(!q||busy)return;question.value='';bubble(q,'user');const pending=bubble('Thinking…','assistant');busy=true;send.disabled=true;try{let weatherContext='';try{weatherContext=await weatherContextFor(q)}catch(weatherError){pending.textContent=weatherError.message||'Could not retrieve weather. Try asking for a city.';return}const aiQuestion=weatherContext?q+'\\n\\n'+weatherContext:q;const {data,error}=await db.functions.invoke('mobileconfig-ai',{body:{question:aiQuestion,context:'unsure',history:history.slice(-8),includePersonalContext:contextConsent.checked,webSearch:$('web-search').checked,memories:memoryMode==='off'?[]:memoryCache.slice(0,20).map(m=>({content:m.content,category:m.category}))}});if(error){let msg=error.message||'The assistant could not respond.';try{const b=await error.context?.json?.();if(b?.error)msg=b.error}catch(_){}throw new Error(msg)}if(!data?.answer)throw new Error(data?.error||'The assistant returned no answer.');pending.textContent=data.answer;history.push({role:'user',content:q},{role:'assistant',content:data.answer});if(history.length>80)history.splice(0,history.length-80);try{await handleMemoryCandidate(q)}catch(memoryError){bubble('Memory could not be updated: '+(memoryError.message||'Please try again.'),'assistant')}let saved;try{saved=await persistConversation()}catch(saveError){saved={error:saveError}}if(saved.error)bubble('Auto-save could not complete: '+(saved.error.message||'A network error occurred.')+' You can retry with Save now.','assistant')}catch(err){pending.textContent=err.message||'Something went wrong. Please try again.'}finally{busy=false;send.disabled=false;question.focus()}});
+status.hidden=true;$('app').hidden=false;await refreshSaved();await loadMemoryCentre();await loadAIPreferences()}
+form.addEventListener('submit',async e=>{e.preventDefault();const q=question.value.trim();if(!q||busy)return;question.value='';bubble(q,'user');const pending=bubble('Thinking…','assistant');busy=true;send.disabled=true;try{let weatherContext='';try{weatherContext=await weatherContextFor(q)}catch(weatherError){pending.textContent=weatherError.message||'Could not retrieve weather. Try asking for a city.';return}const aiQuestion=weatherContext?q+'\\n\\n'+weatherContext:q;const {data,error}=await db.functions.invoke('mobileconfig-ai',{body:{question:aiQuestion,context:'unsure',history:history.slice(-8),includePersonalContext:contextConsent.checked,webSearch:$('web-search').checked,memories:memoryMode==='off'||!aiPreferences.use_memories?[]:memoryCache.slice(0,20).map(m=>({content:m.content,category:m.category})),preferences:aiPreferences}});if(error){let msg=error.message||'The assistant could not respond.';try{const b=await error.context?.json?.();if(b?.error)msg=b.error}catch(_){}throw new Error(msg)}if(!data?.answer)throw new Error(data?.error||'The assistant returned no answer.');pending.textContent=data.answer;history.push({role:'user',content:q},{role:'assistant',content:data.answer});if(history.length>80)history.splice(0,history.length-80);try{await handleMemoryCandidate(q)}catch(memoryError){bubble('Memory could not be updated: '+(memoryError.message||'Please try again.'),'assistant')}let saved;try{saved=await persistConversation()}catch(saveError){saved={error:saveError}}if(saved.error)bubble('Auto-save could not complete: '+(saved.error.message||'A network error occurred.')+' You can retry with Save now.','assistant')}catch(err){pending.textContent=err.message||'Something went wrong. Please try again.'}finally{busy=false;send.disabled=false;question.focus()}});
 $('clear').addEventListener('click',()=>{history=[];activeConversationId=null;messages.replaceChildren();bubble('Chat cleared. What would you like help with?','assistant')});
 $('save-chat').addEventListener('click',saveConversation);
-$('load-saved').addEventListener('click',refreshSaved);
+$('load-saved').addEventListener('click',refreshSaved);\n$('ai-controls-save').addEventListener('click',saveAIPreferences);\n$('ai-web-default').addEventListener('change',e=>{if(e.target.value==='preferred')$('web-search').checked=true;else if(e.target.value==='off')$('web-search').checked=false});
 $('memory-mode').addEventListener('change',async e=>{const next=e.target.value;if(!['automatic','approval','off'].includes(next))return;const {data:userData}=await db.auth.getUser();if(!userData?.user?.id){alert('Please sign in again.');return}const {error}=await db.from('configkit_ai_memory_settings').upsert({user_id:userData.user.id,memory_mode:next,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error){alert('Could not save memory preference: '+error.message);e.target.value=memoryMode;return}memoryMode=next;$('memory-mode-note').textContent=memoryModeNotes[next];if(next==='off')$('memory-pending').hidden=true;renderMemories()});
 $('memory-add').addEventListener('click',async()=>{const field=$('memory-new');const value=safeMemoryText(field.value);if(!value)return;const result=await saveMemory(value,'General','user');if(result.error){alert('Could not save memory: '+result.error.message);return}field.value='';});
 $('memory-refresh').addEventListener('click',loadMemoryCentre);
