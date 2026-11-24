@@ -75,7 +75,9 @@ function renderMemories(){
 async function saveMemory(content,category='General',source='user'){
  const clean=safeMemoryText(content);if(clean.length<3)return {error:new Error('Please enter at least 3 characters.')};
  const duplicate=memoryCache.some(m=>m.content.toLowerCase()===clean.toLowerCase());if(duplicate)return {duplicate:true};
- const {error}=await db.from('configkit_ai_memories').insert({content:clean,category,source});
+ const {data:userData,error:userError}=await db.auth.getUser();
+ if(userError||!userData?.user?.id)return {error:userError||new Error('Please sign in again before saving memories.')};
+ const {error}=await db.from('configkit_ai_memories').insert({user_id:userData.user.id,content:clean,category,source});
  if(error)return {error};await loadMemoryCentre();return {ok:true};
 }
 async function editMemory(item){
