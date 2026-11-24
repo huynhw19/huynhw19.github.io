@@ -160,4 +160,5 @@ $('save-device').addEventListener('click',saveToDevice);$('load-device').addEven
 init().catch(e=>{if(token){$('public-view').hidden=false;showPublicError(e.message||'Could not load this form.')}else say(e.message||'Could not load ConfigKit Forms.',true)});
 })();
 </script>
+  <script src="/cookie-consent.js?v=2" defer></script>
 </body></html>
