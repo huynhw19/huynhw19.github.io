@@ -215,14 +215,24 @@ async function deleteConversation(id){
  await refreshSaved();
 }
 
-async function init(){const {data,error}=await db.auth.getSession();if(error)throw error;if(!data.session){location.replace('login.html?next=configkit-ai.html');return}
-let recovery={enabled:false,verified:false};const {data:rc,error:re}=await db.functions.invoke('recovery-codes',{body:{action:'status'}});if(!re&&rc)recovery=rc;
-const {data:aal,error:ae}=await db.auth.mfa.getAuthenticatorAssuranceLevel();if(ae)throw ae;
-const {data:claimsData,error:claimsError}=await db.auth.getClaims(data.session.access_token);if(claimsError)throw claimsError;
-const authMethods=[...(aal.currentAuthenticationMethods||[]),...(claimsData?.claims?.amr||[])];
-const passwordlessMethod=authMethods.some(item=>{const method=typeof item==='string'?item:item?.method;return ['magiclink','otp','passkey','webauthn'].includes(String(method||'').toLowerCase());});
-if(!passwordlessMethod&&!recovery.verified&&aal.currentLevel!=='aal2'&&(aal.nextLevel==='aal2'||recovery.enabled)){location.replace('login.html?next=configkit-ai.html');return}
-status.hidden=true;$('app').hidden=false;await refreshSaved();await loadMemoryCentre();await loadAIPreferences()}
+function authCheckTimeout(promise,step,ms=12000){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(step+' is taking too long. Please reload the page and try again.')),ms)})]).finally(()=>clearTimeout(timer))}
+async function init(){
+ const retry=status.querySelector('[data-auth-retry]');retry?.remove();
+ status.hidden=false;status.classList.remove('error');status.textContent='Checking your sign-in session…';
+ const {data,error}=await authCheckTimeout(db.auth.getSession(),'The sign-in session check');if(error)throw error;
+ if(!data.session){location.replace('login.html?next=configkit-ai.html');return}
+ status.textContent='Checking your account security…';
+ let recovery={enabled:false,verified:false};
+ const {data:rc,error:re}=await authCheckTimeout(db.functions.invoke('recovery-codes',{body:{action:'status'}}),'The account security check');
+ if(!re&&rc)recovery=rc;
+ status.textContent='Verifying your sign-in method…';
+ const {data:aal,error:ae}=await authCheckTimeout(db.auth.mfa.getAuthenticatorAssuranceLevel(),'The authentication-level check');if(ae)throw ae;
+ const {data:claimsData,error:claimsError}=await authCheckTimeout(db.auth.getClaims(data.session.access_token),'The signed sign-in verification');if(claimsError)throw claimsError;
+ const authMethods=[...(aal.currentAuthenticationMethods||[]),...(claimsData?.claims?.amr||[])];
+ const passwordlessMethod=authMethods.some(item=>{const method=typeof item==='string'?item:item?.method;return ['magiclink','otp','passkey','webauthn'].includes(String(method||'').toLowerCase());});
+ if(!passwordlessMethod&&!recovery.verified&&aal.currentLevel!=='aal2'&&(aal.nextLevel==='aal2'||recovery.enabled)){location.replace('login.html?next=configkit-ai.html');return}
+ status.hidden=true;$('app').hidden=false;await refreshSaved();await loadMemoryCentre();await loadAIPreferences()
+}
 form.addEventListener('submit',async e=>{e.preventDefault();const q=question.value.trim();if(!q||busy)return;question.value='';bubble(q,'user');const pending=bubble('Thinking…','assistant');busy=true;send.disabled=true;try{let weatherContext='';try{weatherContext=await weatherContextFor(q)}catch(weatherError){pending.textContent=weatherError.message||'Could not retrieve weather. Try asking for a city.';return}const aiQuestion=weatherContext?q+'\\n\\n'+weatherContext:q;const {data,error}=await db.functions.invoke('mobileconfig-ai',{body:{question:aiQuestion,context:'unsure',history:history.slice(-8),includePersonalContext:contextConsent.checked,webSearch:$('web-search').checked,memories:memoryMode==='off'||!aiPreferences.use_memories?[]:memoryCache.slice(0,20).map(m=>({content:m.content,category:m.category})),preferences:aiPreferences}});if(error){let msg=error.message||'The assistant could not respond.';try{const b=await error.context?.json?.();if(b?.error)msg=b.error}catch(_){}throw new Error(msg)}if(!data?.answer)throw new Error(data?.error||'The assistant returned no answer.');pending.textContent=data.answer;history.push({role:'user',content:q},{role:'assistant',content:data.answer});if(history.length>80)history.splice(0,history.length-80);try{await handleMemoryCandidate(q)}catch(memoryError){bubble('Memory could not be updated: '+(memoryError.message||'Please try again.'),'assistant')}let saved;try{saved=await persistConversation()}catch(saveError){saved={error:saveError}}if(saved.error)bubble('Auto-save could not complete: '+(saved.error.message||'A network error occurred.')+' You can retry with Save now.','assistant')}catch(err){pending.textContent=err.message||'Something went wrong. Please try again.'}finally{busy=false;send.disabled=false;question.focus()}});
 $('clear').addEventListener('click',()=>{history=[];activeConversationId=null;messages.replaceChildren();bubble('Chat cleared. What would you like help with?','assistant')});
 $('save-chat').addEventListener('click',saveConversation);
@@ -234,6 +244,6 @@ $('memory-add').addEventListener('click',async()=>{const field=$('memory-new');c
 $('memory-refresh').addEventListener('click',loadMemoryCentre);
 document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>addPrompt(b.dataset.prompt)));
 db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)location.replace('login.html')});
-init().catch(e=>{status.textContent=e.message||'Could not load ConfigKit AI.';status.classList.add('error')});
+init().catch(e=>{status.textContent=(e.message||'Could not verify your sign-in.')+' Your account security checks have not been skipped.';status.classList.add('error');let retry=status.querySelector('[data-auth-retry]');if(!retry){retry=document.createElement('button');retry.type='button';retry.dataset.authRetry='true';retry.textContent='Reload sign-in check';retry.style.cssText='display:block;margin-top:10px';retry.addEventListener('click',()=>location.reload());status.append(retry)}});
 })();
 </script></body></html>
