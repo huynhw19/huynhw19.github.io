@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title">
+  <title id="title">ConfigKit modular C symbol</title>
+  <g fill="#174B39">
+    <rect x="12" y="12" width="32" height="18" rx="6"/>
+    <rect x="50" y="12" width="34" height="18" rx="6"/>
+    <rect x="12" y="39" width="18" height="18" rx="6"/>
+    <rect x="12" y="66" width="32" height="18" rx="6"/>
+    <rect x="50" y="66" width="34" height="18" rx="6"/>
+  </g>
+  <rect x="50" y="39" width="18" height="18" rx="6" fill="#75C9A4"/>
+</svg>
