@@ -8,7 +8,7 @@
 <body>
 <header><a class="brand" href="integrations.html"><img src="configkit-symbol.svg" alt=""> ConfigKit</a><nav><a href="integrations.html">Integrations</a> · <a href="dashboard.html">Dashboard</a></nav></header>
 <main>
-<div class="eyebrow">External connection · First provider</div><h1>Slack</h1><p class="muted">Connect a Slack workspace to send ConfigKit notifications and automation messages to channels you choose.</p>
+<div class="eyebrow">External connection · First provider</div><h1>Slack</h1><p class="muted">Connect a Slack workspace to send messages to channels you choose, then use that connection in ConfigKit workflows.</p>
 <div id="status" class="status" role="status" aria-live="polite">Checking your ConfigKit session…</div>
 <section class="panel">
 <div class="row"><div><h2>Workspace connection</h2><p class="muted small">Authorize ConfigKit in Slack. Your bot token is encrypted before it is stored and never sent to the browser.</p></div><button id="connect" class="btn primary" type="button" disabled>Connect Slack workspace</button></div>
@@ -33,7 +33,7 @@
 <script>
 (async()=>{
 const $=id=>document.getElementById(id),status=$('status'),endpoint='https://gwhqnqzzlgslwgijkkpt.supabase.co/functions/v1/configkit-slack',cfg=window.CONFIGKIT_AUTH||{};
-let client,session,connections=[];
+let client,session,connections=[];\n$('copy-redirect').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('redirect-uri').value);say('Slack redirect URL copied.')}catch{ $('redirect-uri').select();say('Select and copy the redirect URL above.','warn')}});
 function say(message,type=''){status.textContent=message;status.className='status'+(type?' '+type:'')}
 async function api(payload){const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.supabaseAnonKey,'Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||'Slack request failed.');return data}
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
