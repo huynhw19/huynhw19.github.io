@@ -53,4 +53,5 @@ document.getElementById('teacher-send').addEventListener('submit',async e=>{e.pr
 document.querySelectorAll('[data-sticker-target]').forEach(b=>b.addEventListener('click',()=>{const input=document.getElementById(b.dataset.stickerTarget);input.value=(input.value+' '+b.dataset.sticker).trim();input.focus();}));
 (async()=>{try{const {data,error}=await db.auth.getSession();if(error)throw error;if(!data.session){location.replace('login.html?next='+encodeURIComponent('kids-messages-adults.html'));return;}user=data.session.user;await loadParent();await loadTeacher();say('Your message permissions are ready.');}catch(e){say(e.message||'Could not load the message centre.',true);}})();
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
