@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en-AU">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Connect a Slack workspace to ConfigKit and send messages securely."><title>Slack integration — ConfigKit</title><link rel="stylesheet" href="brand.css?v=1"><link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
+<style>
+:root{--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--mint:#e8f4ed;--red:#9b3030;--gold:#fff7e8}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}header,main,footer{width:min(900px,calc(100% - 32px));margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);flex-wrap:wrap}.brand{display:flex;align-items:center;gap:9px;color:var(--ink);font-weight:800;text-decoration:none}.brand img{width:30px;height:30px}a{color:var(--green);text-decoration:none;font-weight:700}main{padding:32px 0 54px}.eyebrow{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--green);font-weight:850}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;letter-spacing:-.045em;margin:.3rem 0}.muted{color:var(--muted)}.panel{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 8px 24px #17231f08}.panel h2{margin:0 0 8px;font-size:1.15rem}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.btn{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:white;color:var(--ink);font:inherit;font-weight:750;cursor:pointer}.btn.primary{background:var(--green);border-color:var(--green);color:white}.btn.danger{color:var(--red)}.btn:disabled{opacity:.5;cursor:not-allowed}.status{padding:12px 14px;border-radius:10px;background:var(--mint);margin:14px 0}.status.error{background:#fff0f0;color:var(--red)}.status.warn{background:var(--gold);color:#76551b}.workspace{padding:13px 0;border-bottom:1px solid var(--line)}.workspace:last-child{border-bottom:0}.field{display:grid;gap:6px;margin:13px 0}label{font-weight:700}select,input,textarea{width:100%;font:inherit;border:1px solid #cbd6d0;border-radius:9px;padding:10px 12px;background:white;color:var(--ink)}textarea{min-height:100px;resize:vertical}.scope{display:inline-block;padding:3px 9px;border-radius:30px;background:var(--mint);font-size:.8rem;font-weight:750;margin:4px 4px 0 0}.small{font-size:.88rem}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}footer{padding:18px 0 30px;color:var(--muted);font-size:.86rem}[hidden]{display:none!important}
+</style></head>
+<body>
+<header><a class="brand" href="integrations.html"><img src="configkit-symbol.svg" alt=""> ConfigKit</a><nav><a href="integrations.html">Integrations</a> · <a href="dashboard.html">Dashboard</a></nav></header>
+<main>
+<div class="eyebrow">External connection · First provider</div><h1>Slack</h1><p class="muted">Connect a Slack workspace to send ConfigKit notifications and automation messages to channels you choose.</p>
+<div id="status" class="status" role="status" aria-live="polite">Checking your ConfigKit session…</div>
+<section class="panel">
+<div class="row"><div><h2>Workspace connection</h2><p class="muted small">Authorize ConfigKit in Slack. Your bot token is encrypted before it is stored and never sent to the browser.</p></div><button id="connect" class="btn primary" type="button" disabled>Connect Slack workspace</button></div>
+<div id="connections"><p class="muted small">Loading connections…</p></div>
+</section>
+<section class="panel">
+<h2>Send a Slack message</h2><p class="muted small">Choose a public channel and send a message as the ConfigKit bot. The bot must be invited into the channel before it can post.</p>
+<div class="field"><label for="workspace">Workspace</label><select id="workspace" disabled><option value="">Connect a workspace first</option></select></div>
+<div class="field"><label for="channel">Public channel</label><select id="channel" disabled><option value="">Load channels first</option></select></div>
+<div class="field"><label for="message">Message</label><textarea id="message" maxlength="3500" placeholder="Write a message for your Slack channel…"></textarea></div>
+<div class="actions"><button id="load-channels" class="btn" type="button" disabled>Load channels</button><button id="send" class="btn primary" type="button" disabled>Send message</button></div>
+</section>
+<section class="panel">
+<h2>Permissions requested</h2>
+<p><span class="scope">chat:write</span><span class="scope">channels:read</span></p>
+<ul class="muted small"><li>Send messages as the ConfigKit bot.</li><li>List public channels so you can select a destination.</li><li>No access to read message history, private channels, direct messages, files or member lists.</li></ul>
+<p class="muted small">For posting, invite the ConfigKit bot to the target channel using Slack’s channel member controls. ConfigKit does not request permission to join channels automatically.</p>
+</section>
+</main>
+<footer>ConfigKit Slack Integration · <a href="privacy.html">Privacy</a> · <a href="safety.html">Safety</a></footer>
+<script src="/auth-config.js?v=passkey-policy-20261123"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+<script>
+(async()=>{
+const $=id=>document.getElementById(id),status=$('status'),endpoint='https://gwhqnqzzlgslwgijkkpt.supabase.co/functions/v1/configkit-slack',cfg=window.CONFIGKIT_AUTH||{};
+let client,session,connections=[];
+function say(message,type=''){status.textContent=message;status.className='status'+(type?' '+type:'')}
+async function api(payload){const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.supabaseAnonKey,'Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||'Slack request failed.');return data}
+function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderConnections(){const root=$('connections');if(!connections.length){root.innerHTML='<p class="muted small">No Slack workspaces connected yet.</p>';return}root.innerHTML=connections.map(c=>'<div class="workspace"><div class="row"><div><strong>'+esc(c.team_name)+'</strong><div class="muted small">Connected '+esc(new Date(c.connected_at).toLocaleString())+'</div><div class="muted small">Permissions: '+esc((c.granted_scopes||[]).join(', '))+'</div></div><button class="btn danger" data-disconnect="'+esc(c.team_id)+'" type="button">Disconnect</button></div></div>').join('');}
+async function loadStatus(){const data=await api({action:'status'});connections=data.connections||[];renderConnections();$('workspace').innerHTML=connections.map(c=>'<option value="'+esc(c.team_id)+'">'+esc(c.team_name)+'</option>').join('')||'<option value="">Connect a workspace first</option>';$('workspace').disabled=!connections.length;$('load-channels').disabled=!connections.length;$('send').disabled=!connections.length;}
+$('connect').addEventListener('click',async()=>{try{$('connect').disabled=true;say('Preparing secure Slack authorization…');const data=await api({action:'start'});location.assign(data.url)}catch(e){say(e.message,'error');$('connect').disabled=false}});
+$('connections').addEventListener('click',async e=>{const b=e.target.closest('[data-disconnect]');if(!b)return;if(!confirm('Disconnect this Slack workspace from ConfigKit?'))return;try{b.disabled=true;await api({action:'disconnect',team_id:b.dataset.disconnect});await loadStatus();$('channel').innerHTML='<option value="">Load channels first</option>';say('Slack workspace disconnected.')}catch(err){say(err.message,'error');b.disabled=false}});
+$('load-channels').addEventListener('click',async()=>{try{$('load-channels').disabled=true;say('Loading public channels…');const data=await api({action:'channels',team_id:$('workspace').value});$('channel').innerHTML=data.channels.map(c=>'<option value="'+esc(c.id)+'">'+(c.is_member?'':'(invite bot) ')+'#'+esc(c.name)+(c.is_member?'':' — bot not a member')+'</option>').join('')||'<option value="">No public channels found</option>';$('channel').disabled=!data.channels.length;say('Loaded '+data.channels.length+' public channels. Invite the bot to a channel before posting.')}catch(e){say(e.message,'error')}finally{$('load-channels').disabled=!connections.length}});
+$('send').addEventListener('click',async()=>{const text=$('message').value.trim();if(!text||!$('channel').value){say('Choose a channel and enter a message.','warn');return}try{$('send').disabled=true;say('Sending message to Slack…');await api({action:'send',team_id:$('workspace').value,channel:$('channel').value,text});$('message').value='';say('Message sent to Slack.')}catch(e){say(e.message,'error')}finally{$('send').disabled=!connections.length}});
+try{
+ if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient)throw new Error('ConfigKit authentication is not configured.');
+ client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+ const {data,error}=await client.auth.getSession();if(error||!data.session){location.replace('/login.html?next=slack.html');return}session=data.session;
+ await loadStatus();$('connect').disabled=false;say(connections.length?'Slack is ready. Choose a workspace and channel to send a message.':'Sign-in verified. Connect your Slack workspace to get started.');
+ const result=new URLSearchParams(location.search).get('status');if(result==='connected'){say('Slack workspace connected successfully!');history.replaceState({},'',location.pathname)}else if(result&&result!==''){const messages={denied:'Slack authorization was cancelled.',invalid:'Slack returned an invalid authorization response.',expired:'The Slack authorization expired. Please try connecting again.','not-configured':'Slack app credentials are not configured on the server yet.','exchange-failed':'Slack could not complete the authorization. Check the Slack app redirect URL and credentials.','missing-team':'Slack did not return a workspace identifier.','save-failed':'Slack authorized ConfigKit, but the secure connection could not be saved.'};say(messages[result]||'Slack connection could not be completed.','error');history.replaceState({},'',location.pathname)}
+}catch(e){say(e.message||'Could not initialize Slack integration.','error')}
+})();
+</script><script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
