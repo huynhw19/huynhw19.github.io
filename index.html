@@ -968,7 +968,6 @@
       const settings = document.getElementById('cookie-settings');
       const preferenceToggle = document.getElementById('cookie-preferences');
       const mediaToggle = document.getElementById('cookie-external-media');
-      const videoPlaceholder = document.getElementById('youtube-consent-placeholder');
       const qrImage = document.querySelector('img[data-cookie-src]');
       const qrPlaceholder = document.getElementById('qr-consent-placeholder');
       let choice = null;
@@ -983,6 +982,7 @@
         try { localStorage.setItem(KEY, JSON.stringify(next)); } catch (_) {}
         banner.hidden = true;
         if (next.categories.externalMedia) {
+          const videoPlaceholder = document.getElementById('youtube-consent-placeholder');
           if (videoPlaceholder && !document.getElementById('youtube-consented-frame')) {
             const frame = document.createElement('iframe');
             frame.id = 'youtube-consented-frame';
@@ -1000,7 +1000,15 @@
           }
         } else {
           const frame = document.getElementById('youtube-consented-frame');
-          if (frame) frame.remove();
+          if (frame) {
+            const placeholder = document.createElement('div');
+            placeholder.id = 'youtube-consent-placeholder';
+            placeholder.className = 'external-media-placeholder';
+            const note = document.createElement('p');
+            note.textContent = 'This video is hosted by YouTube. Allow external media in Cookie Settings to load it, or use the YouTube link below.';
+            placeholder.append(note);
+            frame.replaceWith(placeholder);
+          }
           if (qrImage) qrImage.removeAttribute('src');
           if (qrPlaceholder) qrPlaceholder.hidden = false;
         }
