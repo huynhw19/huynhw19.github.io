@@ -59,4 +59,5 @@ document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{filter=b.da
 async function start(){if(!db){say('ConfigKit could not initialize its database connection.',true);$('login-panel').classList.remove('hidden');return}const {data,error}=await db.auth.getSession();if(error)throw error;user=data.session?.user||null;if(!user){$('login-panel').classList.remove('hidden');say('Please sign in to view your private tasks.');return}$('app').classList.remove('hidden');say('Loading your tasks…');await refresh();say('Your tasks are up to date.')}
 start().catch(e=>say(e.message||'Could not load your tasks. Refresh to try again.',true));
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
