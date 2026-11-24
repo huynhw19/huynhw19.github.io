@@ -26,7 +26,7 @@ let history=[],busy=false;
 async function weatherContextFor(questionText){
  const weatherIntent=/\\b(weather|forecast|temperature|rain(?:ing)?|sunny|wind(?:y)?|humidity)\\b/i.test(questionText);
  if(!weatherIntent)return '';
- const cityMatch=questionText.match(/\\b(?:in|for|around|near)\\s+([\\p{L}][\\p{L} .'-]{1,55}?)(?=\\s+(?:today|tomorrow|tonight|this\\s+week|right\\s+now)\\b|[?.!,]|$)/iu);
+ const wantsCurrentLocation=/\\b(my location|current location|where i am|right here)\\b/i.test(questionText);\n const cityMatch=wantsCurrentLocation?null:questionText.match(/\\b(?:in|for|around|near)\\s+([\\p{L}][\\p{L} .'-]{1,55}?)(?=\\s+(?:today|tomorrow|tonight|this\\s+week|right\\s+now)\\b|[?.!,]|$)/iu);
  let latitude,longitude,place='';
  if(cityMatch){
    const city=cityMatch[1].trim();
