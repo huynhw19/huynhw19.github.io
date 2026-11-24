@@ -61,4 +61,5 @@
  function formatSize(n){if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';return (n/1048576).toFixed(1)+' MB'}
  client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')location.href='login.html'});
 })().catch(error=>{const node=document.getElementById('loading');node.textContent='ConfigKit Mail error: '+error.message;node.classList.remove('hidden')});
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
