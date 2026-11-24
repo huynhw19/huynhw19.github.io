@@ -25,4 +25,5 @@ $('refresh').addEventListener('click',refresh);$('revoke').addEventListener('cli
 $('copy-token').addEventListener('click',async()=>{if(!shownToken)return;try{await navigator.clipboard.writeText(shownToken);tokenStatus('Token copied. Store it in your MCP client’s secret manager.')}catch{tokenStatus('Clipboard access was blocked. Select and copy the token manually.',true)}});
 $('hide-token').addEventListener('click',()=>{shownToken='';$('token').textContent='';$('token-panel').classList.add('hidden')});$('copy-endpoint').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(endpoint);tokenStatus('Server address copied.')}catch{tokenStatus('Could not access clipboard.',true)}});
 db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){accessToken='';$('app').classList.add('hidden');status('You have signed out.')}});init().catch(e=>status(e.message||'Could not load your connector.',true));})();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
