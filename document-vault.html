@@ -59,4 +59,5 @@ async function init(){const {data,error}=await db.auth.getSession();if(error)thr
 db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)location.replace('login.html')});
 init().catch(e=>message(e.message||'Could not load Drive.',true));
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
