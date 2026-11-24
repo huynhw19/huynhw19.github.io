@@ -48,6 +48,11 @@
       <div class="ck-actions"><button type="button" class="ck-primary" data-action="save">Save my choices</button></div>
     </div>`;
   document.body.append(banner);
+  const launcher = document.createElement('a');
+  launcher.href = '#cookie-settings'; launcher.setAttribute('data-cookie-settings','');
+  launcher.textContent = 'Cookie settings';
+  launcher.style.cssText = 'position:fixed;z-index:999;right:12px;bottom:12px;padding:7px 10px;border:1px solid #dce7df;border-radius:999px;background:#fff;color:#176344;font:600 12px/1.3 system-ui,sans-serif;text-decoration:none;box-shadow:0 3px 12px rgba(0,0,0,.12)';
+  document.body.append(launcher);
   const options = banner.querySelector('.ck-options');
   const pref = banner.querySelector('[data-category="preferences"]');
   const media = banner.querySelector('[data-category="externalMedia"]');
