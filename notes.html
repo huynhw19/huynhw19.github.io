@@ -55,4 +55,5 @@ document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLower
 async function start(){if(!db){status('Supabase could not be initialized.',true);$('login-panel').classList.remove('hidden');return}const {data:{session},error}=await db.auth.getSession();if(error)throw error;user=session?.user;if(!user){$('login-panel').classList.remove('hidden');status('Sign in to access your notes');return}$('app').classList.remove('hidden');status('Loading notes…');await refresh();status(notes.length+' notes synced');const n=notes.find(x=>!x.deleted_at&&!x.is_archived)||notes[0];setEditor(n||null);db.auth.onAuthStateChange((event,s)=>{if(event==='SIGNED_OUT'){user=null;notes=[];$('app').classList.add('hidden');$('login-panel').classList.remove('hidden');status('Signed out')}else if(event==='SIGNED_IN'&&s?.user){user=s.user;start().catch(e=>status(e.message,true))}})}
 start().catch(e=>status(e.message||'Could not load notes',true));
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
