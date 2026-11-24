@@ -181,6 +181,7 @@ Deno.serve(async (req: Request) => {
     const body = await req.json().catch(() => ({})) as Record<string, unknown>;
 
     if (body.action === "start") {
+      await admin.schema("private").from("configkit_slack_oauth_states").delete().lt("expires_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
       const clientId = Deno.env.get("SLACK_CLIENT_ID") || "";
       if (!clientId || !Deno.env.get("SLACK_CLIENT_SECRET") || !Deno.env.get("SLACK_TOKEN_ENCRYPTION_KEY")) {
         return reply({ error: "Slack is not configured yet. Add the Slack app credentials and encryption key to Supabase Edge Function secrets." }, 503);
