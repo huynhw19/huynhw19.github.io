@@ -48,4 +48,5 @@ $('open').addEventListener('click',()=>setMode(false));$('close').addEventListen
 (async()=>{try{const {data,error}=await client.auth.getSession();if(error)throw error;if(!data.session){$('auth-status').textContent='Please sign in first.';const a=document.createElement('a');a.href='login.html';a.textContent=' Sign in';$('auth-status').append(a);return}if(data.session.user.id!==OWNER){$('auth-status').textContent='Access denied. This account is not the registered owner.';$('auth-status').classList.add('error');return}token=data.session.access_token;$('auth-status').textContent='Owner verified: '+data.session.user.email;$('controls').hidden=false;await load();await loadEditorial()}catch(e){$('auth-status').textContent='Could not verify owner access: '+e.message;$('auth-status').classList.add('error')}})();
 client.auth.onAuthStateChange((_event,session)=>{if(!session)location.replace('login.html')});
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
