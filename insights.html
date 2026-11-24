@@ -126,4 +126,5 @@ const {data,error}=await db.auth.getSession();if(error)throw error;if(!data.sess
 user=data.session.user;app.hidden=false;await load();
 })().catch(e=>{const s=document.getElementById('status');s.hidden=false;s.textContent=e.message||'Could not load ConfigKit Insights.';s.classList.add('error')});
 </script>
+  <script src="/cookie-consent.js?v=2" defer></script>
 </body></html>
