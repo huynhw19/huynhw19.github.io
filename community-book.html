@@ -43,4 +43,5 @@ $('close-reader').addEventListener('click',()=>$('reader').classList.add('hidden
 (async()=>{try{const {data,error}=await db.auth.getSession();if(error)throw error;if(!data.session){msg('status','Please sign in to browse Community Book.');const a=document.createElement('a');a.href='login.html';a.textContent=' Sign in';$('status').append(a);return}user=data.session.user;$('library').hidden=false;await Promise.all([loadLibrary(),loadApplication()]);msg('status','Welcome to Community Book.')}catch(e){msg('status',e.message||'Could not load Community Book.',true)}})();
 db.auth.onAuthStateChange((_event,session)=>{if(!session)location.replace('login.html')});
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
