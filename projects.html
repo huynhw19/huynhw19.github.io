@@ -47,4 +47,5 @@ $('search').oninput=render;$('status-filter').onchange=render;
 async function start(){if(!db){say('Could not initialize ConfigKit database.',true);$('login').classList.remove('hidden');return}const {data,error}=await db.auth.getSession();if(error)throw error;user=data.session?.user||null;if(!user){$('login').classList.remove('hidden');say('Sign in to access your private projects.');return}$('app').classList.remove('hidden');say('Loading projects…');await refresh();say('Your projects are up to date.')}
 start().catch(e=>say(e.message||'Could not load projects. Refresh to try again.',true));
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
