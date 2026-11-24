@@ -37,4 +37,5 @@ $('report').addEventListener('click',async()=>{if(!active||!user)return;const re
 (async()=>{try{const {data,error}=await db.auth.getSession();if(error)throw error;user=data.session?.user||null;if(user){$('new-article').hidden=false;await loadMine()}await loadPages();const requestedId=new URLSearchParams(location.search).get('id');if(requestedId&&pages.some(p=>p.id===requestedId))openPage(requestedId);say(user?'Welcome! You can publish and manage your articles below.':'Browse published articles. Sign in to write your own.')}catch(e){say(e.message||'Could not load Community Wiki.',true)}})();
 db.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;if(!user&&$('editor')&&!$('editor').hidden)resetEditor();$('new-article').hidden=!user;loadPages().catch(e=>say(e.message,true));if(user)loadMine().catch(e=>say(e.message,true));else $('my-work').hidden=true});
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
