@@ -370,5 +370,6 @@ else{
  start().catch(async e=>{if(channel){await db.removeChannel(channel).catch(()=>{});channel=null;}if(ydoc){ydoc.destroy();ydoc=null;}topSay(e.message||'Could not open Collaboration Studio.',true);$('home').hidden=false;$('workspace').hidden=true;});
 }
 </script>
+  <script src="/cookie-consent.js?v=2" defer></script>
 </body>
 </html>
