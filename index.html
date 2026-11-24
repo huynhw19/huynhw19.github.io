@@ -63,14 +63,11 @@
       color: var(--ink);
     }
     .brand-mark {
-      display: inline-grid;
-      place-items: center;
+      display: block;
       width: 1.8rem;
       height: 1.8rem;
-      border-radius: .6rem;
-      background: var(--green);
-      color: var(--white);
-      font-size: 1.1rem;
+      object-fit: contain;
+      flex: 0 0 auto;
     }
 
     nav {
@@ -397,7 +394,7 @@
   <header class="topbar">
     <div class="wrap">
       <a class="brand" href="index.html">
-        <span class="brand-mark" aria-hidden="true">⌘</span>
+        <img class="brand-mark" src="configkit-symbol.svg" alt="">
         <span>ConfigKit</span>
       </a>
       <nav aria-label="Main navigation">
@@ -465,6 +462,16 @@
         <a class="button primary" href="https://www.canva.com/d/-32tnA3veNCBNaf" target="_blank" rel="noopener noreferrer">Open the beginner presentation in Canva ↗</a>
       </div>
       <p style="margin-top:.8rem;margin-bottom:0;font-size:.9rem">Opens the presentation directly in Canva in a new tab.</p>
+    </section>
+
+    <section class="panel" id="configkit-brand-kit" aria-labelledby="configkit-brand-kit-title">
+      <span class="eyebrow">ConfigKit identity</span>
+      <h2 class="section-title" id="configkit-brand-kit-title">Our brand, all in one place</h2>
+      <p>Explore the official ConfigKit logo collection, forest-green and mint colour palette, typography, and visual guidelines. The logo assets are editable SVG files.</p>
+      <div class="cta-row">
+        <a class="button primary" href="brand-kit.html">Explore the ConfigKit Brand Kit ↗</a>
+        <a class="button" href="configkit-logo.svg" download>Download the logo</a>
+      </div>
     </section>
 
     <section class="panel" id="configkit-social-pack" aria-labelledby="configkit-social-pack-title">
