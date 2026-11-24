@@ -29,7 +29,8 @@
  if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){setStatus('Community Games is not configured. Please contact the site owner.',true);return;}
  const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
  let user=null, games=[], activeGame=null;
- const starter='<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:18px system-ui;text-align:center;padding:2rem;background:#f1f7f3;color:#173d2c}button{padding:.8rem 1.2rem;border:0;border-radius:9px;background:#226b51;color:white;font:inherit;cursor:pointer}.score{font-size:2rem;font-weight:800}</style></head><body><h1>Tap Challenge</h1><p>Click the button as many times as you can!</p><p class="score" id="score">0</p><button id="tap" onclick="document.getElementById(\'score\').textContent=Number(document.getElementById(\'score\').textContent)+1">Tap me!</button></body></html>';
+ const starter='<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:18px system-ui;text-align:center;padding:2rem;background:#f1f7f3;color:#173d2c}button{padding:.8rem 1.2rem;border:0;border-radius:9px;background:#226b51;color:white;font:inherit;cursor:pointer}.score{font-size:2rem;font-weight:800}</style></head><body><h1>Tap Challenge</h1><p>Click the button as many times as you can!</p><p class="score" id="score">0</p><button id="tap" onclick="document.getElementById(\'score\').textContent=Number(document.getElementById(\'score\').textContent)+1">Tap me!</button>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>';
  $('html-code').value=starter;
  $('game-file').addEventListener('change',async e=>{
   const file=e.target.files?.[0];if(!file)return;
