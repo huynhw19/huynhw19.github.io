@@ -34,4 +34,5 @@ $('reset-settings').addEventListener('click',async()=>{if(!confirm('Reset this w
 $('export-settings').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({workspace:requested,exportedAt:new Date().toISOString(),settings:readFields()},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='configkit-'+requested+'-settings.json';a.click();URL.revokeObjectURL(url);say('Settings export prepared. Store the file securely.')});
 $('sign-out').addEventListener('click',async()=>{if(!confirm('Sign out of ConfigKit on this device?'))return;const {error}=await client.auth.signOut();if(error){say(error.message||'Could not sign out.',true);return}location.replace('login.html')});
 client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)location.replace('login.html')});void boot()})();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
