@@ -379,18 +379,6 @@
     @media(prefers-reduced-motion:reduce) { html{scroll-behavior:auto} *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important} }
 
 
-    /* ConfigKit translation centre */
-    .translation-panel{margin-top:2rem}
-    .translation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin:1rem 0}
-    .translation-field label{display:block;font-weight:650;margin-bottom:.45rem}
-    .translation-field select,.translation-field textarea{width:100%;min-height:48px;padding:.8rem;border:1px solid var(--line);border-radius:.8rem;background:#fff;color:var(--ink);font:inherit}
-    .translation-field textarea{min-height:165px;resize:vertical;line-height:1.55}
-    .translation-field textarea[readonly]{background:#f7faf8}
-    .translation-actions{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center}
-    .translation-actions button{cursor:pointer}
-    .translation-note{font-size:.88rem;color:var(--muted);line-height:1.55}
-    .translation-count{display:flex;justify-content:space-between;gap:.5rem;margin-top:.35rem;font-size:.82rem;color:var(--muted)}
-    @media(max-width:620px){.translation-grid{grid-template-columns:1fr}.translation-field textarea{min-height:135px}.translation-actions button{flex:1 1 100%}}
   </style>
 </head>
 <body>
@@ -451,24 +439,6 @@
       </div>
     </section>
 
-    <section class="panel translation-panel" id="configkit-translation" aria-labelledby="translation-title">
-      <span class="eyebrow">ConfigKit Translation Centre · Worldwide</span>
-      <h2 class="section-title" id="translation-title">Translate text between languages</h2>
-      <p>Translate a short message, sentence or paragraph into another language. Choose your languages, enter text and tap Translate.</p>
-      <div class="translation-grid">
-        <div class="translation-field"><label for="translation-source">Translate from</label><select id="translation-source">
-          <option value="en">English</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="pt-BR">Portuguese (Brazil)</option><option value="zh-CN">Chinese (Simplified)</option><option value="zh-TW">Chinese (Traditional)</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="ar">Arabic</option><option value="hi">Hindi</option><option value="bn">Bengali</option><option value="ur">Urdu</option><option value="id">Indonesian</option><option value="ms">Malay</option><option value="vi">Vietnamese</option><option value="th">Thai</option><option value="tl">Filipino</option><option value="ru">Russian</option><option value="uk">Ukrainian</option><option value="nl">Dutch</option><option value="tr">Turkish</option><option value="pl">Polish</option><option value="el">Greek</option><option value="sv">Swedish</option><option value="da">Danish</option><option value="fi">Finnish</option><option value="no">Norwegian</option><option value="he">Hebrew</option><option value="cs">Czech</option><option value="ro">Romanian</option><option value="hu">Hungarian</option><option value="sw">Swahili</option>
-        </select></div>
-        <div class="translation-field"><label for="translation-target">Translate to</label><select id="translation-target">
-          <option value="en">English</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="pt-BR">Portuguese (Brazil)</option><option value="zh-CN">Chinese (Simplified)</option><option value="zh-TW">Chinese (Traditional)</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="ar">Arabic</option><option value="hi">Hindi</option><option value="bn">Bengali</option><option value="ur">Urdu</option><option value="id">Indonesian</option><option value="ms">Malay</option><option value="vi">Vietnamese</option><option value="th">Thai</option><option value="tl">Filipino</option><option value="ru">Russian</option><option value="uk">Ukrainian</option><option value="nl">Dutch</option><option value="tr">Turkish</option><option value="pl">Polish</option><option value="el">Greek</option><option value="sv">Swedish</option><option value="da">Danish</option><option value="fi">Finnish</option><option value="no">Norwegian</option><option value="he">Hebrew</option><option value="cs">Czech</option><option value="ro">Romanian</option><option value="hu">Hungarian</option><option value="sw">Swahili</option>
-        </select></div>
-        <div class="translation-field"><label for="translation-input">Your text</label><textarea id="translation-input" maxlength="450" placeholder="Type or paste the text you want to translate…" spellcheck="true"></textarea><div class="translation-count"><span>Maximum 450 characters per translation</span><span id="translation-count">0 / 450</span></div></div>
-        <div class="translation-field"><label for="translation-output">Translation</label><textarea id="translation-output" readonly placeholder="Your translation will appear here…" aria-live="polite"></textarea><div class="translation-count"><span id="translation-result-note">Ready when you are</span><span id="translation-output-count">0 characters</span></div></div>
-      </div>
-      <div class="translation-actions"><button class="button primary" type="button" id="translate-button">Translate text</button><button class="button" type="button" id="translation-swap">↔ Swap languages</button><button class="button" type="button" id="translation-copy">Copy translation</button><button class="button" type="button" id="translation-clear">Clear</button></div>
-      <div class="status" id="translation-status" role="status" aria-live="polite">Choose your languages and enter some text to get started.</div>
-      <p class="translation-note">Choose the language your text is written in before translating. Translations are powered by ConfigKit AI through Groq. You must be signed in. Your text is sent securely to the AI translation service; do not enter passwords, private information or sensitive content. AI translations can make mistakes, so check important or official translations carefully. Free AI usage limits may apply.</p>
-    </section>
     <section class="quick-paths" aria-label="Choose your next step">
       <article class="quick-path"><strong>I'm new to profiles</strong><p>Learn what a configuration profile can change before installing one.</p><a href="mobileconfig-guide.html">Read the beginner guide →</a></article>
       <article class="quick-path"><strong>I know what I need</strong><p>Jump straight to Wi‑Fi, encrypted DNS, web clips, or profile inspection.</p><a href="#builders">Explore the tools →</a></article>
@@ -636,91 +606,6 @@
   </footer>
 
   <script>
-
-    (() => {
-      const input = document.getElementById('translation-input');
-      if (!input) return;
-      const source = document.getElementById('translation-source');
-      const target = document.getElementById('translation-target');
-      const output = document.getElementById('translation-output');
-      const button = document.getElementById('translate-button');
-      const status = document.getElementById('translation-status');
-      const resultNote = document.getElementById('translation-result-note');
-      const outputCount = document.getElementById('translation-output-count');
-      const count = document.getElementById('translation-count');
-      const swap = document.getElementById('translation-swap');
-      let requestId = 0;
-      let db = null;
-      const setStatus = (message, error = false) => {
-        status.className = error ? 'status error' : 'status';
-        status.textContent = message;
-      };
-      const updateCount = () => {
-        count.textContent = input.value.length + ' / 450';
-        outputCount.textContent = output.value.length + ' characters';
-      };
-      input.addEventListener('input', updateCount);
-      swap.disabled = false;
-      document.getElementById('translation-clear').addEventListener('click', () => {
-        requestId++; input.value = ''; output.value = '';
-        resultNote.textContent = 'Ready when you are'; updateCount();
-        button.disabled = false; setStatus('Text cleared. Enter something new to translate.');
-      });
-      swap.addEventListener('click', () => {
-        const previous = source.value; source.value = target.value; target.value = previous;
-        const previousText = input.value; input.value = output.value; output.value = previousText;
-        updateCount(); resultNote.textContent = 'Languages swapped';
-        setStatus('Languages swapped. Translate again for the reverse translation.');
-      });
-      document.getElementById('translation-copy').addEventListener('click', async () => {
-        if (!output.value) { setStatus('There is no translation to copy yet.', true); return; }
-        try { await navigator.clipboard.writeText(output.value); setStatus('Translation copied to your clipboard.'); }
-        catch { output.focus(); output.select(); setStatus('Select the translation and use Copy from your device menu.'); }
-      });
-      button.addEventListener('click', async () => {
-        const text = input.value.trim();
-        if (!text) { setStatus('Please enter some text first.', true); input.focus(); return; }
-        if (source.value === target.value) { setStatus('Choose two different languages.', true); return; }
-        if (!db) { setStatus('Please sign in to use AI translation.', true); return; }
-        const id = ++requestId;
-        button.disabled = true; output.value = '';
-        resultNote.textContent = 'Translating with AI…'; updateCount();
-        setStatus('Translating your text with ConfigKit AI…');
-        try {
-          const { data, error } = await db.functions.invoke('configkit-translate', { body: { text, source: source.value, target: target.value } });
-          if (id !== requestId) return;
-          if (error) {
-            let message = error.message || 'The AI translation service could not respond.';
-            try { const detail = await error.context?.json?.(); if (detail?.error) message = detail.error; } catch (_) {}
-            throw new Error(message);
-          }
-          if (!data?.translation) throw new Error(data?.error || 'No translation was returned. Please try again.');
-          output.value = data.translation.trim(); resultNote.textContent = 'Translation ready'; updateCount();
-          setStatus('Translation complete. Please review important translations for accuracy.');
-        } catch (error) {
-          if (id !== requestId) return;
-          output.value = ''; resultNote.textContent = 'Translation unavailable'; updateCount();
-          setStatus(error.message || 'Could not translate this text. Please try again.', true);
-        } finally { if (id === requestId) button.disabled = false; }
-      });
-      document.addEventListener('DOMContentLoaded', async () => {
-        const config = window.CONFIGKIT_AUTH;
-        if (!config?.supabaseUrl || !config?.supabaseAnonKey || !window.supabase?.createClient) {
-          setStatus('Sign-in is not configured. Please try again later.', true); return;
-        }
-        try {
-          db = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
-          const { data, error } = await db.auth.getSession();
-          if (error) throw error;
-          if (!data.session) {
-            setStatus('Please sign in to use AI-powered translations. Opening sign-in…', true);
-            window.location.href = 'login.html?next=' + encodeURIComponent('index.html#configkit-translation'); return;
-          }
-          setStatus('AI translation is ready. Your text is sent securely to ConfigKit’s translation service.');
-        } catch (error) { setStatus(error.message || 'Could not initialise translation. Please refresh and try again.', true); }
-      });
-      updateCount();
-    })();
 
     const translations = {
       en: {
