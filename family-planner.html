@@ -36,4 +36,5 @@ $('refresh').addEventListener('click',()=>load().catch(e=>say(e.message,true)));
 async function init(){const {data,error}=await db.auth.getSession();if(error)throw error;if(!data.session){location.replace('login.html?next=family-planner.html');return}user=data.session.user;const m=await db.from('family_account_members').select('family_id,role').eq('user_id',user.id).maybeSingle();if(m.error)throw m.error;if(!m.data){say('You are not linked to a Family ID yet. Open Family dashboard to create or join a family.',true);return}const f=await db.from('family_accounts').select('id,family_id').eq('id',m.data.family_id).single();if(f.error)throw f.error;family=f.data;$('family-code').textContent='Family ID · '+family.family_id;const mem=await db.from('family_account_members').select('user_id,role,joined_at').eq('family_id',family.id).order('joined_at');if(mem.error)throw mem.error;members=mem.data||[];fillAssignees();await load();$('app').hidden=false;status.hidden=true}
 db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)location.replace('login.html')});init().catch(e=>say(e.message||'Could not load Family Planner.',true));
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
