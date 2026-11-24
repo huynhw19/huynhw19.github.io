@@ -313,4 +313,5 @@ document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click'
 db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)location.replace('login.html')});
 init().catch(e=>{status.textContent=(e.message||'Could not verify your sign-in.')+' Your account security checks have not been skipped.';status.classList.add('error');let retry=status.querySelector('[data-auth-retry]');if(!retry){retry=document.createElement('button');retry.type='button';retry.dataset.authRetry='true';retry.textContent='Reload sign-in check';retry.style.cssText='display:block;margin-top:10px';retry.addEventListener('click',()=>location.reload());status.append(retry)}});
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
