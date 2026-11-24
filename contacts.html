@@ -37,4 +37,5 @@ $('export').onclick=()=>{const data=rows.filter(r=>!r.deleted_at);if(!data.lengt
 async function start(){if(!db){say('ConfigKit could not initialize its database connection.',true);$('login').classList.remove('hidden');return}const {data,error}=await db.auth.getSession();if(error)throw error;user=data.session?.user||null;if(!user){$('login').classList.remove('hidden');say('Please sign in to view your private contacts.');return}$('app').classList.remove('hidden');say('Loading your contacts…');await load();say('Your contacts are up to date.')}
 start().catch(e=>say(e.message||'Could not load contacts.',true));
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
