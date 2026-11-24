@@ -138,28 +138,28 @@ Deno.serve(async (req: Request) => {
     if (isCallback) {
       const code = incoming.searchParams.get("code") || "";
       const state = incoming.searchParams.get("state") || "";
-      if (incoming.searchParams.get("error")) return redirect(ORIGIN + "/integrations.html?slack=denied");
-      if (!code || !state || state.length > 180) return redirect(ORIGIN + "/integrations.html?slack=invalid");
+      if (incoming.searchParams.get("error")) return redirect(ORIGIN + "/slack.html?status=denied");
+      if (!code || !state || state.length > 180) return redirect(ORIGIN + "/slack.html?status=invalid");
       const stateHash = await sha256(state);
       const { data: stateRow, error: stateError } = await admin.schema("private").from("configkit_slack_oauth_states")
         .update({ used_at: new Date().toISOString() }).eq("state_hash", stateHash).is("used_at", null)
         .gt("expires_at", new Date().toISOString()).select("user_id").maybeSingle();
-      if (stateError || !stateRow?.user_id) return redirect(ORIGIN + "/integrations.html?slack=expired");
+      if (stateError || !stateRow?.user_id) return redirect(ORIGIN + "/slack.html?status=expired");
 
       const clientId = Deno.env.get("SLACK_CLIENT_ID") || "";
       const clientSecret = Deno.env.get("SLACK_CLIENT_SECRET") || "";
-      if (!clientId || !clientSecret) return redirect(ORIGIN + "/integrations.html?slack=not-configured");
+      if (!clientId || !clientSecret) return redirect(ORIGIN + "/slack.html?status=not-configured");
       const form = new URLSearchParams({ code, client_id: clientId, client_secret: clientSecret, redirect_uri: REDIRECT_URI });
       const response = await fetch("https://slack.com/api/oauth.v2.access", {
         method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form,
         signal: AbortSignal.timeout(15000),
       });
       const payload = await response.json() as Record<string, unknown>;
-      if (!response.ok || payload.ok !== true || typeof payload.access_token !== "string") return redirect(ORIGIN + "/integrations.html?slack=exchange-failed");
+      if (!response.ok || payload.ok !== true || typeof payload.access_token !== "string") return redirect(ORIGIN + "/slack.html?status=exchange-failed");
       const team = payload.team && typeof payload.team === "object" ? payload.team as Record<string, unknown> : {};
       const teamId = typeof team.id === "string" ? team.id : "";
       const teamName = typeof team.name === "string" ? team.name : "Slack workspace";
-      if (!teamId) return redirect(ORIGIN + "/integrations.html?slack=missing-team");
+      if (!teamId) return redirect(ORIGIN + "/slack.html?status=missing-team");
       const access = await encrypt(payload.access_token);
       const refresh = typeof payload.refresh_token === "string" ? await encrypt(payload.refresh_token) : null;
       const expires = Number(payload.expires_in) || 0;
@@ -172,8 +172,8 @@ Deno.serve(async (req: Request) => {
         expires_at: expires ? new Date(Date.now() + expires * 1000).toISOString() : null,
         granted_scopes: scopes, updated_at: new Date().toISOString(),
       }, { onConflict: "user_id,team_id" });
-      if (saveError) return redirect(ORIGIN + "/integrations.html?slack=save-failed");
-      return redirect(ORIGIN + "/integrations.html?slack=connected");
+      if (saveError) return redirect(ORIGIN + "/slack.html?status=save-failed");
+      return redirect(ORIGIN + "/slack.html?status=connected");
     }
 
     const user = await authenticatedUser(req);
