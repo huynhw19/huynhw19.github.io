@@ -29,4 +29,5 @@ document.getElementById('reset').addEventListener('click',()=>{document.getEleme
 document.getElementById('signout').addEventListener('click',async()=>{await db.auth.signOut();location.href='login.html'});
 (async()=>{const {data,error}=await db.auth.getSession();if(error)throw error;if(!data.session){msg('Please sign in to use Tool Studio.',true);return}user=data.session.user;isOwner=user.id===OWNER;document.getElementById('signout').hidden=false;app.classList.remove('hidden');status.classList.add('hidden');await load()})().catch(e=>msg(e.message||'Could not load Tool Studio.',true));
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
