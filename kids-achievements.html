@@ -68,4 +68,5 @@ function update(){const n=done.length;document.getElementById('summary').innerHT
 function render(){grid.replaceChildren();data.forEach((a,i)=>{if(active!=='All'&&a[2]!==active)return;const card=document.createElement('article');card.className='achievement '+(done.includes(i)?'done':'');const em=document.createElement('div');em.className='emoji';em.textContent=a[1];const tag=document.createElement('span');tag.className='tag';tag.textContent=a[2];const h=document.createElement('h3');h.textContent=(done.includes(i)?'✓ ':'')+a[0];const p=document.createElement('p');p.textContent=a[3];const b=document.createElement('button');b.type='button';b.textContent=done.includes(i)?'Completed ✓':'Mark complete';b.setAttribute('aria-pressed',String(done.includes(i)));b.addEventListener('click',()=>{if(done.includes(i))done=done.filter(x=>x!==i);else done.push(i);save();update();render()});card.append(em,tag,h,p,b);grid.append(card)})}
 update();render();
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
