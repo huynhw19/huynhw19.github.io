@@ -39,4 +39,5 @@ $('habit-list').addEventListener('click',async e=>{const b=e.target.closest('but
 async function init(){const {data,error}=await db.auth.getSession();if(error)throw error;if(!data.session){location.replace('login.html?next=habits.html');return}user=data.session.user;const passkey=window.CONFIGKIT_PASSKEY_SESSION?.has(user.id)===true;let recovery={enabled:false,verified:false};const {data:rc,error:re}=await db.functions.invoke('recovery-codes',{body:{action:'status'}});if(!re&&rc)recovery=rc;const {data:aal,error:ae}=await db.auth.mfa.getAuthenticatorAssuranceLevel();if(ae)throw ae;if((recovery.enabled&&!recovery.verified&&!passkey&&aal.currentLevel!=='aal2')||(!recovery.verified&&!passkey&&aal.nextLevel==='aal2'&&aal.currentLevel!=='aal2')){location.replace('login.html?next=habits.html');return}await load();$('app').hidden=false;status.hidden=true}
 db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)location.replace('login.html')});init().catch(e=>{status.textContent=e.message||'Could not load Habit Tracker.';status.classList.add('error')});
 })();
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
