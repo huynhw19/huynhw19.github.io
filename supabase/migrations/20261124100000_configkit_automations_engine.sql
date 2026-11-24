@@ -1,0 +1,3 @@
+-- ConfigKit Automations engine
+-- Scheduled workflows run from pg_cron; the private worker supports only safe, built-in ConfigKit actions.
+-- See the migration applied to Supabase: configkit_automations_engine.
