@@ -742,9 +742,9 @@
       }
     };
 
-    const COOKIE_CONSENT_KEY = 'configkit-cookie-consent-v1';
+    const COOKIE_CONSENT_KEY = 'configkit-cookie-consent-v2';
     function readCookieConsent() {
-      try { const value = JSON.parse(localStorage.getItem(COOKIE_CONSENT_KEY) || 'null'); return value && value.version === 1 ? value : null; }
+      try { const value = JSON.parse(localStorage.getItem(COOKIE_CONSENT_KEY) || 'null'); return value && value.version === 2 ? value : null; }
       catch (_) { return null; }
     }
     let cookieConsent = readCookieConsent();
