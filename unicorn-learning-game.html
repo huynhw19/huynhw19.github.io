@@ -76,5 +76,6 @@ function answer(value){if(completed)return;completed=true;const correct=value===
 $('next').addEventListener('click',newQuestion);$('hint').addEventListener('click',()=>{$('hintText').textContent=current? '💡 '+current.hint:'Choose a question first.'});$('subject').addEventListener('change',e=>{subject=e.target.value;newQuestion()});$('reset').addEventListener('click',()=>{if(!window.confirm('Reset your unicorn game progress on this device?'))return;state={level:1,points:0,answered:0,streak:0,best:0};save();render();newQuestion();});render();newQuestion();
 })();
 </script>
+  <script src="/cookie-consent.js?v=2" defer></script>
 </body>
 </html>
