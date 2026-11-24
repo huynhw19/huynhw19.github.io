@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Your ConfigKit Command Centre: tools, recent activity, notifications and workspace overview.">
+<title>Command Centre — ConfigKit</title>
+<script src="auth-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+<link rel="stylesheet" href="brand.css?v=1"><link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
+<style>
+:root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e1e9e3;--paper:#f4f8f5;--white:#fff;--green:#176344;--forest:#104b33;--mint:#e8f4ed;--shadow:0 12px 32px rgba(23,35,31,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green);text-decoration:none}a:hover{text-decoration:underline}button,input{font:inherit}header,main,footer{width:min(100% - 32px,1160px);margin:auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:9px;font-size:1.12rem;font-weight:850;color:var(--ink)}.brand img{width:30px;height:30px}nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap}nav a{font-weight:650;font-size:.9rem}.signout,.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:9px 13px;font-weight:700;cursor:pointer}.signout{padding:7px 10px}.primary{background:var(--green);border-color:var(--green);color:#fff}.hero{padding:34px 0 20px;display:flex;justify-content:space-between;gap:18px;align-items:end;flex-wrap:wrap}.eyebrow{color:var(--green);font-weight:850;font-size:.75rem;letter-spacing:.11em;text-transform:uppercase}.hero h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.08;letter-spacing:-.05em;margin:.3rem 0}.muted{color:var(--muted)}.hero p{margin:.45rem 0 0}.hero-tools{display:flex;gap:9px;flex-wrap:wrap}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0 22px}.stat,.panel,.tile{background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.stat{padding:15px 17px}.stat strong{display:block;font-size:1.75rem;letter-spacing:-.04em}.stat span{color:var(--muted);font-size:.85rem}.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.85fr);gap:16px;align-items:start}.panel{padding:19px;margin-bottom:16px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.panel h2{font-size:1.12rem;margin:0}.panel-head a{font-size:.88rem;font-weight:750}.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.tile{padding:14px;box-shadow:none;transition:transform .15s,border-color .15s}.tile:hover{transform:translateY(-2px);border-color:#b8d5c2;text-decoration:none}.tile .ico{font-size:1.35rem}.tile strong{display:block;margin:5px 0 1px;color:var(--ink)}.tile small{display:block;color:var(--muted);line-height:1.4}.activity-list{display:grid;gap:0}.activity{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}.activity:last-child{border-bottom:0}.activity-icon{width:32px;height:32px;border-radius:10px;background:var(--mint);display:grid;place-items:center}.activity strong{display:block;font-size:.92rem}.activity small{display:block;color:var(--muted)}.activity a{font-size:.84rem;font-weight:700}.notice-row{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}.notice-row:last-child{border:0}.notice-row .dot{width:9px;height:9px;flex:0 0 auto;margin-top:7px;border-radius:50%;background:var(--green)}.notice-row .dot.read{background:#cbd5ce}.notice-row strong{display:block;font-size:.9rem}.notice-row small{color:var(--muted)}.empty{padding:20px 8px;text-align:center;color:var(--muted)}.quick-search{display:flex;gap:8px}.quick-search input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}.status{margin:18px auto;padding:14px 16px;background:#fff;border:1px solid var(--line);border-radius:12px}.status.error{color:#9b3030;background:#fff2f2}.footer{padding:18px 0 35px;color:var(--muted);font-size:.86rem}[hidden]{display:none!important}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #75c9a4;outline-offset:3px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){header{padding:12px 0}nav{gap:10px}.hero{padding-top:24px}.tiles{grid-template-columns:1fr 1fr}.activity{grid-template-columns:32px minmax(0,1fr)}.activity>a{grid-column:2}.stats{gap:8px}.stat{padding:12px}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="dashboard.html"><img src="configkit-symbol.svg" alt="">ConfigKit</a><nav aria-label="Main navigation"><a href="dashboard.html">Dashboard</a><a href="universal-search.html">Search</a><a href="activity-centre.html">Activity</a><a href="account-settings.html">Account</a><button id="signout" class="signout" type="button">Sign out</button></nav></header>
+<main>
+<div id="status" class="status" role="status" aria-live="polite">Checking your secure sign-in…</div>
+<div id="app" hidden>
+<section class="hero"><div><div class="eyebrow">Your ConfigKit workspace</div><h1>Command Centre</h1><p class="muted" id="greeting">Everything important, together in one place.</p></div><div class="hero-tools"><button class="btn" id="refresh" type="button">↻ Refresh</button><a class="btn primary" href="universal-search.html">⌕ Search ConfigKit</a></div></section>
+<section class="stats" aria-label="Workspace overview">
+<div class="stat"><strong id="unread-stat">—</strong><span>Unread notifications</span></div><div class="stat"><strong id="profiles-stat">—</strong><span>Saved profiles</span></div><div class="stat"><strong id="planner-stat">—</strong><span>Open planner items</span></div><div class="stat"><strong id="achievements-stat">—</strong><span>Achievements earned</span></div>
+</section>
+<div class="layout">
+<div>
+<section class="panel"><div class="panel-head"><h2>Quick launch</h2><a href="index.html#builders">Explore all tools →</a></div><div class="tiles">
+<a class="tile" href="mobileconfig-builder.html"><span class="ico">🛠️</span><strong>Profile Builder</strong><small>Create a mobileconfig profile</small></a>
+<a class="tile" href="profile-library.html"><span class="ico">🗂️</span><strong>Profile Library</strong><small>Your saved configurations</small></a>
+<a class="tile" href="planner.html"><span class="ico">📅</span><strong>Daily Planner</strong><small>Tasks and plans</small></a>
+<a class="tile" href="notes.html"><span class="ico">📝</span><strong>Notes</strong><small>Capture ideas and reminders</small></a>
+<a class="tile" href="configkit-shortcuts.html"><span class="ico">⚡</span><strong>Shortcuts</strong><small>Your personal quick links</small></a>
+<a class="tile" href="drive.html"><span class="ico">☁️</span><strong>ConfigKit Drive</strong><small>Your documents and files</small></a>
+<a class="tile" href="configkit-ai.html"><span class="ico">✨</span><strong>ConfigKit AI</strong><small>Your AI workspace</small></a>
+<a class="tile" href="forms.html"><span class="ico">📋</span><strong>Forms</strong><small>Create and manage forms</small></a>
+<a class="tile" href="backup-restore.html"><span class="ico">🛡️</span><strong>Backup &amp; Restore</strong><small>Protect your ConfigKit data</small></a>
+<a class="tile" href="community.html"><span class="ico">🤝</span><strong>Community</strong><small>Connect and collaborate</small></a>
+<a class="tile" href="groups.html"><span class="ico">👥</span><strong>Groups</strong><small>Your shared spaces</small></a>
+<a class="tile" href="security-centre.html"><span class="ico">🔐</span><strong>Security Centre</strong><small>Account protection settings</small></a>
+</div></section>
+<section class="panel"><div class="panel-head"><h2>Recent activity</h2><a href="activity-centre.html">Open Activity Centre →</a></div><div id="activity-list" class="activity-list"><div class="empty">Loading recent activity…</div></div></section>
+</div>
+<aside>
+<section class="panel"><div class="panel-head"><h2>Notifications</h2><a href="notifications.html">View inbox →</a></div><div id="notification-list"><div class="empty">Loading notifications…</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" id="mark-all" type="button">Mark all read</button><a class="btn" href="activity-centre.html">Activity Centre</a></div></section>
+<section class="panel"><div class="panel-head"><h2>More of ConfigKit</h2></div><div class="tiles">
+<a class="tile" href="rewards-center.html"><span class="ico">🏆</span><strong>Rewards</strong><small>Coins and achievements</small></a>
+<a class="tile" href="insights.html"><span class="ico">📊</span><strong>Insights</strong><small>Your personal overview</small></a>
+<a class="tile" href="document-vault.html"><span class="ico">🗃️</span><strong>Document Vault</strong><small>Organised documents</small></a>
+<a class="tile" href="support.html"><span class="ico">💬</span><strong>Support</strong><small>Get help with ConfigKit</small></a>
+</div></section>
+<section class="panel"><h2>Find something quickly</h2><p class="muted" style="margin:.3rem 0 .8rem;font-size:.9rem">Search across ConfigKit tools and content.</p><form id="search-form" class="quick-search"><input id="quick-search" type="search" placeholder="What are you looking for?" aria-label="Search ConfigKit"><button class="btn primary" type="submit">Go</button></form></section>
+</aside>
+</div>
+</div>
+</main>
+<footer class="footer">ConfigKit Command Centre · <a href="privacy.html">Privacy</a> · <a href="wiki.html">Help Centre</a></footer>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id),status=$('status'),app=$('app');
+const config=window.CONFIGKIT_AUTH_CONFIG||window.CONFIGKIT_CONFIG||window.SUPABASE_CONFIG||{};
+if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){status.textContent='Sign-in is not configured. Please use the main dashboard or contact support.';status.classList.add('error');return}
+const db=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let user=null,refreshing=false,channel=null;
+const escapeHtml=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const timeAgo=value=>{if(!value)return '';const diff=Math.max(0,Date.now()-new Date(value).getTime()),mins=Math.floor(diff/60000);if(mins<1)return 'Just now';if(mins<60)return mins+'m ago';const hours=Math.floor(mins/60);if(hours<24)return hours+'h ago';const days=Math.floor(hours/24);return days+'d ago'};
+function safeAction(value,fallback){try{const u=new URL(value||fallback,location.href);return u.origin===location.origin&&u.protocol==='https:'?u.href:fallback}catch(_){return fallback}}
+function setStatus(message,error=false){status.textContent=message;status.classList.toggle('error',error)}
+async function load(){
+ if(refreshing)return;refreshing=true;$('refresh').disabled=true;
+ try{
+ const settled=await Promise.allSettled([
+  db.from('configkit_notifications').select('id,title,body,category,action_url,created_at,read_at,dismissed_at').eq('user_id',user.id).is('dismissed_at',null).order('created_at',{ascending:false}).limit(8),
+  db.from('configkit_profiles').select('id,name,updated_at').eq('user_id',user.id).order('updated_at',{ascending:false}).limit(100),
+  db.from('planner_items').select('id,status').eq('user_id',user.id).limit(100),
+  db.from('user_achievements').select('achievement_key').eq('user_id',user.id).limit(100),
+  db.from('saved_profiles').select('id,profile_name,filename,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(6)
+ ]);
+ const [n,p,pl,ach,saved]=settled;
+ const notifications=n.status==='fulfilled'&&!n.value.error?(n.value.data||[]):[];
+ const profiles=p.status==='fulfilled'&&!p.value.error?(p.value.data||[]):[];
+ const planner=pl.status==='fulfilled'&&!pl.value.error?(pl.value.data||[]):[];
+ const achievements=ach.status==='fulfilled'&&!ach.value.error?(ach.value.data||[]):[];
+ const savedRows=saved.status==='fulfilled'&&!saved.value.error?(saved.value.data||[]):[];
+ const errors=settled.filter((r,i)=>r.status==='rejected'||r.value?.error).length;
+ $('unread-stat').textContent=notifications.filter(x=>!x.read_at).length;
+ $('profiles-stat').textContent=profiles.length;
+ $('planner-stat').textContent=planner.filter(x=>x.status!=='completed').length;
+ $('achievements-stat').textContent=achievements.length;
+ const unread=notifications.filter(x=>!x.read_at);
+ $('notification-list').innerHTML=notifications.length?notifications.slice(0,5).map(x=>'<div class="notice-row"><span class="dot '+(x.read_at?'read':'')+'"></span><div><strong>'+escapeHtml(x.title)+'</strong><small>'+escapeHtml(x.body||x.category||'')+' · '+escapeHtml(timeAgo(x.created_at))+'</small></div></div>').join(''):'<div class="empty">You are all caught up. New notifications will appear here.</div>';
+ $('mark-all').disabled=!unread.length;
+ const events=[
+ ...notifications.map(x=>({title:x.title,body:x.body||x.category,date:x.created_at,icon:'🔔',url:'notifications.html'})),
+ ...savedRows.map(x=>({title:'Saved a configuration profile',body:x.profile_name||x.filename||'Profile',date:x.created_at,icon:'📥',url:'profile-library.html'})),
+ ...profiles.map(x=>({title:'Updated a saved profile',body:x.name,date:x.updated_at,icon:'🗂️',url:'profile-library.html'}))
+ ].filter(x=>x.date).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,7);
+ $('activity-list').innerHTML=events.length?events.map(x=>'<div class="activity"><span class="activity-icon">'+x.icon+'</span><div><strong>'+escapeHtml(x.title)+'</strong><small>'+escapeHtml(x.body)+' · '+escapeHtml(timeAgo(x.date))+'</small></div><a href="'+x.url+'">Open</a></div>').join(''):'<div class="empty">Your recent ConfigKit activity will show up here.</div>';
+ setStatus(errors?'Command Centre loaded with limited data. Some workspace sections could not be read.':'Your workspace is up to date.');
+ }finally{refreshing=false;$('refresh').disabled=false}
+}
+$('refresh').addEventListener('click',()=>load().catch(e=>setStatus('Could not refresh your workspace: '+e.message,true)));
+$('mark-all').addEventListener('click',async()=>{const {error}=await db.from('configkit_notifications').update({read_at:new Date().toISOString()}).eq('user_id',user.id).is('read_at',null).is('dismissed_at',null);if(error){setStatus('Could not mark notifications as read: '+error.message,true);return}await load()});
+$('search-form').addEventListener('submit',e=>{e.preventDefault();const q=$('quick-search').value.trim();if(q)location.href='universal-search.html?q='+encodeURIComponent(q)});
+$('signout').addEventListener('click',async()=>{await db.auth.signOut({scope:'local'});location.replace('login.html')});
+async function init(){
+ const {data,error}=await db.auth.getSession();if(error)throw error;if(!data.session){location.replace('login.html?next=command-centre.html');return}
+ const recovery=await db.functions.invoke('recovery-codes',{body:{action:'status'}});
+ const recoveryStatus=!recovery.error&&recovery.data?recovery.data:{enabled:false,verified:false};
+ const {data:assurance,error:assuranceError}=await db.auth.mfa.getAuthenticatorAssuranceLevel();if(assuranceError)throw assuranceError;
+ const {data:claimsData,error:claimsError}=await db.auth.getClaims(data.session.access_token);if(claimsError)throw claimsError;
+ const methods=[...(assurance.currentAuthenticationMethods||[]),...(claimsData?.claims?.amr||[])];
+ const passwordless=methods.some(item=>['magiclink','passkey','webauthn'].includes(String(typeof item==='string'?item:item?.method||'').toLowerCase()));
+ const passkey=window.CONFIGKIT_PASSKEY_SESSION?.has(data.session.user.id)===true||passwordless;
+ if(recoveryStatus.enabled&&!recoveryStatus.verified&&!passkey&&assurance.currentLevel!=='aal2'){location.replace('login.html?auth-check=dashboard-recovery-enabled');return}
+ if(!recoveryStatus.verified&&!passkey&&assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'){location.replace('login.html?auth-check=dashboard-aal');return}
+ user=data.session.user;$('greeting').textContent='Welcome back'+(user.user_metadata?.full_name?', '+user.user_metadata.full_name.split(' ')[0]:'')+'. Your ConfigKit workspace is ready.';
+ await load();status.hidden=true;app.hidden=false;await db.realtime.setAuth();
+ channel=db.channel('configkit-command-centre-'+user.id).on('postgres_changes',{event:'*',schema:'public',table:'configkit_notifications',filter:'user_id=eq.'+user.id},()=>load()).on('postgres_changes',{event:'*',schema:'public',table:'planner_items',filter:'user_id=eq.'+user.id},()=>load()).on('postgres_changes',{event:'*',schema:'public',table:'configkit_profiles',filter:'user_id=eq.'+user.id},()=>load()).subscribe();
+}
+init().catch(e=>setStatus(e.message||'Could not load the Command Centre. Please sign in again.',true));
+db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)location.replace('login.html?auth-check=command-centre-session-ended')});
+window.addEventListener('beforeunload',()=>{if(channel)db.removeChannel(channel)});
+})();
+</script>
+<script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
