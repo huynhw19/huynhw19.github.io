@@ -87,9 +87,11 @@ async function persistConversation(){
  return {data:result.data};
 }
 async function saveConversation(){
- const result=await persistConversation();
- if(result.error){bubble('Could not save this conversation: '+result.error.message,'assistant');return}
- bubble('Conversation saved to your ConfigKit account. 💚','assistant');
+ try{
+  const result=await persistConversation();
+  if(result.error){bubble('Could not save this conversation: '+result.error.message,'assistant');return}
+  bubble('Conversation saved to your ConfigKit account. 💚','assistant');
+ }catch(error){bubble('Could not save this conversation: '+(error?.message||'A network error occurred.'),'assistant')}
 }
 async function loadConversation(id){
  const {data,error}=await db.from('configkit_ai_conversations').select('id,title,messages').eq('id',id).single();
@@ -113,7 +115,7 @@ const authMethods=[...(aal.currentAuthenticationMethods||[]),...(claimsData?.cla
 const passwordlessMethod=authMethods.some(item=>{const method=typeof item==='string'?item:item?.method;return ['magiclink','otp','passkey','webauthn'].includes(String(method||'').toLowerCase());});
 if(!passwordlessMethod&&!recovery.verified&&aal.currentLevel!=='aal2'&&(aal.nextLevel==='aal2'||recovery.enabled)){location.replace('login.html?next=configkit-ai.html');return}
 status.hidden=true;$('app').hidden=false;await refreshSaved()}
-form.addEventListener('submit',async e=>{e.preventDefault();const q=question.value.trim();if(!q||busy)return;question.value='';bubble(q,'user');const pending=bubble('Thinking…','assistant');busy=true;send.disabled=true;try{let weatherContext='';try{weatherContext=await weatherContextFor(q)}catch(weatherError){pending.textContent=weatherError.message||'Could not retrieve weather. Try asking for a city.';return}const aiQuestion=weatherContext?q+'\\n\\n'+weatherContext:q;const {data,error}=await db.functions.invoke('mobileconfig-ai',{body:{question:aiQuestion,context:'unsure',history:history.slice(-8),includePersonalContext:contextConsent.checked,webSearch:$('web-search').checked}});if(error){let msg=error.message||'The assistant could not respond.';try{const b=await error.context?.json?.();if(b?.error)msg=b.error}catch(_){}throw new Error(msg)}if(!data?.answer)throw new Error(data?.error||'The assistant returned no answer.');pending.textContent=data.answer;history.push({role:'user',content:q},{role:'assistant',content:data.answer});if(history.length>80)history.splice(0,history.length-80);const saved=await persistConversation();if(saved.error)bubble('Auto-save could not complete: '+saved.error.message+' You can retry with Save now.','assistant')}catch(err){pending.textContent=err.message||'Something went wrong. Please try again.'}finally{busy=false;send.disabled=false;question.focus()}});
+form.addEventListener('submit',async e=>{e.preventDefault();const q=question.value.trim();if(!q||busy)return;question.value='';bubble(q,'user');const pending=bubble('Thinking…','assistant');busy=true;send.disabled=true;try{let weatherContext='';try{weatherContext=await weatherContextFor(q)}catch(weatherError){pending.textContent=weatherError.message||'Could not retrieve weather. Try asking for a city.';return}const aiQuestion=weatherContext?q+'\\n\\n'+weatherContext:q;const {data,error}=await db.functions.invoke('mobileconfig-ai',{body:{question:aiQuestion,context:'unsure',history:history.slice(-8),includePersonalContext:contextConsent.checked,webSearch:$('web-search').checked}});if(error){let msg=error.message||'The assistant could not respond.';try{const b=await error.context?.json?.();if(b?.error)msg=b.error}catch(_){}throw new Error(msg)}if(!data?.answer)throw new Error(data?.error||'The assistant returned no answer.');pending.textContent=data.answer;history.push({role:'user',content:q},{role:'assistant',content:data.answer});if(history.length>80)history.splice(0,history.length-80);let saved;try{saved=await persistConversation()}catch(saveError){saved={error:saveError}}if(saved.error)bubble('Auto-save could not complete: '+(saved.error.message||'A network error occurred.')+' You can retry with Save now.','assistant')}catch(err){pending.textContent=err.message||'Something went wrong. Please try again.'}finally{busy=false;send.disabled=false;question.focus()}});
 $('clear').addEventListener('click',()=>{history=[];activeConversationId=null;messages.replaceChildren();bubble('Chat cleared. What would you like help with?','assistant')});
 $('save-chat').addEventListener('click',saveConversation);
 $('load-saved').addEventListener('click',refreshSaved);
