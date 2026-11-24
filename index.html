@@ -161,6 +161,12 @@
       color: var(--white);
     }
 
+    .beginner-presentation { margin: 1.6rem 0 2rem; padding: clamp(1.1rem, 3vw, 1.8rem); background: linear-gradient(135deg, #f0f4ff, #f5f8ff 55%, #edf4ff); border: 1px solid #dce5fb; border-radius: 1.2rem; box-shadow: var(--shadow); }
+    .beginner-presentation .eyebrow { background: #e1eaff; color: #294b91; }
+    .beginner-presentation h2 { margin: .65rem 0 .35rem; font-size: clamp(1.4rem, 3vw, 1.9rem); }
+    .beginner-presentation p { margin: 0 0 1rem; color: var(--muted); max-width: 760px; }
+    .presentation-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: .9rem; background: #e8edf8; }
+    .presentation-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
     .video-panel {
       margin-top: 1.5rem;
       background: var(--white);
@@ -449,6 +455,19 @@
       <article class="quick-path"><strong>I'm new to profiles</strong><p>Learn what a configuration profile can change before installing one.</p><a href="mobileconfig-guide.html">Read the beginner guide →</a></article>
       <article class="quick-path"><strong>I know what I need</strong><p>Jump straight to Wi‑Fi, encrypted DNS, web clips, or profile inspection.</p><a href="#builders">Explore the tools →</a></article>
       <article class="quick-path"><strong>I need help</strong><p>Find account guidance, backend setup notes, and answers to common errors.</p><a href="wiki.html">Search the help centre →</a></article>
+    </section>
+
+    <section class="beginner-presentation" id="configkit-beginners" aria-labelledby="configkit-beginners-title">
+      <span class="eyebrow">New to ConfigKit?</span>
+      <h2 id="configkit-beginners-title">ConfigKit for Beginners</h2>
+      <p>Take a friendly, step-by-step tour of ConfigKit. Explore the main tools, learn where to start, and discover how to make the most of your workspace.</p>
+      <div class="cta-row" style="margin:0 0 1rem">
+        <a class="button primary" href="https://canva.link/4e7b78jlprkyk6b" target="_blank" rel="noopener noreferrer">Open the presentation ↗</a>
+      </div>
+      <div class="presentation-frame">
+        <div class="side-note" style="padding:1rem;text-align:center">The presentation preview is hosted by Canva. Allow external media in Cookie Settings to load it here.</div>
+        <iframe data-cookie-src="https://www.canva.com/design/DAHbz7xCmfg/view?embed" title="ConfigKit for Beginners presentation" loading="lazy" allowfullscreen></iframe>
+      </div>
     </section>
 
     <section class="video-panel" id="install-tutorial" aria-labelledby="install-tutorial-title">
