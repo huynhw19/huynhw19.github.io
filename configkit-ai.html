@@ -4,7 +4,7 @@
 <style>
 :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--dark:#174b39;--mint:#e8f4ed;--gold:#fff7e8;--red:#9b3030;--shadow:0 12px 32px rgba(23,35,31,.08)}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% 0%,#e8f4ed,transparent 35rem),var(--paper);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}header,main,footer{width:min(1060px,calc(100% - 32px));margin:auto}header{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line)}a{color:var(--green)}nav{display:flex;gap:14px;flex-wrap:wrap}main{padding:30px 0 54px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:8px 0}h2{font-size:1.1rem;margin:0 0 12px}.muted{color:var(--muted)}.eyebrow{color:var(--green);font-size:.75rem;font-weight:800;letter-spacing:.1em}.layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:16px;margin-top:20px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);min-width:0}.chat{display:flex;flex-direction:column;min-height:580px}.messages{display:flex;flex-direction:column;gap:12px;flex:1;max-height:620px;overflow:auto;padding:4px 2px 18px}.bubble{max-width:88%;padding:12px 14px;border-radius:14px;white-space:pre-wrap;overflow-wrap:anywhere}.assistant{align-self:flex-start;background:#f0f5f1;border:1px solid var(--line)}.user{align-self:flex-end;background:var(--green);color:#fff}.composer{border-top:1px solid var(--line);padding-top:14px}.composer textarea{width:100%;min-height:92px;resize:vertical;padding:12px;border:1px solid #cbd6cf;border-radius:11px;font:inherit}.actions,.prompts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}button{font:inherit;border:0;border-radius:10px;padding:10px 14px;background:var(--green);color:#fff;font-weight:700;cursor:pointer}button.secondary{background:var(--mint);color:var(--dark);border:1px solid #d5e6da}button:disabled{opacity:.55;cursor:wait}.prompts button{font-size:.88rem}.notice{padding:12px;border-radius:10px;background:var(--gold);color:#62512d;font-size:.9rem}.privacy{padding:12px;border:1px solid var(--line);border-radius:10px;background:#fbfcfb;font-size:.88rem}.consent{display:flex;gap:9px;align-items:flex-start;margin-top:12px;font-size:.9rem}.consent input{width:auto;margin-top:5px}.status{padding:12px;border-radius:10px;background:var(--mint);margin:12px 0}.status.error{background:#fff0f0;color:var(--red)}.side-link{display:block;padding:10px 0;border-top:1px solid var(--line);text-decoration:none}.side-link:first-of-type{border-top:0}.side-note{font-size:.86rem;color:var(--muted)}[hidden]{display:none!important}footer{padding:20px 0 34px;color:var(--muted)}@media(max-width:760px){.layout{grid-template-columns:1fr}.chat{min-height:520px}.messages{max-height:55vh}.bubble{max-width:95%}}
-.memory-card{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}.memory-card select,.memory-card input{width:100%;padding:9px;border:1px solid #cbd6cf;border-radius:9px;font:inherit;background:#fff}.memory-item{padding:10px 0;border-top:1px solid var(--line);font-size:.88rem}.memory-item:first-child{border-top:0}.memory-actions{display:flex;gap:6px;margin-top:6px}.memory-actions button{padding:6px 9px;font-size:.8rem}.memory-pending{background:var(--gold);padding:10px;border-radius:10px;margin-top:10px;font-size:.88rem}</style></head><body>
+.memory-card{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}.memory-card select,.memory-card input{width:100%;padding:9px;border:1px solid #cbd6cf;border-radius:9px;font:inherit;background:#fff}.memory-item{padding:10px 0;border-top:1px solid var(--line);font-size:.88rem}.memory-item:first-child{border-top:0}.memory-actions{display:flex;gap:6px;margin-top:6px}.memory-actions button{padding:6px 9px;font-size:.8rem}.memory-pending{background:var(--gold);padding:10px;border-radius:10px;margin-top:10px;font-size:.88rem}.danger-zone{border:1px solid #e8b9b9;border-radius:12px;padding:14px;background:#fffafa}.danger-zone h2{color:#922d2d}.danger-warning{padding:12px;border:1px solid #e7b2a9;border-radius:10px;background:#fff0ec;color:#762b25;font-size:.88rem}.danger-action{padding:12px 0;border-top:1px solid #f0dada;margin-top:10px}.danger-action p{margin:5px 0 9px}.danger-button{background:#9b3030}.danger-button:hover{background:#792323}</style></head><body>
 <header><a href="dashboard.html">← ConfigKit dashboard</a><nav><a href="planner.html">Planner</a><a href="Education-dashboard.html">Education</a><a href="mobileconfig-tips.html">Mobileconfig Tips</a></nav></header>
 <main><div class="eyebrow">YOUR CONFIGKIT HELPER</div><h1>ConfigKit AI</h1><p class="muted">Ask questions, understand ConfigKit tools, organise your next steps and learn something new. I can also guide you through Mobileconfig Studio: profile payloads, creating and reviewing files, private library saves, validation and safe sharing.</p>
 <div id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</div>
@@ -34,6 +34,17 @@
 <input id="memory-new" maxlength="500" placeholder="e.g. I prefer concise step-by-step answers">
 <div class="actions"><button id="memory-add" type="button" class="secondary">Add memory</button><button id="memory-refresh" type="button" class="secondary">Refresh</button></div>
 <div id="memory-list" class="side-note" aria-live="polite">Loading your memories…</div>
+</section>
+<section class="memory-card danger-zone" aria-labelledby="danger-zone-title">
+<h2 id="danger-zone-title">⚠️ Danger Zone</h2>
+<p class="side-note">These actions affect data saved to your ConfigKit account. Read each warning carefully. Deleting data cannot be undone.</p>
+<div class="danger-warning" role="note"><strong>‼️ Warning — take care.</strong> Delete actions are permanent. They do not delete your ConfigKit account, change your sign-in method, or remove account security protections. Each destructive action requires confirmation and typing <strong>DELETE</strong>.</div>
+<div class="danger-action"><strong>Delete all saved AI conversations</strong><p class="side-note">Permanently deletes every saved AI conversation. It does not clear messages currently open in this chat.</p><button id="danger-delete-chats" type="button" class="danger-button">Delete all conversations</button></div>
+<div class="danger-action"><strong>Delete all saved AI memories</strong><p class="side-note">Permanently deletes all Memory Centre entries. Other AI preferences remain unchanged.</p><button id="danger-delete-memories" type="button" class="danger-button">Delete all memories</button></div>
+<div class="danger-action"><strong>Reset AI preferences</strong><p class="side-note">Restores response style, answer length, expertise, web-search default, memory-use toggle and custom instructions to defaults.</p><button id="danger-reset-preferences" type="button" class="secondary">Reset AI preferences</button></div>
+<div class="danger-action"><strong>Disable AI memory</strong><p class="side-note">Turns memory off so saved memories are not used and no new memories are saved. Existing memories remain available to review or delete.</p><button id="danger-disable-memory" type="button" class="secondary">Turn memory off</button></div>
+<div class="danger-action"><strong>Clear all AI personalisation data</strong><p class="side-note">Permanently deletes all saved AI memories and resets AI preferences. Memory is switched off afterward. Saved conversations are not affected.</p><button id="danger-clear-personalisation" type="button" class="danger-button">Clear personalisation data</button></div>
+<p id="danger-status" class="side-note" role="status" aria-live="polite"></p>
 </section><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h2>Try asking</h2><div class="prompts"><button class="secondary" data-prompt="What can I do in ConfigKit?">Explore ConfigKit</button><button class="secondary" data-prompt="What is the weather like in my current location today?">Current weather 🌦️</button><button class="secondary" data-prompt="What is the weather forecast for Melbourne today?">Weather forecast</button><button class="secondary" data-prompt="Help me plan my week and prioritise my work.">Plan my week</button><button class="secondary" data-prompt="How can I organise my school assignments and study time?">Study planning</button><button class="secondary" data-prompt="Explain Apple configuration profiles and how to check them safely.">Apple profiles</button><button class="secondary" data-prompt="Walk me through creating a Wi-Fi, Web Clip or encrypted DNS profile in ConfigKit Mobileconfig Studio.">Build a profile</button><button class="secondary" data-prompt="What can I currently save and share from Mobileconfig Studio, and what sharing safeguards should I use?">Save &amp; share profiles</button><button class="secondary" data-prompt="How should I review and validate an existing .mobileconfig file before installing it?">Review a profile</button><button class="secondary" data-prompt="How do I protect my ConfigKit account?">Account security</button><button class="secondary" data-prompt="What is the difference between a task, an event and a reminder in Planner?">Planner help</button></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h2>Open a ConfigKit tool</h2><a class="side-link" href="configkit-ai-docs.html">AI Docs &amp; Beginner Guide →</a><a class="side-link" href="planner.html">Planner →</a><a class="side-link" href="Education-dashboard.html">Education →</a><a class="side-link" href="finance.html">Finance tracker →</a><a class="side-link" href="mobileconfig-builder.html">Mobileconfig Studio →</a><a class="side-link" href="profile-library.html">Profile Library →</a><a class="side-link" href="mobileconfig-guide.html">Mobileconfig guide →</a><a class="side-link" href="roadmap.html#mobileconfig-studio-plan">Mobileconfig Studio roadmap →</a><a class="side-link" href="account-settings.html">Account settings →</a><p class="side-note">ConfigKit AI can explain and guide, but it cannot operate these tools or change your account.</p></aside></div>
 <div class="privacy" style="margin-top:16px"><strong>Web search:</strong> Optional Tavily search runs through ConfigKit’s authenticated server function. Queries and snippets are sent to Groq to generate the answer. Check source links for details.</div>
 <div class="privacy" style="margin-top:16px"><strong>Weather:</strong> Ask about the weather in a city, or ask for your current location. For current-location weather, your browser will ask permission to share your location. Weather is retrieved from Open-Meteo; location is only used for that weather lookup and is not added to your saved ConfigKit profile.</div>
@@ -207,6 +218,7 @@ async function loadConversation(id){
  activeConversationId=data.id;history=Array.isArray(data.messages)?data.messages.filter(m=>m&&['user','assistant'].includes(m.role)&&typeof m.content==='string').slice(-80):[];
  messages.replaceChildren();history.forEach(m=>bubble(m.content,m.role));bubble('Loaded saved conversation. Continue whenever you’re ready.','assistant');
 }
+
 async function deleteConversation(id){
  if(!confirm('Delete this saved conversation from your account?'))return;
  const {error}=await db.from('configkit_ai_conversations').delete().eq('id',id);
@@ -214,6 +226,61 @@ async function deleteConversation(id){
  if(activeConversationId===id){activeConversationId=null;history=[]}
  await refreshSaved();
 }
+async function confirmDangerAction(label,details){
+ if(!confirm(label+'\\n\\n'+details+'\\n\\nThis cannot be undone. Continue?'))return false;
+ return prompt('Final confirmation: type DELETE to continue.')==='DELETE';
+}
+async function runDangerAction(buttonId,work,successMessage){
+ const button=$(buttonId),out=$('danger-status');if(button.disabled)return;
+ button.disabled=true;out.textContent='Working…';
+ try{await work();out.textContent=successMessage}
+ catch(error){out.textContent='Action could not be completed: '+(error?.message||'Please try again.')}
+ finally{button.disabled=false}
+}
+$('danger-delete-chats').addEventListener('click',async()=>{
+ if(!await confirmDangerAction('Delete all saved AI conversations?','Every saved ConfigKit AI conversation will be permanently deleted.'))return;
+ await runDangerAction('danger-delete-chats',async()=>{
+  const {error}=await db.from('configkit_ai_conversations').delete().not('id','is',null);if(error)throw error;
+  activeConversationId=null;history=[];await refreshSaved();
+ },'All saved AI conversations have been deleted.');
+});
+$('danger-delete-memories').addEventListener('click',async()=>{
+ if(!await confirmDangerAction('Delete all saved AI memories?','Every Memory Centre entry will be permanently deleted. Other AI preferences remain unchanged.'))return;
+ await runDangerAction('danger-delete-memories',async()=>{
+  const {error}=await db.from('configkit_ai_memories').delete().not('id','is',null);if(error)throw error;
+  memoryCache=[];renderMemories();
+ },'All saved AI memories have been deleted.');
+});
+$('danger-reset-preferences').addEventListener('click',async()=>{
+ if(!await confirmDangerAction('Reset AI preferences?','All AI response preferences and custom instructions will return to their defaults.'))return;
+ await runDangerAction('danger-reset-preferences',async()=>{
+  const {data:userData,error:userError}=await db.auth.getUser();if(userError||!userData?.user?.id)throw userError||new Error('Please sign in again.');
+  const defaults={user_id:userData.user.id,response_style:'friendly',answer_length:'balanced',expertise_level:'intermediate',web_search_default:'optional',use_memories:true,custom_instructions:'',updated_at:new Date().toISOString()};
+  const {error}=await db.from('configkit_ai_preferences').upsert(defaults,{onConflict:'user_id'});if(error)throw error;
+  aiPreferences={...defaults};$('ai-style').value='friendly';$('ai-length').value='balanced';$('ai-level').value='intermediate';$('ai-web-default').value='optional';$('ai-use-memories').checked=true;$('ai-custom').value='';$('web-search').checked=false;$('ai-controls-status').textContent='Preferences reset to defaults.';
+ },'AI preferences have been reset to their defaults.');
+});
+$('danger-disable-memory').addEventListener('click',async()=>{
+ if(!confirm('Turn off AI memory? Existing memories remain saved, but will not be used or added.'))return;
+ await runDangerAction('danger-disable-memory',async()=>{
+  const {data:userData,error:userError}=await db.auth.getUser();if(userError||!userData?.user?.id)throw userError||new Error('Please sign in again.');
+  const {error}=await db.from('configkit_ai_memory_settings').upsert({user_id:userData.user.id,memory_mode:'off',updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)throw error;
+  memoryMode='off';$('memory-mode').value='off';$('memory-mode-note').textContent=memoryModeNotes.off;$('memory-pending').hidden=true;renderMemories();
+ },'AI memory is now off. Existing memories have not been deleted.');
+});
+$('danger-clear-personalisation').addEventListener('click',async()=>{
+ if(!await confirmDangerAction('Clear all AI personalisation data?','All AI memories will be permanently deleted, preferences will reset, and Memory Centre will be switched off. Saved conversations remain untouched.'))return;
+ await runDangerAction('danger-clear-personalisation',async()=>{
+  const {data:userData,error:userError}=await db.auth.getUser();if(userError||!userData?.user?.id)throw userError||new Error('Please sign in again.');
+  const memories=await db.from('configkit_ai_memories').delete().not('id','is',null);if(memories.error)throw memories.error;
+  const defaults={user_id:userData.user.id,response_style:'friendly',answer_length:'balanced',expertise_level:'intermediate',web_search_default:'optional',use_memories:true,custom_instructions:'',updated_at:new Date().toISOString()};
+  const prefs=await db.from('configkit_ai_preferences').upsert(defaults,{onConflict:'user_id'});if(prefs.error)throw prefs.error;
+  const mode=await db.from('configkit_ai_memory_settings').upsert({user_id:userData.user.id,memory_mode:'off',updated_at:new Date().toISOString()},{onConflict:'user_id'});if(mode.error)throw mode.error;
+  memoryMode='off';memoryCache=[];aiPreferences={...defaults};$('memory-mode').value='off';$('memory-mode-note').textContent=memoryModeNotes.off;$('memory-pending').hidden=true;renderMemories();
+  $('ai-style').value='friendly';$('ai-length').value='balanced';$('ai-level').value='intermediate';$('ai-web-default').value='optional';$('ai-use-memories').checked=true;$('ai-custom').value='';$('web-search').checked=false;$('ai-controls-status').textContent='Preferences reset to defaults.';
+ },'AI personalisation data has been cleared. Memory is off and saved conversations are untouched.');
+});
+
 
 function authCheckTimeout(promise,step,ms=12000){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(step+' is taking too long. Please reload the page and try again.')),ms)})]).finally(()=>clearTimeout(timer))}
 async function init(){
