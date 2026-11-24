@@ -68,4 +68,5 @@ $('refresh').addEventListener('click',async()=>{const b=$('refresh');b.disabled=
 try{await load()}catch(e){console.warn('Personal Insights could not load:',e);say('Some personal summaries could not be loaded. Please refresh or check your account access.',true)}
 client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&!session)window.location.replace('login.html')});
 })().catch(e=>{const s=document.getElementById('status');s.textContent='Personal Insights could not load. Please try again.';s.classList.add('error')});
-</script></body></html>
+</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
