@@ -379,6 +379,12 @@
     @media(prefers-reduced-motion:reduce) { html{scroll-behavior:auto} *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important} }
 
 
+    .cookie-banner{position:fixed;z-index:1000;left:16px;right:16px;bottom:16px;max-width:900px;margin:0 auto;padding:18px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 55px rgba(15,35,25,.22);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
+    .cookie-banner h2{margin:0 0 4px;font-size:1.12rem}.cookie-banner p{margin:0;color:var(--muted);font-size:.92rem}
+    .cookie-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.cookie-actions button{cursor:pointer;font:inherit;font-weight:700;padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink)}.cookie-actions .accept{background:var(--green);border-color:var(--green);color:#fff}
+    .cookie-settings{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:9px}.cookie-settings label{display:flex;gap:9px;align-items:flex-start;font-size:.9rem}.cookie-settings input{margin-top:5px}.cookie-settings .essential{color:var(--muted)}
+    .external-media-placeholder{display:grid;place-items:center;min-height:180px;padding:24px;text-align:center;color:#eaf5ed;background:#17251e;border-radius:.8rem}.external-media-placeholder p{max-width:540px;margin:0;color:inherit}
+    @media(max-width:700px){.cookie-banner{grid-template-columns:1fr;left:10px;right:10px;bottom:10px}.cookie-actions{justify-content:flex-start}.cookie-actions button{flex:1 1 130px}}
   </style>
 </head>
 <body>
@@ -450,14 +456,9 @@
       <h2 id="install-tutorial-title">How to install a mobileconfig profile</h2>
       <p>Watch this step-by-step video to learn how to install a mobileconfig profile on your device.</p>
       <div class="video-frame">
-        <iframe
-          src="https://www.youtube-nocookie.com/embed/sZyY5NpxxRw"
-          title="How to install a mobileconfig profile"
-          loading="lazy"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen>
-        </iframe>
+        <div id="youtube-consent-placeholder" class="external-media-placeholder">
+          <p>▶ This video is hosted by YouTube. Allow external media in Cookie Settings to load it, or use the YouTube link below.</p>
+        </div>
       </div>
       <p style="margin-top: .8rem; margin-bottom: 0;"><a href="https://www.youtube.com/watch?v=sZyY5NpxxRw" target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a></p>
     </section>
@@ -472,7 +473,7 @@
       </div>
       <p class="muted">Scan the QR code to open the family dashboard on your phone.</p>
       <a href="https://huynhw19.github.io/family-dashboard.html" aria-label="Open family dashboard">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&amp;margin=10&amp;data=https%3A%2F%2Fhuynhw19.github.io%2Ffamily-dashboard.html" alt="QR code for the ConfigKit family dashboard" width="200" height="200" loading="lazy">
+        <img data-cookie-src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&amp;margin=10&amp;data=https%3A%2F%2Fhuynhw19.github.io%2Ffamily-dashboard.html" alt="QR code for the ConfigKit family dashboard" width="200" height="200" loading="lazy"><span id="qr-consent-placeholder" class="side-note">QR image loads when you allow external media in Cookie Settings.</span>
       </a>
     </section>
 
@@ -601,6 +602,7 @@
       <a href="login.html" data-i18n="footerLogin">Log in / Sign up</a>
       <a href="safety.html" data-i18n="footerSafety">Safety &amp; contact</a>
       <a href="privacy.html" data-i18n="footerPrivacy">Privacy</a>
+      <a href="#cookie-settings" id="cookie-settings-link">Cookie settings</a>
       <a href="#newsletter" data-i18n="footerNewsletter">Newsletter</a>
     </div>
   </footer>
@@ -742,6 +744,14 @@
       }
     };
 
+    const COOKIE_CONSENT_KEY = 'configkit-cookie-consent-v1';
+    function readCookieConsent() {
+      try { const value = JSON.parse(localStorage.getItem(COOKIE_CONSENT_KEY) || 'null'); return value && value.version === 1 ? value : null; }
+      catch (_) { return null; }
+    }
+    let cookieConsent = readCookieConsent();
+    function hasPreferenceConsent() { return cookieConsent?.categories?.preferences === true; }
+
     const select = document.getElementById('lang-select');
     const status = document.getElementById('status');
 
@@ -763,11 +773,11 @@
 
     if (select) {
       let saved = 'en';
-      try { saved = localStorage.getItem('configkit-lang') || 'en'; } catch (_) {}
+      if (hasPreferenceConsent()) { try { saved = localStorage.getItem('configkit-lang') || 'en'; } catch (_) {} }
       applyLanguage(saved);
       select.addEventListener('change', (event) => {
         const lang = event.target.value;
-        try { localStorage.setItem('configkit-lang', lang); } catch (_) {}
+        if (hasPreferenceConsent()) { try { localStorage.setItem('configkit-lang', lang); } catch (_) {} }
         applyLanguage(lang);
       });
     }
@@ -932,5 +942,95 @@
   <script src="auth-config.js?v=passkey-policy-20261123"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
   <script src="saved-profiles.js"></script>
+  <section id="cookie-banner" class="cookie-banner" role="region" aria-label="Cookie and privacy choices" hidden>
+    <div>
+      <h2>🍪 Your privacy choices</h2>
+      <p>ConfigKit uses essential browser storage for site security and to remember this choice. Optional preferences can remember your language, and external media can load the YouTube tutorial and QR image. No advertising or analytics cookies are used by this homepage.</p>
+      <p><a href="privacy.html#cookies">Read our privacy policy</a></p>
+    </div>
+    <div class="cookie-actions">
+      <button type="button" id="cookie-reject">Reject optional</button>
+      <button type="button" id="cookie-customize">Customize</button>
+      <button type="button" class="accept" id="cookie-accept">Accept all</button>
+    </div>
+    <div id="cookie-settings" class="cookie-settings" hidden>
+      <strong>Cookie and storage settings</strong>
+      <label class="essential"><input type="checkbox" checked disabled> <span><strong>Essential</strong> — required for this choice to be remembered and for core site/security functions. Always active.</span></label>
+      <label><input type="checkbox" id="cookie-preferences"> <span><strong>Preferences</strong> — remember your selected homepage language between visits.</span></label>
+      <label><input type="checkbox" id="cookie-external-media"> <span><strong>External media</strong> — load embedded YouTube video and the family dashboard QR image from their providers.</span></label>
+      <div class="cookie-actions"><button type="button" id="cookie-save" class="accept">Save my choices</button></div>
+    </div>
+  </section>
+  <script>
+    (() => {
+      const KEY = 'configkit-cookie-consent-v1';
+      const banner = document.getElementById('cookie-banner');
+      const settings = document.getElementById('cookie-settings');
+      const preferenceToggle = document.getElementById('cookie-preferences');
+      const mediaToggle = document.getElementById('cookie-external-media');
+      const videoPlaceholder = document.getElementById('youtube-consent-placeholder');
+      const qrImage = document.querySelector('img[data-cookie-src]');
+      const qrPlaceholder = document.getElementById('qr-consent-placeholder');
+      let choice = null;
+      try { choice = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (_) {}
+      if (!choice || choice.version !== 1 || !choice.categories) {
+        banner.hidden = false;
+      } else {
+        applyChoice(choice);
+      }
+      function applyChoice(next) {
+        choice = next;
+        try { localStorage.setItem(KEY, JSON.stringify(next)); } catch (_) {}
+        banner.hidden = true;
+        if (next.categories.externalMedia) {
+          if (videoPlaceholder && !document.getElementById('youtube-consented-frame')) {
+            const frame = document.createElement('iframe');
+            frame.id = 'youtube-consented-frame';
+            frame.src = 'https://www.youtube-nocookie.com/embed/sZyY5NpxxRw';
+            frame.title = 'How to install a mobileconfig profile';
+            frame.loading = 'lazy';
+            frame.referrerPolicy = 'strict-origin-when-cross-origin';
+            frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+            frame.allowFullscreen = true;
+            videoPlaceholder.replaceWith(frame);
+          }
+          if (qrImage && !qrImage.getAttribute('src')) {
+            qrImage.src = qrImage.dataset.cookieSrc;
+            if (qrPlaceholder) qrPlaceholder.hidden = true;
+          }
+        } else {
+          const frame = document.getElementById('youtube-consented-frame');
+          if (frame) frame.remove();
+          if (qrImage) qrImage.removeAttribute('src');
+          if (qrPlaceholder) qrPlaceholder.hidden = false;
+        }
+        if (!next.categories.preferences) {
+          try { localStorage.removeItem('configkit-lang'); } catch (_) {}
+        }
+      }
+      function save(preferences, externalMedia) {
+        applyChoice({version:1,updatedAt:new Date().toISOString(),categories:{essential:true,preferences:!!preferences,externalMedia:!!externalMedia}});
+        preferenceToggle.checked = !!preferences;
+        mediaToggle.checked = !!externalMedia;
+      }
+      document.getElementById('cookie-accept').addEventListener('click', () => save(true,true));
+      document.getElementById('cookie-reject').addEventListener('click', () => save(false,false));
+      document.getElementById('cookie-customize').addEventListener('click', () => {
+        const current = choice?.categories || {};
+        preferenceToggle.checked = !!current.preferences;
+        mediaToggle.checked = !!current.externalMedia;
+        settings.hidden = !settings.hidden;
+      });
+      document.getElementById('cookie-save').addEventListener('click', () => save(preferenceToggle.checked,mediaToggle.checked));
+      document.getElementById('cookie-settings-link').addEventListener('click', event => {
+        event.preventDefault();
+        banner.hidden = false;
+        settings.hidden = false;
+        preferenceToggle.checked = !!choice?.categories?.preferences;
+        mediaToggle.checked = !!choice?.categories?.externalMedia;
+        banner.scrollIntoView({behavior:'smooth',block:'nearest'});
+      });
+    })();
+  </script>
 </body>
 </html>
