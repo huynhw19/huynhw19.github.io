@@ -58,6 +58,12 @@
         <div id="student-document-records"></div>
       </section>
 
+      <section id="student-courses" class="card" aria-labelledby="student-courses-title" hidden>
+        <h2 id="student-courses-title">📘 My courses</h2>
+        <p class="learning-meta">Courses published for classes you are enrolled in. Open lessons, use learning resources and mark lessons complete as you go.</p>
+        <div id="student-course-records"></div>
+      </section>
+
       <section id="student-lessons" class="card" aria-labelledby="student-lessons-title" hidden>
         <h2 id="student-lessons-title">📚 My lesson plans</h2>
         <p class="learning-meta">Lessons published by your linked teachers.</p>
@@ -128,6 +134,78 @@
       const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
       });
+
+      async function initCourseLearning(studentUserId) {
+        const panel=document.getElementById('student-courses');
+        const host=document.getElementById('student-course-records');
+        panel.hidden=false;host.replaceChildren();
+        const [courseResult,progressResult]=await Promise.all([
+          client.from('education_courses').select('id,title,description,subject,year_level,created_at,education_course_lessons(id,title,content,lesson_order,estimated_minutes,status,education_course_resources(id,title,resource_type,url,description,lesson_id))').eq('status','published').order('created_at',{ascending:false}),
+          client.from('education_course_lesson_progress').select('lesson_id,completed_at').eq('student_user_id',studentUserId)
+        ]);
+        if(courseResult.error) {
+          const message=document.createElement('p');message.className='error';
+          message.textContent='Your published courses could not be loaded. Please refresh or ask your teacher for help.';
+          host.append(message);return;
+        }
+        if(progressResult.error) {
+          const message=document.createElement('p');message.className='error';
+          message.textContent='Your lesson progress could not be loaded. You can still open your published lessons.';
+          host.append(message);
+        }
+        const completed=new Set((progressResult.data||[]).map(row=>row.lesson_id));
+        const courses=courseResult.data||[];
+        if(!courses.length) {
+          const empty=document.createElement('p');empty.textContent='No published courses are available for your enrolled classes yet.';
+          host.append(empty);return;
+        }
+        courses.forEach(course=>{
+          const article=document.createElement('article');article.className='assignment';
+          const title=document.createElement('h3');title.textContent=course.title;
+          const meta=document.createElement('p');meta.className='assignment-meta';
+          meta.textContent=[course.subject,course.year_level].filter(Boolean).join(' · ')||'Course';
+          article.append(title,meta);
+          if(course.description){const desc=document.createElement('p');desc.textContent=course.description;article.append(desc);}
+          const courseResources=(course.education_course_lessons||[]).flatMap(lesson=>(lesson.education_course_resources||[]).filter(r=>!r.lesson_id));
+          courseResources.forEach(resource=>{
+            const line=document.createElement('p');line.className='assignment-meta';
+            if(resource.resource_type==='link'&&resource.url){
+              try{const url=new URL(resource.url);if(['http:','https:'].includes(url.protocol)){const link=document.createElement('a');link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';link.textContent=resource.title;line.append('📎 ',link);}}
+              catch{}
+            }else{line.textContent='📎 '+resource.title+(resource.description?' · '+resource.description:'');}
+            article.append(line);
+          });
+          const lessons=[...(course.education_course_lessons||[])].filter(l=>l.status==='published').sort((a,b)=>a.lesson_order-b.lesson_order);
+          if(!lessons.length){const empty=document.createElement('p');empty.textContent='Your teacher is preparing the lessons for this course.';article.append(empty);}
+          lessons.forEach(lesson=>{
+            const block=document.createElement('section');block.className='record';
+            const heading=document.createElement('h4');heading.textContent=lesson.lesson_order+'. '+lesson.title;
+            const duration=document.createElement('p');duration.className='assignment-meta';duration.textContent=lesson.estimated_minutes+' minutes';
+            const body=document.createElement('p');body.className='document-content';body.textContent=lesson.content;
+            block.append(heading,duration);if(lesson.content)block.append(body);
+            (lesson.education_course_resources||[]).filter(r=>r.lesson_id===lesson.id).forEach(resource=>{
+              const row=document.createElement('p');row.className='assignment-meta';
+              if(resource.resource_type==='link'&&resource.url){
+                try{const url=new URL(resource.url);if(['http:','https:'].includes(url.protocol)){const link=document.createElement('a');link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';link.textContent=resource.title;row.append('📎 ',link);}}
+                catch{}
+              }else{row.textContent='📎 '+resource.title+(resource.description?' · '+resource.description:'');}
+              block.append(row);
+            });
+            const done=completed.has(lesson.id);
+            const button=document.createElement('button');button.type='button';button.className=done?'secondary':'';
+            button.textContent=done?'✓ Lesson completed':'Mark lesson complete';button.disabled=done;
+            button.addEventListener('click',async()=>{
+              button.disabled=true;button.textContent='Saving…';
+              const {error}=await client.from('education_course_lesson_progress').insert({student_user_id:studentUserId,lesson_id:lesson.id});
+              if(error&&error.code!=='23505'){button.disabled=false;button.textContent='Mark lesson complete';showStatus('Could not save lesson progress. Please try again.',true);return;}
+              completed.add(lesson.id);button.textContent='✓ Lesson completed';button.className='secondary';
+              showStatus('Lesson completed. Great work!');
+            });
+            block.append(button);article.append(block);
+          });
+          host.append(article);
+        });
+      }
 
       async function initLearningZone(studentUserId) {
         const panel = document.getElementById('learning-zone');
@@ -437,6 +515,7 @@
         }
         showStatus(`Signed in as ${data.session.user.email || 'student'}.`);
         await initLearningZone(data.session.user.id);
+        await initCourseLearning(data.session.user.id);
 
         const teacherIds = [...new Set(studentRecords.map(student => student.user_id))];
         const {data: publishedSlideshows, error: slideshowError} = await client.from('education_slideshows')
