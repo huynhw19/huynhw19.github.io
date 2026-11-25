@@ -45,6 +45,7 @@ Get the right package from the [ConfigKit Downloads page](https://huynhw19.githu
 | [Advanced Analytics](https://huynhw19.github.io/advanced-analytics.html) | Explore private activity trends, project and collaboration metrics, creator performance, period comparisons and CSV exports. |
 | [Security Centre](https://huynhw19.github.io/security-centre.html) | Review account-protection options and security settings. |
 | [Scratch Project Studio](https://huynhw19.github.io/scratch-project.html) | Load and run Scratch projects, use the editor workflow and save project files to Drive when signed in. |
+| [ConfigKit Movies](https://huynhw19.github.io/movies.html) | Discover movie information, publish films, manage creator pages, collect watchlists, review movies, build collections and view creator analytics. |
 | [Community](https://huynhw19.github.io/community.html) | Set up a community profile and discover other members. |
 | [Groups](https://huynhw19.github.io/groups.html) | Create or join groups and share profiles. |
 | [Community Book](https://huynhw19.github.io/community-book.html) | Read community books and participate in the approved-author programme. |
@@ -58,6 +59,10 @@ Get the right package from the [ConfigKit Downloads page](https://huynhw19.githu
 | [Kids Messages](https://huynhw19.github.io/kids-messages.html) | Use parent-supervised messaging with approved contacts. |
 | [Family Dashboard](https://huynhw19.github.io/family-dashboard.html) | Manage family learning, children, resources and safety tools. |
 | [Education Dashboard](https://huynhw19.github.io/Education-dashboard.html) | Access teaching, student, lesson and learning-resource tools. |
+
+## 🎬 ConfigKit Movies
+
+ConfigKit Movies is a browser-based movie discovery and creator workspace. Members can publish public or private movie listings, add poster and trailer/video links, browse movie pages, follow creators, review films, save watchlists, organise collections, receive creator publishing notifications and view creator analytics. Recommendations are based on activity such as watchlists and highly rated genres; they are not AI-generated. The first movie listing has been published: **Big Buck Bunny (2008)**. Open [ConfigKit Movies](https://huynhw19.github.io/movies.html).
 
 ## 📱 Mobileconfig Studio: current features and direction
 
