@@ -107,7 +107,14 @@
     configScript.src = '/posthog-config.js';
     configScript.onload = () => {
       const config = window.CONFIGKIT_POSTHOG;
-      if (!config || !config.token || !config.apiHost) return;
+      if (!config || !config.token || !config.apiHost) {
+        console.error('[ConfigKit analytics] Configuration is missing or invalid. Check /posthog-config.js.');
+        return;
+      }
+      console.info('[ConfigKit analytics] Configuration loaded; initializing PostHog.');
+      if (navigator.doNotTrack === '1' || window.doNotTrack === '1') {
+        console.warn('[ConfigKit analytics] Do Not Track is enabled. PostHog may suppress analytics events in this browser.');
+      }
       (function (t, e) {
         var o, n, p, r;
         e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) {
@@ -118,6 +125,8 @@
           }
           p = t.createElement('script'); p.type = 'text/javascript'; p.crossOrigin = 'anonymous'; p.async = true;
           p.src = (s.api_host.endsWith('.i.posthog.com') ? s.api_host.replace('.i.posthog.com', '-assets.i.posthog.com') : s.api_host.replace('.posthog.com', '-assets.posthog.com')) + '/static/array.js';
+          p.onload = () => console.info('[ConfigKit analytics] PostHog SDK script loaded successfully.');
+          p.onerror = () => console.error('[ConfigKit analytics] PostHog SDK script failed to load. Check the Network panel for the array.js request; a content blocker, DNS failure, or CSP rule may be blocking it.');
           r = t.getElementsByTagName('script')[0]; r.parentNode.insertBefore(p, r);
           var u = e;
           void 0 !== a ? u = e[a] = [] : a = 'posthog';
@@ -154,7 +163,7 @@
       window.__configKitPosthogReady = true;
       capturePageView();
     };
-    configScript.onerror = () => console.warn('ConfigKit analytics configuration could not be loaded.');
+    configScript.onerror = () => console.error('[ConfigKit analytics] Could not load /posthog-config.js. Check the Network panel and GitHub Pages deployment.');
     document.head.append(configScript);
   }
   function syncAnalytics() {
