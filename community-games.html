@@ -59,7 +59,27 @@
  $('game-form').addEventListener('submit',async e=>{e.preventDefault();if(!user){setStatus('Please sign in to create a game.',true);return;}const intent=e.submitter?.value||'draft',id=$('game-id').value;const playUrl=$('play-url').value.trim();if(playUrl){try{const parsed=new URL(playUrl);if(parsed.protocol!=='https:')throw new Error('Use an HTTPS website URL.');}catch(error){setStatus(error.message||'Enter a valid HTTPS Play website URL.',true);return;}}const payload={created_by:user.id,title:$('title').value.trim(),description:$('description').value.trim(),category:$('category').value,html_code:$('html-code').value,play_url:playUrl||null,status:intent,updated_at:new Date().toISOString()};if(!payload.title||!payload.html_code.trim())return;const buttons=[$('save-draft'),$('publish-game')];buttons.forEach(b=>b.disabled=true);const result=id?await db.from('community_games').update(payload).eq('id',id).eq('created_by',user.id):await db.from('community_games').insert(payload);buttons.forEach(b=>b.disabled=false);if(result.error){setStatus('Could not save game: '+result.error.message,true);return;}setStatus(intent==='published'?'Game published!':'Draft saved.');resetForm();await load();});
  $('cancel-edit').addEventListener('click',resetForm);$('search').addEventListener('input',render);$('category-filter').addEventListener('change',render);$('close-game').addEventListener('click',()=>{$('game-frame').srcdoc='';$('game-viewer').classList.add('hidden');activeGame=null;});$('share-game').addEventListener('click',()=>activeGame&&shareGame(activeGame));
  $('create-cta').addEventListener('click',e=>{if(!user){e.preventDefault();setStatus('Please sign in to create a game.');}});
- async function start(){const {data,error}=await db.auth.getSession();if(error){setStatus('Could not check sign-in: '+error.message,true);return;}user=data.session?.user||null;if(user){$('creator').classList.remove('hidden');}else{$('creator').classList.add('hidden');const login=el('a','button','Sign in to create games');login.href='login.html?next='+encodeURIComponent('community-games.html');$('creator').classList.remove('hidden');$('creator').replaceChildren(el('h2','', 'Create a game'),el('p','muted','Sign in to create, publish and manage your own games.'),login);}$('my-games-section').classList.toggle('hidden',!user);await load();}
+ async function start(){
+  // Public game discovery must not wait for auth storage/session restoration.
+  // Start the public catalogue immediately so a slow auth check cannot leave
+  // the entire page stuck on its initial loading message.
+  const publicLoad=load();
+  const authTimeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Sign-in check timed out. You can still browse public games; refresh to try account features again.')),10000));
+  try{
+   const {data,error}=await Promise.race([db.auth.getSession(),authTimeout]);
+   if(error)throw error;
+   user=data.session?.user||null;
+  }catch(error){
+   console.warn('Community Games session check:',error);
+   user=null;
+   setStatus('Public games are loading. Account features could not be checked: '+(error?.message||'unknown error'),true);
+  }
+  if(user){$('creator').classList.remove('hidden');}
+  else{$('creator').classList.add('hidden');const login=el('a','button','Sign in to create games');login.href='login.html?next='+encodeURIComponent('community-games.html');$('creator').classList.remove('hidden');$('creator').replaceChildren(el('h2','', 'Create a game'),el('p','muted','Sign in to create, publish and manage your own games.'),login);}
+  $('my-games-section').classList.toggle('hidden',!user);
+  render();
+  await publicLoad;
+ }
  db.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;setTimeout(()=>{if(!user){$('creator').classList.add('hidden');$('my-games-section').classList.add('hidden');}else if(!$('game-form').isConnected){location.reload();}else{$('creator').classList.remove('hidden');load();}},0);});
  void start();
 })();
