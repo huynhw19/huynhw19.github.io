@@ -9,7 +9,7 @@
   try {
     consent = JSON.parse(localStorage.getItem(KEY) || 'null');
   } catch (_) {}
-  if (!consent || consent.version !== 2 || !consent.categories) consent = null;
+  if (!consent || consent.version !== 3 || !consent.categories) consent = null;
 
   const styles = `
     #ck-consent-banner{position:fixed;z-index:2147483000;left:16px;right:16px;bottom:16px;max-width:980px;margin:auto;padding:18px;background:#fff;color:#17231f;border:1px solid #dce7df;border-radius:16px;box-shadow:0 18px 55px rgba(15,35,25,.24);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
