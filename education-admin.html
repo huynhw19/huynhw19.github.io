@@ -74,6 +74,7 @@
           <article class="tile"><h3>👥 Users &amp; roles</h3><p>Review access assignments and manage staff, guardians and learner permissions within your authorised scope.</p><span class="tag">Available</span></article>
           <article class="tile"><h3>🏫 Schools &amp; classes</h3><p>Organise school spaces, academic years, class groups, rosters and teacher assignments.</p><span class="tag">Available</span></article>
           <article class="tile"><h3>🎒 Student rosters</h3><p>View privacy-limited student details and manage class enrolments within your authorised school scope.</p><span class="tag">Available</span></article>
+          <article class="tile"><h3>📚 Learning management</h3><p>Organise courses, structured lessons and school learning resources.</p><span class="tag">Available</span></article>
           <article class="tile"><h3>📚 Learning management</h3><p>Oversee courses, lessons, books, documents, slideshows and learning resources.</p><span class="tag">Integration planned</span></article>
           <article class="tile"><h3>📝 Assessments</h3><p>Coordinate assignments, tests, submissions, marking workflows and feedback.</p><span class="tag">Integration planned</span></article>
           <article class="tile"><h3>📊 Progress &amp; reports</h3><p>Understand learning activity and outcomes with role-appropriate reporting.</p><span class="tag">Integration planned</span></article>
@@ -107,6 +108,44 @@
           </form>
         </div>
         <h3>Classes</h3><div id="classes-list" class="grid"></div>
+      </section>
+
+      <section class="panel" id="learning-management">
+        <h2>📚 Courses, Lessons &amp; Resources</h2>
+        <p class="muted">Build school-scoped courses, add ordered lessons and attach learning links or written resources. Drafts stay in the staff workspace until published.</p>
+        <p id="learning-admin-status" class="status" role="status" aria-live="polite">Loading learning workspace…</p>
+        <form id="course-create-form" class="grid">
+          <label>School<select id="course-school" required></select></label>
+          <label>Class (optional)<select id="course-class"><option value="">Whole school / not class-specific</option></select></label>
+          <label>Course title<input id="course-title" required maxlength="160" placeholder="e.g. Year 5 Mathematics"></label>
+          <label>Subject<input id="course-subject" maxlength="100" placeholder="Mathematics"></label>
+          <label>Year level<input id="course-year" maxlength="80" placeholder="Year 5"></label>
+          <label>Description<textarea id="course-description" rows="3" maxlength="3000" placeholder="What will learners cover?"></textarea></label>
+          <label>Initial status<select id="course-status"><option value="draft">Draft</option><option value="published">Published</option></select></label>
+          <div><button class="button" type="submit">Create course</button></div>
+        </form>
+        <h3>Courses in your school scope</h3><div id="course-list" class="grid"></div>
+        <div id="course-content-wrap" hidden>
+          <h3 id="selected-course-title">Course content</h3>
+          <form id="course-lesson-form" class="grid">
+            <label>Lesson title<input id="course-lesson-title" required maxlength="160"></label>
+            <label>Lesson order<input id="course-lesson-order" type="number" min="1" max="500" value="1" required></label>
+            <label>Estimated minutes<input id="course-lesson-minutes" type="number" min="1" max="600" value="30" required></label>
+            <label>Lesson content<textarea id="course-lesson-content" rows="5" maxlength="20000" placeholder="Explain the topic, steps, activities and key ideas…"></textarea></label>
+            <label>Lesson status<select id="course-lesson-status"><option value="draft">Draft</option><option value="published">Published</option></select></label>
+            <div><button class="button" type="submit">Add lesson</button></div>
+          </form>
+          <h3>Lessons</h3><div id="course-lesson-list" class="grid"></div>
+          <form id="course-resource-form" class="grid">
+            <label>Resource title<input id="course-resource-title" required maxlength="160"></label>
+            <label>Attach to lesson (optional)<select id="course-resource-lesson"><option value="">Course-level resource</option></select></label>
+            <label>Resource type<select id="course-resource-type"><option value="link">Web link</option><option value="note">Written note</option></select></label>
+            <label id="course-resource-url-wrap">Resource URL<input id="course-resource-url" type="url" placeholder="https://…" maxlength="2000"></label>
+            <label>Description / note<textarea id="course-resource-description" rows="3" maxlength="5000"></textarea></label>
+            <div><button class="button" type="submit">Add resource</button></div>
+          </form>
+          <h3>Learning resources</h3><div id="course-resource-list" class="grid"></div>
+        </div>
       </section>
 
       <section class="panel" id="student-roster-management">
@@ -490,6 +529,152 @@
         await refreshRoster();
       }
       window.addEventListener('configkit-education-admin-ready',initRoster,{once:true});
+    })();
+  </script>
+
+  <script>
+    (() => {
+      async function initLearningAdmin() {
+        const client=window.educationAdminClient,roles=window.educationAdminRoles||[];
+        if(!client||!roles.length)return;
+        const userId=window.educationAdminUserId;
+        const isSuper=roles.some(r=>r.role==='super_admin');
+        const adminSchools=roles.filter(r=>r.role==='school_admin').map(r=>r.school_name);
+        const teacherSchools=roles.filter(r=>r.role==='teacher').map(r=>r.school_name);
+        const canAdmin=isSuper||adminSchools.length>0;
+        const status=document.getElementById('learning-admin-status');
+        const schoolSelect=document.getElementById('course-school');
+        const classSelect=document.getElementById('course-class');
+        const courseList=document.getElementById('course-list');
+        const contentWrap=document.getElementById('course-content-wrap');
+        const lessonList=document.getElementById('course-lesson-list');
+        const resourceList=document.getElementById('course-resource-list');
+        const resourceLesson=document.getElementById('course-resource-lesson');
+        const resourceType=document.getElementById('course-resource-type');
+        const resourceUrlWrap=document.getElementById('course-resource-url-wrap');
+        const resourceUrl=document.getElementById('course-resource-url');
+        const setStatus=(m,e=false)=>{status.textContent=m;status.className=e?'status error':'status';};
+        const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        let schools=[],classes=[],courses=[],selectedCourse=null;
+        if(!canAdmin) {
+          document.getElementById('course-school').disabled=true;
+          document.getElementById('course-class').required=true;
+        }
+        async function audit(action,schoolName,targetType,targetId,details={}) {
+          const {error}=await client.from('education_admin_audit_logs').insert({actor_user_id:userId,school_name:schoolName,action,target_type:targetType,target_id:targetId,details});
+          if(error)console.warn('Learning admin audit entry not recorded:',error.message);
+        }
+        function currentSchool(){return schools.find(s=>s.id===schoolSelect.value);}
+        async function loadCourses() {
+          const {data,error}=await client.from('education_courses').select('id,school_id,class_id,title,description,subject,year_level,status,created_by,education_schools(name),education_classes(name)').order('created_at',{ascending:false});
+          if(error){setStatus('Could not load courses: '+error.message,true);return;}
+          courses=data||[];courseList.innerHTML='';
+          if(!courses.length){courseList.textContent='No courses have been created in your authorised scope yet.';contentWrap.hidden=true;return;}
+          courses.forEach(course=>{
+            const card=document.createElement('article');card.className='tile';
+            const heading=document.createElement('h4');heading.textContent=course.title;
+            const meta=document.createElement('p');meta.textContent=(course.education_schools?.name||'School')+(course.education_classes?.name?' · '+course.education_classes.name:' · Whole school')+' · '+(course.subject||'General')+' · '+course.status;
+            const open=document.createElement('button');open.type='button';open.className='button secondary';open.textContent='Manage content';open.addEventListener('click',()=>selectCourse(course));
+            const toggle=document.createElement('button');toggle.type='button';toggle.className='button secondary';toggle.textContent=course.status==='published'?'Return to draft':'Publish course';
+            toggle.addEventListener('click',async()=>{
+              const next=course.status==='published'?'draft':'published';
+              const {error}=await client.from('education_courses').update({status:next,updated_at:new Date().toISOString()}).eq('id',course.id);
+              if(error){setStatus('Could not update course status: '+error.message,true);return;}
+              await audit('course_status_changed',course.education_schools?.name,'education_course',course.id,{status:next});
+              setStatus('Course '+next+'.');await loadCourses();
+            });
+            card.append(heading,meta,open,toggle);courseList.appendChild(card);
+          });
+        }
+        async function selectCourse(course) {
+          selectedCourse=course;contentWrap.hidden=false;
+          document.getElementById('selected-course-title').textContent='Content for '+course.title;
+          const {data:lessons,error:le}=await client.from('education_course_lessons').select('id,title,content,lesson_order,estimated_minutes,status').eq('course_id',course.id).order('lesson_order');
+          if(error){setStatus('Could not load lessons: '+error.message,true);return;}
+          lessonList.innerHTML='';resourceLesson.innerHTML='<option value="">Course-level resource</option>';
+          (lessons||[]).forEach(lesson=>{
+            const option=document.createElement('option');option.value=lesson.id;option.textContent=lesson.lesson_order+'. '+lesson.title;resourceLesson.appendChild(option);
+            const card=document.createElement('article');card.className='tile';
+            const h=document.createElement('h4');h.textContent=lesson.lesson_order+'. '+lesson.title;
+            const p=document.createElement('p');p.textContent=lesson.estimated_minutes+' minutes · '+lesson.status;
+            const body=document.createElement('p');body.textContent=lesson.content;
+            const btn=document.createElement('button');btn.type='button';btn.className='button secondary';btn.textContent=lesson.status==='published'?'Move to draft':'Publish lesson';
+            btn.addEventListener('click',async()=>{
+              const next=lesson.status==='published'?'draft':'published';
+              const {error}=await client.from('education_course_lessons').update({status:next,updated_at:new Date().toISOString()}).eq('id',lesson.id);
+              if(error){setStatus('Could not update lesson: '+error.message,true);return;}
+              await audit('course_lesson_status_changed',course.education_schools?.name,'education_course_lesson',lesson.id,{status:next});
+              await selectCourse(course);
+            });
+            card.append(h,p,body,btn);lessonList.appendChild(card);
+          });
+          if(!lessons?.length)lessonList.textContent='No lessons added yet.';
+          const {data:resources,error:re}=await client.from('education_course_resources').select('id,title,resource_type,url,description,lesson_id').eq('course_id',course.id).order('created_at',{ascending:false});
+          if(error){setStatus('Could not load resources: '+error.message,true);return;}
+          resourceList.innerHTML='';
+          (resources||[]).forEach(resource=>{
+            const card=document.createElement('article');card.className='tile';
+            const h=document.createElement('h4');h.textContent=resource.title;
+            const p=document.createElement('p');p.textContent=resource.description||resource.resource_type;
+            card.append(h,p);
+            if(resource.resource_type==='link'&&resource.url){
+              try{const u=new URL(resource.url);if(['http:','https:'].includes(u.protocol)){const a=document.createElement('a');a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Open resource';card.appendChild(a);}}catch{}
+            }
+            resourceList.appendChild(card);
+          });
+          if(!resources?.length)resourceList.textContent='No resources added yet.';
+          setStatus('Managing '+course.title+'.');
+        }
+        document.getElementById('course-create-form').addEventListener('submit',async e=>{
+          e.preventDefault();const school=currentSchool();if(!school){setStatus('Choose an authorised school first.',true);return;}
+          const classId=classSelect.value||null;
+          if(!canAdmin&&!classId){setStatus('Teachers need to choose one of their assigned classes.',true);return;}
+          if(classId&&!classes.some(cl=>cl.id===classId&&cl.school_id===school.id)){setStatus('Choose a class in the selected school.',true);return;}
+          const payload={school_id:school.id,class_id:classId,title:document.getElementById('course-title').value.trim(),subject:document.getElementById('course-subject').value.trim(),year_level:document.getElementById('course-year').value.trim(),description:document.getElementById('course-description').value.trim(),status:document.getElementById('course-status').value,created_by:userId};
+          const {data,error}=await client.from('education_courses').insert(payload).select('id').single();
+          if(error){setStatus('Could not create course: '+error.message,true);return;}
+          await audit('course_created',school.name,'education_course',data.id,{title:payload.title});
+          e.currentTarget.reset();await loadCourses();setStatus('Course created.');
+        });
+        document.getElementById('course-school').addEventListener('change',()=>{
+          const school=currentSchool();classSelect.innerHTML='<option value="">Whole school / not class-specific</option>';
+          classes.filter(cl=>cl.school_id===school?.id).forEach(cl=>{const o=document.createElement('option');o.value=cl.id;o.textContent=cl.name;classSelect.appendChild(o);});
+        });
+        document.getElementById('course-lesson-form').addEventListener('submit',async e=>{
+          e.preventDefault();if(!selectedCourse)return;
+          const payload={course_id:selectedCourse.id,title:document.getElementById('course-lesson-title').value.trim(),lesson_order:Number(document.getElementById('course-lesson-order').value),estimated_minutes:Number(document.getElementById('course-lesson-minutes').value),content:document.getElementById('course-lesson-content').value.trim(),status:document.getElementById('course-lesson-status').value,created_by:userId};
+          const {data,error}=await client.from('education_course_lessons').insert(payload).select('id').single();
+          if(error){setStatus('Could not add lesson: '+error.message,true);return;}
+          await audit('course_lesson_created',selectedCourse.education_schools?.name,'education_course_lesson',data.id,{title:payload.title});
+          e.currentTarget.reset();document.getElementById('course-lesson-order').value='1';document.getElementById('course-lesson-minutes').value='30';await selectCourse(selectedCourse);
+        });
+        resourceType.addEventListener('change',()=>{const isLink=resourceType.value==='link';resourceUrlWrap.hidden=!isLink;resourceUrl.required=isLink;});
+        document.getElementById('course-resource-form').addEventListener('submit',async e=>{
+          e.preventDefault();if(!selectedCourse)return;
+          const type=resourceType.value,url=resourceUrl.value.trim();
+          if(type==='link'&&!/^https?:\/\//i.test(url)){setStatus('Enter a valid http or https resource link.',true);return;}
+          const payload={course_id:selectedCourse.id,lesson_id:resourceLesson.value||null,title:document.getElementById('course-resource-title').value.trim(),resource_type:type,url:type==='link'?url:null,description:document.getElementById('course-resource-description').value.trim(),created_by:userId};
+          const {data,error}=await client.from('education_course_resources').insert(payload).select('id').single();
+          if(error){setStatus('Could not add resource: '+error.message,true);return;}
+          await audit('course_resource_created',selectedCourse.education_schools?.name,'education_course_resource',data.id,{title:payload.title});
+          e.currentTarget.reset();resourceUrlWrap.hidden=false;resourceUrl.required=true;await selectCourse(selectedCourse);
+        });
+        setStatus('Loading your authorised schools and classes…');
+        const {data:schoolRows,error:se}=await client.from('education_schools').select('id,name').order('name');
+        if(se){setStatus('Could not load schools: '+se.message,true);return;}
+        schools=(schoolRows||[]).filter(s=>isSuper||adminSchools.includes(s.name)||teacherSchools.includes(s.name));
+        if(!canAdmin)schools=schools.filter(s=>teacherSchools.includes(s.name));
+        schoolSelect.innerHTML='';
+        schools.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;schoolSelect.appendChild(o);});
+        const {data:classRows,error:ce}=await client.from('education_classes').select('id,name,school_id,teacher_user_id').order('name');
+        if(ce){setStatus('Could not load classes: '+ce.message,true);return;}
+        classes=(classRows||[]).filter(cl=>canAdmin||cl.teacher_user_id===userId);
+        schoolSelect.dispatchEvent(new Event('change'));
+        if(!schools.length){setStatus('No school is assigned to your staff role yet.');return;}
+        await loadCourses();
+        setStatus('Learning management is ready for your authorised school scope.');
+      }
+      window.addEventListener('configkit-education-admin-ready',initLearningAdmin,{once:true});
     })();
   </script>
 
