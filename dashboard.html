@@ -502,22 +502,28 @@
             return;
           }
           const user = data.session.user;
-          // Sync preference is account-scoped and stored in user metadata.
+          // Sync is enforced by database and Storage write guards.
           const syncToggle = document.getElementById('configkit-sync-toggle');
           const syncStatus = document.getElementById('configkit-sync-status');
-          syncToggle.checked = user.user_metadata?.configkit_sync_enabled !== false;
-          syncStatus.textContent = syncToggle.checked ? 'Sync preference: On.' : 'Sync preference: Off.';
+          const {data: syncRow, error: syncReadError} = await client.from('configkit_sync_preferences')
+            .select('enabled').eq('user_id', user.id).maybeSingle();
+          if (syncReadError) throw syncReadError;
+          syncToggle.checked = syncRow?.enabled !== false;
+          syncStatus.textContent = syncToggle.checked ? 'Sync is On. Cloud changes are being saved.' : 'Sync is Off. Cloud writes are paused; your existing data remains available.';
           syncToggle.addEventListener('change', async () => {
             const enable = syncToggle.checked;
             if (!enable) {
-              const confirmed = window.confirm('Turn ConfigKit Sync off? This changes your account sync preference. It will NOT delete cloud files or account data. Some ConfigKit features may continue to use cloud storage until they support this preference. Continue?');
+              const confirmed = window.confirm('Turn ConfigKit Sync off? ConfigKit will stop saving changes to your cloud data and uploads. Existing cloud files and records will NOT be deleted. You can turn Sync back on at any time. Continue?');
               if (!confirmed) { syncToggle.checked = true; return; }
             }
             syncToggle.disabled = true;
             try {
-              const {data: updated, error: updateError} = await client.auth.updateUser({data:{configkit_sync_enabled:enable}});
+              const {error: updateError} = await client.from('configkit_sync_preferences').upsert(
+                {user_id:user.id, enabled:enable, updated_at:new Date().toISOString()},
+                {onConflict:'user_id'}
+              );
               if (updateError) throw updateError;
-              syncStatus.textContent = enable ? 'Sync preference saved: On.' : 'Sync preference saved: Off. Your cloud data has not been deleted.';
+              syncStatus.textContent = enable ? 'Sync is On. Cloud changes can be saved again.' : 'Sync is Off. Cloud writes and owned-file uploads are paused; your existing cloud data has not been deleted.';
             } catch (syncError) {
               syncToggle.checked = !enable;
               syncStatus.textContent = syncError.message || 'Could not save your sync preference.';
