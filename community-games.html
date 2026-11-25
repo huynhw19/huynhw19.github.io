@@ -50,7 +50,35 @@
  node.append(actions);return node;}
  function render(){const query=$('search').value.trim().toLowerCase(),category=$('category-filter').value;const list=games.filter(g=>g.status==='published'&&(!category||g.category===category)&&(!query||(g.title+' '+g.description).toLowerCase().includes(query)));const pub=$('public-games');pub.replaceChildren();if(!list.length)pub.append(el('div','empty','No games found yet. Be the first to publish one!'));else list.forEach(g=>pub.append(card(g)));
  const mine=$('my-games');mine.replaceChildren();const own=games.filter(g=>g.created_by===user?.id);$('my-games-section').classList.toggle('hidden',!user);if(!own.length)mine.append(el('div','empty','You have not created any games yet.'));else own.forEach(g=>mine.append(card(g,true)));}
- async function load(){const {data,error}=await db.from('community_games').select('id,created_by,title,description,category,html_code,play_url,status,play_count,created_at,updated_at').order('created_at',{ascending:false}).limit(100);if(error){setStatus('Could not load games: '+error.message,true);return;}games=data||[];render();setStatus(user?'You are signed in. Create and manage your games below.':'Browse and play public games. Sign in to create and manage your own games.');const params=new URLSearchParams(location.search),id=params.get('id');if(id){const target=games.find(g=>g.id===id&&g.status==='published');if(target)openGame(target);}}
+ async function load(){
+  setStatus('Loading community games…');
+  const request=db.from('community_games').select('id,created_by,title,description,category,html_code,play_url,status,play_count,created_at,updated_at').order('created_at',{ascending:false}).limit(100);
+  let timeoutId;
+  const timeout=new Promise((_,reject)=>{timeoutId=setTimeout(()=>reject(new Error('The games request took too long. Please check your connection and try again.')),15000);});
+  let result;
+  try{result=await Promise.race([request,timeout]);}
+  catch(error){
+   setStatus('Could not load games: '+(error?.message||'Request timed out.'),true);
+   const retry=el('button','secondary','Try again');
+   retry.type='button';
+   retry.addEventListener('click',()=>{retry.disabled=true;load();});
+   status.append(document.createTextNode(' '),retry);
+   return;
+  }finally{clearTimeout(timeoutId);}
+  const {data,error}=result;
+  if(error){
+   setStatus('Could not load games: '+error.message,true);
+   const retry=el('button','secondary','Try again');
+   retry.type='button';
+   retry.addEventListener('click',()=>{retry.disabled=true;load();});
+   status.append(document.createTextNode(' '),retry);
+   return;
+  }
+  games=data||[];render();
+  setStatus(user?'You are signed in. Create and manage your games below.':'Browse and play public games. Sign in to create and manage your own games.');
+  const params=new URLSearchParams(location.search),id=params.get('id');
+  if(id){const target=games.find(g=>g.id===id&&g.status==='published');if(target)openGame(target);}
+ }
  function editGame(g){$('game-id').value=g.id;$('title').value=g.title;$('description').value=g.description||'';$('category').value=g.category;$('play-url').value=g.play_url||'';$('html-code').value=g.html_code;$('form-title').textContent='Edit your game';$('cancel-edit').classList.remove('hidden');$('creator').classList.remove('hidden');$('creator').scrollIntoView({behavior:'smooth'});}
  function resetForm(){$('game-form').reset();$('game-id').value='';$('game-file').value='';$('play-url').value='';$('html-code').value=starter;$('form-title').textContent='Create your game';$('cancel-edit').classList.add('hidden');}
  async function shareGame(g){const url=new URL(location.href);url.search='?id='+encodeURIComponent(g.id);try{await navigator.clipboard.writeText(url.href);setStatus('Share link copied. Anyone with the link can play this published game.');}catch{setStatus('Share link: '+url.href);}}
