@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Your saved ConfigKit Movies watchlist."><title>My watchlist · ConfigKit Movies</title><link rel="stylesheet" href="brand.css?v=1"><link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
+<style>
+:root{color-scheme:light;--ink:#17251f;--muted:#607168;--line:#dce7df;--paper:#f4f8f5;--green:#176344;--mint:#e4f3e9}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}header,main,footer{width:min(1000px,calc(100% - 32px));margin:auto}header{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;padding:1rem 0;border-bottom:1px solid var(--line)}a{color:var(--green)}.brand{font-weight:850;text-decoration:none;color:var(--ink)}nav{display:flex;gap:1rem;flex-wrap:wrap}main{padding:2rem 0 3rem}h1{font-size:clamp(2rem,5vw,3rem);letter-spacing:-.04em;margin:.2rem 0}.muted{color:var(--muted)}.status{padding:.9rem 1rem;background:var(--mint);border-radius:.8rem;margin:1rem 0}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem;margin-top:1.5rem}.card{background:white;border:1px solid var(--line);border-radius:1rem;overflow:hidden}.poster{height:260px;background:linear-gradient(145deg,#dcebe1,#f5f8f5);display:grid;place-items:center;font-size:3rem}.poster img{width:100%;height:100%;object-fit:cover}.body{padding:1rem}.body h2{font-size:1.2rem;margin:0}.body p{color:var(--muted);margin:.4rem 0}.actions{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top:.8rem}.actions button{border:1px solid var(--line);border-radius:.6rem;background:white;padding:.5rem .7rem;color:#8e3838;font:inherit;font-weight:700;cursor:pointer}footer{padding:1.5rem 0 2.5rem;color:var(--muted)}
+</style></head><body>
+<header><a class="brand" href="movies.html">⌘ ConfigKit · Movies</a><nav><a href="movies.html">Discover movies</a><a href="dashboard.html">Dashboard</a></nav></header>
+<main><a href="movies.html">← Back to movies</a><h1>My watchlist 🍿</h1><p class="muted">Keep track of films you want to watch. Your watchlist is private to your account.</p><div id="status" class="status" role="status" aria-live="polite">Loading your watchlist…</div><div id="watchlist" class="grid"></div></main>
+<footer>ConfigKit Movies · Your saved list is visible only to you.</footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async()=>{
+ const $=id=>document.getElementById(id),status=$('status'),host=$('watchlist');
+ const say=(s)=>status.textContent=s;
+ const cfg=window.CONFIGKIT_AUTH||{};
+ try{
+  if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient)throw new Error('Movie service is not configured.');
+  const db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+  const {data:auth,error:authError}=await db.auth.getSession();if(authError)throw authError;
+  const user=auth?.session?.user;if(!user){say('Sign in to view your private watchlist.');const a=document.createElement('a');a.href='login.html?next=watchlist.html';a.textContent=' Sign in';status.append(a);return;}
+  const {data:rows,error}=await db.from('configkit_movie_watchlist').select('id,movie_id,created_at,movie:configkit_movies(id,title,description,genre,release_year,poster_url,visibility)').eq('user_id',user.id).order('created_at',{ascending:false});
+  if(error)throw error;
+  const items=(rows||[]).filter(x=>x.movie&&x.movie.visibility==='public');
+  host.replaceChildren();
+  if(!items.length){say('Your watchlist is empty. Open a public movie and choose “Add to my watchlist”.');return;}
+  say(items.length+' saved '+(items.length===1?'film':'films'));
+  items.forEach(item=>{
+   const movie=item.movie,card=document.createElement('article');card.className='card';
+   const poster=document.createElement('div');poster.className='poster';poster.textContent='🎬';
+   if(movie.poster_url){
+    let src=null;
+    try{const u=new URL(movie.poster_url);if(u.protocol==='https:')src=u.href;}catch(_){}
+    if(!src&&/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|jpeg|png|webp)$/i.test(movie.poster_url)){
+     const {data}=await db.storage.from('configkit-movie-posters').createSignedUrl(movie.poster_url,3600);src=data?.signedUrl||null;
+    }
+    if(src){const img=document.createElement('img');img.src=src;img.alt='Poster for '+movie.title;img.loading='lazy';img.referrerPolicy='no-referrer';poster.replaceChildren(img);}
+   }
+   const body=document.createElement('div');body.className='body';
+   const title=document.createElement('h2');title.textContent=movie.title;
+   const meta=document.createElement('p');meta.textContent=[movie.genre,movie.release_year].filter(Boolean).join(' · ')||'Independent film';
+   const link=document.createElement('a');link.href='movie.html?id='+encodeURIComponent(movie.id);link.textContent='View movie →';
+   const actions=document.createElement('div');actions.className='actions';
+   const remove=document.createElement('button');remove.type='button';remove.textContent='Remove from watchlist';
+   remove.addEventListener('click',async()=>{remove.disabled=true;const {error}=await db.from('configkit_movie_watchlist').delete().eq('id',item.id).eq('user_id',user.id);if(error){remove.disabled=false;say(error.message);return;}card.remove();const count=host.children.length;say(count+' saved '+(count===1?'film':'films'));if(!count)say('Your watchlist is empty.');});
+   actions.append(link,remove);body.append(title,meta,actions);card.append(poster,body);host.append(card);
+  });
+ }catch(error){say(error.message||'Could not load your watchlist.');}
+})();
+</script></body></html>
