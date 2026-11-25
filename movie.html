@@ -12,7 +12,7 @@
 </head>
 <body>
 <header><a class="brand" href="movies.html">⌘ ConfigKit · Movies</a><nav aria-label="Main navigation"><a href="movies.html">Discover movies</a><a href="dashboard.html">Dashboard</a></nav></header>
-<main><a class="back" href="movies.html">← Back to movies</a><div id="movie-status" class="status" role="status" aria-live="polite">Loading movie details…</div><article id="movie-detail" class="detail" hidden><div id="movie-poster" class="poster" aria-label="Movie poster">🎬</div><div class="content"><span class="eyebrow">ConfigKit Movies</span><h1 id="movie-title"></h1><p id="movie-meta" class="meta"></p><h2>About this film</h2><p id="movie-description" class="synopsis"></p><a id="movie-trailer" class="button" target="_blank" rel="noopener noreferrer" hidden>Watch trailer ↗</a><div class="creator">Published by a ConfigKit creator</div></div></article></main>
+<main><a class="back" href="movies.html">← Back to movies</a><div id="movie-status" class="status" role="status" aria-live="polite">Loading movie details…</div><article id="movie-detail" class="detail" hidden><div id="movie-poster" class="poster" aria-label="Movie poster">🎬</div><div class="content"><span class="eyebrow">ConfigKit Movies</span><h1 id="movie-title"></h1><p id="movie-meta" class="meta"></p><h2>About this film</h2><p id="movie-description" class="synopsis"></p><a id="movie-trailer" class="button" target="_blank" rel="noopener noreferrer" hidden>Watch trailer ↗</a><div class="creator">Published by a ConfigKit creator · <a id="creator-link" href="#">View creator’s public films →</a></div></div></article></main>
 <footer>ConfigKit Movies · Respect copyright and privacy. Only share films and media you own or have permission to use.</footer>
 <script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -34,7 +34,7 @@
    if(!row)throw new Error('This movie could not be found, or it is private.');
    const own=!!auth?.session?.user?.id&&auth.session.user.id===row.user_id;
    if(row.visibility!=='public'&&!own)throw new Error('This movie is private.');
-   $('movie-title').textContent=row.title;
+   $('movie-title').textContent=row.title;$('creator-link').href='creator.html?creator='+encodeURIComponent(row.user_id);
    $('movie-meta').textContent=[row.genre,row.release_year].filter(Boolean).join(' · ')||'Independent film';
    $('movie-description').textContent=row.description||'The creator has not added a synopsis yet.';
    if(row.trailer_url){const url=safeHttps(row.trailer_url);if(url){const link=$('movie-trailer');link.href=url;link.hidden=false;}}
