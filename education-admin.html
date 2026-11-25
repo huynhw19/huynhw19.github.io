@@ -67,6 +67,12 @@
     </section>
 
     <section id="admin-workspace" hidden>
+      <section class="panel" id="school-enrolment-review" hidden aria-labelledby="school-enrolment-review-title">
+        <h2 id="school-enrolment-review-title">🏫 School Enrolment Requests</h2>
+        <p class="muted">Review applications submitted through the Enroll a School page. Approving creates a new school space; disapproving records your decision.</p>
+        <p id="school-request-status" class="status" role="status" aria-live="polite">Loading school enrolment requests…</p>
+        <div id="school-request-list" class="grid"></div>
+      </section>
       <section class="panel">
         <h2>Administration overview</h2>
         <p class="muted">Your current role determines which school and administration functions you can access. School-scoped roles do not receive platform-wide access.</p>
