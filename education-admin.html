@@ -71,7 +71,7 @@
         <h2>Administration overview</h2>
         <p class="muted">Your current role determines which school and administration functions you can access. School-scoped roles do not receive platform-wide access.</p>
         <div class="grid">
-          <article class="tile"><h3>👥 Users &amp; roles</h3><p>Review access assignments and manage staff, guardians and learner permissions within your authorised scope.</p><span class="tag">Foundation planned</span></article>
+          <article class="tile"><h3>👥 Users &amp; roles</h3><p>Review access assignments and manage staff, guardians and learner permissions within your authorised scope.</p><span class="tag">Available</span></article>
           <article class="tile"><h3>🏫 Schools &amp; classes</h3><p>Organise school spaces, academic years, class groups, rosters and teacher assignments.</p><span class="tag">Available</span></article>
           <article class="tile"><h3>📚 Learning management</h3><p>Oversee courses, lessons, books, documents, slideshows and learning resources.</p><span class="tag">Integration planned</span></article>
           <article class="tile"><h3>📝 Assessments</h3><p>Coordinate assignments, tests, submissions, marking workflows and feedback.</p><span class="tag">Integration planned</span></article>
@@ -106,6 +106,23 @@
           </form>
         </div>
         <h3>Classes</h3><div id="classes-list" class="grid"></div>
+      </section>
+
+      <section class="panel" id="staff-management">
+        <h2>👩‍🏫 Staff &amp; Access Management</h2>
+        <p class="muted">Assign teacher and school-admin access using the staff member’s ConfigKit account UUID. Staff receive access only within the selected school. Email addresses and student records are not exposed in this directory.</p>
+        <div id="staff-create-wrap" hidden>
+          <form id="staff-create-form" class="grid">
+            <label>Staff account UUID<input name="user_id" required maxlength="36" pattern="[0-9a-fA-F-]{36}" placeholder="Paste the staff member’s Auth user ID"></label>
+            <label>School<select name="school_name" id="staff-school" required></select></label>
+            <label>Access role<select name="role" id="staff-role" required><option value="teacher">Teacher</option><option value="school_admin">School Admin</option></select></label>
+            <div><button class="button" type="submit">Assign staff role</button></div>
+          </form>
+          <p class="muted">Only Super Admin can appoint School Admins. School Admins can assign Teacher roles in their own school. This does not create a ConfigKit account; the person must already have signed up.</p>
+        </div>
+        <p id="staff-status" class="status" role="status" aria-live="polite">Loading staff access…</p>
+        <h3>School staff</h3><div id="staff-list" class="grid"></div>
+        <h3>Class teacher assignments</h3><div id="teacher-assignments" class="grid"></div>
       </section>
 
       <section class="panel">
@@ -233,7 +250,7 @@
             const o=document.createElement('option');o.value=s.id;o.textContent=s.name;schoolSelect.appendChild(o);
           });
           if(!schools?.length)schoolsList.textContent='No schools are assigned to your account yet.';
-          const {data:classes,error:ce}=await client.from('education_classes').select('id,name,year_level,academic_year,status,school_id,education_schools(name)').order('name');
+          const {data:classes,error:ce}=await client.from('education_classes').select('id,name,year_level,academic_year,status,school_id,teacher_user_id,education_schools(name)').order('name');
           if(ce){setStatus('Schools loaded, but classes could not be loaded: '+ce.message,true);return;}
           classesList.innerHTML='';
           (classes||[]).forEach(cl=>{
@@ -261,6 +278,86 @@
         load();
       }
       window.addEventListener('configkit-education-admin-ready',init,{once:true});
+    })();
+  </script>
+
+  <script>
+    (() => {
+      async function initStaff() {
+        const client=window.educationAdminClient, roles=window.educationAdminRoles;
+        if(!client||!roles)return;
+        const status=document.getElementById('staff-status');
+        const setStatus=(m,e=false)=>{status.textContent=m;status.className=e?'status error':'status';};
+        const isSuper=roles.some(r=>r.role==='super_admin');
+        const scopedNames=[...new Set(roles.filter(r=>r.role==='school_admin').map(r=>r.school_name))];
+        const canAssign=isSuper||scopedNames.length>0;
+        const wrap=document.getElementById('staff-create-wrap');
+        wrap.hidden=!canAssign;
+        const roleSelect=document.getElementById('staff-role');
+        if(!isSuper) roleSelect.innerHTML='<option value="teacher">Teacher</option>';
+        const schoolSelect=document.getElementById('staff-school');
+        const staffList=document.getElementById('staff-list');
+        const assignmentList=document.getElementById('teacher-assignments');
+        const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        async function audit(action,schoolName,targetId,details={}) {
+          const {error}=await client.from('education_admin_audit_logs').insert({actor_user_id:window.educationAdminUserId,school_name:schoolName,action,target_type:'education_admin_role',target_id:targetId,details});
+          if(error)console.warn('Audit entry not recorded:',error.message);
+        }
+        async function loadStaff() {
+          setStatus('Loading school staff and class assignments…');
+          const {data:schools,error:se}=await client.from('education_schools').select('id,name').order('name');
+          if(se){setStatus('Could not load schools: '+se.message,true);return;}
+          const visible=(schools||[]).filter(s=>isSuper||scopedNames.includes(s.name));
+          schoolSelect.innerHTML='';
+          visible.forEach(s=>{const o=document.createElement('option');o.value=s.name;o.textContent=s.name;schoolSelect.appendChild(o);});
+          const {data:staff,error:re}=await client.from('education_admin_roles').select('id,user_id,role,school_name,created_at').in('role',['teacher','school_admin']).order('created_at');
+          if(re){setStatus('Could not load staff roles: '+re.message,true);return;}
+          const scoped=(staff||[]).filter(x=>isSuper||scopedNames.includes(x.school_name));
+          staffList.innerHTML='';
+          scoped.forEach(person=>{
+            const card=document.createElement('article');card.className='tile';
+            card.innerHTML='<h3>'+esc(person.role.replace('_',' '))+'</h3><p>School: '+esc(person.school_name)+'<br>Account UUID: <code>'+esc(person.user_id)+'</code></p>';
+            staffList.appendChild(card);
+          });
+          if(!scoped.length)staffList.textContent='No staff roles have been assigned yet.';
+          const {data:classes,error:ce}=await client.from('education_classes').select('id,name,teacher_user_id,school_id,education_schools(name)').order('name');
+          if(ce){setStatus('Staff loaded, but class assignments could not be loaded: '+ce.message,true);return;}
+          assignmentList.innerHTML='';
+          (classes||[]).forEach(cl=>{
+            const schoolName=cl.education_schools?.name||'';
+            if(!isSuper&&!scopedNames.includes(schoolName))return;
+            const teachers=scoped.filter(p=>p.role==='teacher'&&p.school_name===schoolName);
+            const card=document.createElement('article');card.className='tile';
+            card.innerHTML='<h3>'+esc(cl.name)+'</h3><p>'+esc(schoolName)+'</p>';
+            const select=document.createElement('select');select.setAttribute('aria-label','Teacher for '+cl.name);
+            const none=document.createElement('option');none.value='';none.textContent='Unassigned';select.appendChild(none);
+            teachers.forEach(t=>{const o=document.createElement('option');o.value=t.user_id;o.textContent=t.user_id;select.appendChild(o);});
+            select.value=cl.teacher_user_id||'';
+            const save=document.createElement('button');save.type='button';save.className='button secondary';save.textContent='Save teacher';
+            save.addEventListener('click',async()=>{
+              const {error}=await client.from('education_classes').update({teacher_user_id:select.value||null}).eq('id',cl.id);
+              if(error){setStatus('Could not assign teacher: '+error.message,true);return;}
+              await audit('class_teacher_assigned',schoolName,cl.id,{teacher_user_id:select.value||null});
+              setStatus('Teacher assignment saved for '+cl.name+'.');
+            });
+            card.append(select,save);assignmentList.appendChild(card);
+          });
+          if(!assignmentList.children.length)assignmentList.textContent='No classes are available in your school scope.';
+          setStatus(scoped.length+' staff role(s) and '+assignmentList.children.length+' class(es) available in your authorised scope.');
+        }
+        document.getElementById('staff-create-form').addEventListener('submit',async e=>{
+          e.preventDefault();
+          const v=Object.fromEntries(new FormData(e.currentTarget));
+          const userId=v.user_id.trim().toLowerCase();
+          if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(userId)){setStatus('Enter a valid ConfigKit account UUID.',true);return;}
+          const {data,error}=await client.from('education_admin_roles').insert({user_id:userId,role:v.role,school_name:v.school_name,granted_by:window.educationAdminUserId}).select('id').single();
+          if(error){setStatus('Could not assign staff role: '+error.message,true);return;}
+          await audit('staff_role_assigned',v.school_name,data.id,{role:v.role,user_id:userId});
+          e.currentTarget.reset();setStatus('Staff role assigned successfully.');loadStaff();
+        });
+        loadStaff();
+      }
+      window.addEventListener('configkit-education-admin-ready',initStaff,{once:true});
     })();
   </script>
 
