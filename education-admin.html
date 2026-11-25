@@ -256,6 +256,13 @@
         return;
       }
       window.educationAdminRoles = roles;
+      const { data: firstAdminVisit, error: welcomeError } = await client.rpc('claim_education_admin_first_welcome');
+      if (welcomeError) {
+        console.warn('First-admin welcome check could not be completed:', welcomeError.message);
+      } else if (firstAdminVisit === true) {
+        window.location.replace('admin-welcome.html');
+        return;
+      }
       const highest = roles.find(r => r.role === 'super_admin') || roles.find(r => r.role === 'school_admin') || roles[0];
       const labels = roles.map(r => r.role.replace('_',' ') + (r.school_name ? ' · ' + r.school_name : ''));
       document.getElementById('role-label').textContent = labels.join(' | ');
