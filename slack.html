@@ -53,5 +53,5 @@ try{
  const result=new URLSearchParams(location.search).get('status');if(result==='connected'){say('Slack workspace connected successfully!');history.replaceState({},'',location.pathname)}else if(result&&result!==''){const messages={denied:'Slack authorization was cancelled.',invalid:'Slack returned an invalid authorization response.',expired:'The Slack authorization expired. Please try connecting again.','not-configured':'Slack app credentials are not configured on the server yet.','exchange-failed':'Slack could not complete the authorization. Check the Slack app redirect URL and credentials.','missing-team':'Slack did not return a workspace identifier.','save-failed':'Slack authorized ConfigKit, but the secure connection could not be saved.'};say(messages[result]||'Slack connection could not be completed.','error');history.replaceState({},'',location.pathname)}
 }catch(e){say(e.message||'Could not initialize Slack integration.','error')}
 })();
-</script><script src="/cookie-consent.js?v=2" defer></script>
+</script><script src="/cookie-consent.js?v=3" defer></script>
 </body></html>
