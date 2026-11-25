@@ -1,4 +1,4 @@
-/* ConfigKit site-wide privacy and consent manager. No advertising or analytics trackers are installed by this script. */
+/* ConfigKit site-wide privacy and consent manager. Optional analytics loads only after explicit consent. */
 (() => {
   'use strict';
   const KEY = 'configkit-cookie-consent-v3';
