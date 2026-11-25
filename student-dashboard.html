@@ -140,7 +140,7 @@
         const host=document.getElementById('student-course-records');
         panel.hidden=false;host.replaceChildren();
         const [courseResult,progressResult]=await Promise.all([
-          client.from('education_courses').select('id,title,description,subject,year_level,created_at,education_course_lessons(id,title,content,lesson_order,estimated_minutes,status,education_course_resources(id,title,resource_type,url,description,lesson_id))').eq('status','published').order('created_at',{ascending:false}),
+          client.from('education_courses').select('id,title,description,subject,year_level,created_at,education_course_lessons(id,title,content,lesson_order,estimated_minutes,status)').eq('status','published').order('created_at',{ascending:false}),
           client.from('education_course_lesson_progress').select('lesson_id,completed_at').eq('student_user_id',studentUserId)
         ]);
         if(courseResult.error) {
@@ -153,6 +153,15 @@
           message.textContent='Your lesson progress could not be loaded. You can still open your published lessons.';
           host.append(message);
         }
+        const courseIds=(courseResult.data||[]).map(course=>course.id);
+        const resourceResult=courseIds.length
+          ? await client.from('education_course_resources').select('id,course_id,lesson_id,title,resource_type,url,description').in('course_id',courseIds).order('created_at',{ascending:false})
+          : {data:[],error:null};
+        const resourcesByCourse=new Map();
+        (resourceResult.data||[]).forEach(resource=>{
+          if(!resourcesByCourse.has(resource.course_id))resourcesByCourse.set(resource.course_id,[]);
+          resourcesByCourse.get(resource.course_id).push(resource);
+        });
         const completed=new Set((progressResult.data||[]).map(row=>row.lesson_id));
         const courses=courseResult.data||[];
         if(!courses.length) {
@@ -166,7 +175,7 @@
           meta.textContent=[course.subject,course.year_level].filter(Boolean).join(' · ')||'Course';
           article.append(title,meta);
           if(course.description){const desc=document.createElement('p');desc.textContent=course.description;article.append(desc);}
-          const courseResources=(course.education_course_lessons||[]).flatMap(lesson=>(lesson.education_course_resources||[]).filter(r=>!r.lesson_id));
+          const courseResources=(resourcesByCourse.get(course.id)||[]).filter(r=>!r.lesson_id);
           courseResources.forEach(resource=>{
             const line=document.createElement('p');line.className='assignment-meta';
             if(resource.resource_type==='link'&&resource.url){
@@ -183,7 +192,7 @@
             const duration=document.createElement('p');duration.className='assignment-meta';duration.textContent=lesson.estimated_minutes+' minutes';
             const body=document.createElement('p');body.className='document-content';body.textContent=lesson.content;
             block.append(heading,duration);if(lesson.content)block.append(body);
-            (lesson.education_course_resources||[]).filter(r=>r.lesson_id===lesson.id).forEach(resource=>{
+            (resourcesByCourse.get(course.id)||[]).filter(r=>r.lesson_id===lesson.id).forEach(resource=>{
               const row=document.createElement('p');row.className='assignment-meta';
               if(resource.resource_type==='link'&&resource.url){
                 try{const url=new URL(resource.url);if(['http:','https:'].includes(url.protocol)){const link=document.createElement('a');link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';link.textContent=resource.title;row.append('📎 ',link);}}
