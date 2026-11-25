@@ -11,8 +11,8 @@
 </style>
 </head>
 <body>
-<header><a class="brand" href="movies.html">⌘ ConfigKit · Movies</a><nav aria-label="Main navigation"><a href="movies.html">Discover movies</a><a href="dashboard.html">Dashboard</a></nav></header>
-<main><a class="back" href="movies.html">← Back to movies</a><section class="hero"><span class="eyebrow">Creator filmography</span><h1>Films by this creator</h1><p class="muted">A collection of films this creator has chosen to share with the ConfigKit community.</p></section><div id="creator-status" class="status" role="status" aria-live="polite">Loading creator's public films…</div><section id="creator-films" class="results" aria-label="Creator's public films"></section></main>
+<header><a class="brand" href="movies.html">⌘ ConfigKit · Movies</a><nav aria-label="Main navigation"><a href="movies.html">Discover movies</a><a href="notifications.html">Notifications</a><a href="dashboard.html">Dashboard</a></nav></header>
+<main><a class="back" href="movies.html">← Back to movies</a><section class="hero"><span class="eyebrow">Creator filmography</span><h1>Films by this creator</h1><p class="muted">A collection of films this creator has chosen to share with the ConfigKit community.</p><div id="creator-follow" class="status" aria-live="polite">Sign in to follow this creator.</div></section><div id="creator-status" class="status" role="status" aria-live="polite">Loading creator's public films…</div><section id="creator-films" class="results" aria-label="Creator's public films"></section></main>
 <footer>ConfigKit Movies · Only public creator listings appear on this page.</footer>
 <script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -44,6 +44,25 @@
    const creator=new URLSearchParams(location.search).get('creator');
    if(!creator||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(creator))throw new Error('This creator link is missing or invalid.');
    const db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+   const followHost=$('creator-follow');
+   const {data:sessionData}=await db.auth.getSession();
+   const viewer=sessionData?.session?.user||null;
+   if(viewer&&viewer.id!==creator){
+    const followButton=document.createElement('button');followButton.type='button';followButton.style.cssText='font:inherit;font-weight:750;border:1px solid #b9d8c4;border-radius:.7rem;padding:.6rem .9rem;background:#176344;color:#fff;cursor:pointer';
+    const count=document.createElement('span');count.style.marginLeft='.65rem';
+    const [{data:existing,error:followError},{count:followerCount,error:countError}]=await Promise.all([
+     db.from('configkit_movie_follows').select('id').eq('follower_id',viewer.id).eq('creator_id',creator).maybeSingle(),
+     db.from('configkit_movie_follows').select('id',{count:'exact',head:true}).eq('creator_id',creator)
+    ]);
+    if(followError)throw followError;if(countError)throw countError;
+    let following=!!existing;
+    const renderFollow=()=>{followButton.textContent=following?'✓ Following · Unfollow':'＋ Follow creator';count.textContent=(followerCount||0)+' follower'+((followerCount||0)===1?'':'s');};
+    renderFollow();
+    followButton.addEventListener('click',async()=>{followButton.disabled=true;try{if(following){const {error}=await db.from('configkit_movie_follows').delete().eq('follower_id',viewer.id).eq('creator_id',creator);if(error)throw error;following=false;}else{const {error}=await db.from('configkit_movie_follows').insert({follower_id:viewer.id,creator_id:creator});if(error)throw error;following=true;}renderFollow();}catch(err){followButton.textContent=err.message||'Could not update follow';}finally{followButton.disabled=false;}});
+    followHost.replaceChildren(followButton,count);
+   }else if(viewer&&viewer.id===creator){followHost.textContent='This is your creator page.';}
+   else{const sign=document.createElement('a');sign.href='login.html?next='+encodeURIComponent('creator.html?creator='+creator);sign.textContent='Sign in to follow this creator';followHost.replaceChildren(sign);}
+
    const {data,error}=await db.from('configkit_movies').select('id,title,description,genre,release_year,poster_url,visibility,created_at').eq('user_id',creator).eq('visibility','public').order('created_at',{ascending:false}).limit(60);
    if(error)throw error;
    if(!data?.length){setStatus('This creator has not published any public films yet.');return;}
