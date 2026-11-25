@@ -12,7 +12,7 @@
 </head>
 <body>
 <header><a class="brand" href="movies.html">⌘ ConfigKit · Movies</a><nav aria-label="Main navigation"><a href="movies.html">Discover movies</a><a href="dashboard.html">Dashboard</a></nav></header>
-<main><a class="back" href="movies.html">← Back to movies</a><div id="movie-status" class="status" role="status" aria-live="polite">Loading movie details…</div><article id="movie-detail" class="detail" hidden><div id="movie-poster" class="poster" aria-label="Movie poster">🎬</div><div class="content"><span class="eyebrow">ConfigKit Movies</span><h1 id="movie-title"></h1><p id="movie-meta" class="meta"></p><h2>About this film</h2><p id="movie-description" class="synopsis"></p><a id="movie-trailer" class="button" target="_blank" rel="noopener noreferrer" hidden>Watch trailer ↗</a><div class="creator">Published by a ConfigKit creator · <a id="creator-link" href="#">View creator’s public films →</a></div></div></article><section id="reviews-section" class="reviews" aria-labelledby="reviews-heading" hidden><h2 id="reviews-heading">Ratings &amp; reviews</h2><p id="review-summary" class="review-summary"></p><div id="review-form-wrap"></div><div id="review-list" class="review-list"></div></section></main>
+<main><a class="back" href="movies.html">← Back to movies</a><div id="movie-status" class="status" role="status" aria-live="polite">Loading movie details…</div><article id="movie-detail" class="detail" hidden><div id="movie-poster" class="poster" aria-label="Movie poster">🎬</div><div class="content"><span class="eyebrow">ConfigKit Movies</span><h1 id="movie-title"></h1><p id="movie-meta" class="meta"></p><h2>About this film</h2><p id="movie-description" class="synopsis"></p><a id="movie-trailer" class="button" target="_blank" rel="noopener noreferrer" hidden>Watch trailer ↗</a><div class="creator">Published by a ConfigKit creator · <a id="creator-link" href="#">View creator’s public films →</a><div id="watchlist-control" style="margin-top:.8rem"></div></div></div></article><section id="reviews-section" class="reviews" aria-labelledby="reviews-heading" hidden><h2 id="reviews-heading">Ratings &amp; reviews</h2><p id="review-summary" class="review-summary"></p><div id="review-form-wrap"></div><div id="review-list" class="review-list"></div></section></main>
 <footer>ConfigKit Movies · Respect copyright and privacy. Only share films and media you own or have permission to use.</footer>
 <script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -160,6 +160,29 @@ const loadMovieReviews=async(db,movie,currentUser)=>{
     if(src){const img=document.createElement('img');img.src=src;img.alt='Poster for '+row.title;img.referrerPolicy='no-referrer';img.onerror=()=>{poster.textContent='🎬';};poster.replaceChildren(img);}
    }
    detail.hidden=false;status.hidden=true;document.title=row.title+' · ConfigKit Movies';
+   const watchHost=$('watchlist-control');
+   if(row.visibility==='public'){
+    if(auth?.session?.user){
+     const watchButton=document.createElement('button');watchButton.type='button';watchButton.className='reply-action';
+     const {data:saved,error:savedError}=await db.from('configkit_movie_watchlist').select('id').eq('movie_id',row.id).eq('user_id',auth.session.user.id).maybeSingle();
+     if(savedError)throw savedError;
+     const renderWatch=present=>{watchButton.textContent=present?'✓ Saved to watchlist · Remove':'＋ Add to my watchlist';watchButton.setAttribute('aria-pressed',String(present));};
+     let inWatchlist=!!saved;renderWatch(inWatchlist);
+     watchButton.addEventListener('click',async()=>{
+      watchButton.disabled=true;
+      try{
+       if(inWatchlist){const {error}=await db.from('configkit_movie_watchlist').delete().eq('movie_id',row.id).eq('user_id',auth.session.user.id);if(error)throw error;inWatchlist=false;}
+       else{const {error}=await db.from('configkit_movie_watchlist').insert({movie_id:row.id,user_id:auth.session.user.id});if(error)throw error;inWatchlist=true;}
+       renderWatch(inWatchlist);
+      }catch(err){watchButton.textContent=err.message||'Could not update watchlist';}
+      finally{watchButton.disabled=false;}
+     });
+     watchHost.append(watchButton);
+     const listLink=document.createElement('a');listLink.href='watchlist.html';listLink.textContent=' View my watchlist →';listLink.style.marginLeft='.7rem';watchHost.append(listLink);
+    }else{
+     const sign=document.createElement('a');sign.href='login.html?next='+encodeURIComponent('movie.html?id='+row.id);sign.textContent='Sign in to save to your watchlist';watchHost.append(sign);
+    }
+   }
    await loadMovieReviews(db,row,auth?.session?.user||null);
   }catch(error){setStatus(error.message||'Could not load this movie.',true);}
  })();
