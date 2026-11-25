@@ -12,7 +12,7 @@ Build and review Apple configuration profiles, organise your work, explore learn
 
 <br>
 
-**[Open ConfigKit](https://huynhw19.github.io/) · [Official Wiki](https://huynhw19.github.io/wiki.html) · [Community Wiki](https://huynhw19.github.io/community-wiki.html) · [Get Help](https://huynhw19.github.io/support.html)**
+**[Open ConfigKit](https://huynhw19.github.io/) · [Complete User Guide](https://huynhw19.github.io/complete-guide.html) · [Official Wiki](https://huynhw19.github.io/wiki.html) · [Account Guide](https://huynhw19.github.io/account-docs.html) · [Community Wiki](https://huynhw19.github.io/community-wiki.html) · [Get Help](https://huynhw19.github.io/support.html)**
 
 </div>
 
