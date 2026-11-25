@@ -347,13 +347,14 @@
         }
         document.getElementById('staff-create-form').addEventListener('submit',async e=>{
           e.preventDefault();
-          const v=Object.fromEntries(new FormData(e.currentTarget));
+          const form=e.currentTarget;
+          const v=Object.fromEntries(new FormData(form));
           const userId=v.user_id.trim().toLowerCase();
           if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(userId)){setStatus('Enter a valid ConfigKit account UUID.',true);return;}
           const {data,error}=await client.from('education_admin_roles').insert({user_id:userId,role:v.role,school_name:v.school_name,granted_by:window.educationAdminUserId}).select('id').single();
           if(error){setStatus('Could not assign staff role: '+error.message,true);return;}
           await audit('staff_role_assigned',v.school_name,data.id,{role:v.role,user_id:userId});
-          e.currentTarget.reset();setStatus('Staff role assigned successfully.');loadStaff();
+          form.reset();setStatus('Staff role assigned successfully.');loadStaff();
         });
         loadStaff();
       }
