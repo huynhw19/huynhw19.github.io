@@ -678,6 +678,64 @@
     })();
   </script>
 
-  <script src="/cookie-consent.js?v=2" defer></script>
+
+  <script>
+    (() => {
+      async function initSchoolRequestReview() {
+        const client=window.educationAdminClient, roles=window.educationAdminRoles||[];
+        if(!client||!roles.some(r=>r.role==='super_admin')) return;
+        const panel=document.getElementById('school-enrolment-review');
+        const status=document.getElementById('school-request-status');
+        const list=document.getElementById('school-request-list');
+        panel.hidden=false;
+        const setStatus=(message,error=false)=>{status.textContent=message;status.className=error?'status error':'status';};
+        async function load(){
+          setStatus('Loading school enrolment requests…');list.replaceChildren();
+          const {data:rows,error}=await client.from('education_school_enrolment_requests')
+            .select('id,school_name,school_type,country,timezone,website,contact_name,contact_email,contact_role,message,submitted_by,status,review_note,created_at,school_id')
+            .order('created_at',{ascending:false});
+          if(error){setStatus('Could not load school requests: '+error.message,true);return;}
+          if(!rows?.length){setStatus('There are no school enrolment requests yet.');return;}
+          setStatus(rows.filter(x=>x.status==='pending').length+' pending request(s); '+rows.length+' total.');
+          rows.forEach(row=>{
+            const card=document.createElement('article');card.className='tile';
+            const title=document.createElement('h3');title.textContent=row.school_name;
+            const meta=document.createElement('p');meta.textContent=[row.school_type.replaceAll('_',' '),row.country,'Timezone: '+row.timezone].join(' · ');
+            const contact=document.createElement('p');contact.textContent=row.contact_name+' · '+row.contact_role+' · '+row.contact_email;
+            const account=document.createElement('p');account.textContent='ConfigKit account: '+row.submitted_by;
+            const submitted=document.createElement('p');submitted.textContent='Submitted: '+new Date(row.created_at).toLocaleString();
+            const website=document.createElement('p');
+            if(row.website){const a=document.createElement('a');a.href=row.website;a.target='_blank';a.rel='noopener noreferrer';a.textContent='School website ↗';website.append(a);}
+            const message=document.createElement('p');message.textContent=row.message||'No additional message provided.';
+            const state=document.createElement('p');state.className='status';state.textContent='Status: '+row.status+(row.school_id?' · School created':'');
+            card.append(title,meta,contact,account,submitted,website,message,state);
+            if(row.status==='pending'){
+              const note=document.createElement('textarea');note.maxLength=1000;note.placeholder='Optional note for the decision';
+              note.setAttribute('aria-label','Review note for '+row.school_name);
+              const actions=document.createElement('div');actions.style.display='flex';actions.style.gap='.6rem';actions.style.flexWrap='wrap';
+              const approve=document.createElement('button');approve.className='button';approve.type='button';approve.textContent='Approve & create school';
+              const reject=document.createElement('button');reject.className='button secondary';reject.type='button';reject.textContent='Disapprove';
+              async function decide(decision){
+                approve.disabled=true;reject.disabled=true;setStatus('Saving your decision…');
+                const {data,error}=await client.rpc('review_education_school_enrolment_request',{p_request_id:row.id,p_decision:decision,p_note:note.value.trim()});
+                if(error){setStatus('Could not save the decision: '+error.message,true);approve.disabled=false;reject.disabled=false;return;}
+                setStatus(decision==='approved'?'School request approved and a school space was created.':'School request disapproved.');
+                await load();
+              }
+              approve.addEventListener('click',()=>decide('approved'));
+              reject.addEventListener('click',()=>decide('disapproved'));
+              actions.append(approve,reject);card.append(note,actions);
+            } else if(row.review_note){
+              const note=document.createElement('p');note.textContent='Owner note: '+row.review_note;card.append(note);
+            }
+            list.append(card);
+          });
+        }
+        await load();
+      }
+      window.addEventListener('configkit-education-admin-ready',initSchoolRequestReview,{once:true});
+    })();
+  </script>
+\n  <script src="/cookie-consent.js?v=2" defer></script>
 </body>
 </html>
