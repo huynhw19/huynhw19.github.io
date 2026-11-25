@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Secure administration centre for ConfigKit Education.">
+  <title>Education Admin Centre — ConfigKit</title>
+  <link rel="stylesheet" href="brand.css?v=1">
+  <link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
+  <style>
+    :root{--admin-ink:#17231f;--admin-muted:#607168;--admin-line:#dfe9e3;--admin-green:#226b51;--admin-paper:#f4f8f5}
+    *{box-sizing:border-box}body{margin:0;background:var(--admin-paper);color:var(--admin-ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+    a{color:var(--admin-green);text-decoration:none}a:hover{text-decoration:underline}
+    .wrap{max-width:1180px;margin:auto;padding:24px 20px 56px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+    .brand{font-weight:800;font-size:1.05rem;color:var(--admin-ink)}.nav{display:flex;gap:14px;flex-wrap:wrap}
+    .hero{padding:28px;border-radius:20px;background:linear-gradient(135deg,#e7f5ec,#edf4ff);border:1px solid #d7e8dc;margin-bottom:20px}
+    .eyebrow{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#276347}
+    h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;margin:.4rem 0 .7rem;letter-spacing:-.04em}
+    h2{margin:.1rem 0 .5rem}p{margin:.4rem 0 1rem}.muted{color:var(--admin-muted)}
+    .panel,.tile{background:#fff;border:1px solid var(--admin-line);border-radius:15px;padding:20px;box-shadow:0 10px 28px rgba(24,57,39,.045)}
+    .panel{margin:18px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:16px 0}
+    .tile h3{margin:0 0 6px;font-size:1.02rem}.tile p{color:var(--admin-muted);font-size:.94rem;min-height:3em}
+    .tile a{font-weight:700}.tile .tag{display:inline-block;border-radius:999px;padding:3px 9px;background:#eef4ef;color:#355746;font-size:.76rem;font-weight:700}
+    .status{padding:12px 14px;border-radius:10px;background:#edf6f0;color:#24553c}.status.error{background:#fff0f0;color:#982d2d}
+    .button{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border:0;border-radius:9px;background:var(--admin-green);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+    .button.secondary{background:#eaf1ec;color:#234634}.button:focus-visible,a:focus-visible{outline:3px solid #8ac9a2;outline-offset:3px}
+    code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#17231f;color:#edf7f0;padding:14px;border-radius:10px;font-size:.88rem}
+    .role-line{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.role{font-weight:800;color:#1b6944}
+    [hidden]{display:none!important}
+    @media(max-width:620px){.wrap{padding:16px 14px 40px}.hero{padding:22px}.panel,.tile{padding:16px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="Education-dashboard.html">🎓 ConfigKit Education</a>
+      <nav class="nav" aria-label="Education navigation">
+        <a href="Education-dashboard.html">Teacher dashboard</a>
+        <a href="student-dashboard.html">Student dashboard</a>
+        <a href="dashboard.html">Main dashboard</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">Education administration</div>
+      <h1>Education Admin Centre</h1>
+      <p>One secure place to oversee education access, school operations, learning resources, wellbeing and reporting. Administrative tools are enabled only for accounts with a database-assigned role.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="access-title">
+      <h2 id="access-title">Administrator access</h2>
+      <p id="access-status" class="status" role="status" aria-live="polite">Checking your ConfigKit sign-in…</p>
+      <div id="account-details" hidden>
+        <p class="muted">Signed-in account</p>
+        <div class="role-line"><strong id="account-email"></strong><span id="role-label" class="role"></span></div>
+        <p class="muted">Account ID: <code id="account-id"></code></p>
+      </div>
+      <div id="bootstrap-panel" hidden>
+        <h3>Set up the first Super Admin</h3>
+        <p>This account does not yet have an Education Admin role. For safety, users cannot grant themselves administrator access from this page. If you manage the Supabase project, copy the SQL below and run it in the Supabase SQL Editor after checking that the account ID matches your own account.</p>
+        <pre id="bootstrap-sql"></pre>
+        <button id="copy-bootstrap" class="button" type="button">Copy setup SQL</button>
+        <p class="muted">Only a trusted project owner should run this one-time bootstrap. After the role is assigned, refresh this page. Never share your Supabase secret or service-role key.</p>
+      </div>
+      <p id="login-link" hidden><a class="button" href="login.html">Sign in to ConfigKit</a></p>
+    </section>
+
+    <section id="admin-workspace" hidden>
+      <section class="panel">
+        <h2>Administration overview</h2>
+        <p class="muted">Your current role determines which school and administration functions you can access. School-scoped roles do not receive platform-wide access.</p>
+        <div class="grid">
+          <article class="tile"><h3>👥 Users &amp; roles</h3><p>Review access assignments and manage staff, guardians and learner permissions within your authorised scope.</p><span class="tag">Foundation planned</span></article>
+          <article class="tile"><h3>🏫 Schools &amp; classes</h3><p>Organise school spaces, academic years, class groups, rosters and teacher assignments.</p><span class="tag">Foundation planned</span></article>
+          <article class="tile"><h3>📚 Learning management</h3><p>Oversee courses, lessons, books, documents, slideshows and learning resources.</p><span class="tag">Integration planned</span></article>
+          <article class="tile"><h3>📝 Assessments</h3><p>Coordinate assignments, tests, submissions, marking workflows and feedback.</p><span class="tag">Integration planned</span></article>
+          <article class="tile"><h3>📊 Progress &amp; reports</h3><p>Understand learning activity and outcomes with role-appropriate reporting.</p><span class="tag">Integration planned</span></article>
+          <article class="tile"><h3>📣 Announcements</h3><p>Prepare school, class and learner communications with audience checks.</p><span class="tag">Planned</span></article>
+          <article class="tile"><h3>🛡️ Safety &amp; moderation</h3><p>Review reports, protect student privacy and follow clear escalation processes.</p><span class="tag">Planned</span></article>
+          <article class="tile"><h3>🧾 Audit &amp; governance</h3><p>Keep a traceable record of sensitive administrative changes and policy decisions.</p><span class="tag">Audit foundation created</span></article>
+          <article class="tile"><h3>⚙️ School settings</h3><p>Configure school identity, term dates, defaults, access and local policies.</p><span class="tag">Planned</span></article>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Connected Education tools</h2>
+        <p>These existing ConfigKit workspaces remain available while the central administration features are developed.</p>
+        <div class="grid">
+          <article class="tile"><h3>Teacher dashboard</h3><p>Manage linked students, lessons, assignments and teaching settings.</p><a href="Education-dashboard.html">Open teacher dashboard →</a></article>
+          <article class="tile"><h3>Student dashboard</h3><p>Student learning space for lessons, assignments and learning activities.</p><a href="student-dashboard.html">Open student dashboard →</a></article>
+          <article class="tile"><h3>Learning reports</h3><p>Open the existing Education reporting workspace.</p><a href="education-reports.html">Open reports →</a></article>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Security and access principles</h2>
+        <ul>
+          <li>Administrator roles are assigned outside the browser by a trusted project owner.</li>
+          <li>Role records are protected by Row Level Security; signed-in users can read only their own role assignments.</li>
+          <li>School administrators and teachers must be scoped to a school; only Super Admin has platform-wide scope.</li>
+          <li>Administrative audit entries are append-only from the browser and are associated with the signed-in actor.</li>
+          <li>Student information must be minimised, protected and shown only to authorised people.</li>
+        </ul>
+      </section>
+    </section>
+  </div>
+
+  <script src="auth-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (async () => {
+      const status = document.getElementById('access-status');
+      const config = window.CONFIGKIT_AUTH || {};
+      const showError = message => { status.textContent = message; status.className = 'status error'; };
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+        showError('ConfigKit authentication is not configured. Please contact the site administrator.');
+        return;
+      }
+      const client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      });
+      const { data: sessionData, error: sessionError } = await client.auth.getSession();
+      const user = sessionData?.session?.user;
+      if (sessionError || !user) {
+        status.textContent = 'Please sign in to check your Education Admin access.';
+        document.getElementById('login-link').hidden = false;
+        return;
+      }
+      document.getElementById('account-details').hidden = false;
+      document.getElementById('account-email').textContent = user.email || 'Signed-in ConfigKit account';
+      document.getElementById('account-id').textContent = user.id;
+      const sql = "insert into public.education_admin_roles (user_id, role, school_name, granted_by)\nvalues ('" + user.id + "'::uuid, 'super_admin', null, '" + user.id + "'::uuid)\non conflict do nothing;";
+      document.getElementById('bootstrap-sql').textContent = sql;
+      document.getElementById('copy-bootstrap').addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(sql);
+          document.getElementById('copy-bootstrap').textContent = 'Copied!';
+        } catch (_) {
+          document.getElementById('bootstrap-sql').focus?.();
+          status.textContent = 'Clipboard access is unavailable. Select and copy the SQL above.';
+        }
+      });
+      const { data: roles, error: roleError } = await client
+        .from('education_admin_roles')
+        .select('role,school_name,created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
+      if (roleError) {
+        showError('Your account is signed in, but administrator access could not be checked. ' + roleError.message);
+        return;
+      }
+      if (!roles?.length) {
+        status.textContent = 'No Education Admin role is assigned to this account yet. The secure setup SQL is ready below for the trusted Supabase project owner.';
+        document.getElementById('bootstrap-panel').hidden = false;
+        return;
+      }
+      const highest = roles.find(r => r.role === 'super_admin') || roles.find(r => r.role === 'school_admin') || roles[0];
+      const labels = roles.map(r => r.role.replace('_',' ') + (r.school_name ? ' · ' + r.school_name : ''));
+      document.getElementById('role-label').textContent = labels.join(' | ');
+      status.textContent = 'Administrator role verified. The workspace below is enabled for your assigned role.';
+      document.getElementById('admin-workspace').hidden = false;
+      if (highest.role !== 'super_admin') {
+        const note = document.createElement('p');
+        note.className = 'status';
+        note.textContent = 'Your access is school-scoped. Platform-wide controls are reserved for Super Admin.';
+        document.querySelector('#admin-workspace .panel').prepend(note);
+      }
+    })().catch(error => {
+      const status = document.getElementById('access-status');
+      status.textContent = 'Education Admin could not load. Please refresh or contact support.';
+      status.className = 'status error';
+      console.error(error);
+    });
+  </script>
+  <script src="/cookie-consent.js?v=2" defer></script>
+</body>
+</html>
