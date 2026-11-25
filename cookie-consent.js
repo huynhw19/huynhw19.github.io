@@ -21,6 +21,14 @@
     .ck-media-blocked{display:grid;place-items:center;min-height:150px;padding:20px;text-align:center;background:#edf4ef;color:#31483b;border:1px solid #dce7df;border-radius:12px;font:14px/1.5 system-ui,sans-serif}
     .ck-media-blocked button{margin-top:9px;padding:8px 12px;border:1px solid #176344;border-radius:8px;background:#176344;color:#fff;font:inherit;font-weight:650;cursor:pointer}
     @media(max-width:650px){#ck-consent-banner{left:9px;right:9px;bottom:9px;padding:15px}#ck-consent-banner .ck-actions button{flex:1 1 130px}}
+    #ck-analytics-status{position:fixed;z-index:1000;right:12px;bottom:48px;padding:7px 10px;border:1px solid #dce7df;border-radius:999px;background:#fff;color:#176344;font:600 12px/1.3 system-ui,sans-serif;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.12)}
+    #ck-analytics-panel{position:fixed;z-index:2147482999;right:12px;bottom:88px;width:min(360px,calc(100vw - 24px));padding:16px;background:#fff;color:#17231f;border:1px solid #dce7df;border-radius:14px;box-shadow:0 12px 36px rgba(15,35,25,.2);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+    #ck-analytics-panel[hidden]{display:none}#ck-analytics-panel h2{font-size:1rem;margin:0 0 5px}#ck-analytics-panel p{margin:0 0 10px;color:#586b61}
+    #ck-analytics-panel ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}#ck-analytics-panel li{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #edf1ee;padding-top:7px}
+    #ck-analytics-panel .ck-diagnostic-value{font-weight:650;text-align:right}#ck-analytics-panel .ck-diagnostic-error{color:#9b3030}#ck-analytics-panel .ck-panel-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    #ck-analytics-panel button{cursor:pointer;font:inherit;font-weight:650;padding:7px 10px;border:1px solid #dce7df;border-radius:8px;background:#fff;color:#17231f}
+    #ck-analytics-panel button.ck-panel-primary{background:#176344;color:#fff;border-color:#176344}
+    @media(max-width:650px){#ck-analytics-status{right:9px;bottom:47px}#ck-analytics-panel{right:9px;bottom:87px}}
   `;
   const style = document.createElement('style'); style.textContent = styles; document.head.append(style);
   const banner = document.createElement('section');
@@ -48,6 +56,41 @@
   launcher.textContent = 'Cookie settings';
   launcher.style.cssText = 'position:fixed;z-index:999;right:12px;bottom:12px;padding:7px 10px;border:1px solid #dce7df;border-radius:999px;background:#fff;color:#176344;font:600 12px/1.3 system-ui,sans-serif;text-decoration:none;box-shadow:0 3px 12px rgba(0,0,0,.12)';
   document.body.append(launcher);
+
+  const diagnostics = { consent: false, config: 'Not loaded', sdk: 'Not loaded', pageview: 'Not sent', error: '' };
+  const statusLauncher = document.createElement('button');
+  statusLauncher.type = 'button'; statusLauncher.id = 'ck-analytics-status';
+  statusLauncher.textContent = 'Analytics status';
+  statusLauncher.setAttribute('aria-expanded', 'false');
+  const diagnosticPanel = document.createElement('section');
+  diagnosticPanel.id = 'ck-analytics-panel'; diagnosticPanel.hidden = true;
+  diagnosticPanel.setAttribute('role', 'region'); diagnosticPanel.setAttribute('aria-label', 'Analytics diagnostics');
+  diagnosticPanel.innerHTML = '<h2>Analytics diagnostics</h2><p>Privacy-safe checks for anonymous page-view analytics. No form fields or personal information are inspected.</p><ul><li><span>Analytics consent</span><span class="ck-diagnostic-value" data-check="consent">Checking…</span></li><li><span>Configuration</span><span class="ck-diagnostic-value" data-check="config">Not loaded</span></li><li><span>PostHog SDK</span><span class="ck-diagnostic-value" data-check="sdk">Not loaded</span></li><li><span>Page-view event</span><span class="ck-diagnostic-value" data-check="pageview">Not sent</span></li></ul><p data-check="error" class="ck-diagnostic-error" aria-live="polite"></p><div class="ck-panel-actions"><button type="button" class="ck-panel-primary" data-diagnostic-action="settings">Cookie settings</button><button type="button" data-diagnostic-action="close">Close</button></div>';
+  document.body.append(statusLauncher, diagnosticPanel);
+  function updateDiagnostics() {
+    diagnostics.consent = allowed('analytics');
+    diagnosticPanel.querySelector('[data-check="consent"]').textContent = diagnostics.consent ? 'Enabled' : 'Off — opt in to test';
+    diagnosticPanel.querySelector('[data-check="config"]').textContent = diagnostics.config;
+    diagnosticPanel.querySelector('[data-check="sdk"]').textContent = diagnostics.sdk;
+    diagnosticPanel.querySelector('[data-check="pageview"]').textContent = diagnostics.pageview;
+    diagnosticPanel.querySelector('[data-check="error"]').textContent = diagnostics.error;
+    diagnosticPanel.querySelectorAll('.ck-diagnostic-value').forEach(node => node.classList.toggle('ck-diagnostic-error', /failed|error|blocked|invalid/i.test(node.textContent)));
+  }
+  function setDiagnostic(key, value, error) {
+    diagnostics[key] = value;
+    if (error !== undefined) diagnostics.error = error;
+    updateDiagnostics();
+  }
+  statusLauncher.addEventListener('click', () => {
+    diagnosticPanel.hidden = !diagnosticPanel.hidden;
+    statusLauncher.setAttribute('aria-expanded', String(!diagnosticPanel.hidden));
+    updateDiagnostics();
+  });
+  diagnosticPanel.querySelector('[data-diagnostic-action="close"]').addEventListener('click', () => {
+    diagnosticPanel.hidden = true; statusLauncher.setAttribute('aria-expanded', 'false');
+  });
+  diagnosticPanel.querySelector('[data-diagnostic-action="settings"]').addEventListener('click', openSettings);
+
   const options = banner.querySelector('.ck-options');
   const pref = banner.querySelector('[data-category="preferences"]');
   const media = banner.querySelector('[data-category="externalMedia"]');
@@ -91,6 +134,7 @@
       $current_url: window.location.origin + cleanPath,
       $pathname: cleanPath
     });
+    setDiagnostic('pageview', 'Queued for delivery');
   }
   function stopAnalytics() {
     if (window.__configKitPosthogReady && window.posthog) {
@@ -109,11 +153,15 @@
       const config = window.CONFIGKIT_POSTHOG;
       if (!config || !config.token || !config.apiHost) {
         console.error('[ConfigKit analytics] Configuration is missing or invalid. Check /posthog-config.js.');
+        setDiagnostic('config', 'Invalid', 'The analytics configuration is missing or invalid. Check the site deployment.');
         return;
       }
+      setDiagnostic('config', 'Loaded');
+      setDiagnostic('sdk', 'Loading');
       console.info('[ConfigKit analytics] Configuration loaded; initializing PostHog.');
       if (navigator.doNotTrack === '1' || window.doNotTrack === '1') {
         console.warn('[ConfigKit analytics] Do Not Track is enabled. PostHog may suppress analytics events in this browser.');
+        setDiagnostic('sdk', 'Paused by Do Not Track', 'Do Not Track is enabled in this browser; analytics may be suppressed.');
       }
       (function (t, e) {
         var o, n, p, r;
@@ -125,8 +173,8 @@
           }
           p = t.createElement('script'); p.type = 'text/javascript'; p.crossOrigin = 'anonymous'; p.async = true;
           p.src = (s.api_host.endsWith('.i.posthog.com') ? s.api_host.replace('.i.posthog.com', '-assets.i.posthog.com') : s.api_host.replace('.posthog.com', '-assets.posthog.com')) + '/static/array.js';
-          p.onload = () => console.info('[ConfigKit analytics] PostHog SDK script loaded successfully.');
-          p.onerror = () => console.error('[ConfigKit analytics] PostHog SDK script failed to load. Check the Network panel for the array.js request; a content blocker, DNS failure, or CSP rule may be blocking it.');
+          p.onload = () => { console.info('[ConfigKit analytics] PostHog SDK script loaded successfully.'); setDiagnostic('sdk', 'Loaded'); };
+          p.onerror = () => { console.error('[ConfigKit analytics] PostHog SDK script failed to load. Check the Network panel for the array.js request; a content blocker, DNS failure, or CSP rule may be blocking it.'); setDiagnostic('sdk', 'Failed to load', 'PostHog could not load. A content blocker, DNS filter, or site security rule may be blocking it.'); };
           r = t.getElementsByTagName('script')[0]; r.parentNode.insertBefore(p, r);
           var u = e;
           void 0 !== a ? u = e[a] = [] : a = 'posthog';
@@ -163,12 +211,13 @@
       window.__configKitPosthogReady = true;
       capturePageView();
     };
-    configScript.onerror = () => console.error('[ConfigKit analytics] Could not load /posthog-config.js. Check the Network panel and GitHub Pages deployment.');
+    configScript.onerror = () => { console.error('[ConfigKit analytics] Could not load /posthog-config.js. Check the Network panel and GitHub Pages deployment.'); setDiagnostic('config', 'Failed to load', 'The analytics configuration file could not be loaded. Check that the latest site deployment is live.'); };
     document.head.append(configScript);
   }
   function syncAnalytics() {
+    updateDiagnostics();
     if (allowed('analytics')) startAnalytics();
-    else stopAnalytics();
+    else { stopAnalytics(); setDiagnostic('pageview', 'Waiting for consent'); }
   }
 
   function openSettings() {
@@ -206,6 +255,7 @@
     if (link) { event.preventDefault(); openSettings(); }
   });
   publish();
+  updateDiagnostics();
   if (consent) { banner.hidden = true; scanMedia(); syncAnalytics(); }
   else banner.hidden = false;
 })();
