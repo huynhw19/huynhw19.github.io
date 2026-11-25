@@ -105,13 +105,13 @@
       <section class="card" id="configkit-sync-settings" aria-labelledby="sync-title" style="padding:1.2rem;margin:1rem 0">
         <span class="eyebrow">Account preferences</span>
         <h2 id="sync-title">☁️ ConfigKit Sync</h2>
-        <p class="muted">Choose whether your account preference is to keep ConfigKit sync enabled.</p>
+        <p class="muted">Control whether ConfigKit saves changes to your account-owned cloud data.</p>
         <label for="configkit-sync-toggle" style="display:flex;align-items:center;gap:.75rem;font-weight:700">
           <input id="configkit-sync-toggle" type="checkbox" checked style="width:1.2rem;height:1.2rem">
           Enable sync
         </label>
         <p id="configkit-sync-status" class="muted" role="status" aria-live="polite">Loading sync preference…</p>
-        <p class="muted" style="font-size:.9rem">Turning sync off does not delete cloud files or account data. This saves your account preference; individual ConfigKit features must support this setting before all cloud activity can be paused.</p>
+        <p class="muted" style="font-size:.9rem">When Sync is off, account-owned database changes and uploads to your owned storage paths are blocked. Existing cloud data is not deleted, and reading existing data remains available. Some server-side services may require separate integration.</p>
       </section>
 
       <section class="card calendar-time-panel" id="configkit-calendar-time" aria-labelledby="ct-title">
