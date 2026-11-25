@@ -22,7 +22,7 @@
 <div class="field"><label for="listing-title">Movie title *</label><input id="listing-title" maxlength="160" required placeholder="Your film's title"></div>
 <div class="field"><label for="listing-description">Synopsis</label><textarea id="listing-description" maxlength="5000" placeholder="Tell viewers what your film is about…"></textarea></div>
 <div class="studio-grid"><div class="field"><label for="listing-genre">Genre</label><input id="listing-genre" maxlength="80" placeholder="Drama, comedy, sci-fi…"></div><div class="field"><label for="listing-year">Release year</label><input id="listing-year" type="number" min="1888" max="2200" placeholder="2026"></div></div>
-<div class="field"><label for="listing-poster">Poster image URL (HTTPS)</label><input id="listing-poster" type="url" maxlength="2048" placeholder="https://…"><small class="muted">Use an image you own or have permission to use.</small></div>
+<div class="field"><label for="listing-poster">Upload movie poster</label><input id="listing-poster" type="file" accept="image/jpeg,image/png,image/webp"><small class="muted">JPEG, PNG or WebP · up to 5 MB. Upload artwork you own or have permission to use. Leave empty to keep the current poster.</small></div>
 <div class="field"><label for="listing-trailer">Trailer URL (HTTPS)</label><input id="listing-trailer" type="url" maxlength="2048" placeholder="YouTube or other HTTPS trailer link"></div>
 <div class="actions"><button class="primary" id="listing-save" type="submit">Save private listing</button><button type="button" id="listing-reset">Clear</button></div>
 </form></section>
