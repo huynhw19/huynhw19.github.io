@@ -705,7 +705,7 @@
             const account=document.createElement('p');account.textContent='ConfigKit account: '+row.submitted_by;
             const submitted=document.createElement('p');submitted.textContent='Submitted: '+new Date(row.created_at).toLocaleString();
             const website=document.createElement('p');
-            if(row.website){const a=document.createElement('a');a.href=row.website;a.target='_blank';a.rel='noopener noreferrer';a.textContent='School website ↗';website.append(a);}
+            if(row.website){try{const url=new URL(row.website);if(url.protocol==='https:'||url.protocol==='http:'){const a=document.createElement('a');a.href=url.href;a.target='_blank';a.rel='noopener noreferrer';a.textContent='School website ↗';website.append(a);}}catch(_){}}
             const message=document.createElement('p');message.textContent=row.message||'No additional message provided.';
             const state=document.createElement('p');state.className='status';state.textContent='Status: '+row.status+(row.school_id?' · School created':'');
             card.append(title,meta,contact,account,submitted,website,message,state);
