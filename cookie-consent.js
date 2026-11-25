@@ -1,19 +1,13 @@
 /* ConfigKit site-wide privacy and consent manager. No advertising or analytics trackers are installed by this script. */
 (() => {
   'use strict';
-  const KEY = 'configkit-cookie-consent-v2';
-  const OLD_KEY = 'configkit-cookie-consent-v1';
-  const defaults = { essential: true, preferences: false, externalMedia: false };
+  const KEY = 'configkit-cookie-consent-v3';
+  const OLD_KEY = 'configkit-cookie-consent-v2';
+  const LEGACY_KEY = 'configkit-cookie-consent-v1';
+  const defaults = { essential: true, preferences: false, externalMedia: false, analytics: false };
   let consent = null;
   try {
     consent = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (!consent) {
-      const old = JSON.parse(localStorage.getItem(OLD_KEY) || 'null');
-      if (old && old.version === 1 && old.categories) {
-        consent = { version: 2, updatedAt: old.updatedAt || new Date().toISOString(), categories: { essential: true, preferences: !!old.categories.preferences, externalMedia: !!old.categories.externalMedia } };
-        localStorage.setItem(KEY, JSON.stringify(consent));
-      }
-    }
   } catch (_) {}
   if (!consent || consent.version !== 2 || !consent.categories) consent = null;
 
@@ -33,7 +27,7 @@
   banner.id = 'ck-consent-banner'; banner.hidden = true; banner.setAttribute('role','region'); banner.setAttribute('aria-label','Cookie and privacy choices');
   banner.innerHTML = `
     <h2>🍪 Your privacy choices</h2>
-    <p>ConfigKit uses essential browser storage for security and core features. You can choose whether to allow optional preferences and external media. We do not use advertising or analytics cookies.</p>
+    <p>ConfigKit uses essential browser storage for security and core features. You can separately choose optional preferences, external media and privacy-friendly analytics. Analytics is off unless you opt in.</p>
     <p><a href="/privacy.html#cookies">Read the Privacy Policy</a></p>
     <div class="ck-actions">
       <button type="button" data-action="reject">Reject optional</button>
@@ -45,6 +39,7 @@
       <label><input type="checkbox" checked disabled><span><strong>Essential</strong> — remembers this choice and supports core site/security functions. Always active.</span></label>
       <label><input type="checkbox" data-category="preferences"><span><strong>Preferences</strong> — remembers choices such as your selected language where supported.</span></label>
       <label><input type="checkbox" data-category="externalMedia"><span><strong>External media</strong> — loads embedded content, such as videos and maps, from third-party providers.</span></label>
+      <label><input type="checkbox" data-category="analytics"><span><strong>Anonymous analytics (optional)</strong> — counts page visits and page paths so we can improve ConfigKit. No names, emails, grades, form contents, clicks or session recordings are collected.</span></label>
       <div class="ck-actions"><button type="button" class="ck-primary" data-action="save">Save my choices</button></div>
     </div>`;
   document.body.append(banner);
@@ -56,6 +51,7 @@
   const options = banner.querySelector('.ck-options');
   const pref = banner.querySelector('[data-category="preferences"]');
   const media = banner.querySelector('[data-category="externalMedia"]');
+  const analytics = banner.querySelector('[data-category="analytics"]');
 
   function allowed(category) { return category === 'essential' || !!consent?.categories?.[category]; }
   function publish() {
@@ -63,7 +59,7 @@
       get: () => consent ? JSON.parse(JSON.stringify(consent.categories)) : null,
       has: allowed,
       open: () => openSettings(),
-      reset: () => { try { localStorage.removeItem(KEY); localStorage.removeItem(OLD_KEY); } catch (_) {} consent = null; banner.hidden = false; options.hidden = true; scanMedia(); },
+      reset: () => { try { localStorage.removeItem(KEY); localStorage.removeItem(OLD_KEY); localStorage.removeItem(LEGACY_KEY); } catch (_) {} consent = null; banner.hidden = false; options.hidden = true; scanMedia(); stopAnalytics(); },
       onChange: (callback) => { window.addEventListener('configkit:consentchange', () => callback(window.ConfigKitConsent.get())); }
     };
   }
@@ -87,29 +83,108 @@
       }
     });
   }
+
+  function capturePageView() {
+    if (!allowed('analytics') || !window.posthog || typeof window.posthog.capture !== 'function') return;
+    const cleanPath = window.location.pathname || '/';
+    window.posthog.capture('$pageview', {
+      $current_url: window.location.origin + cleanPath,
+      $pathname: cleanPath
+    });
+  }
+  function stopAnalytics() {
+    if (window.__configKitPosthogReady && window.posthog) {
+      try { window.posthog.opt_out_capturing(); window.posthog.reset(); } catch (_) {}
+    }
+  }
+  function startAnalytics() {
+    if (!allowed('analytics')) return;
+    if (window.__configKitPosthogReady) {
+      try { window.posthog.opt_in_capturing(); capturePageView(); } catch (_) {}
+      return;
+    }
+    const configScript = document.createElement('script');
+    configScript.src = '/posthog-config.js';
+    configScript.onload = () => {
+      const config = window.CONFIGKIT_POSTHOG;
+      if (!config || !config.token || !config.apiHost) return;
+      (function (t, e) {
+        var o, n, p, r;
+        e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) {
+          function g(t, e) {
+            var o = e.split('.');
+            2 === o.length && (t = t[o[0]], e = o[1]);
+            t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))); };
+          }
+          p = t.createElement('script'); p.type = 'text/javascript'; p.crossOrigin = 'anonymous'; p.async = true;
+          p.src = s.api_host.replace('.i.posthog.com', '-assets.i.posthog.com').replace('.posthog.com', '-assets.posthog.com') + '/static/array.js';
+          r = t.getElementsByTagName('script')[0]; r.parentNode.insertBefore(p, r);
+          var u = e;
+          void 0 !== a ? u = e[a] = [] : a = 'posthog';
+          u.people = u.people || [];
+          u.toString = function (t) { var e = 'posthog'; 'posthog' !== a && (e += '.' + a); return t || (e += ' (stub)'), e; };
+          u.people.toString = function () { return u.toString(1) + '.people (stub)'; };
+          o = 'init capture register register_once unregister unregister_for_session opt_out_capturing opt_in_capturing reset get_distinct_id get_session_id get_property'.split(' ');
+          for (n = 0; n < o.length; n++) g(u, o[n]);
+          e._i.push([i, s, a]);
+        }, e.__SV = 1);
+      })(document, window.posthog || []);
+      window.posthog.init(config.token, {
+        api_host: config.apiHost,
+        defaults: '2026-08-30',
+        autocapture: false,
+        capture_pageview: false,
+        capture_pageleave: false,
+        disable_session_recording: true,
+        disable_surveys: true,
+        capture_heatmaps: false,
+        capture_performance: false,
+        person_profiles: 'identified_only',
+        persistence: 'localStorage',
+        respect_dnt: true,
+        before_send: function (event) {
+          if (!event || !event.properties) return event;
+          const props = event.properties;
+          ['$referrer', '$referring_domain', '$initial_referrer', '$initial_referring_domain', '$entry_current_url', '$initial_current_url', '$search_engine'].forEach(key => { delete props[key]; });
+          if (props.$current_url) props.$current_url = window.location.origin + (window.location.pathname || '/');
+          if (props.$pathname) props.$pathname = window.location.pathname || '/';
+          return event;
+        }
+      });
+      window.__configKitPosthogReady = true;
+      capturePageView();
+    };
+    configScript.onerror = () => console.warn('ConfigKit analytics configuration could not be loaded.');
+    document.head.append(configScript);
+  }
+  function syncAnalytics() {
+    if (allowed('analytics')) startAnalytics();
+    else stopAnalytics();
+  }
+
   function openSettings() {
     banner.hidden = false; options.hidden = false;
-    pref.checked = allowed('preferences'); media.checked = allowed('externalMedia');
+    pref.checked = allowed('preferences'); media.checked = allowed('externalMedia'); analytics.checked = allowed('analytics');
     banner.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
-  function save(preferences, externalMedia) {
-    consent = {version:2,updatedAt:new Date().toISOString(),categories:{...defaults,preferences:!!preferences,externalMedia:!!externalMedia}};
+  function save(preferences, externalMedia, analyticsChoice) {
+    consent = {version:3,updatedAt:new Date().toISOString(),categories:{...defaults,preferences:!!preferences,externalMedia:!!externalMedia,analytics:!!analyticsChoice}};
     try { localStorage.setItem(KEY,JSON.stringify(consent)); localStorage.removeItem(OLD_KEY); } catch (_) {}
-    banner.hidden = true; options.hidden = true; publish(); scanMedia();
+    banner.hidden = true; options.hidden = true; publish(); scanMedia(); syncAnalytics();
     window.dispatchEvent(new CustomEvent('configkit:consentchange',{detail:consent.categories}));
   }
   banner.addEventListener('click', event => {
     const action = event.target.closest('button')?.dataset.action;
-    if (action === 'accept') save(true,true);
-    if (action === 'reject') save(false,false);
-    if (action === 'customize') { options.hidden = !options.hidden; pref.checked = allowed('preferences'); media.checked = allowed('externalMedia'); }
-    if (action === 'save') save(pref.checked,media.checked);
+    if (action === 'accept') save(true,true,true);
+    if (action === 'reject') save(false,false,false);
+    if (action === 'customize') { options.hidden = !options.hidden; pref.checked = allowed('preferences'); media.checked = allowed('externalMedia'); analytics.checked = allowed('analytics'); }
+    if (action === 'save') save(pref.checked,media.checked,analytics.checked);
   });
   document.addEventListener('click', event => {
     const link = event.target.closest('a[href="#cookie-settings"],[data-cookie-settings]');
     if (link) { event.preventDefault(); openSettings(); }
   });
   publish();
-  if (consent) { banner.hidden = true; scanMedia(); }
+  if (consent) { banner.hidden = true; scanMedia(); syncAnalytics(); }
   else banner.hidden = false;
 })();
