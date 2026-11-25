@@ -26,10 +26,10 @@
    const card=document.createElement('article');card.className='listing-card';
    const poster=document.createElement('div');poster.className='listing-poster';showPoster(row.poster_url,poster);
    const body=document.createElement('div');body.className='listing-body';
-   const title=document.createElement('h3');title.textContent=row.title;
+   const title=document.createElement('h3');title.textContent=row.title;const detailLink=document.createElement('a');detailLink.href='movie.html?id='+encodeURIComponent(row.id);detailLink.textContent='View movie page →';detailLink.className='movie-detail-link';
    const meta=document.createElement('p');meta.textContent=[row.genre,row.release_year].filter(Boolean).join(' · ')||'Independent film';
    const desc=document.createElement('p');desc.textContent=row.description||'No synopsis provided.';
-   body.append(title,meta,desc);
+   body.append(title,meta,desc,detailLink);
    if(row.trailer_url){const link=document.createElement('a');link.href=safeHttps(row.trailer_url)||'#';link.target='_blank';link.rel='noopener noreferrer';link.textContent='Watch trailer ↗';body.append(link);}
    if(owner){
      const badge=document.createElement('p');badge.textContent=row.visibility==='public'?'Public listing':'Private draft';body.append(badge);
