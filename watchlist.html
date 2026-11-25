@@ -23,7 +23,7 @@
   host.replaceChildren();
   if(!items.length){say('Your watchlist is empty. Open a public movie and choose “Add to my watchlist”.');return;}
   say(items.length+' saved '+(items.length===1?'film':'films'));
-  items.forEach(item=>{
+  for(const item of items){
    const movie=item.movie,card=document.createElement('article');card.className='card';
    const poster=document.createElement('div');poster.className='poster';poster.textContent='🎬';
    if(movie.poster_url){
@@ -42,7 +42,7 @@
    const remove=document.createElement('button');remove.type='button';remove.textContent='Remove from watchlist';
    remove.addEventListener('click',async()=>{remove.disabled=true;const {error}=await db.from('configkit_movie_watchlist').delete().eq('id',item.id).eq('user_id',user.id);if(error){remove.disabled=false;say(error.message);return;}card.remove();const count=host.children.length;say(count+' saved '+(count===1?'film':'films'));if(!count)say('Your watchlist is empty.');});
    actions.append(link,remove);body.append(title,meta,actions);card.append(poster,body);host.append(card);
-  });
+  }
  }catch(error){say(error.message||'Could not load your watchlist.');}
 })();
 </script></body></html>
