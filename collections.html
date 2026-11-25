@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Explore and create ConfigKit Movies collections."><title>Movie collections · ConfigKit Movies</title><link rel="stylesheet" href="brand.css?v=1"><link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
+<style>
+:root{color-scheme:light;--ink:#17251f;--muted:#607168;--line:#dce7df;--paper:#f4f8f5;--green:#176344;--mint:#e4f3e9}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}header,main,footer{width:min(1050px,calc(100% - 32px));margin:auto}header{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;padding:1rem 0;border-bottom:1px solid var(--line)}a{color:var(--green)}.brand{font-weight:850;text-decoration:none;color:var(--ink)}nav{display:flex;gap:1rem;flex-wrap:wrap}main{padding:2rem 0 3rem}h1{font-size:clamp(2rem,5vw,3rem);letter-spacing:-.04em;margin:.3rem 0}.muted{color:var(--muted)}.panel,.collection{background:#fff;border:1px solid var(--line);border-radius:1rem;padding:1.2rem;margin:1rem 0}.field{display:grid;gap:.3rem;margin:.7rem 0}.field input,.field textarea,.field select{font:inherit;padding:.7rem;border:1px solid var(--line);border-radius:.6rem;width:100%}.field textarea{min-height:75px}.row{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}.row>*{flex:1}.button,button{font:inherit;font-weight:700;border:1px solid var(--line);border-radius:.65rem;padding:.55rem .8rem;background:#fff;cursor:pointer;text-decoration:none;color:var(--ink)}button.primary,.button.primary{background:var(--green);color:white;border-color:var(--green)}button.danger{color:#922f2f}.status{padding:.8rem 1rem;border-radius:.7rem;background:var(--mint);margin:.8rem 0}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:.8rem}.movie{padding:.8rem;border:1px solid var(--line);border-radius:.7rem;margin:.6rem 0}.movie h3{margin:0}.movie p{margin:.2rem 0;color:var(--muted);font-size:.92rem}.movie a{font-weight:700}footer{padding:1rem 0 2rem;color:var(--muted)}
+</style></head><body>
+<header><a class="brand" href="movies.html">⌘ ConfigKit · Movies</a><nav><a href="movies.html">Discover</a><a href="watchlist.html">My watchlist</a><a href="dashboard.html">Dashboard</a></nav></header>
+<main><a href="movies.html">← Back to movies</a><h1>Movie collections 🎞️</h1><p class="muted">Create themed playlists, film series and curated collections. Choose whether each collection is private or public.</p>
+<section class="panel"><h2>Create a collection</h2><div id="auth-status" class="status" role="status" aria-live="polite">Checking sign-in…</div><form id="create-form"><div class="field"><label for="title">Collection name</label><input id="title" maxlength="120" required placeholder="e.g. Weekend sci-fi picks"></div><div class="field"><label for="description">Description</label><textarea id="description" maxlength="2000" placeholder="What connects these films?"></textarea></div><div class="field"><label for="visibility">Visibility</label><select id="visibility"><option value="private">Private (only me)</option><option value="public">Public (community)</option></select></div><button class="primary" type="submit">Create collection</button></form></section>
+<section><h2>My collections</h2><div id="mine" class="grid"><p class="muted">Loading…</p></div></section>
+<section><h2>Community collections</h2><div id="community" class="grid"><p class="muted">Loading…</p></div></section>
+</main><footer>ConfigKit Movies · Private collections and their contents are protected by Supabase Row Level Security.</footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+(async()=>{
+ const $=id=>document.getElementById(id),say=(s)=>$('auth-status').textContent=s;
+ const cfg=window.CONFIGKIT_AUTH||{};
+ if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient){say('Movie service is not configured.');return;}
+ const db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+ let user=null,eligibleMovies=[];
+ const safeHttps=v=>{try{const u=new URL(v);return u.protocol==='https:'?u.href:null;}catch(_){return null;}};
+ const empty=(host,msg)=>{host.replaceChildren();const p=document.createElement('p');p.className='muted';p.textContent=msg;host.append(p);};
+ const loadMovies=async()=>{
+  const {data,error}=await db.from('configkit_movies').select('id,title,genre,release_year,visibility').or('visibility.eq.public,user_id.eq.'+user.id).order('created_at',{ascending:false}).limit(100);
+  if(error)throw error;eligibleMovies=data||[];
+ };
+ const renderCollection=async(collection,owner)=>{
+  const card=document.createElement('article');card.className='collection';
+  const heading=document.createElement('h3');heading.textContent=collection.title;
+  const desc=document.createElement('p');desc.className='muted';desc.textContent=collection.description||'A collection of films.';
+  const visibility=document.createElement('p');visibility.className='muted';visibility.textContent=owner?(collection.visibility==='public'?'Public collection':'Private collection'):'Community collection';
+  card.append(heading,desc,visibility);
+  const {data:items,error}=await db.from('configkit_movie_collection_items').select('id,movie_id,added_at').eq('collection_id',collection.id).order('added_at');
+  if(error)throw error;
+  const itemHost=document.createElement('div');
+  for(const item of items||[]){
+   const movie=eligibleMovies.find(m=>m.id===item.movie_id);
+   if(!movie)continue;
+   const line=document.createElement('div');line.className='movie';
+   const title=document.createElement('h3');title.textContent=movie.title;
+   const meta=document.createElement('p');meta.textContent=[movie.genre,movie.release_year].filter(Boolean).join(' · ');
+   const link=document.createElement('a');link.href='movie.html?id='+encodeURIComponent(movie.id);link.textContent='View film →';
+   line.append(title,meta,link);
+   if(owner){const remove=document.createElement('button');remove.className='danger';remove.textContent='Remove';remove.addEventListener('click',async()=>{remove.disabled=true;const {error}=await db.from('configkit_movie_collection_items').delete().eq('id',item.id);if(error){remove.disabled=false;say(error.message);return;}await refresh();});line.append(remove);}
+   itemHost.append(line);
+  }
+  if(!itemHost.children.length){const p=document.createElement('p');p.className='muted';p.textContent='No films added yet.';itemHost.append(p);}
+  card.append(itemHost);
+  if(owner){
+   const addRow=document.createElement('div');addRow.className='row';
+   const select=document.createElement('select');select.setAttribute('aria-label','Choose a movie to add');
+   const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Choose one of your films…';select.append(placeholder);
+   eligibleMovies.forEach(m=>{if((items||[]).some(i=>i.movie_id===m.id))return;const o=document.createElement('option');o.value=m.id;o.textContent=m.title+(m.visibility==='private'?' (private)':'');select.append(o);});
+   const add=document.createElement('button');add.className='primary';add.textContent='Add film';add.addEventListener('click',async()=>{if(!select.value)return;add.disabled=true;const {error}=await db.from('configkit_movie_collection_items').insert({collection_id:collection.id,movie_id:select.value});if(error){say(error.message);add.disabled=false;return;}await refresh();});
+   addRow.append(select,add);card.append(addRow);
+   const actions=document.createElement('div');actions.className='row';
+   const toggle=document.createElement('button');toggle.textContent=collection.visibility==='public'?'Make private':'Publish';toggle.addEventListener('click',async()=>{const next=collection.visibility==='public'?'private':'public';const {error}=await db.from('configkit_movie_collections').update({visibility:next,updated_at:new Date().toISOString()}).eq('id',collection.id).eq('user_id',user.id);if(error){say(error.message);return;}await refresh();});
+   const del=document.createElement('button');del.className='danger';del.textContent='Delete collection';del.addEventListener('click',async()=>{if(!confirm('Delete this collection?'))return;const {error}=await db.from('configkit_movie_collections').delete().eq('id',collection.id).eq('user_id',user.id);if(error){say(error.message);return;}await refresh();});
+   actions.append(toggle,del);card.append(actions);
+  }
+  return card;
+ };
+ const refresh=async()=>{
+  const [mine,community]=await Promise.all([
+   db.from('configkit_movie_collections').select('id,user_id,title,description,visibility,created_at').eq('user_id',user.id).order('created_at',{ascending:false}),
+   db.from('configkit_movie_collections').select('id,user_id,title,description,visibility,created_at').eq('visibility','public').order('created_at',{ascending:false}).limit(60)
+  ]);
+  if(mine.error)throw mine.error;if(community.error)throw community.error;
+  $('mine').replaceChildren();$('community').replaceChildren();
+  if(!mine.data?.length)empty($('mine'),'You have not created any collections yet.');
+  else for(const c of mine.data)$('mine').append(await renderCollection(c,true));
+  const others=(community.data||[]).filter(c=>c.user_id!==user?.id);
+  if(!others.length)empty($('community'),'No public collections from other creators yet.');
+  else for(const c of others)$('community').append(await renderCollection(c,false));
+ };
+ $('create-form').addEventListener('submit',async e=>{
+  e.preventDefault();const button=e.submitter;button.disabled=true;
+  try{const title=$('title').value.trim();if(!title)throw new Error('Enter a collection name.');const {error}=await db.from('configkit_movie_collections').insert({user_id:user.id,title,description:$('description').value.trim(),visibility:$('visibility').value});if(error)throw error;$('create-form').reset();say('Collection created. Add films below.');await refresh();}
+  catch(err){say(err.message||'Could not create collection.');}finally{button.disabled=false;}
+ });
+ try{
+  const {data,error}=await db.auth.getSession();if(error)throw error;user=data.session?.user||null;
+  if(!user){say('Sign in to create collections. Public collections are still browseable below.');$('create-form').hidden=true;const {data:pub,error:pubErr}=await db.from('configkit_movie_collections').select('id,user_id,title,description,visibility,created_at').eq('visibility','public').order('created_at',{ascending:false}).limit(60);if(pubErr)throw pubErr;empty($('mine'),'Sign in to create and manage your collections.');if(!pub?.length)empty($('community'),'No public collections yet.');else{const allMovies=await db.from('configkit_movies').select('id,title,genre,release_year,visibility').eq('visibility','public').limit(150);if(allMovies.error)throw allMovies.error;eligibleMovies=allMovies.data||[];for(const c of pub)$('community').append(await renderCollection(c,false));}return;}
+  say('Signed in. New collections are private by default.');await loadMovies();await refresh();
+ }catch(error){say(error.message||'Could not load collections.');}
+})();
+</script></body></html>
