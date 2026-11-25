@@ -102,6 +102,18 @@
         <div id="workspace-details" class="workspace" hidden><strong>Work account workspace</strong><div id="workplace-label" class="muted"></div><small class="muted">This is a local profile label and does not provide employer-managed access.</small></div>
       </section>
 
+      <section class="card" id="configkit-sync-settings" aria-labelledby="sync-title" style="padding:1.2rem;margin:1rem 0">
+        <span class="eyebrow">Account preferences</span>
+        <h2 id="sync-title">☁️ ConfigKit Sync</h2>
+        <p class="muted">Choose whether your account preference is to keep ConfigKit sync enabled.</p>
+        <label for="configkit-sync-toggle" style="display:flex;align-items:center;gap:.75rem;font-weight:700">
+          <input id="configkit-sync-toggle" type="checkbox" checked style="width:1.2rem;height:1.2rem">
+          Enable sync
+        </label>
+        <p id="configkit-sync-status" class="muted" role="status" aria-live="polite">Loading sync preference…</p>
+        <p class="muted" style="font-size:.9rem">Turning sync off does not delete cloud files or account data. This saves your account preference; individual ConfigKit features must support this setting before all cloud activity can be paused.</p>
+      </section>
+
       <section class="card calendar-time-panel" id="configkit-calendar-time" aria-labelledby="ct-title">
         <div class="ct-top">
           <div><span class="eyebrow">ConfigKit Calendar &amp; Time</span><h2 id="ct-title">Your calendar and world clock</h2><p class="ct-muted">Check today's date, browse months, and see the time in a time zone of your choice.</p></div>
@@ -490,6 +502,27 @@
             return;
           }
           const user = data.session.user;
+          // Sync preference is account-scoped and stored in user metadata.
+          const syncToggle = document.getElementById('configkit-sync-toggle');
+          const syncStatus = document.getElementById('configkit-sync-status');
+          syncToggle.checked = user.user_metadata?.configkit_sync_enabled !== false;
+          syncStatus.textContent = syncToggle.checked ? 'Sync preference: On.' : 'Sync preference: Off.';
+          syncToggle.addEventListener('change', async () => {
+            const enable = syncToggle.checked;
+            if (!enable) {
+              const confirmed = window.confirm('Turn ConfigKit Sync off? This changes your account sync preference. It will NOT delete cloud files or account data. Some ConfigKit features may continue to use cloud storage until they support this preference. Continue?');
+              if (!confirmed) { syncToggle.checked = true; return; }
+            }
+            syncToggle.disabled = true;
+            try {
+              const {data: updated, error: updateError} = await client.auth.updateUser({data:{configkit_sync_enabled:enable}});
+              if (updateError) throw updateError;
+              syncStatus.textContent = enable ? 'Sync preference saved: On.' : 'Sync preference saved: Off. Your cloud data has not been deleted.';
+            } catch (syncError) {
+              syncToggle.checked = !enable;
+              syncStatus.textContent = syncError.message || 'Could not save your sync preference.';
+            } finally { syncToggle.disabled = false; }
+          });
           await loadConfigKitCoins();
           const metadata = user.user_metadata || {};
           const achievementDefinitions = [
