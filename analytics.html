@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Private creator analytics for ConfigKit Movies."><title>Creator analytics · ConfigKit Movies</title><link rel="stylesheet" href="brand.css?v=1"><link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
+<style>
+:root{color-scheme:light;--ink:#17251f;--muted:#607168;--line:#dce7df;--paper:#f4f8f5;--green:#176344;--mint:#e4f3e9}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}header,main,footer{width:min(1050px,calc(100% - 32px));margin:auto}header{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;padding:1rem 0;border-bottom:1px solid var(--line)}nav{display:flex;gap:1rem;flex-wrap:wrap}.brand{font-weight:850;text-decoration:none;color:var(--ink)}a{color:var(--green)}main{padding:2rem 0 3rem}h1{font-size:clamp(2rem,5vw,3rem);letter-spacing:-.04em;margin:.3rem 0}.muted{color:var(--muted)}.status{padding:.8rem 1rem;border-radius:.7rem;background:var(--mint);margin:1rem 0}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.8rem;margin:1.2rem 0}.metric,.film{background:white;border:1px solid var(--line);border-radius:.9rem;padding:1rem}.metric span{display:block;color:var(--muted);font-size:.9rem}.metric strong{display:block;font-size:2rem;line-height:1.3}.films{display:grid;gap:.8rem}.film{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.8rem;align-items:center}.film h3{margin:0}.film p{margin:.2rem 0;color:var(--muted)}.film a{font-weight:750}button{font:inherit;border:1px solid var(--line);border-radius:.6rem;background:white;padding:.5rem .8rem;color:var(--green);font-weight:700;cursor:pointer}@media(max-width:600px){.film{grid-template-columns:1fr}}
+</style></head><body><header><a class="brand" href="movies.html">⌘ ConfigKit · Movies</a><nav><a href="movies.html">Discover</a><a href="collections.html">Collections</a><a href="notifications.html">Notifications</a><a href="dashboard.html">Dashboard</a></nav></header>
+<main><a href="movies.html">← Back to Movies</a><h1>Creator analytics 📊</h1><p class="muted">A private snapshot of how your public films are performing.</p><div id="status" class="status" role="status" aria-live="polite">Loading your creator stats…</div><section id="metrics" class="metrics" aria-label="Creator overview"></section><h2>Your films</h2><p class="muted">Views count recorded public movie-page visits. Ratings and reviews include public community feedback.</p><section id="films" class="films"></section></main><footer style="width:min(1050px,calc(100% - 32px));margin:auto;padding:1rem 0 2rem" class="muted">Analytics are visible only to the signed-in creator. View counts are approximate and can include repeat visits.</footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+(async()=>{
+ const $=id=>document.getElementById(id),status=$('status');
+ const setStatus=s=>status.textContent=s;
+ const metric=(label,value)=>{const el=document.createElement('article');el.className='metric';const strong=document.createElement('strong');strong.textContent=String(value);const span=document.createElement('span');span.textContent=label;el.append(strong,span);return el;};
+ try{
+  const cfg=window.CONFIGKIT_AUTH||{};
+  if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient)throw new Error('Movie service is not configured.');
+  const db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+  const {data:session,error:sessionError}=await db.auth.getSession();if(sessionError)throw sessionError;
+  const user=session?.session?.user;if(!user){setStatus('Sign in to view your private creator analytics.');const a=document.createElement('a');a.href='login.html?next=analytics.html';a.textContent='Sign in';$('films').append(a);return;}
+  const {data:movies,error:movieError}=await db.from('configkit_movies').select('id,title,visibility,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(200);
+  if(movieError)throw movieError;
+  const rows=movies||[],ids=rows.map(m=>m.id);
+  const [follows,views,reviews]=await Promise.all([
+   db.from('configkit_movie_follows').select('id',{count:'exact',head:true}).eq('creator_id',user.id),
+   ids.length?db.from('configkit_movie_view_events').select('id,movie_id').in('movie_id',ids):Promise.resolve({data:[],error:null}),
+   ids.length?db.from('configkit_movie_reviews').select('id,movie_id,rating').in('movie_id',ids):Promise.resolve({data:[],error:null})
+  ]);
+  if(follows.error)throw follows.error;if(views.error)throw views.error;if(reviews.error)throw reviews.error;
+  const viewRows=views.data||[],reviewRows=reviews.data||[];
+  const avg=reviewRows.length?reviewRows.reduce((n,r)=>n+Number(r.rating),0)/reviewRows.length:0;
+  $('metrics').append(metric('Public films',rows.filter(m=>m.visibility==='public').length),metric('Total recorded views',viewRows.length),metric('Followers',follows.count||0),metric('Community reviews',reviewRows.length),metric('Average rating',reviewRows.length?avg.toFixed(1)+' / 5':'—'));
+  if(!rows.length){setStatus('You have not created any movie listings yet.');return;}
+  for(const movie of rows){
+   const card=document.createElement('article');card.className='film';
+   const info=document.createElement('div');const title=document.createElement('h3');title.textContent=movie.title;
+   const v=viewRows.filter(v=>v.movie_id===movie.id).length,rs=reviewRows.filter(r=>r.movie_id===movie.id),rating=rs.length?(rs.reduce((n,r)=>n+Number(r.rating),0)/rs.length).toFixed(1)+'/5':'No ratings';
+   const p=document.createElement('p');p.textContent=(movie.visibility==='public'?'Public':'Private')+' · '+v+' views · '+rs.length+' reviews · '+rating;
+   info.append(title,p);const link=document.createElement('a');link.href='movie.html?id='+encodeURIComponent(movie.id);link.textContent='View film →';card.append(info,link);$('films').append(card);
+  }
+  setStatus('Analytics loaded. Counts reflect recorded activity available to your account.');
+ }catch(error){setStatus(error.message||'Could not load analytics.');}
+})();
+</script></body></html>
