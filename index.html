@@ -777,9 +777,9 @@
       }
     };
 
-    const COOKIE_CONSENT_KEY = 'configkit-cookie-consent-v2';
+    const COOKIE_CONSENT_KEY = 'configkit-cookie-consent-v3';
     function readCookieConsent() {
-      try { const value = JSON.parse(localStorage.getItem(COOKIE_CONSENT_KEY) || 'null'); return value && value.version === 2 ? value : null; }
+      try { const value = JSON.parse(localStorage.getItem(COOKIE_CONSENT_KEY) || 'null'); return value && value.version === 3 ? value : null; }
       catch (_) { return null; }
     }
     let cookieConsent = readCookieConsent();
@@ -975,6 +975,6 @@
   <script src="auth-config.js?v=passkey-policy-20261123"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
   <script src="saved-profiles.js"></script>
-  <script src="/cookie-consent.js?v=2" defer></script>
+  <script src="/cookie-consent.js?v=3" defer></script>
 </body>
 </html>
