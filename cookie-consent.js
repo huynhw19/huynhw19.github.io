@@ -117,7 +117,7 @@
             t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))); };
           }
           p = t.createElement('script'); p.type = 'text/javascript'; p.crossOrigin = 'anonymous'; p.async = true;
-          p.src = s.api_host.replace('.i.posthog.com', '-assets.i.posthog.com').replace('.posthog.com', '-assets.posthog.com') + '/static/array.js';
+          p.src = (s.api_host.endsWith('.i.posthog.com') ? s.api_host.replace('.i.posthog.com', '-assets.i.posthog.com') : s.api_host.replace('.posthog.com', '-assets.posthog.com')) + '/static/array.js';
           r = t.getElementsByTagName('script')[0]; r.parentNode.insertBefore(p, r);
           var u = e;
           void 0 !== a ? u = e[a] = [] : a = 'posthog';
