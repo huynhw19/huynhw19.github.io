@@ -23,6 +23,28 @@
 <section id="game-viewer" class="viewer hidden"><div class="viewer-head"><div><span class="eyebrow">Now playing</span><h2 id="viewer-title">Game</h2><p id="viewer-description" class="muted"></p></div><div class="actions"><button id="share-game" class="secondary" type="button">Copy share link</button><button id="close-game" class="secondary" type="button">Close game</button></div></div><iframe id="game-frame" title="Community game" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe><p class="meta">This game runs in an isolated browser frame. Avoid entering personal information.</p></section>
 </main>
 <footer>ConfigKit Community Games · <a href="privacy.html">Privacy</a> · <a href="safety.html">Safety</a></footer>
+<script>
+/* Keep startup failures visible instead of leaving the catalogue on "Loading…" */
+(() => {
+  const showStartupError = message => {
+    const status = document.getElementById('status');
+    if (!status || !/Loading community games|Loading games/i.test(status.textContent)) return;
+    status.textContent = 'Community Games startup error: ' + message;
+    status.classList.add('error');
+  };
+  window.addEventListener('error', event => {
+    const detail = event.message || event.error?.message || 'A page script failed to load or run.';
+    showStartupError(detail);
+  });
+  window.addEventListener('unhandledrejection', event => {
+    const reason = event.reason;
+    showStartupError(reason?.message || String(reason || 'An unexpected startup promise failed.'));
+  });
+  window.setTimeout(() => {
+    showStartupError('The page did not finish starting. A script may be blocked or failed before the catalogue could initialize. Try refreshing, or contact the site owner with this message.');
+  }, 20000);
+})();
+</script>
 <script src="auth-config.js"></script><script async data-supabase-sdk src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (async()=> {
