@@ -82,6 +82,32 @@
           <article class="tile"><h3>⚙️ School settings</h3><p>Configure school identity, term dates, defaults, access and local policies.</p><span class="tag">Planned</span></article>
         </div>
       </section>
+
+      <section class="panel" id="school-management">
+        <h2>🏫 Schools &amp; Classes Management</h2>
+        <p class="muted">Create school spaces and organise classes. Records are restricted by your administrator role and school scope.</p>
+        <div id="school-create-wrap" hidden><h3>Create a school</h3>
+          <form id="school-create-form" class="grid">
+            <label>School name<input name="name" required maxlength="160" placeholder="e.g. ConfigKit Learning Academy"></label>
+            <label>School URL slug<input name="slug" required maxlength="80" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="configkit-learning-academy"></label>
+            <label>Time zone<input name="timezone" maxlength="80" value="Australia/Melbourne"></label>
+            <div><button class="button" type="submit">Create school</button></div>
+          </form>
+        </div>
+        <p id="management-status" class="status" role="status" aria-live="polite">Loading your school workspace…</p>
+        <h3>Your schools</h3><div id="schools-list" class="grid"></div>
+        <div id="class-create-wrap" hidden><h3>Create a class</h3>
+          <form id="class-create-form" class="grid">
+            <label>School<select name="school_id" id="class-school" required></select></label>
+            <label>Class name<input name="name" required maxlength="120" placeholder="Year 5 - Room A"></label>
+            <label>Year / grade<input name="year_level" maxlength="60" placeholder="Year 5"></label>
+            <label>Academic year<input name="academic_year" maxlength="40" placeholder="2027"></label>
+            <div><button class="button" type="submit">Create class</button></div>
+          </form>
+        </div>
+        <h3>Classes</h3><div id="classes-list" class="grid"></div>
+      </section>
+
       <section class="panel">
         <h2>Connected Education tools</h2>
         <p>These existing ConfigKit workspaces remain available while the central administration features are developed.</p>
@@ -120,6 +146,7 @@
       });
       const { data: sessionData, error: sessionError } = await client.auth.getSession();
       const user = sessionData?.session?.user;
+      window.educationAdminUserId = user?.id || null;
       if (sessionError || !user) {
         status.textContent = 'Please sign in to check your Education Admin access.';
         document.getElementById('login-link').hidden = false;
@@ -139,6 +166,7 @@
           status.textContent = 'Clipboard access is unavailable. Select and copy the SQL above.';
         }
       });
+      window.educationAdminClient = client;
       const { data: roles, error: roleError } = await client
         .from('education_admin_roles')
         .select('role,school_name,created_at')
@@ -153,11 +181,13 @@
         document.getElementById('bootstrap-panel').hidden = false;
         return;
       }
+      window.educationAdminRoles = roles;
       const highest = roles.find(r => r.role === 'super_admin') || roles.find(r => r.role === 'school_admin') || roles[0];
       const labels = roles.map(r => r.role.replace('_',' ') + (r.school_name ? ' · ' + r.school_name : ''));
       document.getElementById('role-label').textContent = labels.join(' | ');
       status.textContent = 'Administrator role verified. The workspace below is enabled for your assigned role.';
       document.getElementById('admin-workspace').hidden = false;
+      window.dispatchEvent(new Event('configkit-education-admin-ready'));
       if (highest.role !== 'super_admin') {
         const note = document.createElement('p');
         note.className = 'status';
@@ -171,6 +201,69 @@
       console.error(error);
     });
   </script>
+
+  <script>
+    (() => {
+      async function init() {
+        const client=window.educationAdminClient, roles=window.educationAdminRoles;
+        if(!client||!roles)return;
+        const status=document.getElementById('management-status');
+        const setStatus=(m,e=false)=>{status.textContent=m;status.className=e?'status error':'status';};
+        const isSuper=roles.some(r=>r.role==='super_admin'), canManage=isSuper||roles.some(r=>r.role==='school_admin');
+        document.getElementById('school-create-wrap').hidden=!isSuper;
+        document.getElementById('class-create-wrap').hidden=!canManage;
+        const schoolsList=document.getElementById('schools-list'),classesList=document.getElementById('classes-list'),schoolSelect=document.getElementById('class-school');
+        const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        async function audit(action,schoolName,targetId,details={}) {
+          const {error}=await client.from('education_admin_audit_logs').insert({actor_user_id:window.educationAdminUserId,school_name:schoolName,action,target_type:'education_admin',target_id:targetId,details});
+          if(error)console.warn('Audit entry not recorded:',error.message);
+        }
+        async function load(){
+          setStatus('Loading schools and classes…');
+          const {data:schools,error:se}=await client.from('education_schools').select('id,name,slug,status,timezone').order('name');
+          if(se){setStatus('Could not load schools: '+se.message,true);return;}
+          schoolsList.innerHTML='';schoolSelect.innerHTML='';
+          (schools||[]).forEach(s=>{
+            const card=document.createElement('article');card.className='tile';
+            card.innerHTML='<h3>'+esc(s.name)+'</h3><p>Slug: '+esc(s.slug)+'<br>Time zone: '+esc(s.timezone)+'<br>Status: <strong>'+esc(s.status)+'</strong></p>';
+            if(canManage){const b=document.createElement('button');b.type='button';b.className='button secondary';b.textContent=s.status==='active'?'Pause school':'Activate school';b.addEventListener('click',async()=>{
+              const next=s.status==='active'?'paused':'active', {error}=await client.from('education_schools').update({status:next}).eq('id',s.id);
+              if(error){setStatus('Could not update school: '+error.message,true);return;}await audit('school_status_changed',s.name,s.id,{status:next});load();
+            });card.appendChild(b);}schoolsList.appendChild(card);
+            const o=document.createElement('option');o.value=s.id;o.textContent=s.name;schoolSelect.appendChild(o);
+          });
+          if(!schools?.length)schoolsList.textContent='No schools are assigned to your account yet.';
+          const {data:classes,error:ce}=await client.from('education_classes').select('id,name,year_level,academic_year,status,school_id,education_schools(name)').order('name');
+          if(ce){setStatus('Schools loaded, but classes could not be loaded: '+ce.message,true);return;}
+          classesList.innerHTML='';
+          (classes||[]).forEach(cl=>{
+            const card=document.createElement('article');card.className='tile';
+            card.innerHTML='<h3>'+esc(cl.name)+'</h3><p>'+esc(cl.education_schools?.name||'School')+'<br>'+esc(cl.year_level||'Year not set')+' · '+esc(cl.academic_year||'Academic year not set')+'<br>Status: '+esc(cl.status)+'</p>';
+            if(canManage){const b=document.createElement('button');b.type='button';b.className='button secondary';b.textContent=cl.status==='active'?'Archive class':'Reactivate class';b.addEventListener('click',async()=>{
+              const next=cl.status==='active'?'archived':'active', {error}=await client.from('education_classes').update({status:next}).eq('id',cl.id);
+              if(error){setStatus('Could not update class: '+error.message,true);return;}await audit('class_status_changed',cl.education_schools?.name||null,cl.id,{status:next});load();
+            });card.appendChild(b);}classesList.appendChild(card);
+          });
+          if(!classes?.length)classesList.textContent='No classes have been created yet.';
+          setStatus((schools?.length||0)+' school(s) and '+(classes?.length||0)+' class(es) visible in your authorised scope.');
+        }
+        document.getElementById('school-create-form').addEventListener('submit',async e=>{
+          e.preventDefault();const form=e.currentTarget,v=Object.fromEntries(new FormData(form));
+          const {data,error}=await client.from('education_schools').insert({name:v.name.trim(),slug:v.slug.trim().toLowerCase(),timezone:v.timezone.trim()||'Australia/Melbourne',created_by:window.educationAdminUserId}).select('id,name').single();
+          if(error){setStatus('Could not create school: '+error.message,true);return;}await audit('school_created',data.name,data.id,{slug:v.slug});form.reset();setStatus('School created successfully.');load();
+        });
+        document.getElementById('class-create-form').addEventListener('submit',async e=>{
+          e.preventDefault();const form=e.currentTarget,v=Object.fromEntries(new FormData(form));
+          const {data:school}=await client.from('education_schools').select('name').eq('id',v.school_id).maybeSingle();
+          const {data,error}=await client.from('education_classes').insert({school_id:v.school_id,name:v.name.trim(),year_level:v.year_level.trim()||null,academic_year:v.academic_year.trim()||null,created_by:window.educationAdminUserId}).select('id').single();
+          if(error){setStatus('Could not create class: '+error.message,true);return;}await audit('class_created',school?.name||null,data.id,{class_name:v.name});form.reset();setStatus('Class created successfully.');load();
+        });
+        load();
+      }
+      window.addEventListener('configkit-education-admin-ready',init,{once:true});
+    })();
+  </script>
+
   <script src="/cookie-consent.js?v=2" defer></script>
 </body>
 </html>
