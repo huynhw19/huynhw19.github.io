@@ -6,5 +6,5 @@
 <body><main class="panel"><span class="mark">⌘</span><h1>We’ll be back soon</h1><p id="message">ConfigKit is temporarily in maintenance mode while we make improvements. Please check back shortly.</p><p class="small">Thank you for your patience.</p></main>
 <script>
 (async()=>{try{const r=await fetch('https://gwhqnqzzlgslwgijkkpt.supabase.co/functions/v1/owner-site-control',{headers:{apikey:'sb_publishable_qf35m_HhuP-QC_lFVlfmWg_VLPoUY7w'},cache:'no-store'});if(r.ok){const s=await r.json();if(!s.maintenance_mode){location.replace('index.html');return}if(s.maintenance_message)document.getElementById('message').textContent=s.maintenance_message}}catch(_){}})();
-</script>  <script src="/cookie-consent.js?v=2" defer></script>
+</script>  <script src="/cookie-consent.js?v=3" defer></script>
 </body></html>
