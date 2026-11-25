@@ -108,6 +108,23 @@
         <h3>Classes</h3><div id="classes-list" class="grid"></div>
       </section>
 
+      <section class="panel" id="student-roster-management">
+        <h2>🎒 Student Roster &amp; Enrolment</h2>
+        <p class="muted">View the minimum student details needed for class organisation and enrol existing school records into classes. Contact details and private notes are deliberately excluded.</p>
+        <div class="grid">
+          <label>School<select id="roster-school" required></select></label>
+          <label>Class<select id="roster-class" required></select></label>
+        </div>
+        <div id="enrol-student-wrap" hidden>
+          <form id="enrol-student-form" class="grid">
+            <label>Student to enrol<select id="roster-student" required></select></label>
+            <div><button class="button" type="submit">Add student to class</button></div>
+          </form>
+        </div>
+        <p id="roster-status" class="status" role="status" aria-live="polite">Loading student roster…</p>
+        <h3>Class roster</h3><div id="roster-list" class="grid"></div>
+      </section>
+
       <section class="panel" id="staff-management">
         <h2>👩‍🏫 Staff &amp; Access Management</h2>
         <p class="muted">Assign teacher and school-admin access using the staff member’s ConfigKit account UUID. Staff receive access only within the selected school. Email addresses and student records are not exposed in this directory.</p>
@@ -359,6 +376,119 @@
         loadStaff();
       }
       window.addEventListener('configkit-education-admin-ready',initStaff,{once:true});
+    })();
+  </script>
+
+  <script>
+    (() => {
+      async function initRoster() {
+        const client=window.educationAdminClient, roles=window.educationAdminRoles||[];
+        if(!client||!roles.length)return;
+        const isSuper=roles.some(r=>r.role==='super_admin');
+        const canManage=isSuper||roles.some(r=>r.role==='school_admin');
+        const schoolSelect=document.getElementById('roster-school');
+        const classSelect=document.getElementById('roster-class');
+        const studentSelect=document.getElementById('roster-student');
+        const status=document.getElementById('roster-status');
+        const rosterList=document.getElementById('roster-list');
+        const enrolWrap=document.getElementById('enrol-student-wrap');
+        enrolWrap.hidden=!canManage;
+        const setStatus=(m,e=false)=>{status.textContent=m;status.className=e?'status error':'status';};
+        const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        let schools=[],classes=[],students=[],memberships=[];
+        async function audit(action,schoolName,classId,studentId) {
+          const {error}=await client.from('education_admin_audit_logs').insert({
+            actor_user_id:window.educationAdminUserId,school_name:schoolName,
+            action,target_type:'education_class_membership',target_id:classId,
+            details:{education_student_id:studentId}
+          });
+          if(error)console.warn('Roster audit entry not recorded:',error.message);
+        }
+        function selectedSchool(){return schools.find(s=>s.id===schoolSelect.value);}
+        function selectedClass(){return classes.find(cl=>cl.id===classSelect.value);}
+        async function refreshRoster() {
+          const school=selectedSchool();
+          if(!school)return;
+          const schoolClasses=classes.filter(cl=>cl.school_id===school.id);
+          classSelect.innerHTML='';
+          schoolClasses.forEach(cl=>{const o=document.createElement('option');o.value=cl.id;o.textContent=cl.name;classSelect.appendChild(o);});
+          const {data:roster,error:re}=await client.from('education_admin_student_roster').select('id,student_name,grade,school').eq('school',school.name).order('student_name');
+          if(error){setStatus('Could not load the restricted student roster: '+error.message,true);return;}
+          students=roster||[];
+          const classIds=schoolClasses.map(cl=>cl.id);
+          if(classIds.length) {
+            const {data:memberRows,error:me}=await client.from('education_class_memberships').select('id,class_id,education_student_id').in('class_id',classIds);
+            if(me){setStatus('Could not load class enrolments: '+me.message,true);return;}
+            memberships=memberRows||[];
+          } else memberships=[];
+          render();
+          setStatus(students.length+' student record(s) available in '+school.name+'; '+schoolClasses.length+' class(es) in scope.');
+        }
+        function render() {
+          const cl=selectedClass();
+          rosterList.innerHTML='';
+          if(!cl){rosterList.textContent='No classes exist for this school yet.';studentSelect.innerHTML='';return;}
+          const enrolled=memberships.filter(m=>m.class_id===cl.id);
+          const enrolledIds=new Set(enrolled.map(m=>m.education_student_id));
+          studentSelect.innerHTML='';
+          students.filter(s=>!enrolledIds.has(s.id)).forEach(s=>{
+            const o=document.createElement('option');o.value=s.id;o.textContent=s.student_name+(s.grade?' · '+s.grade:'');studentSelect.appendChild(o);
+          });
+          const card=document.createElement('article');card.className='tile';
+          card.innerHTML='<h3>'+esc(cl.name)+'</h3><p>'+enrolled.length+' enrolled student(s)</p>';
+          if(!enrolled.length) {
+            const empty=document.createElement('p');empty.className='muted';empty.textContent='No students enrolled in this class yet.';card.appendChild(empty);
+          }
+          enrolled.forEach(m=>{
+            const student=students.find(s=>s.id===m.education_student_id);
+            if(!student)return;
+            const line=document.createElement('div');line.className='role-line';
+            const name=document.createElement('span');name.textContent=student.student_name+(student.grade?' · '+student.grade:'');
+            line.appendChild(name);
+            if(canManage) {
+              const remove=document.createElement('button');remove.type='button';remove.className='button secondary';remove.textContent='Remove';
+              remove.addEventListener('click',async()=>{
+                if(!confirm('Remove '+student.student_name+' from '+cl.name+'?'))return;
+                const {error}=await client.from('education_class_memberships').delete().eq('id',m.id);
+                if(error){setStatus('Could not remove enrolment: '+error.message,true);return;}
+                await audit('student_removed_from_class',selectedSchool().name,cl.id,student.id);
+                setStatus('Student removed from class.');await refreshRoster();
+              });
+              line.appendChild(remove);
+            }
+            card.appendChild(line);
+          });
+          rosterList.appendChild(card);
+          if(canManage&&students.filter(s=>!enrolledIds.has(s.id)).length===0) {
+            const note=document.createElement('p');note.className='muted';note.textContent='All available students are already enrolled in this class.';rosterList.appendChild(note);
+          }
+        }
+        document.getElementById('enrol-student-form').addEventListener('submit',async e=>{
+          e.preventDefault();
+          const cl=selectedClass(),school=selectedSchool(),studentId=studentSelect.value;
+          if(!cl||!school||!studentId){setStatus('Choose a class and an available student first.',true);return;}
+          const {data,error}=await client.from('education_class_memberships').insert({
+            class_id:cl.id,education_student_id:studentId,added_by:window.educationAdminUserId
+          }).select('id').single();
+          if(error){setStatus('Could not enrol student: '+error.message,true);return;}
+          await audit('student_enrolled_in_class',school.name,cl.id,studentId);
+          setStatus('Student enrolled successfully.');await refreshRoster();
+        });
+        classSelect.addEventListener('change',render);
+        schoolSelect.addEventListener('change',refreshRoster);
+        setStatus('Loading schools and classes…');
+        const {data:classRows,error:ce}=await client.from('education_classes').select('id,name,school_id,education_schools(name)').order('name');
+        if(ce){setStatus('Could not load classes: '+ce.message,true);return;}
+        classes=(classRows||[]).map(cl=>({...cl,school_name:cl.education_schools?.name||''}));
+        const schoolMap=new Map();
+        classes.forEach(cl=>{if(cl.school_id&&cl.school_name)schoolMap.set(cl.school_id,{id:cl.school_id,name:cl.school_name});});
+        schools=[...schoolMap.values()].sort((a,b)=>a.name.localeCompare(b.name));
+        schoolSelect.innerHTML='';
+        schools.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;schoolSelect.appendChild(o);});
+        if(!schools.length){setStatus('No classes are available in your school scope yet. Create a class first, then manage its roster here.');return;}
+        await refreshRoster();
+      }
+      window.addEventListener('configkit-education-admin-ready',initRoster,{once:true});
     })();
   </script>
 
