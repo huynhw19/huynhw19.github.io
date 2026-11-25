@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Explore an independent film on ConfigKit Movies.">
+<title>Movie details · ConfigKit Movies</title>
+<link rel="stylesheet" href="brand.css?v=1"><link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
+<style>
+:root{color-scheme:light;--ink:#17251f;--muted:#607168;--line:#dce7df;--paper:#f4f8f5;--green:#176344;--mint:#e4f3e9;--shadow:0 14px 34px rgba(18,54,37,.08)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green)}header,main,footer{width:min(1000px,calc(100% - 32px));margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:1rem 0;border-bottom:1px solid var(--line)}.brand{font-weight:850;text-decoration:none;color:var(--ink)}nav{display:flex;gap:1rem;flex-wrap:wrap}main{padding:2rem 0 3rem}.back{display:inline-block;margin-bottom:1rem;font-weight:700}.detail{display:grid;grid-template-columns:minmax(220px,340px) minmax(0,1fr);gap:clamp(1.2rem,4vw,2.5rem);background:white;border:1px solid var(--line);border-radius:1.2rem;padding:clamp(1rem,3vw,2rem);box-shadow:var(--shadow)}.poster{background:linear-gradient(145deg,#dcebe1,#f5f8f5);border-radius:.9rem;overflow:hidden;min-height:300px;display:grid;place-items:center;font-size:3rem;color:var(--muted)}.poster img{width:100%;height:100%;min-height:300px;max-height:520px;object-fit:cover}.eyebrow{display:inline-block;padding:.25rem .7rem;border-radius:99px;background:var(--mint);color:#104b33;font-weight:800;font-size:.82rem}.content h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.08;letter-spacing:-.04em;margin:.7rem 0}.meta{color:var(--muted);font-weight:650}.synopsis{white-space:pre-wrap;overflow-wrap:anywhere}.button{display:inline-flex;padding:.7rem 1rem;border-radius:.75rem;background:var(--green);color:white;text-decoration:none;font-weight:750}.status{padding:.9rem 1rem;border-radius:.75rem;background:var(--mint);color:#104b33;margin:.8rem 0}.status.error{background:#fff0f0;color:#922f2f}.creator{margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}footer{padding:1.5rem 0 2.5rem;color:var(--muted)}@media(max-width:650px){header{align-items:flex-start;flex-direction:column}.detail{grid-template-columns:1fr}.poster,.poster img{min-height:240px;max-height:420px}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="movies.html">⌘ ConfigKit · Movies</a><nav aria-label="Main navigation"><a href="movies.html">Discover movies</a><a href="dashboard.html">Dashboard</a></nav></header>
+<main><a class="back" href="movies.html">← Back to movies</a><div id="movie-status" class="status" role="status" aria-live="polite">Loading movie details…</div><article id="movie-detail" class="detail" hidden><div id="movie-poster" class="poster" aria-label="Movie poster">🎬</div><div class="content"><span class="eyebrow">ConfigKit Movies</span><h1 id="movie-title"></h1><p id="movie-meta" class="meta"></p><h2>About this film</h2><p id="movie-description" class="synopsis"></p><a id="movie-trailer" class="button" target="_blank" rel="noopener noreferrer" hidden>Watch trailer ↗</a><div class="creator">Published by a ConfigKit creator</div></div></article></main>
+<footer>ConfigKit Movies · Respect copyright and privacy. Only share films and media you own or have permission to use.</footer>
+<script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+ const $=id=>document.getElementById(id),status=$('movie-status'),detail=$('movie-detail');
+ const setStatus=(message,error=false)=>{status.textContent=message;status.classList.toggle('error',error);};
+ const safeHttps=value=>{if(!value)return null;try{const u=new URL(value);return u.protocol==='https:'?u.href:null;}catch(_){return null;}};
+ const storedPath=value=>typeof value==='string'&&/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|jpeg|png|webp)$/i.test(value);
+ (async()=>{
+  try{
+   const cfg=window.CONFIGKIT_AUTH||{};
+   if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient)throw new Error('Movie service is not configured.');
+   const id=new URLSearchParams(location.search).get('id');
+   if(!id||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))throw new Error('That movie link is missing or invalid.');
+   const db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+   const {data:auth}=await db.auth.getSession();
+   const {data:row,error}=await db.from('configkit_movies').select('id,user_id,title,description,genre,release_year,poster_url,trailer_url,visibility,created_at').eq('id',id).maybeSingle();
+   if(error)throw error;
+   if(!row)throw new Error('This movie could not be found, or it is private.');
+   const own=!!auth?.session?.user?.id&&auth.session.user.id===row.user_id;
+   if(row.visibility!=='public'&&!own)throw new Error('This movie is private.');
+   $('movie-title').textContent=row.title;
+   $('movie-meta').textContent=[row.genre,row.release_year].filter(Boolean).join(' · ')||'Independent film';
+   $('movie-description').textContent=row.description||'The creator has not added a synopsis yet.';
+   if(row.trailer_url){const url=safeHttps(row.trailer_url);if(url){const link=$('movie-trailer');link.href=url;link.hidden=false;}}
+   const poster=$('movie-poster');
+   if(row.poster_url){
+    let src=safeHttps(row.poster_url);
+    if(storedPath(row.poster_url)){const {data,error}=await db.storage.from('configkit-movie-posters').createSignedUrl(row.poster_url,3600);if(!error&&data?.signedUrl)src=data.signedUrl;}
+    if(src){const img=document.createElement('img');img.src=src;img.alt='Poster for '+row.title;img.referrerPolicy='no-referrer';img.onerror=()=>{poster.textContent='🎬';};poster.replaceChildren(img);}
+   }
+   detail.hidden=false;status.hidden=true;document.title=row.title+' · ConfigKit Movies';
+  }catch(error){setStatus(error.message||'Could not load this movie.',true);}
+ })();
+})();
+</script>
+</body>
+</html>
