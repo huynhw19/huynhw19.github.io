@@ -173,12 +173,24 @@
     banner.hidden = true; options.hidden = true; publish(); scanMedia(); syncAnalytics();
     window.dispatchEvent(new CustomEvent('configkit:consentchange',{detail:consent.categories}));
   }
-  banner.addEventListener('click', event => {
-    const action = event.target.closest('button')?.dataset.action;
-    if (action === 'accept') save(true,true,true);
-    if (action === 'reject') save(false,false,false);
-    if (action === 'customize') { options.hidden = !options.hidden; pref.checked = allowed('preferences'); media.checked = allowed('externalMedia'); analytics.checked = allowed('analytics'); }
-    if (action === 'save') save(pref.checked,media.checked,analytics.checked);
+  // Bind each consent action directly. This avoids delegated-click edge cases
+  // on mobile browsers and ensures the Save button always closes the banner.
+  banner.querySelectorAll('button[data-action]').forEach(button => {
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      const action = button.dataset.action;
+      if (action === 'accept') save(true,true,true);
+      else if (action === 'reject') save(false,false,false);
+      else if (action === 'customize') {
+        options.hidden = !options.hidden;
+        pref.checked = allowed('preferences');
+        media.checked = allowed('externalMedia');
+        analytics.checked = allowed('analytics');
+      } else if (action === 'save') {
+        save(pref.checked,media.checked,analytics.checked);
+      }
+    });
   });
   document.addEventListener('click', event => {
     const link = event.target.closest('a[href="#cookie-settings"],[data-cookie-settings]');
