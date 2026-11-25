@@ -11,7 +11,7 @@
 </style>
 </head>
 <body>
-<header><a class="brand" href="movies.html">⌘ ConfigKit · Movies</a><nav aria-label="Main navigation"><a href="movies.html">Discover movies</a><a href="dashboard.html">Dashboard</a></nav></header>
+<header><a class="brand" href="movies.html">⌘ ConfigKit · Movies</a><nav aria-label="Main navigation"><a href="movies.html">Discover movies</a><a href="analytics.html">Creator analytics</a><a href="dashboard.html">Dashboard</a></nav></header>
 <main><a class="back" href="movies.html">← Back to movies</a><div id="movie-status" class="status" role="status" aria-live="polite">Loading movie details…</div><article id="movie-detail" class="detail" hidden><div id="movie-poster" class="poster" aria-label="Movie poster">🎬</div><div class="content"><span class="eyebrow">ConfigKit Movies</span><h1 id="movie-title"></h1><p id="movie-meta" class="meta"></p><h2>About this film</h2><p id="movie-description" class="synopsis"></p><a id="movie-trailer" class="button" target="_blank" rel="noopener noreferrer" hidden>Watch trailer ↗</a><div class="creator">Published by a ConfigKit creator · <a id="creator-link" href="#">View creator’s public films →</a><div id="watchlist-control" style="margin-top:.8rem"></div></div></div></article><section id="reviews-section" class="reviews" aria-labelledby="reviews-heading" hidden><h2 id="reviews-heading">Ratings &amp; reviews</h2><p id="review-summary" class="review-summary"></p><div id="review-form-wrap"></div><div id="review-list" class="review-list"></div></section></main>
 <footer>ConfigKit Movies · Respect copyright and privacy. Only share films and media you own or have permission to use.</footer>
 <script src="auth-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -149,6 +149,10 @@ const loadMovieReviews=async(db,movie,currentUser)=>{
    if(!row)throw new Error('This movie could not be found, or it is private.');
    const own=!!auth?.session?.user?.id&&auth.session.user.id===row.user_id;
    if(row.visibility!=='public'&&!own)throw new Error('This movie is private.');
+   if(row.visibility==='public'&&!own){
+    // Store an anonymous page-view event; no IP address, account ID or device identifier is collected.
+    db.from('configkit_movie_view_events').insert({movie_id:row.id}).then(({error})=>{if(error)console.warn('Movie view analytics unavailable:',error.message);});
+   }
    $('movie-title').textContent=row.title;$('creator-link').href='creator.html?creator='+encodeURIComponent(row.user_id);
    $('movie-meta').textContent=[row.genre,row.release_year].filter(Boolean).join(' · ')||'Independent film';
    $('movie-description').textContent=row.description||'The creator has not added a synopsis yet.';
