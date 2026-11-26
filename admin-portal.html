@@ -95,5 +95,11 @@ async function start(){
  await loadMyApplications();
 }
 
+start().catch(error=>{
+ console.error('ConfigKit admin startup failed:',error);
+ $('identity').textContent='Admin access could not be verified.';
+ show(error?.message||'Something went wrong while opening the admin dashboard. Please reload and try again.','error');
+});
+
 })();
 </script></body></html>
