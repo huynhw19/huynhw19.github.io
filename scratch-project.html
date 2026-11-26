@@ -405,16 +405,39 @@ function renderExamples(){
  if(!filtered.length)$('example-projects').innerHTML='<p class="note">No projects match that search. Try another word or category.</p>';
 }
 async function loadExampleProjects(){
- const button=$('refresh-examples');button.disabled=true;$('example-status').textContent='Fetching popular and trending public projects from Scratch…';
- try{
-  const endpoints=['https://api.scratch.mit.edu/explore/projects/?mode=popular&limit=40&offset=0','https://api.scratch.mit.edu/explore/projects/?mode=trending&limit=40&offset=0','https://api.scratch.mit.edu/explore/projects/?mode=popular&limit=40&offset=40'];
-  const batches=await Promise.all(endpoints.map(async url=>{const response=await fetch(url,{headers:{Accept:'application/json'}});if(!response.ok)throw new Error('Scratch returned HTTP '+response.status);return response.json();}));
-  const unique=new Map();for(const project of [...(batches[0]||[]),...(batches[1]||[])])if(project?.id&&!unique.has(String(project.id)))unique.set(String(project.id),project);
+ const button=$('refresh-examples');
+ button.disabled=true;
+ $('example-status').className='status';
+ $('example-status').textContent='Loading the latest cached Scratch community projects…';
+ const setProjects=projects=>{
+  const unique=new Map();
+  for(const p of (Array.isArray(projects)?projects:[])){
+   if(p&&p.id&&!unique.has(String(p.id)))unique.set(String(p.id),p);
+  }
   exampleCache.splice(0,exampleCache.length,...Array.from(unique.values()).slice(0,50));
-  if(exampleCache.length<1)throw new Error('Scratch did not return any public projects.');
-  $('example-status').textContent='Loaded '+exampleCache.length+' real community projects from Scratch’s popular and trending feeds.';
   renderExamples();
- }catch(error){$('example-status').className='status error';$('example-status').textContent='Could not load Scratch’s public project feed: '+(error.message||'Network error')+'. You can still open projects using a Scratch URL above.';}
+  return exampleCache.length;
+ };
+ try{
+  // GitHub Pages cannot safely call Scratch's API directly from every browser.
+  // The scheduled GitHub Action fetches the public feed server-side and publishes this same-origin JSON file.
+  const cacheUrl=new URL('scratch-projects.json',location.href);
+  cacheUrl.searchParams.set('v',String(Date.now()));
+  const response=await fetch(cacheUrl.toString(),{cache:'no-store',headers:{Accept:'application/json'}});
+  if(!response.ok)throw new Error('Community feed cache returned HTTP '+response.status);
+  const payload=await response.json();
+  const count=setProjects(payload.projects||payload);
+  if(count){
+   $('example-status').className='status success';
+   $('example-status').textContent='Loaded '+count+' public Scratch community projects. The feed is refreshed automatically.';
+  }else{
+   throw new Error('The community feed is being prepared. Please refresh in a few minutes.');
+  }
+ }catch(error){
+  $('example-status').className='status error';
+  $('example-status').textContent='The public project list is temporarily unavailable: '+(error.message||'Network error')+'. You can still open any shared project using its URL above, or browse Scratch Explore.';
+  if(!exampleCache.length)$('example-count').textContent='The public feed will appear here when its cache is ready.';
+ }
  finally{button.disabled=false;}
 }
 $('example-search').addEventListener('input',renderExamples);
