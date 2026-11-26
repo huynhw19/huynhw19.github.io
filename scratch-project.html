@@ -354,23 +354,33 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
   if(!loaded){accountStatus.textContent='Load a project first, then open the editor.';return;}
   const popup=window.open('about:blank','_blank');
   if(!popup){accountStatus.textContent='Allow pop-ups for this site to open the editor.';return;}
+  const showPopupMessage=(heading,detail)=>{
+   try{popup.document.open();popup.document.write('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>ConfigKit — Opening TurboWarp</title><style>body{font:16px system-ui,sans-serif;background:#111827;color:#f9fafb;padding:28px;line-height:1.5}main{max-width:560px;margin:8vh auto}p{color:#cbd5e1}</style></head><body><main><h2>'+heading+'</h2><p>'+detail+'</p></main></body></html>');popup.document.close();}catch(_){}
+  };
   try{
-   accountStatus.textContent='Saving a private working copy for the editor…';
+   showPopupMessage('Preparing your project…','ConfigKit is exporting a private working copy. Please keep this page open.');
+   accountStatus.textContent='Exporting the current project…';
    const latestBytes=await exportCurrentProject();
    const id=uuid(),path=signedInUser.id+'/'+id,blob=new Blob([latestBytes],{type:'application/octet-stream'}),name=driveName(currentTitle);
+   showPopupMessage('Saving to your private Drive…','Your project is being uploaded securely.');
+   accountStatus.textContent='Uploading the private working copy to ConfigKit Drive…';
    const {error:uploadError}=await db.storage.from(bucket).upload(path,blob,{contentType:'application/octet-stream',upsert:false});if(uploadError)throw uploadError;
+   accountStatus.textContent='Registering the saved project…';
    const {error:rowError}=await db.from('drive_items').insert({id,user_id:signedInUser.id,parent_id:null,item_type:'file',name,mime_type:'application/x-scratch-project',size_bytes:blob.size,storage_path:path});
    if(rowError){await db.storage.from(bucket).remove([path]);throw rowError;}
+   accountStatus.textContent='Creating a secure one-hour editor link…';
    const {data:signed,error:signedError}=await db.storage.from(bucket).createSignedUrl(path,3600);if(signedError)throw signedError;
    if(!signed?.signedUrl)throw new Error('ConfigKit could not create a secure project link for TurboWarp.');
-   // Do not use HEAD as a gate here: some storage/CDN layers reject HEAD even
-   // when the signed file is downloadable with GET. TurboWarp performs the real
-   // CORS-enabled GET itself when it imports project_url.
    const editorUrl='https://turbowarp.org/editor?project_url='+encodeURIComponent(signed.signedUrl)+'&project_title='+encodeURIComponent(currentTitle);
-   popup.location.replace(editorUrl);
-   accountStatus.textContent='Your private working copy is saved in ConfigKit Drive. TurboWarp is opening it from a time-limited link (valid for 1 hour). If TurboWarp reports a download/CORS error, use Download selected project below and import the .sb3 with File → Load from your computer.';
-   await refreshDriveList();
-  }catch(e){popup.close();accountStatus.textContent=e.message||'Could not open the editor.';}
+   accountStatus.textContent='Private copy saved. Opening TurboWarp…';
+   // Navigate the already-open popup; do not wait on a Drive-list refresh after navigation.
+   popup.location.href=editorUrl;
+   void refreshDriveList().catch(e=>{accountStatus.textContent='The project was sent to TurboWarp, but the Drive list could not refresh: '+(e.message||'Please reload the list.');});
+  }catch(e){
+   const message=e?.message||'Could not open the editor.';
+   showPopupMessage('Could not open TurboWarp',message+' You can close this tab and try again.');
+   accountStatus.textContent='TurboWarp handoff stopped: '+message;
+  }
  });
 }else{
  $('account-editor').hidden=false;$('editor-account').textContent='Account sign-in is temporarily unavailable. You can still play projects and download local copies.';
