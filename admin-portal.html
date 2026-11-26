@@ -103,11 +103,12 @@ async function waitForInitialSession(){
  }), 'ConfigKit sign-in verification');
 }
 async function start(){
+ $('identity').textContent='Checking your ConfigKit sign-in…';
  if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient)throw new Error('ConfigKit authentication is unavailable. Check auth-config.js and reload.');
  db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
  show('Checking your ConfigKit sign-in…');
  const session=await waitForInitialSession();
- if(!session){show('Please sign in to ConfigKit to continue.','error');const a=document.createElement('a');a.href='login.html?next=admin-portal.html';a.textContent='Sign in to ConfigKit →';$('status').append(' ',a);return}
+ if(!session){$('identity').textContent='You are not signed in.';show('Please sign in to ConfigKit to continue.','error');const a=document.createElement('a');a.href='login.html?next=admin-portal.html';a.textContent='Sign in to ConfigKit →';$('status').append(' ',a);return}
  user=session.user;
  if(!user?.id)throw new Error('Your sign-in session did not contain a user. Please sign in again.');
  isOwner=user.id===OWNER;
