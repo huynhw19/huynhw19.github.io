@@ -333,6 +333,22 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
   signedInUser=session?.user||null;
   editorTools.hidden=!signedInUser;
   if(!signedInUser){accountStatus.textContent='You are not signed in. Sign in to unlock the editor and private Drive saving.';return;}
+  accountStatus.textContent='Checking your secure Drive session…';
+  try{
+   const [{data:recovery,error:recoveryError},{data:assurance,error:assuranceError},{data:claimsData,error:claimsError}]=await Promise.all([
+    db.functions.invoke('recovery-codes',{body:{action:'status'}}),
+    db.auth.mfa.getAuthenticatorAssuranceLevel(),
+    db.auth.getClaims(session.access_token)
+   ]);
+   if(recoveryError)throw recoveryError;if(assuranceError)throw assuranceError;if(claimsError)throw claimsError;
+   const methods=[...(assurance.currentAuthenticationMethods||[]),...(claimsData?.claims?.amr||[])];
+   const passkey=methods.some(item=>['passkey','webauthn'].includes(String(typeof item==='string'?item:item?.method||'').toLowerCase()));
+   if(recovery?.enabled&&!recovery?.verified&&assurance.currentLevel!=='aal2'&&!passkey){
+    accountStatus.textContent='Your private Drive needs a verified second step. Redirecting to secure sign-in…';
+    location.replace('login.html?next='+encodeURIComponent('scratch-project.html'));
+    return;
+   }
+  }catch(e){accountStatus.textContent='Could not verify your secure Drive session: '+(e.message||'Please sign in again.');return;}
   accountStatus.textContent='Signed in. Your Scratch project files are private to your ConfigKit account.';
   try{await refreshDriveList();}catch(e){accountStatus.textContent='Drive could not be loaded: '+(e.message||'Please try again.');}
   $('save-drive').disabled=!loaded;$('open-editor').disabled=!loaded;
@@ -378,8 +394,9 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
    showPopupMessage('Saving to your private Drive…','Your project is being uploaded securely.');
    accountStatus.textContent='Uploading the private working copy to ConfigKit Drive…';
    const {error:uploadError}=await db.storage.from(bucket).upload(path,blob,{contentType:'application/octet-stream',upsert:false});if(uploadError)throw uploadError;
-   // This editor handoff uses a short-lived signed URL and intentionally does not
-   // create a Drive metadata row: verified-session RLS protects drive_items.
+   accountStatus.textContent='Registering the saved project in your private Drive…';
+   const {error:rowError}=await db.from('drive_items').insert({id,user_id:signedInUser.id,parent_id:null,item_type:'file',name,mime_type:'application/x-scratch-project',size_bytes:blob.size,storage_path:path});
+   if(rowError){await db.storage.from(bucket).remove([path]);throw rowError;}
    accountStatus.textContent='Creating a secure one-hour editor link…';
    const {data:signed,error:signedError}=await db.storage.from(bucket).createSignedUrl(path,3600);if(signedError)throw signedError;
    if(!signed?.signedUrl)throw new Error('ConfigKit could not create a secure project link for TurboWarp.');
