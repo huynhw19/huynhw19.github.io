@@ -13,6 +13,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import com.posthog.android.PostHogAndroid;
+
 import java.io.OutputStream;
 import java.util.ArrayList;
 
@@ -57,6 +59,18 @@ public class MainActivity extends Activity {
     private boolean isConfigKitHost(Uri uri) {
         return "https".equalsIgnoreCase(uri.getScheme())
             && "huynhw19.github.io".equalsIgnoreCase(uri.getHost());
+    }
+
+    private void captureEvent(String event) {
+        if (!BuildConfig.POSTHOG_API_KEY.isEmpty() && !BuildConfig.POSTHOG_HOST.isEmpty()) {
+            PostHogAndroid.getInstance().capture(event);
+        }
+    }
+
+    private void logForPostHog(String message) {
+        if (!BuildConfig.POSTHOG_API_KEY.isEmpty() && !BuildConfig.POSTHOG_HOST.isEmpty()) {
+            PostHogAndroid.getInstance().getLogger().info(message, null);
+        }
     }
 
     private void installSiteDownloadBridge() {
@@ -122,6 +136,7 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
+        logForPostHog("ConfigKit WebView shell initialized");
         if (savedInstanceState == null) webView.loadUrl(HOME);
         else webView.restoreState(savedInstanceState);
     }
@@ -140,12 +155,18 @@ public class MainActivity extends Activity {
                 } else if (data.getData() != null) results = new Uri[]{data.getData()};
             }
             fileChooserCallback.onReceiveValue(results);
+            if (results != null) {
+                captureEvent("file_upload_selected");
+                logForPostHog("File upload selection returned to the WebView");
+            }
             fileChooserCallback = null;
         } else if (requestCode == DOWNLOAD_REQUEST) {
             if (resultCode == RESULT_OK && data != null && data.getData() != null && pendingDownload != null) {
                 try (OutputStream output = getContentResolver().openOutputStream(data.getData())) {
                     if (output == null) throw new IllegalStateException("No output stream");
                     output.write(pendingDownload);
+                    captureEvent("file_download_saved");
+                    logForPostHog("WebView download written to Android storage");
                     Toast.makeText(this, "Download saved.", Toast.LENGTH_LONG).show();
                 } catch (Exception error) {
                     Toast.makeText(this, "Could not save the download.", Toast.LENGTH_LONG).show();

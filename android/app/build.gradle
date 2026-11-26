@@ -1,14 +1,35 @@
 plugins {
     id 'com.android.application'
 }
+
+
+def posthogProperties = new Properties()
+def posthogEnvFile = rootProject.file('.env')
+if (posthogEnvFile.exists()) {
+    posthogEnvFile.withInputStream { posthogProperties.load(it) }
+}
+def posthogApiKey = System.getenv('POSTHOG_API_KEY') ?: posthogProperties.getProperty('POSTHOG_API_KEY', '')
+def posthogHost = System.getenv('POSTHOG_HOST') ?: posthogProperties.getProperty('POSTHOG_HOST', '')
+
 android {
     namespace 'com.configkit.android'
     compileSdk 35
+
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         applicationId 'com.configkit.android'
         minSdk 26
         targetSdk 35
         versionCode project.hasProperty("VERSION_CODE") ? project.property("VERSION_CODE").toString().toInteger() : 1
         versionName project.hasProperty("VERSION_NAME") ? project.property("VERSION_NAME").toString() : "1.0.0"
+        buildConfigField 'String', 'POSTHOG_API_KEY', "\"${posthogApiKey}\""
+        buildConfigField 'String', 'POSTHOG_HOST', "\"${posthogHost}\""
     }
+}
+
+dependencies {
+    implementation 'com.posthog:posthog-android:3.+'
 }
