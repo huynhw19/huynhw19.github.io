@@ -378,14 +378,13 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
    showPopupMessage('Saving to your private Drive…','Your project is being uploaded securely.');
    accountStatus.textContent='Uploading the private working copy to ConfigKit Drive…';
    const {error:uploadError}=await db.storage.from(bucket).upload(path,blob,{contentType:'application/octet-stream',upsert:false});if(uploadError)throw uploadError;
-   accountStatus.textContent='Registering the saved project…';
-   const {error:rowError}=await db.from('drive_items').insert({id,user_id:signedInUser.id,parent_id:null,item_type:'file',name,mime_type:'application/x-scratch-project',size_bytes:blob.size,storage_path:path});
-   if(rowError){await db.storage.from(bucket).remove([path]);throw rowError;}
+   // This editor handoff uses a short-lived signed URL and intentionally does not
+   // create a Drive metadata row: verified-session RLS protects drive_items.
    accountStatus.textContent='Creating a secure one-hour editor link…';
    const {data:signed,error:signedError}=await db.storage.from(bucket).createSignedUrl(path,3600);if(signedError)throw signedError;
    if(!signed?.signedUrl)throw new Error('ConfigKit could not create a secure project link for TurboWarp.');
    const editorUrl='https://turbowarp.org/editor?project_url='+encodeURIComponent(signed.signedUrl)+'&project_title='+encodeURIComponent(currentTitle);
-   accountStatus.textContent='Private copy saved. Opening TurboWarp…';
+   accountStatus.textContent='Private temporary copy ready. Opening TurboWarp…';
    // Navigate the already-open popup; do not wait on a Drive-list refresh after navigation.
    popup.location.href=editorUrl;
    void refreshDriveList().catch(e=>{accountStatus.textContent='The project was sent to TurboWarp, but the Drive list could not refresh: '+(e.message||'Please reload the list.');});
