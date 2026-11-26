@@ -208,9 +208,21 @@ async function exportCurrentProject(){
  if(!player||!loaded)throw new Error('Load a project first.');
  if(typeof player.vm?.saveProjectSb3!=='function')throw new Error('Project export is not available in the current player engine.');
  const exported=await player.vm.saveProjectSb3();
-  return exported instanceof ArrayBuffer?exported:exported.buffer.slice(exported.byteOffset,exported.byteOffset+exported.byteLength);
-
+ if(exported instanceof ArrayBuffer)return exported;
+ if(ArrayBuffer.isView(exported)){
+  return exported.buffer.slice(exported.byteOffset,exported.byteOffset+exported.byteLength);
+ }
+ if(typeof Blob!=='undefined'&&exported instanceof Blob)return await exported.arrayBuffer();
+ if(exported&&typeof exported.arrayBuffer==='function')return await exported.arrayBuffer();
+ if(exported&&exported.buffer instanceof ArrayBuffer){
+  const offset=Number.isInteger(exported.byteOffset)?exported.byteOffset:0;
+  const length=Number.isInteger(exported.byteLength)?exported.byteLength:exported.buffer.byteLength-offset;
+  return exported.buffer.slice(offset,offset+length);
+ }
+ const kind=exported===null?'null':typeof exported==='undefined'?'undefined':Object.prototype.toString.call(exported);
+ throw new Error('The Scratch player returned an unsupported project-export format ('+kind+'). Please reload the project and try again.');
 }
+
 $('load-file').addEventListener('click',async()=>{
  const file=$('project-file').files[0];if(!file){status('Choose an .sb3 file first.','error');return;}
  if(!file.name.toLowerCase().endsWith('.sb3')){status('Please choose a Scratch 3 .sb3 file.','error');return;}
