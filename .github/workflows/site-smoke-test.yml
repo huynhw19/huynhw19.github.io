@@ -35,7 +35,6 @@ jobs:
           const end = html.indexOf('</script>', start);
           if (start < 0 || end < 0) throw new Error('Could not locate the dashboard inline script');
           const source = html.slice(start + marker.length, end);
-          const fs = await import('node:fs/promises');
           await fs.writeFile('/tmp/admin-inline.js', source);
           console.log('Repository Admin Dashboard inline script chars:', source.length);
           try {
