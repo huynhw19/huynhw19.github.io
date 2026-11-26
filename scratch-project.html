@@ -210,7 +210,8 @@ async function exportCurrentProject(){
  const exported=await player.vm.saveProjectSb3();
  if(exported instanceof ArrayBuffer)return exported;
  if(ArrayBuffer.isView(exported)){
-  return exported.buffer.slice(exported.byteOffset,exported.byteOffset+exported.byteLength);
+  // Copy the exact view bytes without assuming its backing buffer exposes slice().
+  return await new Blob([exported]).arrayBuffer();
  }
  if(typeof Blob!=='undefined'&&exported instanceof Blob)return await exported.arrayBuffer();
  if(exported&&typeof exported.arrayBuffer==='function')return await exported.arrayBuffer();
