@@ -313,7 +313,7 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
  const saveDriveBytes=async(bytes,title)=>{
   if(!signedInUser)throw new Error('Please sign in to save projects to your private Drive.');
   if(!bytes)throw new Error('Load a project first.');
-  const id=uuid(),path=signedInUser.id+'/'+id;
+  const id=uuid(),path=signedInUser.id+'/'+id+'/blob';
   const blob=new Blob([bytes],{type:'application/octet-stream'}),name=driveName(title);
   const {error:uploadError}=await db.storage.from(bucket).upload(path,blob,{contentType:'application/octet-stream',upsert:false});
   if(uploadError)throw uploadError;
@@ -390,7 +390,7 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
    showPopupMessage('Preparing your project…','ConfigKit is exporting a private working copy. Please keep this page open.');
    accountStatus.textContent='Exporting the current project…';
    const latestBytes=await exportCurrentProject();
-   const id=uuid(),path=signedInUser.id+'/'+id,blob=new Blob([latestBytes],{type:'application/octet-stream'}),name=driveName(currentTitle);
+   const id=uuid(),path=signedInUser.id+'/'+id+'/blob',blob=new Blob([latestBytes],{type:'application/octet-stream'}),name=driveName(currentTitle);
    showPopupMessage('Saving to your private Drive…','Your project is being uploaded securely.');
    accountStatus.textContent='Uploading the private working copy to ConfigKit Drive…';
    const {error:uploadError}=await db.storage.from(bucket).upload(path,blob,{contentType:'application/octet-stream',upsert:false});if(uploadError)throw uploadError;
