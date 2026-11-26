@@ -363,10 +363,12 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
    if(rowError){await db.storage.from(bucket).remove([path]);throw rowError;}
    const {data:signed,error:signedError}=await db.storage.from(bucket).createSignedUrl(path,3600);if(signedError)throw signedError;
    if(!signed?.signedUrl)throw new Error('ConfigKit could not create a secure project link for TurboWarp.');
-   popup.document.title='Checking TurboWarp import…';popup.document.body.innerHTML='<p style="font:16px system-ui;padding:24px">Checking whether TurboWarp can securely read your private project…</p>';
-   let crossOriginReadable=false;try{const check=await fetch(signed.signedUrl,{method:'HEAD',mode:'cors',cache:'no-store'});crossOriginReadable=check.ok;}catch(_){}
-   if(crossOriginReadable){const editorUrl='https://turbowarp.org/editor?project_url='+encodeURIComponent(signed.signedUrl)+'&project_title='+encodeURIComponent(currentTitle);popup.location.replace(editorUrl);accountStatus.textContent='TurboWarp can reach the time-limited private project link. If import still fails, use Download selected project in Drive and import the .sb3 file manually.';}
-   else{popup.location.replace('https://turbowarp.org/editor/');accountStatus.textContent='Your working copy is saved in ConfigKit Drive, but this browser could not verify cross-site access to the private file. In the editor, use File → Load from your computer after downloading the project with “Download selected project” below. This avoids sending your private project through a third-party proxy.';}
+   // Do not use HEAD as a gate here: some storage/CDN layers reject HEAD even
+   // when the signed file is downloadable with GET. TurboWarp performs the real
+   // CORS-enabled GET itself when it imports project_url.
+   const editorUrl='https://turbowarp.org/editor?project_url='+encodeURIComponent(signed.signedUrl)+'&project_title='+encodeURIComponent(currentTitle);
+   popup.location.replace(editorUrl);
+   accountStatus.textContent='Your private working copy is saved in ConfigKit Drive. TurboWarp is opening it from a time-limited link (valid for 1 hour). If TurboWarp reports a download/CORS error, use Download selected project below and import the .sb3 with File → Load from your computer.';
    await refreshDriveList();
   }catch(e){popup.close();accountStatus.textContent=e.message||'Could not open the editor.';}
  });
