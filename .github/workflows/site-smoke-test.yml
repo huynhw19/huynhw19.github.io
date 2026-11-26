@@ -61,11 +61,11 @@ jobs:
                 });
                 status = response?.status() ?? 0;
                 await page.waitForTimeout(2500);
-      if (path === '/admin-portal.html') {
-        const state = await page.locator('#status').innerText().catch(() => 'missing #status');
-        console.log('ADMIN DASHBOARD STATE:', state);
-        if (state.includes('Loading secure admin workspace') || state.includes('Verifying your administrator access')) errors.push('Admin startup did not update the initial status: ' + state);
-      }
+                if (path === '/admin-portal.html') {
+                  const state = await page.locator('#status').innerText().catch(() => 'missing #status');
+                  console.log('ADMIN DASHBOARD STATE:', state);
+                  if (state.includes('Loading secure admin workspace') || state.includes('Verifying your administrator access')) errors.push('Admin startup did not update the initial status: ' + state);
+                }
               } catch (error) {
                 errors.push('Navigation: ' + error.message);
               }
