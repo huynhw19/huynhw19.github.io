@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>ConfigKit sign-in test</title>
+<link rel="stylesheet" href="brand.css?v=1"><link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#f7f9f6;color:#17231f;font:16px/1.6 system-ui,sans-serif;display:grid;place-items:center;padding:20px}
+main{width:min(100%,620px);background:#fff;border:1px solid #e2e9e3;border-radius:18px;padding:clamp(22px,5vw,38px);box-shadow:0 12px 36px #17231f0d}
+h1{line-height:1.15}p{color:#627168}.field{display:grid;gap:7px;margin:20px 0}input{font:inherit;padding:12px;border:1px solid #cbd8ce;border-radius:9px;width:100%}button{font:inherit;font-weight:650;padding:12px 18px;border:0;border-radius:9px;background:#226b51;color:#fff;cursor:pointer}button:disabled{opacity:.6;cursor:wait}#status{margin-top:18px;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f5f1;padding:14px;border-radius:10px}.error{color:#a32e2e}.success{color:#17613e}a{color:#226b51}
+</style>
+</head>
+<body><main>
+<p><a href="/">ConfigKit</a> · Developer test utility</p>
+<h1>Sign in with ConfigKit</h1>
+<p>This is a small public OAuth 2.1 + PKCE test client. It uses no client secret and requests only your basic OpenID Connect identity.</p>
+<section id="start">
+<label class="field">Approved OAuth Client ID
+<input id="clientId" autocomplete="off" placeholder="Paste the Client ID from OAuth Apps"></label>
+<button id="connect" type="button">Continue with ConfigKit</button>
+</section>
+<section id="result" hidden><h2>Identity response</h2><pre id="identity"></pre><button id="again" type="button">Run another test</button></section>
+<p id="status" role="status" aria-live="polite">Register this page as the app's exact HTTPS callback URL: <strong>https://huynhw19.github.io/oauth-test.html</strong></p>
+<p><a href="oauth-apps.html">Open OAuth Apps</a> · <a href="oauth-developer-guide.html">Developer guide</a></p>
+</main>
+<script>
+(() => {
+  const AUTH = 'https://gwhqnqzzlgslwgijkkpt.supabase.co/auth/v1/oauth';
+  const CALLBACK = 'https://huynhw19.github.io/oauth-test.html';
+  const $ = id => document.getElementById(id);
+  const status = $('status');
+  const showError = message => { status.className = 'error'; status.textContent = message; };
+  const b64url = bytes => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  const params = new URLSearchParams(location.search);
+
+  async function handleCallback() {
+    const code = params.get('code');
+    if (!code) return;
+    $('start').hidden = true;
+    status.textContent = 'Completing secure sign-in…';
+    try {
+      const state = sessionStorage.getItem('ck_oauth_state');
+      const verifier = sessionStorage.getItem('ck_oauth_verifier');
+      const clientId = sessionStorage.getItem('ck_oauth_client');
+      if (!state || params.get('state') !== state || !verifier || !clientId) throw new Error('OAuth state check failed. Please restart the sign-in test.');
+      const response = await fetch(AUTH + '/token', {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({grant_type:'authorization_code',client_id:clientId,redirect_uri:CALLBACK,code,code_verifier:verifier})
+      });
+      const tokens = await response.json();
+      if (!response.ok) throw new Error(tokens.msg || tokens.error_description || tokens.error || 'Token exchange failed.');
+      const userResponse = await fetch(AUTH + '/userinfo', {headers:{Authorization:'Bearer '+tokens.access_token}});
+      const identity = await userResponse.json();
+      if (!userResponse.ok) throw new Error(identity.msg || identity.message || 'Could not retrieve the signed-in identity.');
+      $('identity').textContent = JSON.stringify(identity, null, 2);
+      $('result').hidden = false;
+      status.className = 'success';
+      status.textContent = 'Success! ConfigKit authenticated this test client.';
+      sessionStorage.removeItem('ck_oauth_state');
+      sessionStorage.removeItem('ck_oauth_verifier');
+      sessionStorage.removeItem('ck_oauth_client');
+      history.replaceState({}, document.title, CALLBACK);
+    } catch (error) {
+      showError(error.message || 'Sign-in could not be completed.');
+    }
+  }
+
+  $('connect').addEventListener('click', async () => {
+    const clientId = $('clientId').value.trim();
+    if (!clientId) { showError('Paste your approved OAuth Client ID first.'); return; }
+    $('connect').disabled = true;
+    status.className = '';
+    status.textContent = 'Preparing secure sign-in…';
+    try {
+      const verifier = b64url(crypto.getRandomValues(new Uint8Array(32)));
+      const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
+      const state = crypto.randomUUID();
+      sessionStorage.setItem('ck_oauth_verifier', verifier);
+      sessionStorage.setItem('ck_oauth_state', state);
+      sessionStorage.setItem('ck_oauth_client', clientId);
+      const authorize = new URL(AUTH + '/authorize');
+      authorize.search = new URLSearchParams({
+        response_type:'code',client_id:clientId,redirect_uri:CALLBACK,
+        scope:'openid email profile',state,code_challenge:challenge,code_challenge_method:'S256'
+      }).toString();
+      location.assign(authorize.href);
+    } catch (error) {
+      $('connect').disabled = false;
+      showError(error.message || 'Could not start sign-in.');
+    }
+  });
+  $('again').addEventListener('click', () => { history.replaceState({},document.title,CALLBACK); $('result').hidden=true; $('start').hidden=false; $('clientId').value=sessionStorage.getItem('ck_oauth_client')||''; status.className=''; status.textContent='Ready for another test.'; });
+  if (params.has('error')) showError(params.get('error_description') || params.get('error'));
+  else handleCallback();
+})();
+</script>
+<script src="/cookie-consent.js?v=2" defer></script>
+</body></html>
