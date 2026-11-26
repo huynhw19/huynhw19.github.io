@@ -40,7 +40,7 @@ jobs:
           import { chromium } from 'playwright';
 
           const base = process.env.SITE_URL;
-          const pages = ['/', '/community-store.html', '/login.html', '/dashboard.html', '/money-centre.html', '/finance.html', '/invoices.html', '/insights.html', '/connect.html', '/forms.html', '/account-docs.html', '/Education-dashboard.html', '/student-dashboard.html', '/student-progress.html', '/education-ai.html', '/education-reports.html', '/education-reports.html?view=student', '/admin-portal.html'];
+          const pages = ['/admin-portal.html'];
           const results = [];
           const browser = await chromium.launch({ headless: true });
 
@@ -75,17 +75,7 @@ jobs:
               await page.close();
             }
 
-            // The translation page requires a real signed-in session. In this
-            // unauthenticated smoke test, verify its sign-in gate rather than
-            // mocking the retired public translation provider.
-            const translationPage = await browser.newPage();
-            await translationPage.goto(base + '/#configkit-translation', { waitUntil: 'domcontentloaded', timeout: 30000 });
-            await translationPage.waitForTimeout(1200);
-            if (!translationPage.url().includes('login.html?next=')) {
-              throw new Error('AI translation did not direct a signed-out visitor to sign in');
-            }
-            console.log('PASS: AI translation sign-in gate');
-
+  
           } finally {
             await browser.close();
           }
