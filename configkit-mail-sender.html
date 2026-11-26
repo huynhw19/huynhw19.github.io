@@ -1,34 +1,64 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-AU">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="ConfigKit Mail is coming soon. Email sending will be available once delivery setup is complete.">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Send an email to an external address from ConfigKit using Unipile.">
 <meta name="theme-color" content="#f5f8f5">
-<title>ConfigKit Mail — Coming Soon</title>
+<title>ConfigKit Mail Sender — Unipile</title>
+<link rel="stylesheet" href="brand.css?v=1"><link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
 <style>
 :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e1e9e3;--paper:#f5f8f5;--green:#226b51;--dark:#174b39;--mint:#e7f3eb}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 25%,#e5f3e9 0,transparent 55%),var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}header,main,footer{width:min(900px,calc(100% - 32px));margin:auto}header{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}a{color:var(--green)}.brand{font-weight:850;color:var(--ink);text-decoration:none}main{flex:1;display:grid;place-items:center;padding:3rem 0}.card{width:100%;max-width:650px;text-align:center;background:#ffffffed;border:1px solid var(--line);border-radius:24px;padding:clamp(2rem,7vw,4rem);box-shadow:0 18px 50px #17231f10}.icon{width:76px;height:76px;display:grid;place-items:center;margin:0 auto 1.4rem;border-radius:22px;background:var(--mint);font-size:2.4rem}.badge{display:inline-block;padding:.3rem .8rem;border-radius:99px;background:var(--mint);color:var(--dark);font-size:.82rem;font-weight:800;letter-spacing:.04em}.card h1{font-size:clamp(2.5rem,8vw,4.2rem);line-height:1.05;letter-spacing:-.04em;margin:1rem 0}.muted{color:var(--muted);max-width:460px;margin:0 auto}.progress{height:7px;max-width:280px;margin:2rem auto 0;border-radius:99px;background:#e9eee9;overflow:hidden}.progress span{display:block;width:38%;height:100%;border-radius:99px;background:var(--green)}.home{display:inline-block;margin-top:2rem;padding:.75rem 1.1rem;border-radius:10px;background:var(--green);color:white;text-decoration:none;font-weight:750}footer{border-top:1px solid var(--line);padding:1.3rem 0 1.8rem;text-align:center;color:var(--muted);font-size:.9rem}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 15%,#e5f3e9 0,transparent 55%),var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+header,main,footer{width:min(900px,calc(100% - 32px));margin:auto}header{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line)}a{color:var(--green)}.brand{font-weight:850;color:var(--ink);text-decoration:none}
+main{padding:2.5rem 0;display:grid;place-items:center}.card{width:100%;max-width:650px;background:#ffffffed;border:1px solid var(--line);border-radius:22px;padding:clamp(1.3rem,5vw,2.5rem);box-shadow:0 18px 50px #17231f10}
+.eyebrow{color:var(--green);font-size:.78rem;font-weight:850;letter-spacing:.1em;text-transform:uppercase}.card h1{font-size:clamp(2rem,6vw,3rem);line-height:1.1;letter-spacing:-.04em;margin:.35rem 0}.muted{color:var(--muted)}.status{margin:1rem 0;padding:.8rem 1rem;border-radius:10px;background:var(--mint);color:var(--dark);font-size:.92rem}.status.error{background:#fff0ed;color:#8d3025}.field{margin:1rem 0}.field label{display:block;font-weight:700;margin-bottom:.35rem}.field input,.field textarea{width:100%;border:1px solid #cfdad2;border-radius:10px;padding:.8rem .9rem;font:inherit;background:white;color:var(--ink)}.field textarea{min-height:170px;resize:vertical}.actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:1.3rem}.btn{border:0;border-radius:10px;padding:.8rem 1.2rem;background:var(--green);color:white;font:inherit;font-weight:750;cursor:pointer}.btn:disabled{opacity:.55;cursor:not-allowed}.small{font-size:.86rem}footer{padding:1rem 0 1.8rem;text-align:center;color:var(--muted);font-size:.9rem}
 </style>
-  <link rel="stylesheet" href="brand.css?v=1">
-  <link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="brand.css?v=1">
-  <link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
 </head>
 <body>
-<header><a class="brand" href="index.html">⌘ ConfigKit</a><a href="index.html">Home</a></header>
-<main>
-<section class="card" aria-labelledby="title">
-<div class="icon" aria-hidden="true">✉️</div>
-<span class="badge">COMING SOON</span>
-<h1 id="title">ConfigKit Mail</h1>
-<p class="muted">A simpler way to send email from ConfigKit is on its way. We're getting the delivery setup ready before opening the doors.</p>
-<div class="progress" role="img" aria-label="Work in progress"><span></span></div>
-<p class="muted" style="margin-top:1rem;font-size:.9rem">No action or purchase is needed right now. We'll let you know when it's ready. 💚</p>
-<a class="home" href="index.html">Back to ConfigKit</a>
-</section>
-</main>
-<footer>ConfigKit Mail · Made with care 💚</footer>
-  <script src="/cookie-consent.js?v=3" defer></script>
-</body>
-</html>
+<header><a class="brand" href="index.html">⌘ ConfigKit</a><a href="integrations.html">Integrations</a></header>
+<main><section class="card">
+<div class="eyebrow">Powered by Unipile</div><h1>Send an email</h1>
+<p class="muted">Send a message to an external email address using your connected email account. Your Unipile credentials stay on the server.</p>
+<div id="status" class="status" role="status" aria-live="polite">Checking your ConfigKit session…</div>
+<form id="send-form" hidden>
+<div class="field"><label for="to">Recipient email</label><input id="to" type="email" maxlength="254" autocomplete="email" placeholder="someone@example.com" required></div>
+<div class="field"><label for="subject">Subject</label><input id="subject" maxlength="180" placeholder="Email subject" required></div>
+<div class="field"><label for="message">Message</label><textarea id="message" maxlength="12000" placeholder="Write your message…" required></textarea></div>
+<div class="actions"><button class="btn" id="send" type="submit">Send email</button><span class="muted small">Sending is available to the ConfigKit owner account.</span></div>
+</form>
+</section></main>
+<footer>ConfigKit Mail Sender · Secure delivery through Unipile</footer>
+<script src="auth-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),cfg=window.CONFIGKIT_AUTH||{},status=$('status'),form=$('send-form'),endpoint=String(cfg.supabaseUrl||'').replace(/\/$/,'')+'/functions/v1/configkit-resend';
+if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient){status.textContent='ConfigKit authentication is unavailable.';status.classList.add('error');return}
+const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let session=null;
+const headers=()=>({apikey:cfg.supabaseAnonKey,Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'});
+async function initialize(){
+ const result=await client.auth.getSession();session=result.data?.session;
+ if(!session){status.textContent='Please sign in to ConfigKit before sending email.';status.classList.add('error');return}
+ const response=await fetch(endpoint,{headers:headers(),cache:'no-store'}),data=await response.json().catch(()=>({}));
+ if(!response.ok){status.textContent=data.error||'Could not check the Unipile connection.';status.classList.add('error');return}
+ if(!data.configured){status.textContent='Unipile is not configured on the server yet. Check the Supabase Edge Function secrets.';status.classList.add('error');return}
+ status.textContent='Connected to Unipile. Ready to send.';form.hidden=false;
+}
+form.addEventListener('submit',async event=>{
+ event.preventDefault();if(!session)return;
+ const button=$('send');button.disabled=true;status.classList.remove('error');status.textContent='Sending your email…';
+ try{
+  const response=await fetch(endpoint,{method:'POST',headers:{...headers(),'x-configkit-request-id':crypto.randomUUID()},body:JSON.stringify({to:$('to').value.trim(),subject:$('subject').value.trim(),message:$('message').value})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'Email could not be sent.');
+  status.textContent='Email accepted by Unipile for delivery. Reference: '+(data.id||'accepted');
+  form.reset();
+ }catch(error){status.textContent=error.message||'Email could not be sent.';status.classList.add('error')}
+ finally{button.disabled=false}
+});
+initialize().catch(error=>{status.textContent=error.message||'Could not initialize ConfigKit Mail Sender.';status.classList.add('error')});
+})();
+</script>
+<script src="/cookie-consent.js?v=3" defer></script>
+</body></html>
