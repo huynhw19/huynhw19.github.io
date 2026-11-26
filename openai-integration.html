@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f8f5">
+<meta name="description" content="ConfigKit's proposal for Sign in with ChatGPT — a privacy-conscious identity integration for a practical web toolkit.">
+<title>ChatGPT Integration Proposal — ConfigKit</title>
+<link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="brand.css?v=1">
+<style>
+:root{color-scheme:light;--ink:#14251e;--muted:#5b6d63;--line:#dce7df;--paper:#f4f8f5;--white:#fff;--green:#176344;--deep:#104b33;--mint:#e4f3e9;--gold:#fff7e8;--shadow:0 18px 48px rgba(18,54,37,.08}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green);text-decoration:none}a:hover{text-decoration:underline}.wrap{width:min(1100px,calc(100% - 36px));margin:auto}
+header{position:sticky;top:0;z-index:10;background:rgba(244,248,245,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}header .wrap{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:10px;font-weight:850;color:var(--ink)}.brand img{width:32px;height:32px}nav{display:flex;gap:18px;flex-wrap:wrap;font-size:.92rem;font-weight:650}
+.hero{padding:clamp(58px,9vw,108px) 0 54px;position:relative;overflow:hidden}.hero:before{content:"";position:absolute;z-index:-1;width:540px;height:540px;right:-160px;top:-170px;border-radius:50%;background:radial-gradient(circle,rgba(108,181,132,.25),transparent 68%)}.kicker{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:var(--mint);color:var(--deep);font-size:.78rem;font-weight:850;letter-spacing:.08em;text-transform:uppercase}.dot{width:8px;height:8px;border-radius:50%;background:#32956b}.hero h1{max-width:850px;margin:20px 0 14px;font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.01;letter-spacing:-.06em}.hero h1 span{color:var(--green)}.lead{max-width:740px;color:var(--muted);font-size:clamp(1.05rem,2vw,1.22rem);margin:0}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 18px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:750;box-shadow:0 7px 20px rgba(17,54,37,.05)}.btn.primary{background:var(--green);border-color:var(--green);color:#fff}.btn:hover{transform:translateY(-1px);text-decoration:none}.fine{font-size:.85rem;color:var(--muted);margin-top:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 58px}.stat{padding:18px;border:1px solid var(--line);border-radius:16px;background:#fff}.stat b{display:block;font-size:1.25rem;letter-spacing:-.03em}.stat span{font-size:.86rem;color:var(--muted)}
+section.content{margin:54px 0}.section-label{color:var(--green);font-size:.75rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}h2{font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.13;letter-spacing:-.04em;margin:8px 0 12px}h3{margin:0 0 8px;font-size:1.08rem}.intro{max-width:740px;color:var(--muted);margin:0 0 22px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{padding:21px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:var(--shadow)}.icon{width:42px;height:42px;border-radius:13px;background:var(--mint);display:grid;place-items:center;font-size:1.25rem;margin-bottom:15px}.card p{margin:0;color:var(--muted);font-size:.94rem}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;counter-reset:step}.step{position:relative;padding:18px 16px;border:1px solid var(--line);border-radius:16px;background:#fff}.step:before{counter-increment:step;content:"0" counter(step);display:block;color:var(--green);font-size:.78rem;font-weight:900;letter-spacing:.1em;margin-bottom:13px}.step p{font-size:.9rem;color:var(--muted);margin:0}
+.callout{padding:24px;border:1px solid #d6e6db;border-radius:20px;background:linear-gradient(135deg,#edf7f0,#fff 70%);box-shadow:var(--shadow)}.callout p{color:var(--muted);margin:8px 0 0}
+.copy-panel{padding:22px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:var(--shadow)}.copy-panel pre{white-space:pre-wrap;overflow-wrap:anywhere;font: .93rem/1.7 ui-sans-serif,system-ui,sans-serif;color:#34473d;margin:12px 0 0}.copy-btn{cursor:pointer;font:inherit}
+.notice{padding:16px 18px;border-radius:14px;background:var(--gold);border:1px solid #eddfc2;color:#70551e;font-size:.91rem}.links{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-weight:750}.footer{padding:32px 0 46px;color:var(--muted);font-size:.87rem;border-top:1px solid var(--line);margin-top:64px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr}.hero{padding-top:52px}header .wrap{padding:10px 0;align-items:flex-start;flex-direction:column}nav{gap:12px}}
+@media(max-width:440px){.flow{grid-template-columns:1fr}.actions .btn{width:100%}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="index.html"><img src="configkit-symbol.svg" alt="">ConfigKit</a><nav aria-label="Main navigation"><a href="index.html">Home</a><a href="integrations.html">Integrations</a><a href="privacy.html">Privacy</a></nav></div></header>
+<main class="wrap">
+<section class="hero">
+<div class="kicker"><span class="dot"></span> Integration proposal · Interest stage</div>
+<h1>One less password.<br><span>More room to create.</span></h1>
+<p class="lead">ConfigKit is preparing to offer a simple, privacy-conscious way for people to create or access their ConfigKit account with the ChatGPT identity they already use.</p>
+<div class="actions"><a class="btn primary" href="https://openai.com/form/sign-in-with-chatgpt-interest/" target="_blank" rel="noopener noreferrer">Open OpenAI interest form ↗</a><a class="btn" href="#proposal">Review our proposal</a></div>
+<p class="fine">Independent product proposal. ConfigKit is not an OpenAI partner or an approved Sign in with ChatGPT application at this time.</p>
+</section>
+<div class="stats" aria-label="Project snapshot">
+<div class="stat"><b>Live product</b><span>Public ConfigKit website and working tools</span></div>
+<div class="stat"><b>OAuth 2.1 / OIDC</b><span>ConfigKit identity-provider infrastructure already tested</span></div>
+<div class="stat"><b>Identity first</b><span>Initial request is sign-in only, with no plan-usage access</span></div>
+</div>
+<section class="content" id="proposal">
+<div class="section-label">The product</div><h2>A practical toolkit, with a simpler way in.</h2>
+<p class="intro">ConfigKit is an independent web toolkit focused on making device configuration and everyday digital workflows easier to build, understand and manage.</p>
+<div class="grid">
+<article class="card"><div class="icon">⚙️</div><h3>Configuration tools</h3><p>Build and inspect mobile configuration profiles, including Wi‑Fi, DNS and web clip workflows, with guidance to help people review what they are installing.</p></article>
+<article class="card"><div class="icon">🧰</div><h3>A connected workspace</h3><p>Bring together practical tools such as forms, notes, search, backups, collaboration and account-based features in one accessible web destination.</p></article>
+<article class="card"><div class="icon">🔐</div><h3>Permission-aware integrations</h3><p>ConfigKit has implemented an OAuth 2.1 / OpenID Connect server for third-party applications, with explicit consent and scoped access controls for supported resources.</p></article>
+</div>
+</section>
+<section class="content">
+<div class="section-label">Proposed experience</div><h2>Familiar sign-in. Clear user control.</h2>
+<p class="intro">The proposed first release is deliberately narrow: use ChatGPT as an identity provider for ConfigKit account creation and sign-in. Users would still control whether they link an existing ConfigKit account.</p>
+<div class="flow" aria-label="Proposed sign-in flow">
+<div class="step"><h3>Choose ChatGPT</h3><p>A person selects “Continue with ChatGPT” on the ConfigKit sign-in page.</p></div>
+<div class="step"><h3>Review with OpenAI</h3><p>They authenticate with OpenAI and review the identity information requested.</p></div>
+<div class="step"><h3>Return securely</h3><p>ConfigKit completes the supported OpenID Connect flow and validates the returned identity.</p></div>
+<div class="step"><h3>Choose account action</h3><p>The person creates a ConfigKit account or explicitly links an existing account.</p></div>
+</div>
+</section>
+<section class="content">
+<div class="section-label">Privacy & security</div><h2>Start with the minimum necessary access.</h2>
+<div class="grid">
+<article class="card"><div class="icon">🪪</div><h3>Identity only</h3><p>Initial requested capability: sign-in only. No request for ChatGPT plan usage, conversation history, memory, files or unrelated account data.</p></article>
+<article class="card"><div class="icon">🛡️</div><h3>Standards-based flow</h3><p>Prepared to implement OpenID Connect Authorization Code with PKCE, exact redirect URIs, state validation, secure token handling and issuer/client/subject account binding, subject to OpenAI's approved integration specification.</p></article>
+<article class="card"><div class="icon">🤝</div><h3>Separate consent</h3><p>Signing in would not silently grant access to ConfigKit resources or other integrations. Those permissions remain separate and user-controlled.</p></article>
+</div>
+</section>
+<section class="content">
+<div class="callout"><div class="section-label">Why this is useful</div><h2>A smoother first step into ConfigKit.</h2><p>People already use ChatGPT across their work and creative projects. A familiar sign-in option could reduce account friction, make onboarding easier, and let people try ConfigKit without creating another password. ConfigKit would remain responsible for its own accounts, authorization, privacy disclosures and support.</p></div>
+</section>
+<section class="content">
+<div class="section-label">Application-ready summary</div><h2>What we plan to tell OpenAI</h2>
+<div class="copy-panel">
+<h3>Requested capability: Sign in only</h3>
+<pre id="application-copy">ConfigKit is an independent web-based toolkit that helps people build and inspect device configuration profiles and use practical digital workflow tools in one place. We would like to integrate Sign in with ChatGPT as an additional account sign-in option on https://huynhw19.github.io/.
+
+The intended experience is identity-only account creation and sign-in. Users would be able to create a ConfigKit account or explicitly link an existing account using their ChatGPT identity. We are not requesting ChatGPT plan usage in the initial integration.
+
+ConfigKit has already built and tested its own OAuth 2.1 / OpenID Connect identity-provider infrastructure for third-party applications, including a consent experience and permission-scoped access controls for supported resources. For this integration, we would implement OpenAI's approved OpenID Connect Authorization Code with PKCE flow, validate the identity response, and keep ChatGPT sign-in separate from all other ConfigKit permissions.
+
+The benefit is a simpler onboarding experience for people who already use ChatGPT, while keeping account linking, data access and user consent explicit. We would welcome guidance on eligibility, technical review, branding requirements and the next steps for the Sign in with ChatGPT programme.</pre>
+<div class="actions"><button class="btn copy-btn" type="button" id="copy-summary">Copy application summary</button><span class="fine" id="copy-status" role="status" aria-live="polite"></span></div>
+</div>
+</section>
+<section class="content">
+<div class="section-label">Next step</div><h2>Request review through OpenAI's official channel.</h2>
+<p class="intro">OpenAI currently describes website Sign in with ChatGPT as a limited programme for selected commercial partners. Submitting interest is not approval and does not guarantee a client ID or a timeline.</p>
+<div class="notice"><strong>Important distinction</strong><br>This page is a proposal prepared by ConfigKit, not an OpenAI application submission, endorsement or approval. We will only add the ChatGPT sign-in button after OpenAI approves the integration and issues the required client credentials.</div>
+<div class="actions"><a class="btn primary" href="https://openai.com/form/sign-in-with-chatgpt-interest/" target="_blank" rel="noopener noreferrer">Continue to official interest form ↗</a><a class="btn" href="https://developers.openai.com/siwc/website" target="_blank" rel="noopener noreferrer">Read website integration docs ↗</a><a class="btn" href="privacy.html">Read ConfigKit privacy page</a></div>
+</section>
+</main>
+<footer class="wrap footer">ConfigKit · Independent integration proposal · <a href="privacy.html">Privacy</a> · <a href="safety.html">Safety &amp; contact</a></footer>
+<script>
+document.getElementById('copy-summary').addEventListener('click', async () => {
+  const text = document.getElementById('application-copy').innerText;
+  const status = document.getElementById('copy-status');
+  try {
+    await navigator.clipboard.writeText(text);
+    status.textContent = 'Copied — ready to paste into the OpenAI form.';
+  } catch (_) {
+    status.textContent = 'Clipboard unavailable. Select and copy the summary above.';
+  }
+});
+</script>
+<script src="cookie-consent.js?v=2" defer></script>
+</body>
+</html>
