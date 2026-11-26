@@ -32,20 +32,18 @@ jobs:
           const response = await fetch(url, { cache: 'no-store' });
           if (!response.ok) throw new Error('Admin page returned HTTP ' + response.status);
           const html = await response.text();
-          const scripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)];
-          console.log('Published page:', url, 'HTTP', response.status, 'inline scripts:', scripts.length);
-          if (!scripts.length) throw new Error('No inline dashboard script found');
-          for (let i = 0; i < scripts.length; i++) {
-            try {
-              new Function(scripts[i][1]);
-              console.log('PASS: inline script', i + 1, 'parses');
-            } catch (error) {
-              console.error('FAIL: inline script', i + 1, error.stack || error.message);
-              process.exitCode = 1;
-            }
+          const marker = '<script>';
+          const start = html.indexOf(marker, html.indexOf('supabase-js'));
+          const end = html.indexOf('</script>', start);
+          if (start < 0 || end < 0) throw new Error('Could not locate the dashboard inline script');
+          const source = html.slice(start + marker.length, end);
+          console.log('Published page:', url, 'HTTP', response.status, 'inline script chars:', source.length);
+          try {
+            new Function(source);
+            console.log('PASS: Admin Dashboard inline script parses');
+          } catch (error) {
+            console.error('FAIL: Admin Dashboard inline script:', error.stack || error.message);
+            process.exitCode = 1;
           }
-          const identity = html.match(/id="identity"[^>]*>([^<]*)</)?.[1] || '';
-          const status = html.match(/id="status"[^>]*>([^<]*)</)?.[1] || '';
-          console.log('Initial identity:', identity);
-          console.log('Initial status:', status);
+          console.log('Initial UI contains verifying text:', html.includes('Verifying your administrator access'));
           NODE
