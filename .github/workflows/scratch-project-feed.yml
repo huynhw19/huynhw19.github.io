@@ -1,0 +1,82 @@
+name: Refresh Scratch community project feed
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+  push:
+    paths:
+      - ".github/workflows/scratch-project-feed.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scratch-community-feed
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out ConfigKit
+        uses: actions/checkout@v4
+      - name: Fetch public Scratch Explore feeds
+        env:
+          TZ: UTC
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFile} from 'node:fs/promises';
+
+          const feeds = [
+            'https://api.scratch.mit.edu/explore/projects/?mode=popular&limit=40&offset=0&language=en&q=*',
+            'https://api.scratch.mit.edu/explore/projects/?mode=trending&limit=40&offset=0&language=en&q=*',
+            'https://api.scratch.mit.edu/explore/projects/?mode=recent&limit=40&offset=0&language=en&q=*'
+          ];
+
+          const results = await Promise.allSettled(feeds.map(async (url) => {
+            const response = await fetch(url, {
+              headers: {'accept': 'application/json', 'user-agent': 'ConfigKit-Scratch-Community-Feed/1.0'}
+            });
+            if (!response.ok) throw new Error(`Scratch API returned HTTP ${response.status}`);
+            const data = await response.json();
+            if (!Array.isArray(data)) throw new Error('Scratch API returned an unexpected response');
+            return data;
+          }));
+
+          const projects = new Map();
+          for (const result of results) {
+            if (result.status !== 'fulfilled') {
+              console.warn('One Scratch feed failed:', String(result.reason));
+              continue;
+            }
+            for (const project of result.value) {
+              if (project?.id && !projects.has(String(project.id))) {
+                projects.set(String(project.id), project);
+              }
+            }
+          }
+
+          if (projects.size === 0) {
+            throw new Error('All Scratch Explore feeds failed; keeping the previous cached feed.');
+          }
+
+          const output = {
+            updatedAt: new Date().toISOString(),
+            source: 'Scratch public Explore API',
+            projects: [...projects.values()].slice(0, 50)
+          };
+          await writeFile('scratch-projects.json', JSON.stringify(output, null, 2) + '\n');
+          console.log(`Saved ${output.projects.length} public Scratch projects.`);
+          NODE
+      - name: Publish updated feed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scratch-projects.json
+          if git diff --cached --quiet; then
+            echo "Scratch feed is unchanged."
+          else
+            git commit -m "Refresh cached Scratch community projects"
+            git push
+          fi
