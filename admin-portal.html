@@ -63,7 +63,37 @@ $('refresh-all').addEventListener('click',()=>refresh().then(()=>show('Dashboard
 $('users-refresh').addEventListener('click',()=>refresh().catch(e=>show(e.message,'error')));$('user-search').addEventListener('input',renderUsers);
 $('reports-refresh').addEventListener('click',()=>refresh().catch(e=>show(e.message,'error')));$('report-filter').addEventListener('change',renderReports);
 $('content-filter').addEventListener('change',renderContent);$('content-search').addEventListener('input',renderContent);
-async function start(){if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient)throw new Error('ConfigKit authentication is unavailable.');db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});const {data:{session},error}=await db.auth.getSession();if(error)throw error;if(!session){show('Please sign in to ConfigKit to continue.','error');const a=document.createElement('a');a.href='login.html?next=admin-portal.html';a.textContent='Sign in to ConfigKit →';$('status').append(' ',a);return}user=session.user;isOwner=user.id===OWNER;$('identity').textContent='Signed in as '+(user.email||user.id)+(isOwner?' · Owner':'');if(isOwner){$('workspace').classList.remove('hidden');show('Owner access verified.','good');await refresh();await loadOwnerSettings();return}const {data:role,error:roleError}=await db.from('configkit_admin_roles').select('role').eq('user_id',user.id).maybeSingle();if(roleError)throw roleError;if(role?.role==='admin'){$('workspace').classList.remove('hidden');show('Administrator access verified.','good');await refresh();return}show('You are signed in, but do not have administrator access. You can apply below.');$('apply').classList.remove('hidden');await loadMyApplications()}
-start().catch(e=>show('Could not load admin dashboard: '+e.message,'error'));
+async function withTimeout(promise,label,ms=12000){let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(label+' timed out. Please refresh and try again.')),ms)})])}finally{clearTimeout(timer)}}
+async function waitForInitialSession(){
+ return await withTimeout(new Promise((resolve,reject)=>{
+  let settled=false,subscription;
+  const finish=value=>{if(settled)return;settled=true;subscription?.unsubscribe();resolve(value)};
+  const result=db.auth.onAuthStateChange((event,session)=>{
+   if(event==='INITIAL_SESSION')finish(session||null);
+  });
+  subscription=result.data?.subscription;
+  if(result.error)reject(result.error);
+ }), 'ConfigKit sign-in verification');
+}
+async function start(){
+ if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase?.createClient)throw new Error('ConfigKit authentication is unavailable. Check auth-config.js and reload.');
+ db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ show('Checking your ConfigKit sign-in…');
+ const session=await waitForInitialSession();
+ if(!session){show('Please sign in to ConfigKit to continue.','error');const a=document.createElement('a');a.href='login.html?next=admin-portal.html';a.textContent='Sign in to ConfigKit →';$('status').append(' ',a);return}
+ user=session.user;
+ if(!user?.id)throw new Error('Your sign-in session did not contain a user. Please sign in again.');
+ isOwner=user.id===OWNER;
+ $('identity').textContent='Signed in as '+(user.email||user.id)+(isOwner?' · Owner':'');
+ if(isOwner){$('workspace').classList.remove('hidden');show('Owner access verified.','good');await refresh();await loadOwnerSettings();return}
+ show('Checking your administrator role…');
+ const {data:role,error:roleError}=await withTimeout(db.from('configkit_admin_roles').select('role').eq('user_id',user.id).maybeSingle(),'Administrator role lookup');
+ if(roleError)throw roleError;
+ if(role?.role==='admin'){$('workspace').classList.remove('hidden');show('Administrator access verified.','good');await refresh();return}
+ show('You are signed in, but do not have administrator access. You can apply below.');
+ $('apply').classList.remove('hidden');
+ await loadMyApplications();
+}
+
 })();
 </script></body></html>
