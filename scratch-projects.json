@@ -1,156 +1,103 @@
 {
-  "updatedAt": "2026-11-26T07:00:06.005Z",
+  "updatedAt": "2026-11-26T21:42:32.775Z",
   "source": "Scratch public Explore API",
   "projects": [
     {
-      "id": 58371928,
-      "title": "desert daze",
-      "description": "+ Music: \"Anamalie\" found on incompetech.com\n+ All graphics made in vector mode",
-      "instructions": "I heard this piece of music and an image of the desert popped into my mind. This is a product of that.\n\nSit back and let the desert sun daze you. \n*I recommend viewing this in full screen mode",
+      "id": 35598690,
+      "title": "Origami remix",
+      "description": "Τα εξαιρετικά σχέδια είναι από το έργο Origami Art του χρήστη iAmity\nκαι η ιδέα για την κίνηση από το έργο Pinwheel του χρήστη dolphingirl36  ",
+      "instructions": "Press the green flag. Enjoy!",
       "visibility": "notvisible",
       "public": false,
       "comments_allowed": false,
       "is_published": false,
       "author": {
-        "id": 2755634,
-        "username": "ceebee",
+        "id": 5026274,
+        "username": "scratch4teachers",
         "scratchteam": false,
         "history": {
-          "joined": "2013-09-21T14:57:20.000Z"
+          "joined": "2014-10-05T11:53:14.000Z"
         },
         "profile": {
           "id": null,
           "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/2755634_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/2755634_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/2755634_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/2755634_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/2755634_32x32.png?v="
-          },
-          "membership_avatar_badge": 0
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/58371928_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/58371928_282x218.png?v=1743965866",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/58371928_216x163.png?v=1743965866",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/58371928_200x200.png?v=1743965866",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/58371928_144x108.png?v=1743965866",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/58371928_135x102.png?v=1743965866",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/58371928_100x80.png?v=1743965866"
-      },
-      "history": {
-        "created": "2015-04-22T18:15:34.000Z",
-        "modified": "2025-04-06T18:57:46.000Z",
-        "shared": "2015-04-23T13:31:57.000Z"
-      },
-      "stats": {
-        "views": 9464,
-        "loves": 378,
-        "favorites": 263,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 204797258,
-      "title": "Get The Cheese!",
-      "description": "Please love, favorite, share, and add to studios! Thank you! :)",
-      "instructions": "You are the mouse. You want to eat the cheese. Dodge the beetles, and avoid the ghosts that disappear and appear. The ghosts also follow you. Do face up, press the up arrow. To face left, press the left arrow, and so on.",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 19298959,
-        "username": "dkim19375",
-        "scratchteam": false,
-        "history": {
-          "joined": "2016-10-31T20:49:42.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/19298959_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/19298959_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/19298959_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/19298959_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/19298959_32x32.png?v="
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/5026274_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/5026274_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/5026274_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/5026274_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/5026274_32x32.png?v="
           }
         }
       },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/204797258_480x360.png",
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/35598690_480x360.png",
       "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/204797258_282x218.png?v=1520460659",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/204797258_216x163.png?v=1520460659",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/204797258_200x200.png?v=1520460659",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/204797258_144x108.png?v=1520460659",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/204797258_135x102.png?v=1520460659",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/204797258_100x80.png?v=1520460659"
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/35598690_282x218.png?v=1428944166",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/35598690_216x163.png?v=1428944166",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/35598690_200x200.png?v=1428944166",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/35598690_144x108.png?v=1428944166",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/35598690_135x102.png?v=1428944166",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/35598690_100x80.png?v=1428944166"
       },
       "history": {
-        "created": "2018-02-19T01:17:45.000Z",
-        "modified": "2018-03-07T22:10:59.000Z",
-        "shared": "2018-02-19T02:35:11.000Z"
+        "created": "2014-11-21T17:57:59.000Z",
+        "modified": "2015-04-13T16:56:06.000Z",
+        "shared": "2015-04-07T07:10:09.000Z"
       },
       "stats": {
-        "views": 34194,
-        "loves": 479,
-        "favorites": 357,
+        "views": 5243,
+        "loves": 64,
+        "favorites": 46,
         "remixes": 0
       },
       "remix": {
-        "root": null
+        "root": 31234504
       }
     },
     {
-      "id": 351018410,
-      "title": "Snaking Clones v0.3",
-      "description": "",
-      "instructions": "You have probably all seen my Terraria project I've been working on for a 3 months now. Next up I'm needing to add some worm type AI enemies, but to do this I needed an efficient way of creating a worm/snake body that follows its head without the need to add more lists of positions into an already very large project! And so... this little test project has come into being...\n\nOf course is always the way when you are having fun, I then tried introducing a few constraints to the snake's body such that it would attempt to unfurl a little... and the result is really funny especially as it jiggles around quite a bit :) - So thought I would share it with you!\n\nChange Log\nv0.3 - Choice of worm types :)\nv0.2 - Replaced skin with a dragon - Do you like?\nv0.1 - Initial Worm Scratch Cat Sprite\n",
+      "id": 73909246,
+      "title": "Dance With Me, You P.Y.T.",
+      "description": "music: P.Y.T. by Michael Jackson\nprofessional? nah. not yet at least \n\nAdvice or suggestions are acceptable :)\n\nAlso, I've heard this was sent through email by Scratch. (a shoutout?) because all of a sudden I'm getting more messages than I usually do, so thank you so much for giving recognition to this project especially since its for Michael ♥   (3/19/16)",
+      "instructions": "----------------------------------------------------------------\nlil' dance animation... feel free to dance along \nP.Y.T. means pretty young thing (in case ya didn't know)\n\nIt was Michael Jackson's birthday!! and I've decided to make this \nhis gift!   (8/29/15)\n\n::::UPDATE:::: I decided to fix up the thumbnail (title screen) :3",
       "visibility": "notvisible",
       "public": false,
       "comments_allowed": false,
       "is_published": false,
       "author": {
-        "id": 1882674,
-        "username": "griffpatch",
+        "id": 7719390,
+        "username": "cinnabungirl13",
         "scratchteam": false,
         "history": {
-          "joined": "2012-10-24T12:59:31.000Z"
+          "joined": "2015-02-11T13:53:47.000Z"
         },
         "profile": {
           "id": null,
           "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/1882674_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/1882674_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/1882674_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/1882674_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/1882674_32x32.png?v="
-          },
-          "membership_avatar_badge": 0
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/7719390_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/7719390_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/7719390_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/7719390_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/7719390_32x32.png?v="
+          }
         }
       },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/351018410_480x360.png",
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/73909246_480x360.png",
       "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/351018410_282x218.png?v=1701011403",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/351018410_216x163.png?v=1701011403",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/351018410_200x200.png?v=1701011403",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/351018410_144x108.png?v=1701011403",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/351018410_135x102.png?v=1701011403",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/351018410_100x80.png?v=1701011403"
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/73909246_282x218.png?v=1540739784",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/73909246_216x163.png?v=1540739784",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/73909246_200x200.png?v=1540739784",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/73909246_144x108.png?v=1540739784",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/73909246_135x102.png?v=1540739784",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/73909246_100x80.png?v=1540739784"
       },
       "history": {
-        "created": "2019-12-05T12:01:50.000Z",
-        "modified": "2023-11-26T15:10:03.000Z",
-        "shared": "2019-12-05T18:42:38.000Z"
+        "created": "2015-08-23T22:41:29.000Z",
+        "modified": "2018-10-28T15:16:24.000Z",
+        "shared": "2015-08-26T01:39:04.000Z"
       },
       "stats": {
-        "views": 511948,
-        "loves": 16800,
-        "favorites": 14155,
+        "views": 28419,
+        "loves": 2503,
+        "favorites": 1853,
         "remixes": 0
       },
       "remix": {
@@ -158,10 +105,265 @@
       }
     },
     {
-      "id": 418330331,
-      "title": "A Journey of a Penguin Family ",
-      "description": "Thank you to @Mittensbrother for the great project! \nClaymation : Panda Bear and a Girl \nhttps://scratch.mit.edu/projects/731727384/\nChumie's Tutorial and Info\nhttps://scratch.mit.edu/studios/32316954/\nChumie's Dress Up & Icon Maker Studio:\nhttps://scratch.mit.edu/studios/32316949\nChumie's Interactive Games Studio:\nhttps://scratch.mit.edu/studios/32316951\nChristmas Market Scenery \nhttps://scratch.mit.edu/projects/607634113/\nChristmas Market in Chumieburgh!\nhttps://scratch.mit.edu/projects/606997287/\nAdvent Calendar Christmas Tree\nhttps://scratch.mit.edu/projects/504270282/\nBeat the Winter Blues! \nhttps://scratch.mit.edu/projects/575684072/\nYou can find Penguin, Sledge and Suit case sprites by @Chumie's Free Sprite Collection!\nhttps://scratch.mit.edu/projects/416047339/\nMusic: Oedo Nihonbashi\nhttps://scratch.mit.edu/projects/407882526/",
-      "instructions": "Welcome to my small Anime! They want to take holiday\nColour Blind Awareness \nhttps://scratch.mit.edu/projects/768056957/\nWays to Be an Ally to People with Disability\nhttps://scratch.mit.edu/projects/1308498111/\nTips for Coming Out/Inviting In\nhttps://scratch.mit.edu/projects/1329388260/\nMuslim Cultural Awareness \nhttps://scratch.mit.edu/projects/1135444376/\nTrans Ally: Transgender Ally\nhttps://scratch.mit.edu/projects/1137354213/\nGame Egg Hunt \nhttps://scratch.mit.edu/projects/1286588831/\n\n",
+      "id": 88712533,
+      "title": "Waffle Maker",
+      "description": "credit to google!!!\n\nNo advertising here please unless you are Arctic17712!!!\n\nONLY REMIX IF YOU ARE GOING TO GIVE CREDIT!!!\n\n",
+      "instructions": "Click on the toppings to be on the waffle!\n\nYAYAYAYAY IN A FEATURED STUDIO!!!\n\nIf you don't want a topping but you've already clicked it, use these keys to put them back:\n\nm = maple syrup\nb = butter\ns = strawberries\ndown arrow = bluberries\nh = honey",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 11298382,
+        "username": "Arctic17712",
+        "scratchteam": false,
+        "history": {
+          "joined": "2015-08-13T07:47:44.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/11298382_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/11298382_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/11298382_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/11298382_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/11298382_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/88712533_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/88712533_282x218.png?v=1505974107",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/88712533_216x163.png?v=1505974107",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/88712533_200x200.png?v=1505974107",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/88712533_144x108.png?v=1505974107",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/88712533_135x102.png?v=1505974107",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/88712533_100x80.png?v=1505974107"
+      },
+      "history": {
+        "created": "2015-11-21T19:50:45.000Z",
+        "modified": "2017-09-21T06:08:27.000Z",
+        "shared": "2015-11-21T20:28:31.000Z"
+      },
+      "stats": {
+        "views": 45045,
+        "loves": 872,
+        "favorites": 630,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 166237276,
+      "title": "Ice Cream Shop 2",
+      "description": "All art and coding by me\nMusic: Neonland by Detektivbyrån\nSound Effects: from Scratch library (some sounds were edited by me)\nFont (on thumbnail): Walter Turncoat (uploaded by @FontGod)\n\n✿ See the original Ice Cream Shop game here: https://scratch.mit.edu/projects/64667098/\n\n✿ Updates ✿\n5 different levels\nNew cones\nNew ice cream flavors\nNew toppings\nRandomized customers\n3 lives\n\nThanks to everyone who commented suggestions on my first game!",
+      "instructions": "It's been about 2 years since I shared my first Ice Cream Shop game, so I decided to make some updates!\n\n✿ Instructions ✿\nComplete each customer's order by clicking on the correct cone, ice cream flavor, and topping.\n\n✿ Tips ✿\nMake sure your customers are happy by completing their order as quickly as possible to get more points! Be careful though, if you incorrectly complete the order, you lose a life.\nHave fun! :)\n\n✿ Levels ✿\nLevel 1: 0 points\nLevel 2: 50 points\nLevel 3: 100 points\nLevel 4: 150 points\nLevel 5: 200 points",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 10271602,
+        "username": "Frostpuff",
+        "scratchteam": false,
+        "history": {
+          "joined": "2015-05-25T20:35:38.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/10271602_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/10271602_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/10271602_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/10271602_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/10271602_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/166237276_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/166237276_282x218.png?v=1498453213",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/166237276_216x163.png?v=1498453213",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/166237276_200x200.png?v=1498453213",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/166237276_144x108.png?v=1498453213",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/166237276_135x102.png?v=1498453213",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/166237276_100x80.png?v=1498453213"
+      },
+      "history": {
+        "created": "2017-06-16T00:06:12.000Z",
+        "modified": "2017-06-26T05:00:13.000Z",
+        "shared": "2017-06-26T05:00:13.000Z"
+      },
+      "stats": {
+        "views": 39868,
+        "loves": 2019,
+        "favorites": 1680,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 179164859,
+      "title": "3D Jumping Springs",
+      "description": "Another 3D PullJosh project\n10/13/17 Featured!\n \n@uplift\n@PullJosh\nMusic:\n\"Local Forecast - Elevator\" Kevin MacLeod (incompetech.com)\nLicensed under Creative Commons: By Attribution 3.0 License\nhttp://creativecommons.org/licenses/by/3.0/",
+      "instructions": "This is just a remix from pulljosh's project. I wanted to see if it would look nice as springs.",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 2358746,
+        "username": "uiopscratch327",
+        "scratchteam": false,
+        "history": {
+          "joined": "2013-04-29T20:53:30.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/2358746_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/2358746_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/2358746_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/2358746_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/2358746_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/179164859_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/179164859_282x218.png?v=1576994143",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/179164859_216x163.png?v=1576994143",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/179164859_200x200.png?v=1576994143",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/179164859_144x108.png?v=1576994143",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/179164859_135x102.png?v=1576994143",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/179164859_100x80.png?v=1576994143"
+      },
+      "history": {
+        "created": "2017-10-10T21:44:13.000Z",
+        "modified": "2019-12-22T05:55:43.000Z",
+        "shared": "2017-10-10T22:03:06.000Z"
+      },
+      "stats": {
+        "views": 62615,
+        "loves": 3134,
+        "favorites": 2195,
+        "remixes": 0
+      },
+      "remix": {
+        "root": 178888347
+      }
+    },
+    {
+      "id": 194040799,
+      "title": "☆ Number Guesser ☆",
+      "description": "All art by me.\n\nWhen I was younger, someone tried something similar to this on me. Being a young kid, I obviously thought it was magic and the coolest thing ever. It was quite obvious once I was older, but I wanted to share the \"magic\". Keep that in mind before you comment \"so easy\".\n\nFAQs:\n\n\"How?\"\nMagic! Also, you might find some more \"magic\" inside the project ;)\n\nYep, my cover's been blown, so I've added an explanation inside. Have fun!\n\n\"F4F?\"\nNope, sorry, don't do F4F.\n\n\"I found out how it works!\"\nYep, you did, hats off.\n\n\"It got my number right!\"\nYay! That's kind of what it does.\n\n\"It got my number wrong!\"\nIt... can't. You've made a mistake. Look inside to see how.\n\n\"It read my brain!\"\nYeah... no. Sorry, it did not read your brain. Not yet at least. My team of 42 cats is currently working on that.\n\nIf you're a dog person, I'll have you know that I also work with a team of 35 puppies on color theory...\n\n\"This is so simple! Why is it featured? Even I could do that!\"\nYeah, it is simple. You could have done it, but you didn't. To answer your second question, I don't know. I don't decide.\n\n\"no hate, but I'm going to hate\"\nGee thanks, mate.\n\nAlso, if you read all the way down here, props to you!",
+      "instructions": "Pretty straightforward, just do what it says and you'll be fine.\n\nIf you follow the directions, I guarantee your number will be correct, or you get your money back! Oh, wait. This game's free! Cheerio!\n\nAny bugs, just drop a comment and I'll be sure to fix it.\n\nBefore you comment, please, please, read through the FAQs below.",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 24691038,
+        "username": "-Luminescence-",
+        "scratchteam": false,
+        "history": {
+          "joined": "2017-07-11T04:41:24.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/24691038_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/24691038_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/24691038_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/24691038_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/24691038_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/194040799_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/194040799_282x218.png?v=1615399125",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/194040799_216x163.png?v=1615399125",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/194040799_200x200.png?v=1615399125",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/194040799_144x108.png?v=1615399125",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/194040799_135x102.png?v=1615399125",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/194040799_100x80.png?v=1615399125"
+      },
+      "history": {
+        "created": "2017-12-16T19:52:01.000Z",
+        "modified": "2021-03-10T17:58:45.000Z",
+        "shared": "2018-05-07T00:49:27.000Z"
+      },
+      "stats": {
+        "views": 53979,
+        "loves": 5516,
+        "favorites": 4686,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 542588218,
+      "title": "Laser Connect! (Puzzle Game)",
+      "description": "",
+      "instructions": "If you like it pls like and fav :D and also give a follow.\n\nAlso This was a colab for the GMTK Game jam but this project is just better then the jam game so yea\n\nAll art made by @Trooper_31\n@WilderNaut Made all the code / Levels\n\nHow to play -_-_-_-\n- Move the Red bot with WASD\n- Move the Blue bot with Arrow keys\n- Try to get to the Last Level!\n\n------------------------- People who liked! -----------------------\n@alps88\n@colinmacc\n@papipupepappa\n@xamuil2\n@theChAOTiC (pog)\n@-RipeMangoes-\n@-not-so-fine-art-\n@h0rrnet15\n@timmccool\n@Noentiendo2005 (⌐■_■)\n\nBut most importantly you!\n----------------------------------------------------------------------------\n#Games #Laser #Puzzle #Demo #Story #Fun #Like #Fav",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 69512406,
+        "username": "WilderNaut",
+        "scratchteam": false,
+        "history": {
+          "joined": "2020-12-31T18:48:52.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/69512406_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/69512406_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/69512406_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/69512406_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/69512406_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/542588218_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/542588218_282x218.png?v=1703493948",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/542588218_216x163.png?v=1703493948",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/542588218_200x200.png?v=1703493948",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/542588218_144x108.png?v=1703493948",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/542588218_135x102.png?v=1703493948",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/542588218_100x80.png?v=1703493948"
+      },
+      "history": {
+        "created": "2021-06-09T20:17:15.000Z",
+        "modified": "2023-12-25T08:45:48.000Z",
+        "shared": "2023-12-25T08:45:48.000Z"
+      },
+      "stats": {
+        "views": 165287,
+        "loves": 7117,
+        "favorites": 6111,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 566148015,
+      "title": "Save Electricity",
+      "description": "Claymation : Panda Bear and a Girl \nhttps://scratch.mit.edu/projects/731727384/\nChumie's Tutorial and Info\nhttps://scratch.mit.edu/studios/32316954/\nChumie's Dress Up & Icon Maker Studio:\nhttps://scratch.mit.edu/studios/32316949\nChumie's Interactive Games Studio:\nhttps://scratch.mit.edu/studios/32316951\nHawaiian Dress Up \nhttps://scratch.mit.edu/projects/542510601/\no\nhttps://scratch.mit.edu/projects/557036573/\nSalt and Watermelon\nhttps://scratch.mit.edu/projects/531214778/\nInteractive Ice Cream Maker\nhttps://scratch.mit.edu/projects/532415939/\nA Bank Robber Scratchcat?! Part 1\nhttps://scratch.mit.edu/projects/510622550/",
+      "instructions": "Click the green flag. Which one would you choose?\nThe cutest part is at the end!  ( ◉◞౪◟◉)\nHow to get more views\nhttps://scratch.mit.edu/projects/592069204/\nChristmas Market in Chumieburgh!\nhttps://scratch.mit.edu/projects/606997287/\nAdvent Calendar Christmas Tree\nhttps://scratch.mit.edu/projects/504270282/\nhttps://scratch.mit.edu/projects/607634113/\nInteractive Pirate Ship (SDS)\nhttps://scratch.mit.edu/projects/563852752/\nInteractive Tutorial: Ordering Ice Cream in German\nhttps://scratch.mit.edu/projects/416371164/",
       "visibility": "notvisible",
       "public": false,
       "comments_allowed": false,
@@ -184,84 +386,596 @@
           }
         }
       },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/418330331_480x360.png",
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/566148015_480x360.png",
       "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/418330331_282x218.png?v=1793981222",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/418330331_216x163.png?v=1793981222",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/418330331_200x200.png?v=1793981222",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/418330331_144x108.png?v=1793981222",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/418330331_135x102.png?v=1793981222",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/418330331_100x80.png?v=1793981222"
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/566148015_282x218.png?v=1776836814",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/566148015_216x163.png?v=1776836814",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/566148015_200x200.png?v=1776836814",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/566148015_144x108.png?v=1776836814",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/566148015_135x102.png?v=1776836814",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/566148015_100x80.png?v=1776836814"
       },
       "history": {
-        "created": "2020-08-17T13:36:10.000Z",
-        "modified": "2026-11-06T16:07:02.000Z",
-        "shared": "2020-08-17T15:04:05.000Z"
+        "created": "2021-09-02T17:31:58.000Z",
+        "modified": "2026-04-22T05:46:54.000Z",
+        "shared": "2021-09-03T17:50:59.000Z"
       },
       "stats": {
-        "views": 6398,
-        "loves": 134,
-        "favorites": 109,
+        "views": 8830,
+        "loves": 171,
+        "favorites": 137,
         "remixes": 0
       },
       "remix": {
-        "root": 277703355
+        "root": null
       }
     },
     {
-      "id": 459673516,
-      "title": "Dance, Bubbles, Dance! || Fanart - Bubbles_Official #animations #all",
-      "description": "@Bubbles_Official for her character thingy.\n@coding-turkey (me) for the bubbles.\n12/07/20 - YES! Bubbles_Official loved/faved!!\n12/08/20 - NOO WAAY!!! 4th on trending in all!!\n12/10/20 - o_0 This is on \"What the community is loving, and this reached 10,000 views!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\nYaay! - 250+ views on the first day!! :D\nOMG OMG - I even got 20 views in the first 5 minutes I shared this, and got over 300 messages!!",
-      "instructions": "Click/tap to show controls that let you control her dance. You can turn off the disco lights if they bother you. AND \nYou can also tap the bubbles to pop them.\n\nCheck out the remix tree here (link below):\nhttps://scratch.mit.edu/projects/459673516/remixtree/",
+      "id": 743207951,
+      "title": "✨Flaws✨ Parts 1, 2 and 3",
+      "description": "┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉\n\n✨Flaws✨\n(MAP Parts 1, 2 and 3)\n\n┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉\n\n┌───────────────────────────────┐\n⠀-Instructions-\n\n • Green flag to start, click it multiple times or else it will lag\n • Full-screen mode gives you best quality.\n\nThis MAP is about autism so I animated it with my character Ryssai, an autistic dragon. Ryssai likes stargazing, plants and flowers, and the seaside. Her best friend is Blue, an energetic purple dragon with ADHD. A gold infinity symbol is featured multiple times in the animation, as that's the symbol for autism.\n\nApril is Autism Awareness/Acceptance Month! You can WEAR RED on 2nd April to show support for the autistic community. \n\nBefore anyone complains in the comments: the MAP doesn't intend to call autism a \"flaw\". The \"flaw\" is metaphorical, referring to how we're often excluded, our autistic traits looked down upon and our talents overlooked. This MAP is about autistic people lifting eachother up, and about accepting us for who we are rather than trying to \"fix\" us. :))\n\nMore detailed explanation for anyone who's curious: \n\nPart 1 - \n\"When all of your flaws, and all of my flaws\"\nThe thought bubble with a gold infinity symbol inside it indicates that Ryssai is autistic.\n\"Are laid out one by one\"\nMemories flash through Ryssai's brain as she now makes sense of her experiences from before she knew she was autistic. Other dragons couldn't understand her and Ryssai couldn't figure out why they didn't like her. She thought it might be her fault. \n\nPart 2 - \n\"The wonderful part of the mess that we've made\"\nRyssai meets Blue and discovers he's different too. Blue thinks differently from Ryssai - he has ADHD - but he accepts and supports Ryssai for who she is, because he's had similar experiences of being misunderstood. They become good friends. \n\"We pick ourselves undone\"\nRyssai and Blue are stargazing together which pans upwards to reveal a night sky. A star constellation forms an infinity symbol. This part represents the infinite possibilities of the autism spectrum and autistic people, as well as how Ryssai's interests are connected to her being autistic (autism is part of her identity). Many autistic people are out there and we're a natural part of this world, but when we're not connected we might feel alien or alone.\n\nPart 3 - \n\"All of my flaws and all of your flaws\"\nRyssai talks to Blue about space and the stars and the moon which Blue loves because he's a space dragon, and Ryssai loves because it's one of her special interests. \nBlue gives Ryssai a sunflower because Ryssai likes plants and flowers and Blue likes exploring and finding people little gifts. The sunflower relates to autism because it represents hidden disabilities. Autism is a hidden disability. Ryssai is finally able to recognise this in herself and accept herself for it. \n\"They lie there hand in hand\"\nTogether, Ryssai and Blue have found confidence to be different, not less. \"Different Not Less\" is a mantra coined by Temple Grandin, a famous autistic person. It means we have just as much to offer to the world as anyone else, and deserve just as much as anyone else. We are different and that's beautiful. \n\n└───────────────────────────────┘\n\n┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉\n\n⠀-Credits-\n\n Animation - me (@-Squiggle)\n MAP hosted by @Shaydie_the_Unifox\n Music - Flaws by Bastille (uploaded and split into parts by @Shaydie_the_unifox)\n Inspiration - my experiences as an autistic person, other people's parts\n Other - I drew all art in the Scratch bitmap editor (using a digital art tablet). the characters are Ryssai and Blue (both belong to me). \n\n┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉\n\n⠀-Notes-\n\nI actually wasn't gonna finish this originally, but I did I did I did anyway and it's not perfect but at least I finished it\naaaaaaaa akdfslfsdjdafjdh this entire MAP is so cool I'm so happy I'm so excited aaaaaaa\n\nI'm aware of all the mistakes, but I'm really tired and I wanna share this so ehh. I'm still proud of myself\n\nA ❤️ or ⭐ would be much appreciated <3\n\n┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉\n\n⠀-Links-\n\n┌───────────────────────────────┐\n⠀Autism Awareness / Acceptance Month studio \n https://scratch.mit.edu/studios/33079952/\n └───────────────────────────────┘\n┌───────────────────────────────┐\n⠀Autism Q&A\n https://scratch.mit.edu/projects/721609084/└───────────────────────────────┘\n┌───────────────────────────────┐\n⠀Neuro-Squiggles: ND Voices\n https://scratch.mit.edu/studios/31892630/└───────────────────────────────┘\n┌───────────────────────────────┐\n⠀All my ND-related content\n https://scratch.mit.edu/studios/32053504/└───────────────────────────────┘\n\n┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉\n\n -Tags-\n\n#ActuallyAutistic #AutismAcceptance #AutismAwareness #RedInstead #DifferentNotLess #AutismPride #NothingAboutUsWithoutUs #AutisticAndProud\n#Autism #Autistic #ASD #ASC #Disability #Disorder #Neurodivergent #Neurodiversity #Diversity #Animations #Art #Stories #Squiggle #Squi\n\n┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉\n\nSecret message: LKDJSFGHjlksd hi\n\n┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉",
+      "instructions": "",
       "visibility": "notvisible",
       "public": false,
       "comments_allowed": false,
       "is_published": false,
       "author": {
-        "id": 18184323,
-        "username": "coding-turkey",
+        "id": 61285917,
+        "username": "-Squiggle",
         "scratchteam": false,
         "history": {
-          "joined": "2016-09-09T23:19:27.000Z"
+          "joined": "2020-06-06T08:20:26.000Z"
         },
         "profile": {
           "id": null,
           "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/18184323_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/18184323_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/18184323_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/18184323_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/18184323_32x32.png?v="
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/61285917_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/61285917_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/61285917_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/61285917_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/61285917_32x32.png?v="
           }
         }
       },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/459673516_480x360.png",
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/743207951_480x360.png",
       "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/459673516_282x218.png?v=1672933640",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/459673516_216x163.png?v=1672933640",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/459673516_200x200.png?v=1672933640",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/459673516_144x108.png?v=1672933640",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/459673516_135x102.png?v=1672933640",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/459673516_100x80.png?v=1672933640"
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/743207951_282x218.png?v=1739042697",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/743207951_216x163.png?v=1739042697",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/743207951_200x200.png?v=1739042697",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/743207951_144x108.png?v=1739042697",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/743207951_135x102.png?v=1739042697",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/743207951_100x80.png?v=1739042697"
       },
       "history": {
-        "created": "2020-12-06T16:31:49.000Z",
-        "modified": "2023-01-05T15:47:20.000Z",
-        "shared": "2020-12-06T18:29:23.000Z"
+        "created": "2022-10-09T17:25:59.000Z",
+        "modified": "2025-02-08T19:24:57.000Z",
+        "shared": "2023-04-02T01:42:58.000Z"
       },
       "stats": {
-        "views": 36991,
-        "loves": 2130,
-        "favorites": 1829,
+        "views": 1128,
+        "loves": 92,
+        "favorites": 69,
         "remixes": 0
       },
       "remix": {
-        "root": 416617717
+        "root": 743044157
       }
     },
     {
-      "id": 552713906,
-      "title": "Soccer Labirynth",
+      "id": 800291660,
+      "title": "pirate chase",
+      "description": "Music is pirates of the Caribbean (by Hans Zimmer)\nal the rest is by me.\n\n Tell me if you like it :D",
+      "instructions": "GUYS THIS IS SO OLD, WHY ARE Y'ALL LOVING IT? CHECK THIS OUT INSTEAD: https://scratch.mit.edu/projects/1186693267\n\nHere's a little animation that I made (it keeps going on forever). Keys that do something:\n-Space\n-Z\n-X\n-1,2,3,4,5,6",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 80085226,
+        "username": "nwoij",
+        "scratchteam": false,
+        "history": {
+          "joined": "2021-08-15T20:12:47.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/80085226_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/80085226_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/80085226_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/80085226_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/80085226_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/800291660_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/800291660_282x218.png?v=1786777582",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/800291660_216x163.png?v=1786777582",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/800291660_200x200.png?v=1786777582",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/800291660_144x108.png?v=1786777582",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/800291660_135x102.png?v=1786777582",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/800291660_100x80.png?v=1786777582"
+      },
+      "history": {
+        "created": "2023-02-07T20:09:41.000Z",
+        "modified": "2026-08-15T07:06:22.000Z",
+        "shared": "2023-04-02T14:10:09.000Z"
+      },
+      "stats": {
+        "views": 2209,
+        "loves": 51,
+        "favorites": 37,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 802749986,
+      "title": "Wave of Clones",
+      "description": "Grid of clones, slowly rotating with a slight phase difference. Very simple code (22 blocks); just look inside.\n\nThanks @sly_i for the silent hint to make this more mobile-friendly.\n\nYou may also like: \"Making Waves\" by Scratch-Minion\nhttps://scratch.mit.edu/projects/547726633/\n\nFeatured 2025-06-04; thank you ST and whoever nominated me!\n\n2025-07-01: reached 1000 (re-)remixes!\n\n2026-03-23: on the Explore page.",
+      "instructions": "Click the green flag, sit back, enjoy.\nPress space or click/tap the green 'click here' button to cycle through the 6 different costumes.\n\nPlease feel free to remix! It's easy and fun to change the costumes, change the numbers in code, or add more code. All remixes are showcased here:\nhttps://scratch.mit.edu/studios/50607430",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 6097296,
+        "username": "heldlaw",
+        "scratchteam": false,
+        "history": {
+          "joined": "2014-11-27T20:39:53.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/6097296_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/6097296_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/6097296_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/6097296_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/6097296_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/802749986_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/802749986_282x218.png?v=1774307841",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/802749986_216x163.png?v=1774307841",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/802749986_200x200.png?v=1774307841",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/802749986_144x108.png?v=1774307841",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/802749986_135x102.png?v=1774307841",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/802749986_100x80.png?v=1774307841"
+      },
+      "history": {
+        "created": "2023-02-12T10:11:01.000Z",
+        "modified": "2026-03-23T23:17:21.000Z",
+        "shared": "2023-02-12T12:41:32.000Z"
+      },
+      "stats": {
+        "views": 80621,
+        "loves": 3830,
+        "favorites": 3106,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 804059359,
+      "title": "Happy Valentine's Day!",
+      "description": "Thank you to ceebee for the cute project!\nA Guide to Interacting with People who are blind or who have low vision\nhttps://scratch.mit.edu/projects/770005367/\nA Magical Door of the Wizard of Scratch \nhttps://scratch.mit.edu/projects/791664753/\nBeat the Winter Blues! \nhttps://scratch.mit.edu/projects/575684072/\nBehind the Fairy Door : Interactive\nhttps://scratch.mit.edu/projects/761566902/\nEaster Chocolate Bunny Maker  \nhttps://scratch.mit.edu/projects/673796385/\nHow to make a bear from a Glove\nhttps://scratch.mit.edu/projects/418612643/\nLet's wait and see! \nhttps://scratch.mit.edu/projects/416576732/\nA Hiking Trip with Chumie and Timmi!\nhttps://scratch.mit.edu/projects/557883008/\no\nhttps://scratch.mit.edu/projects/557036573/\nA Bank Robber Scratchcat?! Part 1\nhttps://scratch.mit.edu/projects/510622550/",
+      "instructions": "Carnival in Germany\nhttps://scratch.mit.edu/projects/800956224/\nHow to Host a Bake Sale : Poverty Awareness Month\nhttps://scratch.mit.edu/projects/759999130/\nPoverty Awareness Month \nhttps://scratch.mit.edu/projects/782070650/\nThe SNAP Challenge / Food Stamp Challenge \nhttps://scratch.mit.edu/projects/783648630/\nHow Can an Egg be so Strong? \nhttps://scratch.mit.edu/projects/784062530/\nGrown Women Icon Maker\nhttps://scratch.mit.edu/projects/776958749/\nHow to make Clay Animation\nhttps://scratch.mit.edu/projects/738105472\nClay Animation: Dancing Clays\nhttps://scratch.mit.edu/projects/736704361/\nClay Animation: Hopscotch \nhttps://scratch.mit.edu/projects/736703425/\nClay Animation: Status; Grandma's Footsteps\nhttps://scratch.mit.edu/projects/736644552/\nHalloween: Clay Animation\nhttps://scratch.mit.edu/projects/737175021/\nMoai and a boy and his dog\nhttps://scratch.mit.edu/projects/735512175/\nChumie's Clay Animation : A Figur\nhttps://scratch.mit.edu/projects/736122868/\nClay Animation: A dog\nhttps://scratch.mit.edu/projects/618719280/\nClay Animation : A Panda\nhttps://scratch.mit.edu/projects/730587781/\nClay Animation : Panda and a Girl Revised\nhttps://scratch.mit.edu/projects/731727384/\nChumie, Timmi and the Magic Lamp\nhttps://scratch.mit.edu/projects/722528911/\nOkonomiyaki with Courgette (Japanese Pancake) \nhttps://scratch.mit.edu/projects/720003087/\nWindow to the Magical World\nhttps://scratch.mit.edu/projects/721329590/\nGood Night Scratch Cat : Their Dream\nhttps://scratch.mit.edu/projects/709027048/\nPerfect Laundry Weather 洗濯日和\nhttps://scratch.mit.edu/projects/709316674/\nChumie's Sprite Collection・Free to Use\nhttps://scratch.mit.edu/projects/416047339/\nVery Hungry Koinobori \nhttps://scratch.mit.edu/projects/676412444/\nThis Little Light of Mine\nhttps://scratch.mit.edu/projects/674968185/\nScratch Cat and Fish, a Riddle\nhttps://scratch.mit.edu/projects/625016950/\n\n\n",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 57855475,
+        "username": "Chumie",
+        "scratchteam": false,
+        "history": {
+          "joined": "2020-03-08T19:57:40.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/57855475_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/57855475_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/57855475_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/57855475_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/57855475_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/804059359_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/804059359_282x218.png?v=1682400269",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/804059359_216x163.png?v=1682400269",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/804059359_200x200.png?v=1682400269",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/804059359_144x108.png?v=1682400269",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/804059359_135x102.png?v=1682400269",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/804059359_100x80.png?v=1682400269"
+      },
+      "history": {
+        "created": "2023-02-14T18:30:28.000Z",
+        "modified": "2023-04-25T05:24:29.000Z",
+        "shared": "2023-02-14T19:08:30.000Z"
+      },
+      "stats": {
+        "views": 1027,
+        "loves": 24,
+        "favorites": 19,
+        "remixes": 0
+      },
+      "remix": {
+        "root": 803811673
+      }
+    },
+    {
+      "id": 814372491,
+      "title": "Floating island build!",
+      "description": "",
+      "instructions": "Press Green flag and listen to the cloud that stands out :D ",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 72901308,
+        "username": "ehussain31",
+        "scratchteam": false,
+        "history": {
+          "joined": "2021-03-03T12:12:53.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/72901308_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/72901308_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/72901308_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/72901308_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/72901308_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/814372491_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/814372491_282x218.png?v=1678115657",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/814372491_216x163.png?v=1678115657",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/814372491_200x200.png?v=1678115657",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/814372491_144x108.png?v=1678115657",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/814372491_135x102.png?v=1678115657",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/814372491_100x80.png?v=1678115657"
+      },
+      "history": {
+        "created": "2023-03-06T14:58:08.000Z",
+        "modified": "2023-03-06T15:14:17.000Z",
+        "shared": "2023-03-06T15:07:12.000Z"
+      },
+      "stats": {
+        "views": 13245,
+        "loves": 165,
+        "favorites": 132,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 849655454,
+      "title": "⬦Happy Birthday Scratch!⬦ // Scratch Cat Art // Scratch Week 2023 Friday",
+      "description": "<< Hello, this is 2026 Autumn. You wanna get your art into a contest of mine? I like and fav every entry! Join here: https://scratch.mit.edu/projects/1350191842/\n\nThere are prizes, so I would encourage joining >:) >>\n\n(Original description below:)\nMy typical art-making process: https://scratch.mit.edu/projects/850809319/ \n\nHai guys :P\n\nYou will NOT be Rickrolled here:\nhttps://scratch.mit.edu/projects/850546492/\n\nI wish I could reply to every comment :,0 \nfirst commenter: @Lunaweek\n\nSong is Epic by The Fat Rat.\n\nCat is Scratch Cat, modeled by my cat, Mochi.\n\nArt by yours truly: @-Autumnnight-\n\n#Scratchweek2023\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCOMMENT SCRATCH CAT FOREVER _meow_ if you saw this ;D",
+      "instructions": "(Hey, artists... check the notes and credits! vvv)\nHAPPY 16 BIRTHDAY SCRATCH\n\nThis guy's a vibe I love Scratch Cat <3\n\nHOW. I WAS JUST SITTING IN 3 PERIOD AT SCHOOL AND ALL OF A SUDDEN IM ON FEATURED??!?!?! THANK YOU SO MUCH!!! \n\nThis is my project for Scratch Week 2023\n\nHope ya like it!\n\nI've successfully made it through my 3rd scratch week! nice\n\nNo advertizing please\n\n\n\n\nI finally spelled 'Much' correctly for those of you that were annoyed by it XD\n\n\n\n\n\n\n\nno joke this is my 69th project check for yourself \n\n\n\n\n\n\n\nLoooool Scratchcat of Scratchclan\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n                           l\n                           l\nlook down there v\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n_<3_\n\n\n\n\n\n\n\n\n\nIt really is not my problem if you want to advertise to get famous, and I know that sounds kind of rude, but I just don't have time to explain this to the advertisers. put your projects on famous studios to get them out there, or on scratch news studios! I can guarantee that if I find a project I really like in a studio, I will follow the creator! when you comment on my project with a link, you can guarantee that I will pay NO attention. you may even give yourself a bad reputation advertising on other people's projects, ESPECIALLY when they tell you not to advertise! Even more so when you spam! Another thing I can guarantee is: A lot of creators will feel this exact way about their project when it gets famous. So please, I'll tell you again. No advertising, please. Thank you for understanding, and I wish you the best of luck populating your project in some other way! :)\n",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 66140123,
+        "username": "-AutumnNight-",
+        "scratchteam": false,
+        "history": {
+          "joined": "2020-10-29T20:51:42.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/66140123_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/66140123_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/66140123_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/66140123_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/66140123_32x32.png?v="
+          },
+          "membership_avatar_badge": 0
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/849655454_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/849655454_282x218.png?v=1784582641",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/849655454_216x163.png?v=1784582641",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/849655454_200x200.png?v=1784582641",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/849655454_144x108.png?v=1784582641",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/849655454_135x102.png?v=1784582641",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/849655454_100x80.png?v=1784582641"
+      },
+      "history": {
+        "created": "2023-05-12T05:12:14.000Z",
+        "modified": "2026-07-20T21:24:01.000Z",
+        "shared": "2023-05-12T05:32:22.000Z"
+      },
+      "stats": {
+        "views": 28658,
+        "loves": 1762,
+        "favorites": 1299,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 856015475,
+      "title": "Volcanoe",
+      "description": "Love if you like volcanoes!\nFavorite if you like this project!\nFollow if you like both!",
+      "instructions": "Click the green flag.",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 98508552,
+        "username": "Stormbreakerz",
+        "scratchteam": false,
+        "history": {
+          "joined": "2022-07-23T11:57:34.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/98508552_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/98508552_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/98508552_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/98508552_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/98508552_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/856015475_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/856015475_282x218.png?v=1685021858",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/856015475_216x163.png?v=1685021858",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/856015475_200x200.png?v=1685021858",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/856015475_144x108.png?v=1685021858",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/856015475_135x102.png?v=1685021858",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/856015475_100x80.png?v=1685021858"
+      },
+      "history": {
+        "created": "2023-05-24T03:29:38.000Z",
+        "modified": "2023-05-25T13:37:38.000Z",
+        "shared": "2023-05-24T04:42:33.000Z"
+      },
+      "stats": {
+        "views": 3607,
+        "loves": 94,
+        "favorites": 69,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 882101669,
+      "title": "Classic Platformer #trending #all #games #art #music #tutorials",
+      "description": "Credits:\nCredit to @griffpatch for the fun and great tutorials!\nCredit to @_IntroKing_ for my outro!\nCredit to @-ExoByte- for my OC used in my outro!\nCredit to @iWillFolLowppl for the Halloween Edition!\nCredit to @OY760 for everything else!\n\n                 ❤️ + ⭐️ + Follow IF YOU ENJOY!\n\nChanges:\n26/10/23 - SHARED\n26/10/23 - I added the Halloween Edition (will end after Halloween)!\n27/10/23 - I changed the colour of the moving platforms from orange to purple, so it's a bit more easier to distinguish between the orange background and the platforms.\n31/10/23 - IT'S HALLOWEEN!!!\n31/10/23 - Changed the music to more Halloween Themed (WHAT A PERFECT TIME TO DO THIS LOL)\n4/11/23 - Changed the number of lives for the Scratch Cat to 9.\n4/11/23 - Fixed the bug of the colour changing costumes, when standing on a slope or a platform.\n5/11/23 - Deleted all the Halloween Special Edition, as it is outdated by now.\n\nWANT A FREE FOLLOW???\nCheck out this amazing project that gives you free follows by @freefollows__\nhttps://scratch.mit.edu/projects/845314464\n\nCheck out my Song Of Twilight - Scratch Music Blocks Project:\nhttps://scratch.mit.edu/projects/879726085\n\nTags:\n#trending #all #games #art #music #tutorials\n#trending #all #games #art #music #tutorials\n#trending #all #games #art #music #tutorials\n#trending #all #games #art #music #tutorials\n#trending #all #games #art #music #tutorials\n#trending #all #games #art #music #tutorials\n#trending #all #games #art #music #tutorials\n#trending #all #games #art #music #tutorials\n#platformer #classicplatformer #fun #scratch #good #classic #scratch_cat #game #amazing #best #GOAT\n#popular #like #fav #relatable #cool #great #animated\n#blue #theme #lives #coins #costumes #shop #outro",
+      "instructions": "                Welcome To My Classic Platformer\n               ❤️ + ⭐️ + Follow IF YOU ENJOY!\n\n                     ON TRENDING - 27/10/23!!!\n\nWARNING: \n- This game is a bit glitchy so click the green flag several times! \n- Full-screen recommended!\n- Turbowarp: https://turbowarp.org/882101669\n\nInstructions:\nArrow keys for controls.\nDon't get crashed or hit by platforms.\nKill the enemies by jumping on them.\nCollect the keys to open the doors.\nCollect coins and save up to buy costumes!\nDon't lose all your lives, because otherwise you will die.\nAlso check out the shop (icon on the bottom right) to buy new costumes. (there seems to be a bug in code for the costumes, but it will be fixed soon!)\nWin the game by opening the cyan door.\n\nHint (if you're really stuck): Explore everything on the right of your spawnpoint first and collect the cyan key. Then get back to your spawn point and explore everything on the left of there and you'll be on the right track to winning!\n\nGO CHECK OUT MY STUDIO FOR THIS PROJECT: https://scratch.mit.edu/studios/3407376",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 112125943,
+        "username": "OY760",
+        "scratchteam": false,
+        "history": {
+          "joined": "2023-03-30T10:47:56.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/112125943_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/112125943_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/112125943_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/112125943_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/112125943_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/882101669_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/882101669_282x218.png?v=1699703520",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/882101669_216x163.png?v=1699703520",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/882101669_200x200.png?v=1699703520",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/882101669_144x108.png?v=1699703520",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/882101669_135x102.png?v=1699703520",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/882101669_100x80.png?v=1699703520"
+      },
+      "history": {
+        "created": "2023-08-12T15:12:30.000Z",
+        "modified": "2023-11-11T11:52:00.000Z",
+        "shared": "2023-10-26T11:27:22.000Z"
+      },
+      "stats": {
+        "views": 25729,
+        "loves": 694,
+        "favorites": 594,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 888076822,
+      "title": "Picnic Legends - The Candyland",
+      "description": "Thanks to @griffpatch for the platformer tutorial",
+      "instructions": "In the world of Candyland, the evil Cursed Baskets are trying to destroy ALL the cotton candy floor.\nGet to the end and press the legendary Candy Cleaner button to destroy the Cursed Baskets.",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 117894463,
+        "username": "theamazingmatter",
+        "scratchteam": false,
+        "history": {
+          "joined": "2023-08-13T03:27:46.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/117894463_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/117894463_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/117894463_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/117894463_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/117894463_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/888076822_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/888076822_282x218.png?v=1787582837",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/888076822_216x163.png?v=1787582837",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/888076822_200x200.png?v=1787582837",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/888076822_144x108.png?v=1787582837",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/888076822_135x102.png?v=1787582837",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/888076822_100x80.png?v=1787582837"
+      },
+      "history": {
+        "created": "2023-09-01T00:38:19.000Z",
+        "modified": "2026-08-24T14:47:17.000Z",
+        "shared": "2023-09-01T01:36:42.000Z"
+      },
+      "stats": {
+        "views": 1908,
+        "loves": 72,
+        "favorites": 58,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 917631372,
+      "title": "Sally The Sunflower",
+      "description": "",
+      "instructions": "If you're wondering what that triangle thing is at the bottom I drew this on the same paper as Timothy The Turtle and that's the sunlight he was looking at.",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 123646067,
+        "username": "AcePilotNonMusic",
+        "scratchteam": false,
+        "history": {
+          "joined": "2023-10-30T23:00:50.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/123646067_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/123646067_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/123646067_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/123646067_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/123646067_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/917631372_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/917631372_282x218.png?v=1698862853",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/917631372_216x163.png?v=1698862853",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/917631372_200x200.png?v=1698862853",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/917631372_144x108.png?v=1698862853",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/917631372_135x102.png?v=1698862853",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/917631372_100x80.png?v=1698862853"
+      },
+      "history": {
+        "created": "2023-11-01T18:19:01.000Z",
+        "modified": "2023-11-01T18:20:53.000Z",
+        "shared": "2023-11-01T18:19:41.000Z"
+      },
+      "stats": {
+        "views": 474,
+        "loves": 10,
+        "favorites": 12,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 931880127,
+      "title": "Puzzle Master",
+      "description": "--------- Instructions ---------\nPlay like you would any mezzonic puzzle except it doesn't matter what colour it is, just make the entire board one colour.\n\n--------- Other ---------\nIf you are having trouble solving then here https://www.youtube.com/watch?v=ID4T55NenXw is a good tutorial.\n\nFollow, like, and/or favorite for more!",
+      "instructions": "",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 96318795,
+        "username": "CaceyIronbeard",
+        "scratchteam": false,
+        "history": {
+          "joined": "2022-05-21T02:57:58.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/96318795_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/96318795_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/96318795_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/96318795_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/96318795_32x32.png?v="
+          },
+          "membership_avatar_badge": 1
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/931880127_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/931880127_282x218.png?v=1726097294",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/931880127_216x163.png?v=1726097294",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/931880127_200x200.png?v=1726097294",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/931880127_144x108.png?v=1726097294",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/931880127_135x102.png?v=1726097294",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/931880127_100x80.png?v=1726097294"
+      },
+      "history": {
+        "created": "2023-11-28T17:51:27.000Z",
+        "modified": "2024-09-11T23:28:14.000Z",
+        "shared": "2023-12-13T19:36:41.000Z"
+      },
+      "stats": {
+        "views": 6202,
+        "loves": 110,
+        "favorites": 80,
+        "remixes": 0
+      },
+      "remix": {
+        "root": 898850158
+      }
+    },
+    {
+      "id": 946143906,
+      "title": "|| Fireflies ||",
       "description": "",
       "instructions": "",
       "visibility": "notvisible",
@@ -269,346 +983,40 @@
       "comments_allowed": false,
       "is_published": false,
       "author": {
-        "id": 76671826,
-        "username": "Max5252",
+        "id": 125378389,
+        "username": "-bunnystars-",
         "scratchteam": false,
         "history": {
-          "joined": "2021-05-07T13:53:26.000Z"
+          "joined": "2023-11-26T03:05:05.000Z"
         },
         "profile": {
           "id": null,
           "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/76671826_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/76671826_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/76671826_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/76671826_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/76671826_32x32.png?v="
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/125378389_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/125378389_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/125378389_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/125378389_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/125378389_32x32.png?v="
           }
         }
       },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/552713906_480x360.png",
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/946143906_480x360.png",
       "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/552713906_282x218.png?v=1689279877",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/552713906_216x163.png?v=1689279877",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/552713906_200x200.png?v=1689279877",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/552713906_144x108.png?v=1689279877",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/552713906_135x102.png?v=1689279877",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/552713906_100x80.png?v=1689279877"
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/946143906_282x218.png?v=1704252142",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/946143906_216x163.png?v=1704252142",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/946143906_200x200.png?v=1704252142",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/946143906_144x108.png?v=1704252142",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/946143906_135x102.png?v=1704252142",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/946143906_100x80.png?v=1704252142"
       },
       "history": {
-        "created": "2021-07-12T21:58:54.000Z",
-        "modified": "2023-07-13T20:24:37.000Z",
-        "shared": "2023-07-13T20:24:37.000Z"
+        "created": "2024-01-03T02:23:26.000Z",
+        "modified": "2024-01-03T03:22:22.000Z",
+        "shared": "2024-01-03T03:22:22.000Z"
       },
       "stats": {
-        "views": 4860,
-        "loves": 80,
-        "favorites": 55,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 678684630,
-      "title": "Aquatic Sprites || Bitmap",
-      "description": "https://herman-studios.itch.io/kingdoms-of-war\n\n— Credits —\n==========\n• Graphical Design:\n@SpritePlatoon\n\n• Sprite Designing:\n@SpritePlatoon\n\n• Topic Research:\n@SpritePlatoon\n\n• Advertisement:\n@SpritePlatoon\n\n— Notes —\n========\n• How to help:\nYou can help this project by doing many things. Some of which include; Putting suggestions in the comments, loving and favoriting the project, following me, sharing the project with your friends, and anything else you think might help.",
-      "instructions": "— Aquatic Sprites —\n================\n• Description:\nThis project is a useful tool for anyone in need of pixelated aquatic Sprites. They are free to use, as long as you put a simple crediting message somewhere in the project’s exterior or interior. My preference is “Graphical Design - @SpritePlatoon”, but you can choose something else if you’d like.\n\n• Instructions:\nTo use the sprite, click on “See inside”, then click on the “Usable Items” sprite. Then click on the bar on the left bottom of your screen that says “Backpack”. Then simply drag the sprite to the backpack. You can then drag it from the backpack into one of your projects by reversing what you just did. Then make sure to credit me as instructed in the description. \n\n• Sprites List:\nMermaid\nFish\nBoat\nFishing Pole\nShark\n(NEW!) Island",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 92764318,
-        "username": "SpritePlatoon",
-        "scratchteam": false,
-        "history": {
-          "joined": "2022-03-21T15:06:06.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/92764318_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/92764318_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/92764318_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/92764318_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/92764318_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/678684630_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/678684630_282x218.png?v=1742473301",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/678684630_216x163.png?v=1742473301",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/678684630_200x200.png?v=1742473301",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/678684630_144x108.png?v=1742473301",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/678684630_135x102.png?v=1742473301",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/678684630_100x80.png?v=1742473301"
-      },
-      "history": {
-        "created": "2022-04-21T13:20:02.000Z",
-        "modified": "2025-03-20T12:21:41.000Z",
-        "shared": "2022-04-21T13:46:54.000Z"
-      },
-      "stats": {
-        "views": 1392,
-        "loves": 33,
-        "favorites": 28,
-        "remixes": 0
-      },
-      "remix": {
-        "root": 671903155
-      }
-    },
-    {
-      "id": 740010443,
-      "title": "Get the chees",
-      "description": "",
-      "instructions": "Move = Arrow keys",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 99089179,
-        "username": "Poppy12356",
-        "scratchteam": false,
-        "history": {
-          "joined": "2022-08-15T23:46:45.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/99089179_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/99089179_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/99089179_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/99089179_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/99089179_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/740010443_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/740010443_282x218.png?v=1779768864",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/740010443_216x163.png?v=1779768864",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/740010443_200x200.png?v=1779768864",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/740010443_144x108.png?v=1779768864",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/740010443_135x102.png?v=1779768864",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/740010443_100x80.png?v=1779768864"
-      },
-      "history": {
-        "created": "2022-10-02T23:10:54.000Z",
-        "modified": "2026-05-26T04:14:24.000Z",
-        "shared": "2022-10-02T23:29:22.000Z"
-      },
-      "stats": {
-        "views": 5184,
-        "loves": 94,
-        "favorites": 74,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 783760319,
-      "title": "Pixel Fighter",
-      "description": "Thanks to @rusully56 and @tepy-s for the assets.\nThanks to @theChAOTiC for the music.\nThanks to @username_128 for the achievements idea.\n\n",
-      "instructions": "Welcome to Pixel Fighter! \n\nRULES: Click or space to move the knight up and \n              down. Slay the slimes to earn gold. You can \n              only slay a slime who's level is lower or equal \n              to yours. If it's level is equal to yours, then \n              there's only a 50% of you slaying it, but you \n              will get 15 times more gold than the slimes \n              level.  Earn coins and level up! The slimes will \n              also level up along with you. Every time you \n              slay a slime, there is a 5% chance it will drop \n              a golden blade, which you can use to slay \n              any slime for 10 seconds. That's it! Enjoy!",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 102750997,
-        "username": "Riddle_5",
-        "scratchteam": false,
-        "history": {
-          "joined": "2022-10-21T01:12:14.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/102750997_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/102750997_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/102750997_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/102750997_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/102750997_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/783760319_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/783760319_282x218.png?v=1733757408",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/783760319_216x163.png?v=1733757408",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/783760319_200x200.png?v=1733757408",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/783760319_144x108.png?v=1733757408",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/783760319_135x102.png?v=1733757408",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/783760319_100x80.png?v=1733757408"
-      },
-      "history": {
-        "created": "2023-01-04T18:56:10.000Z",
-        "modified": "2024-12-09T15:16:48.000Z",
-        "shared": "2023-01-06T20:35:53.000Z"
-      },
-      "stats": {
-        "views": 371957,
-        "loves": 6264,
-        "favorites": 5405,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 786151000,
-      "title": "Cave Expedition in a Stalactite-Adorned ",
-      "description": "Thank you to BrycedTea for the fabulous project!\nCulinary Journey Across the Scratch\nhttps://scratch.mit.edu/projects/782625180/\nGrown Women Icon Maker\nhttps://scratch.mit.edu/projects/776958749/\no\nhttps://scratch.mit.edu/projects/557036573/\nSalt and Watermelon\nhttps://scratch.mit.edu/projects/531214778/\nKoinobori (Carp Windsocks Maker)\nhttps://scratch.mit.edu/projects/468044110/\nInteractive Tutorial: Ordering Ice Cream in German\nhttps://scratch.mit.edu/projects/416371164/\nInteractive Tree\nhttps://scratch.mit.edu/projects/556131081/\nInteractive Ice Cream Maker\nhttps://scratch.mit.edu/projects/532415939/\nA Bank Robber Scratchcat?! Part 1\nhttps://scratch.mit.edu/projects/510622550/\nScratchcat Bavarian Dancer\nhttps://scratch.mit.edu/projects/511380623/\nWelcome to Chumieburgh (Animal town Game)\nhttps://scratch.mit.edu/projects/598958619/\nCalavera Dress Up : Día de Muertos\nhttps://scratch.mit.edu/projects/585189549/\nHawaiian Dress Up\nhttps://scratch.mit.edu/projects/542510601/\nGourmet Assortment of Japanese New Year's Dish\nhttps://scratch.mit.edu/projects/468966755/\nQuinceañera : Scrolling\nhttps://scratch.mit.edu/projects/738892466/\nHow to Make Clay Animation\nhttps://scratch.mit.edu/projects/738105472/\nClay Animation: Dance Dance Dance!\nhttps://scratch.mit.edu/projects/737608276/\nClay Animation: Dancing Clays\nhttps://scratch.mit.edu/projects/736704361/\nClay Animation: Hopscotch \nhttps://scratch.mit.edu/projects/736703425/\nMatryoshka Maker \nhttps://scratch.mit.edu/projects/622634863/\nRoad Trip to Explore African American History\nhttps://scratch.mit.edu/projects/667833996/\nInteractive House: The Wizard of Scratch\nhttps://scratch.mit.edu/projects/414820637/\nInteractive Pirate Ship \nhttps://scratch.mit.edu/projects/563852752/\nLet's wait and see! \nhttps://scratch.mit.edu/projects/416576732/\nA Hiking Trip with Chumie and Timmi!\nhttps://scratch.mit.edu/projects/557883008/",
-      "instructions": "Click the green flag and hover your mouse.\nColour Blind Awareness \nhttps://scratch.mit.edu/projects/768056957/\nWays to Be an Ally to People with Disability\nhttps://scratch.mit.edu/projects/1308498111/\nTips for Coming Out/Inviting In\nhttps://scratch.mit.edu/projects/1329388260/\nHow to get more views\nhttps://scratch.mit.edu/projects/592069204/\nMuslim Cultural Awareness \nhttps://scratch.mit.edu/projects/1135444376/\nTrans Ally: Transgender Ally\nhttps://scratch.mit.edu/projects/1137354213/\nWhat is Dementia?\nhttps://scratch.mit.edu/projects/847375469/\nChumie's Tutorial and Info\nhttps://scratch.mit.edu/studios/32316954/\nChumie's Dress Up & Icon Maker Studio:\nhttps://scratch.mit.edu/studios/32316949\nChumie's Interactive Games Studio:\nhttps://scratch.mit.edu/studios/32316951\nRaise Asthma Awareness \nhttps://scratch.mit.edu/projects/1013922478/\nHay Fever: https://scratch.mit.edu/projects/513699336/\nA Guide to Interacting with People who are blind or who have low vision\nhttps://scratch.mit.edu/projects/770005367/\nFood Allergy: Quiz, Animation and Info\nhttps://scratch.mit.edu/projects/950979178/\nFood Allergy Anagram Quiz\nhttps://scratch.mit.edu/projects/954389188/\nStart a Food Drive\nhttps://scratch.mit.edu/projects/946995614/\nStart a Book Drive\nhttps://scratch.mit.edu/projects/948952699/\nHow to Host a Bake Sale \nhttps://scratch.mit.edu/projects/759999130\nPoverty Awareness Month \nhttps://scratch.mit.edu/projects/782070650/\nThe SNAP Challenge / Food Stamp Challenge \nhttps://scratch.mit.edu/projects/783648630/\nPoverty Awareness Month \nhttps://scratch.mit.edu/projects/782070650/\nHow Can an Egg be so Strong? \nhttps://scratch.mit.edu/projects/784062530/\n",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 57855475,
-        "username": "Chumie",
-        "scratchteam": false,
-        "history": {
-          "joined": "2020-03-08T19:57:40.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/57855475_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/57855475_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/57855475_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/57855475_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/57855475_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/786151000_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/786151000_282x218.png?v=1790259704",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/786151000_216x163.png?v=1790259704",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/786151000_200x200.png?v=1790259704",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/786151000_144x108.png?v=1790259704",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/786151000_135x102.png?v=1790259704",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/786151000_100x80.png?v=1790259704"
-      },
-      "history": {
-        "created": "2023-01-10T17:36:50.000Z",
-        "modified": "2026-09-24T14:21:44.000Z",
-        "shared": "2023-01-10T18:44:40.000Z"
-      },
-      "stats": {
-        "views": 4173,
-        "loves": 60,
-        "favorites": 41,
-        "remixes": 0
-      },
-      "remix": {
-        "root": 669100217
-      }
-    },
-    {
-      "id": 794125215,
-      "title": "Science Simulator",
-      "description": "Note: A lot of scripts have comments attached to them explaining what the script does!\n\n------------------------------CREDITS------------------------------\n- cooltext.com \n- Tobu\n- You guys for playing! \n-------------------------------------------------------------------------",
-      "instructions": "Yo! it got featured! \n\nWelcome to Science Simulator, a game where you can explore space among other things!\n\n-----------------------------How to play----------------------------\nWhen you start up the game, you have two choices, you can enter the house, or use the telescope! (by clicking on them) \n\nTelescope: When you click the telescope you will see the wonders of space! Planets, stars and others will be seen! Planets will soar through the sky! If you click on any of the things floating in space, you can learn about them! Use the slider on the top right to adjust the size of the \"zoom\" for the telescope!\n\nHouse: When you select the house, you will see multiple options on what to click, for example, you can click on the microscope to see some objects up close!\n-------------------------------------------------------------------------\n\n\n\n---------------------------------TAGS--------------------------------\n#games #science #simulator #sciencesimulator #planets #stars #trending #fun #animations #all #telescope #game #gaming\n-------------------------------------------------------------------------",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 53699196,
-        "username": "gianfrancom1",
-        "scratchteam": false,
-        "history": {
-          "joined": "2019-12-04T16:38:41.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/53699196_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/53699196_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/53699196_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/53699196_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/53699196_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/794125215_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/794125215_282x218.png?v=1739055552",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/794125215_216x163.png?v=1739055552",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/794125215_200x200.png?v=1739055552",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/794125215_144x108.png?v=1739055552",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/794125215_135x102.png?v=1739055552",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/794125215_100x80.png?v=1739055552"
-      },
-      "history": {
-        "created": "2023-01-26T16:41:19.000Z",
-        "modified": "2025-02-08T22:59:12.000Z",
-        "shared": "2023-02-13T23:44:47.000Z"
-      },
-      "stats": {
-        "views": 97664,
-        "loves": 3649,
-        "favorites": 2940,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 796930244,
-      "title": "le système solaire (terre et saturne)",
-      "description": "Je l'ai fait l'année dernière pour un devoir de physique-chimie...\n___________________________________________________\nI did it last year for a physics-chemistry homework...",
-      "instructions": "Voici la Terre et Saturne\nAppuyez simplement sur le drapeau vert et regardez...\n___________________________________________________\nHere is Earth and Saturn\nJust press the green flag and watch...",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 101721219,
-        "username": "alesanso05",
-        "scratchteam": false,
-        "history": {
-          "joined": "2022-10-04T15:33:07.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/101721219_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/101721219_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/101721219_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/101721219_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/101721219_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/796930244_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/796930244_282x218.png?v=1680969774",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/796930244_216x163.png?v=1680969774",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/796930244_200x200.png?v=1680969774",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/796930244_144x108.png?v=1680969774",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/796930244_135x102.png?v=1680969774",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/796930244_100x80.png?v=1680969774"
-      },
-      "history": {
-        "created": "2023-02-01T12:58:23.000Z",
-        "modified": "2023-04-08T16:02:54.000Z",
-        "shared": "2023-02-01T13:02:58.000Z"
-      },
-      "stats": {
-        "views": 864,
-        "loves": 13,
+        "views": 931,
+        "loves": 12,
         "favorites": 8,
         "remixes": 0
       },
@@ -617,50 +1025,50 @@
       }
     },
     {
-      "id": 822443325,
-      "title": "Constellations",
-      "description": "",
-      "instructions": "",
+      "id": 953890097,
+      "title": "Mountain Generator v.1.7",
+      "description": "Requests for updates are appreciated!\n          ---VOLCANOES ARE NOT BROKEN XD---\n#Generator #Mountains #Pen #Volcano #Color #Random\n\nThank you to \n@Pepperoni_Of_Scratch for yelling at me to do better with the project\n@Scuba_Dog for always being Scuba",
+      "instructions": "Press start and generate a custom mountain! It includes Mountains, Volcanic Mountains, and Spiky Mountains. Warning: on the Volcanic Mountains, there is a glitch to where it will sometimes form a square. Idk how to fix it.\n\nNo ads :D Feel free to report any ads you find!\nplz no arguing\n\nUpdate: Thank you so much for featured!!!!!!\nUpdate: v1.1 came out! Added Amplified setting! [Amplifies the mountain height and/or decrease of height]\nUpdate: v1.2 came out! Added snowy mountains!\nUpdate: v1.3 came out! Added Sunset!\nUpdate: v1.3 Fixed settings bug\nUpdate: v1.3 Fixed settings bug (Again)\nUpdate: v1.4 came out! Added sand mountains!\nUpdate: v1.4 Changed \"Sand Mountains\" to \"Sand Dunes\"\nUpdate: v1.5 came out! Added \"Nuclear Mountains\"\nUpdate: v1.5 Corrected \"Nuclear Mountains\" Spelling error\nUpdate: v1.6 came out! Added a secret >:D\nUpdate: v1.6 made secret more accessible \nUpdate: v1.6 fixed Nuclear settings bug\nUpdate: v1.6 fixed snowy mountain amplified glitch\nUpdate: v1.7 came out! Fixed all the snow mountains glitches; fixed snow on nuclear mountains and fixed volcanoes! Now stop complaining! lol",
       "visibility": "notvisible",
       "public": false,
       "comments_allowed": false,
       "is_published": false,
       "author": {
-        "id": 18338997,
-        "username": "MisterWoog",
+        "id": 127173896,
+        "username": "Orange_drummer_43",
         "scratchteam": false,
         "history": {
-          "joined": "2016-09-17T17:36:38.000Z"
+          "joined": "2024-01-07T22:43:28.000Z"
         },
         "profile": {
           "id": null,
           "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/18338997_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/18338997_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/18338997_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/18338997_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/18338997_32x32.png?v="
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/127173896_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/127173896_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/127173896_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/127173896_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/127173896_32x32.png?v="
           }
         }
       },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/822443325_480x360.png",
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/953890097_480x360.png",
       "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/822443325_282x218.png?v=1699885457",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/822443325_216x163.png?v=1699885457",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/822443325_200x200.png?v=1699885457",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/822443325_144x108.png?v=1699885457",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/822443325_135x102.png?v=1699885457",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/822443325_100x80.png?v=1699885457"
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/953890097_282x218.png?v=1708622401",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/953890097_216x163.png?v=1708622401",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/953890097_200x200.png?v=1708622401",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/953890097_144x108.png?v=1708622401",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/953890097_135x102.png?v=1708622401",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/953890097_100x80.png?v=1708622401"
       },
       "history": {
-        "created": "2023-03-20T15:06:45.000Z",
-        "modified": "2023-11-13T14:24:17.000Z",
-        "shared": "2023-03-20T15:19:23.000Z"
+        "created": "2024-01-21T02:58:09.000Z",
+        "modified": "2024-02-22T17:20:01.000Z",
+        "shared": "2024-01-22T01:57:44.000Z"
       },
       "stats": {
-        "views": 571,
-        "loves": 25,
-        "favorites": 19,
+        "views": 114331,
+        "loves": 2751,
+        "favorites": 2204,
         "remixes": 0
       },
       "remix": {
@@ -668,510 +1076,51 @@
       }
     },
     {
-      "id": 836701634,
-      "title": "Kawaii Rubber Duck Maker   ",
-      "description": "Chumie's Dress Up & Icon Maker Studio\nhttps://scratch.mit.edu/studios/32316949\nChumie's Interactive Games Studio\nhttps://scratch.mit.edu/studios/32316951\nBeat the Winter Blues! \nhttps://scratch.mit.edu/projects/575684072/\nThe SNAP Challenge / Food Stamp Challenge \nhttps://scratch.mit.edu/projects/783648630/\nPoverty Awareness Month \nhttps://scratch.mit.edu/projects/782070650/\nHow Can an Egg be so Strong? \nhttps://scratch.mit.edu/projects/784062530/\nGrown Women Icon Maker\nhttps://scratch.mit.edu/projects/776958749/\nBeat the Winter Blues! \nhttps://scratch.mit.edu/projects/575684072/\nHow to get more views\nhttps://scratch.mit.edu/projects/592069204/\no\nhttps://scratch.mit.edu/projects/557036573/\nSalt and Watermelon\nhttps://scratch.mit.edu/projects/531214778/\nKoinobori (Carp Windsocks Maker)\nhttps://scratch.mit.edu/projects/468044110/\nInteractive Tutorial: Ordering Ice Cream in German\nhttps://scratch.mit.edu/projects/416371164/\nInteractive Tree\nhttps://scratch.mit.edu/projects/556131081/\nInteractive Ice Cream Maker\nhttps://scratch.mit.edu/projects/532415939/\nScratchcat Bavarian Dancer\nhttps://scratch.mit.edu/projects/511380623/\n\n",
-      "instructions": "Make a kawaii Rubber Duck! (◉◞౪◟◉)\nTutorial: How to Increase Views? \nhttps://scratch.mit.edu/projects/592069204\nNative American Boarding School \nhttps://scratch.mit.edu/projects/917448143/\nZitkala-Ša\nhttps://scratch.mit.edu/projects/916457004/\nRethinking \"Thanksgiving\"\nhttps://scratch.mit.edu/projects/764665641/\nNative American Heritage Month\nhttps://scratch.mit.edu/projects/739418065/\nDesign Your own Moccasins \nhttps://scratch.mit.edu/projects/762065199/\nInteractive Native Names of Animals\nhttps://scratch.mit.edu/projects/760237647/\nHaudenosaunee Thanksgiving Address Greetings to the Natural World\nhttps://scratch.mit.edu/projects/765565755/\nInternational Dark Sky Week: April 15-22, 2023\nhttps://scratch.mit.edu/projects/829494368/\nStop! Light Pollution\nhttps://scratch.mit.edu/projects/828658956/\nHow to Host a Bake Sale \nhttps://scratch.mit.edu/projects/759999130/\nA Guide to Interacting with People who are blind or who have low vision\nhttps://scratch.mit.edu/projects/770005367/\nEnjoy Ethnic and Cultural Diversity\nhttps://scratch.mit.edu/projects/797553292/\nClara Luper : Mother of Civil Rights Movements \nhttps://scratch.mit.edu/projects/809703141/\nElizabeth Jennings Graham \nhttps://scratch.mit.edu/projects/815217425/\nA Bank Robber Scratchcat?! Part 1\nhttps://scratch.mit.edu/projects/510622550/\nA Bank Robber Scratchcat?! Part 2\nhttps://scratch.mit.edu/projects/524558990/\n･*:.｡ ｡.:*･ﾟ✽.｡.:*・ﾟ ✽.｡.:*・ﾟ ✽.｡.:*・ﾟ ✽.｡.:*・ﾟ \nHow to make a bear from a Glove\nhttps://scratch.mit.edu/projects/418612643/\nInteractive Tutorial: Ordering Ice Cream in German\nhttps://scratch.mit.edu/projects/416371164/\nInteractive Game: Japanese Restaurant\nhttps://scratch.mit.edu/projects/453317503/\nUkiyoe Colouring Art\nhttps://scratch.mit.edu/projects/486894426/\nLogic Puzzle: Farmer, Sheep, Cabbage and Wolf\nhttps://scratch.mit.edu/projects/469803624/\nInteractive House: The Wizard of Scratch\nhttps://scratch.mit.edu/projects/414820637/\nThe Green Book: Black History Month\nhttps://scratch.mit.edu/projects/570143269/\nOur Dog Ate Chocolate\nhttps://scratch.mit.edu/projects/588168056/\nSpeeddraw Scratch Tiger: Happy New Year!\nhttps://scratch.mit.edu/projects/621494800/\nMatryoshka Maker \nhttps://scratch.mit.edu/projects/622634863/\nClay Animation: A dog\nhttps://scratch.mit.edu/projects/618719280/\nChristmas Market in Chumieburgh!\nhttps://scratch.mit.edu/projects/606997287/\nDaruma Icon Maker\nhttps://scratch.mit.edu/projects/622231478/\nCalavera Dress Up : Día de Muertos\nhttps://scratch.mit.edu/projects/585189549/\nInteractive Tutorial: Ordering Ice Cream in German\nhttps://scratch.mit.edu/projects/416371164/\nInteractive Ice Cream Maker\nhttps://scratch.mit.edu/projects/532415939/\nSalt and Watermelon\nhttps://scratch.mit.edu/projects/531214778/\nDummy and Baby\nhttps://scratch.mit.edu/projects/501993179/\nChumie's Sprite Collection・Free to Use\nhttps://scratch.mit.edu/projects/416047339/\n",
+      "id": 988428245,
+      "title": "‎‧₊˚✧Finger Customiser✧˚₊‧",
+      "description": "NO ADVERTISING\n\nif you find any bugs, or have any art suggestions, \nplease just let me know by commenting :)\nall art by me\nall coding by me\ntitle screen inspired by ☆Otter Creator!☆ by @AmazingOtter_\ni was inspired to make this project when i crocheted myself a mini chef hat for my thumb sooo yeah lol\n\nadded antlers for @cuteyunie\nadded faces :3, >:3 and :p for @Dutchiegirl20\nadded :L face for @MacNCheese_21\nadded devil horns for @Watermask5687\nadded :/ face for @Ghosty1o1\nadded crown for @ISTGGD\nadded heart boppers for valentines <3\nadded pumpkin boppers and pumpkin helmet for halloween\nadded scarves for @Bibliophile17",
+      "instructions": "welcome to finger customiser!! <3\n\n20/7/2024 FREATURED TYSMMM SCRATCH TEAM AND @rosepetalls- FOR PROPOSING!!!! <33\n\nhere, you can customise your own finger with many skin tones, faces, hats and rings!!\n\njust wanted to say, you gotta press the green flag or nothing will work :I\n\nthanks for reading! enjoyyy!!! <3 :)",
       "visibility": "notvisible",
       "public": false,
       "comments_allowed": false,
       "is_published": false,
       "author": {
-        "id": 57855475,
-        "username": "Chumie",
+        "id": 115777367,
+        "username": "Alexandratheeleventh",
         "scratchteam": false,
         "history": {
-          "joined": "2020-03-08T19:57:40.000Z"
+          "joined": "2023-06-03T09:04:56.000Z"
         },
         "profile": {
           "id": null,
           "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/57855475_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/57855475_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/57855475_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/57855475_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/57855475_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/836701634_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/836701634_282x218.png?v=1781589105",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/836701634_216x163.png?v=1781589105",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/836701634_200x200.png?v=1781589105",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/836701634_144x108.png?v=1781589105",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/836701634_135x102.png?v=1781589105",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/836701634_100x80.png?v=1781589105"
-      },
-      "history": {
-        "created": "2023-04-17T17:38:46.000Z",
-        "modified": "2026-06-16T05:51:45.000Z",
-        "shared": "2023-04-18T15:18:03.000Z"
-      },
-      "stats": {
-        "views": 6991,
-        "loves": 198,
-        "favorites": 129,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 862113363,
-      "title": "Fire Hazard",
-      "description": "Scratch Cat sprite from @griffpatch\n{PLAY ON TURBOWARP FOR FASTER GAMEPLAY}\nhttps://turbowarp.org/862113363\nInspired by the nostalgic Snail Bob Games\nTell your ideas about the game in the forum:\nhttps://scratch.mit.edu/discuss/topic/746304/",
-      "instructions": "Your aim is to extinguish all the fires in a level and help Scratch Cat reach his target! Click and drag objects (even the Scratch Cat!) that will be highlighted to remove obstacles and allow water through paths to extinguish fires!\n{-----Controls----}\nClick on objects to activate their actions!\nClick on the stage/red background repeatedly to restart the level!",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 79285366,
-        "username": "CodeDangIt",
-        "scratchteam": false,
-        "history": {
-          "joined": "2021-07-10T20:47:43.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/79285366_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/79285366_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/79285366_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/79285366_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/79285366_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/862113363_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/862113363_282x218.png?v=1783440115",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/862113363_216x163.png?v=1783440115",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/862113363_200x200.png?v=1783440115",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/862113363_144x108.png?v=1783440115",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/862113363_135x102.png?v=1783440115",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/862113363_100x80.png?v=1783440115"
-      },
-      "history": {
-        "created": "2023-06-06T17:13:03.000Z",
-        "modified": "2026-07-07T16:01:55.000Z",
-        "shared": "2024-02-03T22:57:09.000Z"
-      },
-      "stats": {
-        "views": 163541,
-        "loves": 5597,
-        "favorites": 4861,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 881211117,
-      "title": "peashooter and sunflower",
-      "description": "",
-      "instructions": "hopefully it wont be there\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nnot a ship",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 104975073,
-        "username": "diamond-man-he-shiny",
-        "scratchteam": false,
-        "history": {
-          "joined": "2022-11-25T18:18:37.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/104975073_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/104975073_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/104975073_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/104975073_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/104975073_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/881211117_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/881211117_282x218.png?v=1691580693",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/881211117_216x163.png?v=1691580693",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/881211117_200x200.png?v=1691580693",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/881211117_144x108.png?v=1691580693",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/881211117_135x102.png?v=1691580693",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/881211117_100x80.png?v=1691580693"
-      },
-      "history": {
-        "created": "2023-08-09T10:36:48.000Z",
-        "modified": "2023-08-09T11:31:33.000Z",
-        "shared": "2023-08-09T10:49:04.000Z"
-      },
-      "stats": {
-        "views": 1396,
-        "loves": 39,
-        "favorites": 26,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 888127970,
-      "title": "turtle food 2",
-      "description": "",
-      "instructions": "",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 117616913,
-        "username": "melloturtle1",
-        "scratchteam": false,
-        "history": {
-          "joined": "2023-08-03T01:49:03.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/117616913_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/117616913_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/117616913_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/117616913_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/117616913_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/888127970_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/888127970_282x218.png?v=1693542300",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/888127970_216x163.png?v=1693542300",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/888127970_200x200.png?v=1693542300",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/888127970_144x108.png?v=1693542300",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/888127970_135x102.png?v=1693542300",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/888127970_100x80.png?v=1693542300"
-      },
-      "history": {
-        "created": "2023-09-01T04:09:08.000Z",
-        "modified": "2023-09-01T04:25:00.000Z",
-        "shared": "2023-09-01T04:24:45.000Z"
-      },
-      "stats": {
-        "views": 701,
-        "loves": 12,
-        "favorites": 7,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 893849807,
-      "title": "Honeybees, honey, and flowers",
-      "description": "",
-      "instructions": "",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 102499430,
-        "username": "rainbowkitten14",
-        "scratchteam": false,
-        "history": {
-          "joined": "2022-10-18T01:18:01.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/102499430_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/102499430_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/102499430_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/102499430_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/102499430_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/893849807_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/893849807_282x218.png?v=1694934295",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/893849807_216x163.png?v=1694934295",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/893849807_200x200.png?v=1694934295",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/893849807_144x108.png?v=1694934295",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/893849807_135x102.png?v=1694934295",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/893849807_100x80.png?v=1694934295"
-      },
-      "history": {
-        "created": "2023-09-15T12:20:14.000Z",
-        "modified": "2023-09-17T07:04:55.000Z",
-        "shared": "2023-09-15T12:29:24.000Z"
-      },
-      "stats": {
-        "views": 129,
-        "loves": 4,
-        "favorites": 4,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 894457565,
-      "title": "Ant collective learning",
-      "description": "Collective learning results from simple ant rules:\n\nIf ant finds food it bites & leaves pheromone (red). \n\nIf ant detects pheromone, it turns very little. If ant doesn't detect pheromone, it turns at a wider angle.  \n\nAnts only leave pheromone for a limited time after eating. Some pheromone wears out as ants travel over it. Eating food and wearing out pheromone are both negative feedback mechanisms that lead to ants eventually abandoning the march towards food.  \n\nBased on research I read. \n\nI did a version of this model about two years ago, but this one looks better with green grass and bread.\n\nSee also ants following a line of pheromone: https://scratch.mit.edu/projects/520597948/  ",
-      "instructions": "Set number of food items, time 'til new food appears, bite size (eating rate), amount pheromone ants leave.\n\nCan ants find new food? \n\n",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 32587594,
-        "username": "crkcity",
-        "scratchteam": false,
-        "history": {
-          "joined": "2018-05-02T14:01:06.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/32587594_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/32587594_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/32587594_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/32587594_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/32587594_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/894457565_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/894457565_282x218.png?v=1694921685",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/894457565_216x163.png?v=1694921685",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/894457565_200x200.png?v=1694921685",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/894457565_144x108.png?v=1694921685",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/894457565_135x102.png?v=1694921685",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/894457565_100x80.png?v=1694921685"
-      },
-      "history": {
-        "created": "2023-09-17T02:03:59.000Z",
-        "modified": "2023-09-17T03:34:45.000Z",
-        "shared": "2023-09-17T03:34:45.000Z"
-      },
-      "stats": {
-        "views": 3231,
-        "loves": 80,
-        "favorites": 64,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 912903430,
-      "title": "The most hardest day of school...",
-      "description": "new SDS",
-      "instructions": "watch\n\nK-12? It's a highschool educations :D\n\nMY MOST POPULAR PROJECTS",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 117749572,
-        "username": "Markohan",
-        "scratchteam": false,
-        "history": {
-          "joined": "2023-08-08T07:43:32.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/117749572_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/117749572_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/117749572_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/117749572_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/117749572_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/912903430_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/912903430_282x218.png?v=1698900605",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/912903430_216x163.png?v=1698900605",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/912903430_200x200.png?v=1698900605",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/912903430_144x108.png?v=1698900605",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/912903430_135x102.png?v=1698900605",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/912903430_100x80.png?v=1698900605"
-      },
-      "history": {
-        "created": "2023-10-24T09:17:11.000Z",
-        "modified": "2023-11-02T04:50:05.000Z",
-        "shared": "2023-10-24T09:42:07.000Z"
-      },
-      "stats": {
-        "views": 1889,
-        "loves": 37,
-        "favorites": 31,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 916632240,
-      "title": "The Fitness Gram Pacer Test is a Multi...",
-      "description": "✝ WHAT... FEATURED??? I opened scratch to like... 7030 notifications. I don't even know. I am glad so many of you enjoyed this! (I need a couple of minutes). \n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nCredits: \nMusic from Bensound.com \n(great resource for free music)\nAudio by FitnessGram\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nNotes:\nIf you have played, Stroll through the woods, or Wizard Game |pre-alpha|, or Skyraisins, you will notice that the code is similar to those games. I am trying to get criticism for my main game with the same code that I keep copying in these games. Obviously they are all different, but it shows you the progression I have made for the real game set to release sometime in the future.\nI love constructive criticism, so please leave it in the comments!",
-      "instructions": "Intro:\nWe all remember when your Gym/PE teacher turned on the mp3 file and those words that shake fear into the hearts of those who hear them came on. Relive that in this digital challenge to get a good grade.\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nInstructions:\nLeft and right arrow keys or click the screen\nHold down to breathe. (Shows a secret screen at the end if you breathe enough.)\nListen to the guy who talks for directions.\nRun to the other side of the red.",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 56573178,
-        "username": "kipajojo",
-        "scratchteam": false,
-        "history": {
-          "joined": "2020-02-03T19:41:04.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/56573178_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/56573178_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/56573178_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/56573178_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/56573178_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/916632240_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/916632240_282x218.png?v=1701904744",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/916632240_216x163.png?v=1701904744",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/916632240_200x200.png?v=1701904744",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/916632240_144x108.png?v=1701904744",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/916632240_135x102.png?v=1701904744",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/916632240_100x80.png?v=1701904744"
-      },
-      "history": {
-        "created": "2023-10-31T02:32:05.000Z",
-        "modified": "2023-12-06T23:19:04.000Z",
-        "shared": "2023-11-03T23:36:58.000Z"
-      },
-      "stats": {
-        "views": 123175,
-        "loves": 3753,
-        "favorites": 3133,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 919024954,
-      "title": "Aliens On My Farm",
-      "description": "This was made for a gamejam in 2 days\n\nMight stop working in lategame so play on turbowarp with clonelimit off for a bugfree game\n\nThis game is insane so.. take care ",
-      "instructions": "Mouse to move and mouse to dash\n\nCollect upgrades each upgrade swaps between 3 choices so choose wisely \n\nHave fun",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 30377605,
-        "username": "smorrebrot",
-        "scratchteam": false,
-        "history": {
-          "joined": "2018-02-18T19:50:27.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/30377605_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/30377605_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/30377605_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/30377605_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/30377605_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/919024954_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/919024954_282x218.png?v=1701346739",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/919024954_216x163.png?v=1701346739",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/919024954_200x200.png?v=1701346739",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/919024954_144x108.png?v=1701346739",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/919024954_135x102.png?v=1701346739",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/919024954_100x80.png?v=1701346739"
-      },
-      "history": {
-        "created": "2023-11-04T12:09:02.000Z",
-        "modified": "2023-11-30T12:18:59.000Z",
-        "shared": "2023-11-05T21:19:33.000Z"
-      },
-      "stats": {
-        "views": 6880,
-        "loves": 355,
-        "favorites": 310,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 933469571,
-      "title": "Countdown to 2024!",
-      "description": "Please don't advertise here!\nCredits-\nThanks to @icmy123 for  countdown codes.\nThanks to @griffpatch for advanced codes.\nArt by - @MomoDaMonkey\nSong - Memories Piano Version from Chosic.\nGoogle for 2024 gif \nRest by me(@-StarGold-)",
-      "instructions": "OMG!!! FEATURED ON 30th Dec,2023!TYSM ST and the person who proposed (sorry I forgot their name)!\n~Countdown to 2024!~\n2023 was a brilliant year for all of us !Many people had sad as well as memorable experiences during this year!So,we warmly welcome the year 2024 and hope it would be an awesome year as 2023!\nUPDATES-\n01/12/23- ADDED FIREWORKS!!!YOU CAN WATCH IT ON NEW YEAR!\n",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 78423719,
-        "username": "-StarGold-",
-        "scratchteam": false,
-        "history": {
-          "joined": "2021-06-11T04:03:46.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/78423719_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/78423719_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/78423719_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/78423719_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/78423719_32x32.png?v="
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/115777367_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/115777367_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/115777367_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/115777367_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/115777367_32x32.png?v="
           },
           "membership_avatar_badge": 1
         }
       },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/933469571_480x360.png",
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/988428245_480x360.png",
       "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/933469571_282x218.png?v=1765269162",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/933469571_216x163.png?v=1765269162",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/933469571_200x200.png?v=1765269162",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/933469571_144x108.png?v=1765269162",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/933469571_135x102.png?v=1765269162",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/933469571_100x80.png?v=1765269162"
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/988428245_282x218.png?v=1791624371",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/988428245_216x163.png?v=1791624371",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/988428245_200x200.png?v=1791624371",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/988428245_144x108.png?v=1791624371",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/988428245_135x102.png?v=1791624371",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/988428245_100x80.png?v=1791624371"
       },
       "history": {
-        "created": "2023-12-01T05:41:05.000Z",
-        "modified": "2025-12-09T08:32:42.000Z",
-        "shared": "2023-12-01T05:54:38.000Z"
+        "created": "2024-03-23T10:00:55.000Z",
+        "modified": "2026-10-10T09:26:11.000Z",
+        "shared": "2024-05-04T10:02:23.000Z"
       },
       "stats": {
-        "views": 78850,
-        "loves": 3807,
-        "favorites": 3165,
+        "views": 30754,
+        "loves": 1358,
+        "favorites": 974,
         "remixes": 0
       },
       "remix": {
@@ -1179,51 +1128,255 @@
       }
     },
     {
-      "id": 943485646,
-      "title": "もし君が恋でもしたらanimation",
-      "description": "BGM: それゆけワンダーランド\nhttps://youtu.be/ljKLdsoCa8o?si=FxU1BV3NSFPaoxPo\n\n\nEnglish⤵︎\nOh, I see.\n　　“What's wrong?”\nYou like me, don't you?\n       “…”\n　　“So what?”\nI like you, too.\n　　“…”\n　　“Really?”",
-      "instructions": "その時僕は、喜べるかな？\n\nーーーーーーーーーーーーーーーーーーーーーーーーー\nちみちみと作ってたヤツです\n背景とかもこだわってみました\n\n最近昔のプロジェクトを見返してみたら成長を感じられて嬉しかったです\n\n#animation #art #story",
+      "id": 1000246962,
+      "title": "Star Wars, the Darth Vader Show, Episode I, \"Father's Day\"",
+      "description": "More Star Wars videos coming soon! Feel free to remix or add it to your studio. Please love and fav! Thanks, and may the Force be with you...\n\nP.S. To go to the Darth Vader Show studio, go to https://scratch.mit.edu/studios/35010184\nIf you follow the studio you'll get notifications for when new episodes come out.\n\n100 views reached!\n...And before I could even count we have 6,000! XD\n... And now it's over 40,000\n\n#trending\n#star_wars\n#funny\n#animation\n#skywalker\n#frogleg8\n#comedy\n#video\n#Father's_Day\n#starwars\n#star_wars",
+      "instructions": "Thanks to @Grizzlyo who proposed this to be featured!\nAlso CLICK ON MY PROFILE to see other episodes! PLEASE NO ADVERTISING and NO \"F4F\"\nREAD THE BELOW LINE\nCheck out my other cool Star Wars stuff! https://scratch.mit.edu/projects/1011246172/ \nhttps://scratch.mit.edu/projects/1017103680/ https://scratch.mit.edu/projects/1014086496/READ BEFORE WATCHING\nclick the green flag 2 or 3 times\nDarth Vader and Luke Skywalker decide to go to the bowling alley for Father's Day\nIt's not quite done yet, but here it is!\n\nCan you find the two constellations?\n#animation\n#popular\n",
       "visibility": "notvisible",
       "public": false,
       "comments_allowed": false,
       "is_published": false,
       "author": {
-        "id": 73550922,
-        "username": "ramuner",
+        "id": 129793141,
+        "username": "Frogleg8",
         "scratchteam": false,
         "history": {
-          "joined": "2021-03-13T07:52:50.000Z"
+          "joined": "2024-02-18T20:00:42.000Z"
         },
         "profile": {
           "id": null,
           "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/73550922_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/73550922_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/73550922_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/73550922_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/73550922_32x32.png?v="
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/129793141_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/129793141_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/129793141_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/129793141_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/129793141_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/1000246962_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1000246962_282x218.png?v=1724797742",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1000246962_216x163.png?v=1724797742",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1000246962_200x200.png?v=1724797742",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1000246962_144x108.png?v=1724797742",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1000246962_135x102.png?v=1724797742",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1000246962_100x80.png?v=1724797742"
+      },
+      "history": {
+        "created": "2024-04-12T20:32:57.000Z",
+        "modified": "2024-08-27T22:29:02.000Z",
+        "shared": "2024-04-14T16:48:00.000Z"
+      },
+      "stats": {
+        "views": 157511,
+        "loves": 4864,
+        "favorites": 3714,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 1022236684,
+      "title": "Food Allergy Controller - #games",
+      "description": "THANK YOU SO SO SO MUCH FOR FEATURING  !!!! I'M SO HAPPY !!!!\n\nEspecially made for the studio : Food Allergy Awareness \nRead this >>>\nI would like to add a little message to my project since it got so popular, it’s not related to this game but it’s a message I want to share to a lot of people so… I know that being vegan is really badly seen in the society but you need to hear me out (please dont dislike lol) actually veganism is a really important subject today, aproximatly 4 000 000 000 ANIMALS die EVERY DAY in the modern society, that’s a lot, considering that they each feel emotions and pain, and I swear it’s not that hard to go vegan or vegetarian(i recommend foing veggy first to adapt yourself more easily Im currently veggy) with today’s supermarkets it is sooo easy to just take one product instead of an other and being more careful. You must know that today you have the choice, (animal’s don’t tho) that’s mean that consuming animal products became now a pleasure, but do you think that this pleasure is worth the ENTIRE LIFE of a innocent sentient Being? (Spoiler alert it’s not) AND I KNOW ITS HARD to get out of your ideas but please reconsiderate this. And il not telling you to go entirely vegan in one day but to firstly reduce your weekly consumption, then maybe to go vegetarian and then maybe even vegan! (Im currently veggy preparing to go vegan!) THANK YOU SMM FOR READING I LOVE YOU I LOVE YOU GO VEGAN <3 <3 \n\nmusic : \nLe temps fera des choses (instrumental) by Angèle\n\nall art is by me, you can take it if you want but please give credit. :)\n\n\n\n",
+      "instructions": "              FOOD ALLERGY CONTROLLER\n\nYou are a Food allergy controller. It's a very unknown job which consist to control the recipes of allergic people if they can or not, eat the meal!\nenjoy !                                                + new characters !\n\n\n\n-thank you for all the compliments, it make me very happy !!! ( I actually read all the comments! )\n\n-I know that I had a lot of luck by getting featured but I also worked hard to make this project, I've made a lot of research to make the maximum of possibilities, I've worked a lot on art and animations so please don't be jealous on comments if you never got featured but I hope you will be someday ! \n\n-I'm sorry that I didn't do a thumbnail, I didn't know what to do so I thought that I could leave it like this...\n\nI would like to add a little message to my project since it got so popular, it’s not related to this game but it’s a message I want to share to a lot of people so… I know that being vegan is really badly seen in the society but you need to hear me out (please dont dislike lol) actually veganism is a really important subject today, aproximatly 4 000 000 000 ANIMALS die EVERY DAY in the modern society, that’s a lot, considering that they each feel emotions and pain, and I swear it’s not that hard to go vegan or vegetarian with today’s supermarkets it is sooo easy to just take one product instead of an other and being more careful. You must know that today you have the choice, (animal’s don’t tho) that’s mean that consuming animal products became now a pleasure, but do you think that this pleasure is worth the ENTIRE LIFE of a innocent sentient Being? (Spoiler alert it’s not) AND I KNOW ITS HARD to get out of your ideas but please reconsiderate this. And il not telling you to go entirely vegan in one day but to firstly reduce your weekly consumption, then maybe to go vegetarian and then maybe even vegan! (Im currently veggy preparing to go vegan!) THANK YOU SMM FOR READING I LOVE YOU I LOVE YOU GO VEGAN <3 <3 \n\nMY BEST OF : https://scratch.mit.edu/studios/31885344/\n\nadd your projects here !\nhttps://scratch.mit.edu/studios/35253227/",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 64351407,
+        "username": "thibcool",
+        "scratchteam": false,
+        "history": {
+          "joined": "2020-09-25T16:33:20.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/64351407_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/64351407_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/64351407_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/64351407_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/64351407_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/1022236684_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1022236684_282x218.png?v=1791228522",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1022236684_216x163.png?v=1791228522",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1022236684_200x200.png?v=1791228522",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1022236684_144x108.png?v=1791228522",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1022236684_135x102.png?v=1791228522",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1022236684_100x80.png?v=1791228522"
+      },
+      "history": {
+        "created": "2024-05-17T14:43:01.000Z",
+        "modified": "2026-10-05T19:28:42.000Z",
+        "shared": "2024-05-19T23:54:19.000Z"
+      },
+      "stats": {
+        "views": 89835,
+        "loves": 2426,
+        "favorites": 1859,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 1054542676,
+      "title": "StaticChromatic's Character Creator || Version 1.3",
+      "description": "If you use this to make a profile picture, be sure to credit me in your bio!\n-------------------------------------------------------------------------\nPlease no advertising :)\n-------------------------------------------------------------------------\nVersion 1.0: Base game released!\nVersion 1.1: Fantasy Update! New clothes, hair, and horns\nVersion 1.1.1: Bug fixes and added background options\nVersion 1.2: Streetwear Update! New clothes and hair options\nVersion 1.2.1: Added save function!\nVersion 1.3: Cute & Creepy Update! New clothing options added\n\nNext Update:\nCozy Autumn\n-------------------------------------------------------------------------\n}}CREDITS{{\nSprite help from:\n@Mr_Ghost1001\n@RatArt12\nPlaytesting:\n@OWLBOY01\nMusic from:\n@wiIdfIxwers\nSave script inspiration:\n@duckichick",
+      "instructions": "Click on the Menu buttons to create your own character!\n\nInstructions for creating custom content can be found inside :) \n\nWARNING: save function may not work perfectly yet...I'm ironing out the bugs still. If you have issues leave a comment!\n",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 140593878,
+        "username": "StaticChromatic",
+        "scratchteam": false,
+        "history": {
+          "joined": "2024-07-22T23:30:46.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/140593878_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/140593878_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/140593878_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/140593878_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/140593878_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/1054542676_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1054542676_282x218.png?v=1727116545",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1054542676_216x163.png?v=1727116545",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1054542676_200x200.png?v=1727116545",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1054542676_144x108.png?v=1727116545",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1054542676_135x102.png?v=1727116545",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1054542676_100x80.png?v=1727116545"
+      },
+      "history": {
+        "created": "2024-08-10T23:15:57.000Z",
+        "modified": "2024-09-23T18:35:45.000Z",
+        "shared": "2024-08-12T00:51:56.000Z"
+      },
+      "stats": {
+        "views": 68227,
+        "loves": 2565,
+        "favorites": 1973,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 1064468777,
+      "title": "PB and J: Curse of the Mer-Witch",
+      "description": "❌ NO ADS!! NO CHAINMAIL!!\nPlease give the game a ❤️ and/or ⭐️ if you enjoy it!\nGuys I know I won you can stop telling me lol\n-] Credits [-\nArt, code, and idea - @-KingMidas-\nSound effects, Music - Pixabay, Kirby\nGame Jam, score display, depth sorting - @griffpatch\nHow I followed the theme of \"Sticky Situation\":\nThe Mer-Witch \"sticks\" PB and Jelli together with a curse!\nPB and Jelli need to \"stick\" together to defeat enemies.\nPB and Jelli are IN a \"sticky situation.\"\nThe gameplay puts the player in a \"sticky situation\" with the control scheme.\n\nUh and @CJSkitss for telling me about the font I used for the thumbnail\n\nI suppose I would call it an arcade-style game, no idea though.\n\nWait this is on trending what\n9TH IN GAMES WHAT?!?!\n5TH IN MUSIC HUH????? WhY?/1?\nok it's 10th in art now what is happendsing (Jan 7 2025)\nWhat is going on it's back on trending again?? (Jan 14 2025)\nFEATURED?111?!\nGAME JAM WINNER AND ON THE THUMBNAIL?!?!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPlay the game already!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n#Games #All #PB #J #-KingMidas- #Curse",
+      "instructions": "WHAT FEATURED HUH?? TY ST!! Jan 20th, 2025.\nProposed by @Quackers-The-Duck-\n\n  --------------] PB & J: Curse of the Mer-Witch [------------\n                         A difficult underwater battle!\n\nI encourage remixes! Hopefully the comments I have added are enough to get you going! I'm excited to see how you make it your own :)\n\n> Controls \n\nYou control PB and Jelli.\nWASD or Arrow Keys to move PB.\nMouse to move Jelli.\n\n\n\n> Attacking \n\nWhen PB and Jelli are close together, a beam of energy will be created, which is your only way of attacking. You'll need to \"stick\" together to win!\nJelli is invincible, and PB has 5 lives. PB can heal with the bubbles containing health that spawn on the left and right sides of the screen.\n\n\n\n> Scoring \n\nYou gain score based on you combo level, indicated in the top right corner of the screen. You gain combo by defeating enemies. Comment your high score!\n\n\n\n> Notes \n\nThis game was really fun to make, and I hope you enjoy it! Some parts were difficult, but I think my coding knowledge really expanded with this game!\n\nThis was made for the January Griffpatch Game Jam. The theme was \"Sticky Situation!\"\n\n\n\n\n> Story \n\nPB and Jelli live deep underwater and are best friends!\nOne day, they run into the evil Mer-Witch, who casts a spell on them that makes their life force into a beam between them, weakening PB and Jelli.\nThe Mer-Witch then summons her army of evil sea creatures to attack PB and Jelli!\nPB and Jelli will need to stick close to one another to defeat the Mer-Witch and stay alive!\n\n\n\n-] Project Stats [-\n\n - 1 Boss fight\n - 4 Enemies\n - 1735 Blocks (not uncomplicated, just optimised) :)\n - 25 Sprites\n - 1 Person\n\nGive it a love if you enjoy it, and please give me some feedback :D",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 141328223,
+        "username": "-KingMidas-",
+        "scratchteam": false,
+        "history": {
+          "joined": "2024-08-16T13:12:42.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/141328223_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/141328223_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/141328223_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/141328223_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/141328223_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/1064468777_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1064468777_282x218.png?v=1751904756",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1064468777_216x163.png?v=1751904756",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1064468777_200x200.png?v=1751904756",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1064468777_144x108.png?v=1751904756",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1064468777_135x102.png?v=1751904756",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1064468777_100x80.png?v=1751904756"
+      },
+      "history": {
+        "created": "2024-09-06T22:07:09.000Z",
+        "modified": "2025-07-07T16:12:36.000Z",
+        "shared": "2025-01-05T17:25:14.000Z"
+      },
+      "stats": {
+        "views": 77593,
+        "loves": 2737,
+        "favorites": 2352,
+        "remixes": 0
+      },
+      "remix": {
+        "root": null
+      }
+    },
+    {
+      "id": 1102910289,
+      "title": "2024: A Scratch Year in Review",
+      "description": "Press space/tap the screen to advance. Press \"M\" to mute/unmute.\n\nCheck out the studio for more information and ways to participate: https://scratch.mit.edu/studios/36002338/\n\n- - - -\nArtwork: Created in Illustrator; some inspiration/help from @ceebee's New Years Eve countdown project\nFont: Bebas Neue Regular; DIN Condensed Bold\nMusic: \"Neon Laser Horizon\" by Kevin MacLeod (incompetech.com)\nLicensed under Creative Commons: By Attribution 4.0 License\nhttp://creativecommons.org/licenses/by/4.0/",
+      "instructions": "As we approach the end of the year, we have an opportunity to look back on the past year of creating projects, participating in studios, and making new Scratch friends! We invite you to create a project to share moments from the past year on Scratch you would like to remember and say goodbye to 2024.\n\nPress space/tap the screen to advance. Press \"M\" to mute/unmute.\n\nCheck out the studio for more information and ways to participate: https://scratch.mit.edu/studios/36002338/\n\nWhat will you create?\n=^..^=",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 15883188,
+        "username": "ScratchCat",
+        "scratchteam": false,
+        "history": {
+          "joined": "2007-03-05T00:00:00.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/15883188_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/15883188_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/15883188_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/15883188_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/15883188_32x32.png?v="
           },
           "membership_avatar_badge": 1
         }
       },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/943485646_480x360.png",
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/1102910289_480x360.png",
       "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/943485646_282x218.png?v=1789130719",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/943485646_216x163.png?v=1789130719",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/943485646_200x200.png?v=1789130719",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/943485646_144x108.png?v=1789130719",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/943485646_135x102.png?v=1789130719",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/943485646_100x80.png?v=1789130719"
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1102910289_282x218.png?v=1736872281",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1102910289_216x163.png?v=1736872281",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1102910289_200x200.png?v=1736872281",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1102910289_144x108.png?v=1736872281",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1102910289_135x102.png?v=1736872281",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1102910289_100x80.png?v=1736872281"
       },
       "history": {
-        "created": "2023-12-22T08:50:46.000Z",
-        "modified": "2026-09-11T12:45:19.000Z",
-        "shared": "2025-02-11T13:39:25.000Z"
+        "created": "2024-11-27T14:29:57.000Z",
+        "modified": "2025-01-14T16:31:21.000Z",
+        "shared": "2024-12-02T13:59:47.000Z"
       },
       "stats": {
-        "views": 47799,
-        "loves": 3002,
-        "favorites": 2065,
+        "views": 30075,
+        "loves": 1223,
+        "favorites": 1050,
         "remixes": 0
       },
       "remix": {
@@ -1231,50 +1384,50 @@
       }
     },
     {
-      "id": 945561142,
-      "title": "Elevators #animations #trending",
-      "description": "i used pixabay for sounds and also the doom music. :cool face:\n\n#All #Animations #Stories #Trending #Art #Music #All #Animations #Stories #Trending #Art #Music #All #Animations #Stories #Trending #Art #Music #All #Animations #Stories #Trending #Art #Music #All #Animations #Stories #Trending #Art #Music #All #Anim",
-      "instructions": "Ryan alternative wants to go leave the hotel and grab some KFC. \n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\ni got this idea when i was on a trip to las vegas and the hotel elevators were really crowded. Then i thought: Hey! why don't i make a project on this? So here it is.",
+      "id": 1123274185,
+      "title": "Sledding with Matt B0.4",
+      "description": "Apparently I'm on the explore page now. This game keeps getting more famous every day!! You should fr check out my other games in my profile.\n\nTHANKS FOR THE FEATURE GUYS... I never thought I'd see this day... Also no ads of any type or they'll be deleted.\n\nPLEASE stop making remixes with no change. At least replace Matt or the snowman or maybe the music idk. I am truly interested in what you guys have to change. And whenever I see the same title from the original, I just feel depressed and just move on with my day, ignoring the game cuz what would be the point? Also by far, my favorite remix is this one: https://scratch.mit.edu/projects/1134639082/ It's absolute cinema, trust.\n\nThis game is in BETA! There is only one boss fight and there is gonna be more in the near future!\n\nOh yeah, code, art, and music by me.",
+      "instructions": "  Welcome to Sledding with Matt, where you sled. (Discovery of the year!!1!) Instructions are in-game. One thing I was too lazy to change on the tutorial after making the art is this cool thing that happens when you hold down arrow while sliding.\n\n  This game is for the sds, and I think I did a pretty good job for my first sds game.\n\nUPDATE LOG:\nB0.4 - (Feb 25) Tweaked the 3d effect to make it more convincing, added a song message thingy, and yeah, that's it. I may add mobile support in the future, trust.\nB0.3.6 - (Feb 16) Fixed a bug that would make it so that the tutorial screen wouldn't show up.\nB0.3.5 - (Feb 6) Fixed medkit spawning in the boss fight.\nB0.3 - (Feb 5) Release",
       "visibility": "notvisible",
       "public": false,
       "comments_allowed": false,
       "is_published": false,
       "author": {
-        "id": 61832775,
-        "username": "ryanfunblox",
+        "id": 69198804,
+        "username": "_mateomej00",
         "scratchteam": false,
         "history": {
-          "joined": "2020-06-29T00:20:18.000Z"
+          "joined": "2020-12-17T16:08:47.000Z"
         },
         "profile": {
           "id": null,
           "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/61832775_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/61832775_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/61832775_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/61832775_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/61832775_32x32.png?v="
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/69198804_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/69198804_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/69198804_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/69198804_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/69198804_32x32.png?v="
           }
         }
       },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/945561142_480x360.png",
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/1123274185_480x360.png",
       "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/945561142_282x218.png?v=1710716567",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/945561142_216x163.png?v=1710716567",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/945561142_200x200.png?v=1710716567",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/945561142_144x108.png?v=1710716567",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/945561142_135x102.png?v=1710716567",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/945561142_100x80.png?v=1710716567"
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1123274185_282x218.png?v=1775839018",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1123274185_216x163.png?v=1775839018",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1123274185_200x200.png?v=1775839018",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1123274185_144x108.png?v=1775839018",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1123274185_135x102.png?v=1775839018",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1123274185_100x80.png?v=1775839018"
       },
       "history": {
-        "created": "2023-12-31T15:38:21.000Z",
-        "modified": "2024-03-17T23:02:47.000Z",
-        "shared": "2024-01-07T21:29:05.000Z"
+        "created": "2025-01-21T21:14:07.000Z",
+        "modified": "2026-04-10T16:36:58.000Z",
+        "shared": "2025-02-06T04:24:11.000Z"
       },
       "stats": {
-        "views": 75949,
-        "loves": 5236,
-        "favorites": 4499,
+        "views": 73482,
+        "loves": 1609,
+        "favorites": 1313,
         "remixes": 0
       },
       "remix": {
@@ -1282,101 +1435,50 @@
       }
     },
     {
-      "id": 963010306,
-      "title": "Australia | Multiple Artist Project | An Interactive | Team Australiuu | #art",
-      "description": "ㅤAustralia | Multiple ARTIST Project | An Interactive | ㅤㅤㅤㅤTeam Australiuu | Community Project\n\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\nInterested in joining the Scratch Spring Olympics? \nVisit the studio https://scratch.mit.edu/studios/34443086/\nMore details are in that studio.\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\nRecommendation: Check out Sydney, Barrier Reef, Canberra, Perth, Darwin, Uluru, Gold Coast, and Phillip Island first. CONTAINS USER ART\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\nPlease check out the project https://scratch.mit.edu/projects/961923884 if you want to participate in creating art [ Art Requests are still open! ]\nAdd your art in the studio: https://scratch.mit.edu/studios/34601543/\n\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\n\nInstructions\nClick on the waypoints to view the place.\nTo exit the slides, click the Exit button (X) on the bottom right.\n\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\n\nCoded by @Mapmaker- and edited+finalized by @Kqax (me)\n\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\n\nBonus: Color\n\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\nCredits:\n\"Our Planet\" parallax and the mouse effects by @bombo90\nAus Intro by @Magicalunicornsxox (also the thumbnail)\nUser art credited in the slides. \nHuge credits to all!\n\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\n\nOUR STUDIO!\nTeam > https://scratch.mit.edu/studios/34479500\nMAP Studio > https://scratch.mit.edu/studios/34601543\nComment if you want to be apart of the team!\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\n\n02/22/2024 - FEATURED! Thank you ST for the feature! I never would have thought that I would be featured!!! My most popular project :O\n\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\n\nAUS RANKING (in event): \n2ND (SILVER)\n\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\nNOTES:\nNoticed Oceania (Australia) is the only continent in the project? That is because this project targets and focuses on Australia. \nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\nAdvertise here possibly?\nhttps://scratch.mit.edu/users/WhyAreThereSoManyAds\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⏷\nArtists Included:\n@the_rabbit_lover\n@Mapmaker-\n@Magicalunicornsxox\n@MilloMillolas\n@Tenmarble\n@artist_1O1\n@Termgolden\n@CyberSentry23\n@CuteLilEevee\n-Huge credits to them! Check them out if you wish :D\n\n\n\nThank you for reading this all.\n\n\n\n\n\n\n#all #all #all #all #all #all #all #all #all #all #all #all #all\n#art #art #art #art #art #art #art #art #art #art #art #art #trending #trending #trending #trending #trending \n#art #art #art #art #art #art #art #art #art #art #art #art \n#all #all #all #all #all #all #all #all #all #all #all #all #all\n\n#56 on Art > Trending - 03/06/24",
-      "instructions": "",
+      "id": 1196024826,
+      "title": "Ant Path - #mobile #games #drawing",
+      "description": "https://scratch.mit.edu/projects/1282056196/\n\nMusic from Cut The Rope\nTitle font from @iTweakor\n\nBe sure to leave a LOVE and a FAVORITE if you enjoyed. FOLLOW me for more games!\nhttps://scratch.mit.edu/projects/1193096143/\nhttps://scratch.mit.edu/projects/786748078/\nInspiration: https://scratch.mit.edu/projects/1197459323/\n\nUploaded: (7/15/25)\nFeatured: (1/5/26)\n\nDon't advertise please\n----------------------------------------------------------------------\n#mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant #mobile #games #trending #all #draw #drawing #ant ",
+      "instructions": "Dig a path to help the ant reach all of the leaves. But don't draw the corners too sharp, because the ant will die if it runs into a wall. Help the ant through 10 levels to win, and be sure to look around for the secret fossils.\n----------------------------------------------------------------------\nCONTROLS:\nDrag your mouse / finger to DRAW the path\nPress any key / hold the still ant to START moving\nPress space / hold the moving ant to RESET the level\nAfter dying too many times, a SKIP button will appear\nIf confused about movement, go to the HELP menu\nThe game might be hard at times, be patient or quit\n\n\nwhy'd this get featured, definitely my worst game",
       "visibility": "notvisible",
       "public": false,
       "comments_allowed": false,
       "is_published": false,
       "author": {
-        "id": 124991376,
-        "username": "Kqax",
+        "id": 30254215,
+        "username": "balusew",
         "scratchteam": false,
         "history": {
-          "joined": "2023-11-19T20:46:58.000Z"
+          "joined": "2018-02-13T16:32:08.000Z"
         },
         "profile": {
           "id": null,
           "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/124991376_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/124991376_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/124991376_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/124991376_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/124991376_32x32.png?v="
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/30254215_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/30254215_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/30254215_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/30254215_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/30254215_32x32.png?v="
           }
         }
       },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/963010306_480x360.png",
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/1196024826_480x360.png",
       "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/963010306_282x218.png?v=1711499534",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/963010306_216x163.png?v=1711499534",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/963010306_200x200.png?v=1711499534",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/963010306_144x108.png?v=1711499534",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/963010306_135x102.png?v=1711499534",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/963010306_100x80.png?v=1711499534"
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1196024826_282x218.png?v=1788813655",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1196024826_216x163.png?v=1788813655",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1196024826_200x200.png?v=1788813655",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1196024826_144x108.png?v=1788813655",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1196024826_135x102.png?v=1788813655",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1196024826_100x80.png?v=1788813655"
       },
       "history": {
-        "created": "2024-02-08T01:17:24.000Z",
-        "modified": "2024-03-27T00:32:14.000Z",
-        "shared": "2024-02-08T01:53:29.000Z"
+        "created": "2025-07-10T01:45:07.000Z",
+        "modified": "2026-09-07T20:40:55.000Z",
+        "shared": "2025-07-17T01:28:48.000Z"
       },
       "stats": {
-        "views": 32365,
-        "loves": 1504,
-        "favorites": 1170,
-        "remixes": 0
-      },
-      "remix": {
-        "root": 961923884
-      }
-    },
-    {
-      "id": 1013973702,
-      "title": "The Art Gallery - An Escape room",
-      "description": "Music credit inside\nAnswers if needed: https://scratch.mit.edu/projects/1056295262\nNot loading/lagging\nPlay here:\nhttps://turbowarp.org/1013973702\nFULL SCREEN RECOMMENDED\nTap my oc in the corner to get clues, you only get 3.\nDoors with key holes will need keys..\nArt- @coolcoder010101\nCode- @coolcoder010101\nA few ideas from @cookies-art-coding\nMake sure to like and fave \nIf you liked this please propose it to be featured here!\nhttps://scratch.mit.edu/studios/28715018/\nComment any suggestions or bugs.\nNo hate. No advertising. No stealing the art\n\n\n\n\n\n\nHaving difficulty solvimg? \n3 extra HINTS!!\n\n\n\n1. Some things are draggable\n2. You need the toilet.\n3. What do sheeps have attached to their legs? What do have? \n4. To get to private collection drag the artwork of the week away to get the key then drag the key to the lock and click the sign ",
-      "instructions": "Welcome to my newest, and Best game!\nExplore and unlock rooms, gather clues and numbers to then escape\nCan you craCk the lock and escape before the time runs out?\nEpilogue.\nYou wake up and rub your head, it hurts and you notice you have been taken and locked in an office. You cannot remember how you got there or why but a you know you must escape.\n\nInside the project there are featured art works, if you would like to see your art work there send it in to me in the project and say featured art\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTags(ignore)\n#art#gallery#escape#escapetheartgallery#room#code\n#all#coolcoder010101#office#lock#combination#timer\n#games#animations#art#puzzles#all#trending#scratch#whatever#bored#whyamidoinghashtags?\n#escape room\n\n\n\n\n\n\n\n\n\n\n\n\nOriginally shared august 15th 2024",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 74244718,
-        "username": "coolcoder010101",
-        "scratchteam": false,
-        "history": {
-          "joined": "2021-03-24T18:15:09.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/74244718_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/74244718_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/74244718_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/74244718_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/74244718_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/1013973702_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1013973702_282x218.png?v=1751970916",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1013973702_216x163.png?v=1751970916",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1013973702_200x200.png?v=1751970916",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1013973702_144x108.png?v=1751970916",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1013973702_135x102.png?v=1751970916",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1013973702_100x80.png?v=1751970916"
-      },
-      "history": {
-        "created": "2024-05-05T13:21:35.000Z",
-        "modified": "2025-07-08T10:35:16.000Z",
-        "shared": "2025-04-13T10:46:27.000Z"
-      },
-      "stats": {
-        "views": 1745,
-        "loves": 61,
-        "favorites": 49,
+        "views": 168101,
+        "loves": 3241,
+        "favorites": 2715,
         "remixes": 0
       },
       "remix": {
@@ -1384,205 +1486,51 @@
       }
     },
     {
-      "id": 1144050816,
-      "title": "Bouquet Customiser ||#all#games#art#featured",
-      "description": "ᴛʜᴀɴᴋꜱ ᴛᴏ \n@kindness-only- ꜰᴏʀ ʙᴇɪɴɢ ᴋɪɴᴅ ᴀɴᴅ ʜᴇʟᴘɪɴɢ ᴏᴜᴛ!\nᴄʜᴇᴄᴋ ᴛʜɪꜱ ᴘʀᴏᴊ ᴏᴜᴛ! (ʏᴏᴜ ᴄᴀɴ ɢᴇᴛ ꜰᴏʟʟᴏᴡꜱ): https://scratch.mit.edu/projects/1160791164\n\n@SeasonBIossoms isn't me!!! Their  user is  capital i instead of L",
-      "instructions": "━━━━━•❃❀ʙᴏᴜQᴜᴇᴛ ᴄᴜꜱᴛᴏᴍɪꜱᴇʀ❀❃•━━━━━\n\nᴛʜᴀɴᴋꜱ ꜱᴏ ᴍᴜᴄʜ ꜱᴛ ꜰᴏʀ ᴛʜᴇ ꜰᴇᴀᴛᴜʀᴇ! - 4/3/2025\nᴛᴏᴘ ʀᴇᴍɪx 5/5/2025\nᴛʜᴀɴᴋꜱ ᴛᴏ @beabdoobee ꜰᴏʀ ᴘʀᴏᴘᴏꜱɪɴɢ!\n\n ✿ ᴄʟɪᴄᴋ ᴛʜᴇ ᴅɪꜰꜰᴇʀᴇɴᴛ ʙᴜᴛᴛᴏɴꜱ ᴛᴏ ᴄʜᴀɴɢᴇ ᴛʜᴇ ꜰʟᴏᴡᴇʀꜱ ᴀɴᴅ ʙᴏᴜQᴜᴇᴛꜱ!\n ✿ ᴍᴏʀᴇ ꜰʟᴏᴡᴇʀꜱ ᴀɴᴅ ᴅᴇꜱɪɢɴꜱ ᴄᴏᴍɪɴɢ ꜱᴏᴏɴ!\n\nᴄʀᴇᴅɪᴛꜱ:\n ✿ 100% ᴏꜰ ᴛʜᴇ ᴀʀᴛ: ᴍᴇ\n ✿ ᴛʜᴜᴍʙɴᴀɪʟ: ᴍᴇ\n ✿ ᴄᴏɴꜰᴇᴛᴛɪ ᴇꜰꜰᴇᴄᴛ ʙʏ @-Totally_Random-",
+      "id": 1198059944,
+      "title": "Frank's Pocket | An Animation",
+      "description": "",
+      "instructions": "✻ Once upon a time, a banana finds himself squished together with a handful of other living objects! He doesn't know what he's trapped in, or how he got there. Watch the animation to uncover the surprising reality!\n\n✦ Instructions ✦\n\n✧ Click the Green Flag!\n✧ Watch the Animation!\n\n✼ Notes ✼\n\n✏ This project was made for Scratch Camp 2025 - Week 1\n\n✏ The paint tube was featured in the project \"How to Make a Bob Ross Painting - With Frank Ross\"\n\n✏ This project utilizes 594 blocks of code!\n\n\n© Credits ©\n\n❁ All code/graphics by @cheekybubba5\n❁ @cch722 for crocheting the Frank Doll!\n❁ Music/Sound effects from Pixabay\n❁ Luvvoice for the AI text to speech generator!\n\nThanks for viewing! Scratch On! \n\n「 ⋅ ⍛ ⋅ ˥  *Grunt",
       "visibility": "notvisible",
       "public": false,
       "comments_allowed": false,
       "is_published": false,
       "author": {
-        "id": 152007218,
-        "username": "SeasonBlossoms",
+        "id": 61237429,
+        "username": "cheekybubba5",
         "scratchteam": false,
         "history": {
-          "joined": "2025-03-04T03:15:33.000Z"
+          "joined": "2020-06-04T16:54:11.000Z"
         },
         "profile": {
           "id": null,
           "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/152007218_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/152007218_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/152007218_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/152007218_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/152007218_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/1144050816_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1144050816_282x218.png?v=1746561998",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1144050816_216x163.png?v=1746561998",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1144050816_200x200.png?v=1746561998",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1144050816_144x108.png?v=1746561998",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1144050816_135x102.png?v=1746561998",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1144050816_100x80.png?v=1746561998"
-      },
-      "history": {
-        "created": "2025-03-08T03:40:51.000Z",
-        "modified": "2025-05-06T20:06:38.000Z",
-        "shared": "2025-03-08T19:05:50.000Z"
-      },
-      "stats": {
-        "views": 75376,
-        "loves": 2199,
-        "favorites": 1613,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 1191104074,
-      "title": "PACE",
-      "description": "HOLY I GOT FEATURED :D\nalso please stop advertising on this please ^v^\n@aaryaz_codecentral for proposing this project/ giving me MY RISE TO POWER-\nTURBOWARP LINK: https://turbowarp.org/1191104074\nThis Game is inspired entirely by Grace (Roblox)\n\nMusic used in this project:\nAFunnyNinjaMan - Rave Race.\nWill May - Mutronic Plague.\nEscapeBoard - Main Theme.\nKey After Key - OOF-Y GROOVES\nPlasma3Music Remixes - Trainwreck Of Electro Swing.\nNaofumi Hataya - Metallic Madness \"P\" Mix\nToby Fox - BIG SHOT\nEarl Scruggs - Foggy Mountain Breakdown (1949)\nKirby Planet Robobot - Gorgeous-Go-Round\nBouncy Glow's Music Room - Stardust Speedway US\nParagonX9 - Chaoz Fantasy\nOut There Somewhere - Space Battle\nRushJet1 - Savannah Chase\nSonic Colors - Tropical Resort (Act 1)\nboksed - caffeine rush\nENNWAY - RUNNING MAN\nPhill C. - ULTRASONIC FAITH\nKevin MacLeod - Shiny Tech\nHazeEclipse - Amen\n@Nonsense_Vin - Pace For Power\nTherodmod - Sweet Release Of Death\nPaperKitty - Blue Licorice\nKirby Fighters 2 - Dedede's Arena\nMr. Sauceman - Bye Bye There!\nSebastian \"vey\" Fennec - RETALIATION\nPWNed BY 14:00 - CHECK.M4TE\nDIGITAL DESCENDANT - Love and Void\nair - just here if you wanna put different music choices.",
-      "instructions": "yay this is the full game I guess :)\n\nArrow/WASD Keys to Move\nC/L to Sprint\nX/M to Interact with stuff (as well as dash)\nSpace to Jump (mainly over the thorny bushes)\n\nMANUAL:\nThere isn't any kind of guide in game so this is your main manual.\nThere are sometimes barricades in the end of a room, use your dash to break through it\nGates must have all 3 buttons in the room it's in pressed to destroy it.\n\nJust use the Ball in the Saferooms, it gives you a hint on what to do for entities you encounter in that level.\n\nMacrocosm (The Planet): it's the Carnation of this game, just keep going until you find a purple tinted room, and hide in the Holes. (You are also safe while in SafeRooms, and you hide in holes using X/M)\n\nHaste (The Cloud): Just Simply gives a limited amount of time to stay in a room, or else you get damaged.\n\nCorral (The Jellyfish): blocks the entryway, get close enough to it for it to attack, you can pass through if you dodge it.\n\nSyllabary (The Letter-Train): The Slugfish ripoff, just stay out of the middle when it arrives and you're good. (You're also safe from it while in Saferooms)\n\nDiscern (The Rock): Stop sprinting when in it's aura, or you could risk getting damaged.\n\nLeviathan (The Butterfly): don't touch the hooks, or else you risk dying.\n\nParalyze (The Snowflake): When opening it's eyes, don't move. click on Paralyze to get rid of it.",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 152277033,
-        "username": "AFunnyNinjaMan",
-        "scratchteam": false,
-        "history": {
-          "joined": "2025-03-08T05:05:38.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/152277033_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/152277033_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/152277033_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/152277033_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/152277033_32x32.png?v="
-          }
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/1191104074_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1191104074_282x218.png?v=1792422299",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1191104074_216x163.png?v=1792422299",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1191104074_200x200.png?v=1792422299",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1191104074_144x108.png?v=1792422299",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1191104074_135x102.png?v=1792422299",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1191104074_100x80.png?v=1792422299"
-      },
-      "history": {
-        "created": "2025-06-22T03:25:07.000Z",
-        "modified": "2026-10-19T15:04:59.000Z",
-        "shared": "2025-11-07T21:54:08.000Z"
-      },
-      "stats": {
-        "views": 41570,
-        "loves": 2563,
-        "favorites": 2350,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 1218514733,
-      "title": "Pumpkin Surprise",
-      "description": "Learn more about Scratchtober and join the fun here: https://scratch.mit.edu/studios/50960506\n\nPlease do remix! You could add yourself to the animation, change what happens when you press the pumpkin, add trick-or-treaters getting spooked by the surprise, or whatever else you might imagine. I would love to see where you might take this project next!\n\n- - - -\nArtwork: Created in Illustrator; very much inspired by this adorable gif I stumbled upon recently: https://giphy.com/gifs/Mostapes-cat-kitty-mikitti-C77atzfkQ9M4umIq4U\nMusic: \"Ain't Misbehavin'\" by Louie Zong \nFont: Grande October Three",
-      "instructions": "Scratchtober Day 1: Pumpkin\n\nClick the screen or press space for a little pumpkin surprise ^.^\n\nPlease do remix! You could add yourself to the animation, change what happens when you press the pumpkin, add trick-or-treaters getting spooked by the surprise, or whatever else you might imagine. I would love to see where you might take this project next!\n\n*boop*\n=^..^=\n\nLearn more about Scratchtober and join the fun here: https://scratch.mit.edu/studios/50960506",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 2755634,
-        "username": "ceebee",
-        "scratchteam": false,
-        "history": {
-          "joined": "2013-09-21T14:57:20.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/2755634_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/2755634_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/2755634_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/2755634_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/2755634_32x32.png?v="
-          },
-          "membership_avatar_badge": 0
-        }
-      },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/1218514733_480x360.png",
-      "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1218514733_282x218.png?v=1760345955",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1218514733_216x163.png?v=1760345955",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1218514733_200x200.png?v=1760345955",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1218514733_144x108.png?v=1760345955",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1218514733_135x102.png?v=1760345955",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1218514733_100x80.png?v=1760345955"
-      },
-      "history": {
-        "created": "2025-09-18T10:35:14.000Z",
-        "modified": "2025-10-13T08:59:15.000Z",
-        "shared": "2025-10-13T08:59:15.000Z"
-      },
-      "stats": {
-        "views": 4105,
-        "loves": 275,
-        "favorites": 207,
-        "remixes": 0
-      },
-      "remix": {
-        "root": null
-      }
-    },
-    {
-      "id": 1261749240,
-      "title": "Climbing - an animation | #animations #all #stickman",
-      "description": "sounds are from scratch library! \n#animations #all #stickman",
-      "instructions": "Yay I think it's cool! Hope you enjoyed this stickman animation which i made in a few minutes!\n@cheekybubba5 loved! ugh no advertising\n2200 views yippie!\ncould you also check this out?\nhttps://scratch.mit.edu/projects/1378342825/",
-      "visibility": "notvisible",
-      "public": false,
-      "comments_allowed": false,
-      "is_published": false,
-      "author": {
-        "id": 146837086,
-        "username": "_Infinity2013_",
-        "scratchteam": false,
-        "history": {
-          "joined": "2024-11-19T14:40:41.000Z"
-        },
-        "profile": {
-          "id": null,
-          "images": {
-            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/146837086_90x90.png?v=",
-            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/146837086_60x60.png?v=",
-            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/146837086_55x55.png?v=",
-            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/146837086_50x50.png?v=",
-            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/146837086_32x32.png?v="
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/61237429_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/61237429_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/61237429_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/61237429_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/61237429_32x32.png?v="
           },
           "membership_avatar_badge": 1
         }
       },
-      "image": "https://cdn2.scratch.mit.edu/get_image/project/1261749240_480x360.png",
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/1198059944_480x360.png",
       "images": {
-        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1261749240_282x218.png?v=1791613549",
-        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1261749240_216x163.png?v=1791613549",
-        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1261749240_200x200.png?v=1791613549",
-        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1261749240_144x108.png?v=1791613549",
-        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1261749240_135x102.png?v=1791613549",
-        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1261749240_100x80.png?v=1791613549"
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/1198059944_282x218.png?v=1753718492",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/1198059944_216x163.png?v=1753718492",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/1198059944_200x200.png?v=1753718492",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/1198059944_144x108.png?v=1753718492",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/1198059944_135x102.png?v=1753718492",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/1198059944_100x80.png?v=1753718492"
       },
       "history": {
-        "created": "2026-01-05T13:51:53.000Z",
-        "modified": "2026-10-10T06:25:49.000Z",
-        "shared": "2026-01-05T14:22:44.000Z"
+        "created": "2025-07-18T03:20:02.000Z",
+        "modified": "2025-07-28T16:01:32.000Z",
+        "shared": "2025-07-28T08:37:39.000Z"
       },
       "stats": {
-        "views": 2338,
-        "loves": 145,
-        "favorites": 106,
+        "views": 2167,
+        "loves": 161,
+        "favorites": 122,
         "remixes": 0
       },
       "remix": {
@@ -1996,6 +1944,57 @@
       },
       "remix": {
         "root": null
+      }
+    },
+    {
+      "id": 678684630,
+      "title": "Aquatic Sprites || Bitmap",
+      "description": "https://herman-studios.itch.io/kingdoms-of-war\n\n— Credits —\n==========\n• Graphical Design:\n@SpritePlatoon\n\n• Sprite Designing:\n@SpritePlatoon\n\n• Topic Research:\n@SpritePlatoon\n\n• Advertisement:\n@SpritePlatoon\n\n— Notes —\n========\n• How to help:\nYou can help this project by doing many things. Some of which include; Putting suggestions in the comments, loving and favoriting the project, following me, sharing the project with your friends, and anything else you think might help.",
+      "instructions": "— Aquatic Sprites —\n================\n• Description:\nThis project is a useful tool for anyone in need of pixelated aquatic Sprites. They are free to use, as long as you put a simple crediting message somewhere in the project’s exterior or interior. My preference is “Graphical Design - @SpritePlatoon”, but you can choose something else if you’d like.\n\n• Instructions:\nTo use the sprite, click on “See inside”, then click on the “Usable Items” sprite. Then click on the bar on the left bottom of your screen that says “Backpack”. Then simply drag the sprite to the backpack. You can then drag it from the backpack into one of your projects by reversing what you just did. Then make sure to credit me as instructed in the description. \n\n• Sprites List:\nMermaid\nFish\nBoat\nFishing Pole\nShark\n(NEW!) Island",
+      "visibility": "notvisible",
+      "public": false,
+      "comments_allowed": false,
+      "is_published": false,
+      "author": {
+        "id": 92764318,
+        "username": "SpritePlatoon",
+        "scratchteam": false,
+        "history": {
+          "joined": "2022-03-21T15:06:06.000Z"
+        },
+        "profile": {
+          "id": null,
+          "images": {
+            "90x90": "https://cdn2.scratch.mit.edu/get_image/user/92764318_90x90.png?v=",
+            "60x60": "https://cdn2.scratch.mit.edu/get_image/user/92764318_60x60.png?v=",
+            "55x55": "https://cdn2.scratch.mit.edu/get_image/user/92764318_55x55.png?v=",
+            "50x50": "https://cdn2.scratch.mit.edu/get_image/user/92764318_50x50.png?v=",
+            "32x32": "https://cdn2.scratch.mit.edu/get_image/user/92764318_32x32.png?v="
+          }
+        }
+      },
+      "image": "https://cdn2.scratch.mit.edu/get_image/project/678684630_480x360.png",
+      "images": {
+        "282x218": "https://cdn2.scratch.mit.edu/get_image/project/678684630_282x218.png?v=1742473301",
+        "216x163": "https://cdn2.scratch.mit.edu/get_image/project/678684630_216x163.png?v=1742473301",
+        "200x200": "https://cdn2.scratch.mit.edu/get_image/project/678684630_200x200.png?v=1742473301",
+        "144x108": "https://cdn2.scratch.mit.edu/get_image/project/678684630_144x108.png?v=1742473301",
+        "135x102": "https://cdn2.scratch.mit.edu/get_image/project/678684630_135x102.png?v=1742473301",
+        "100x80": "https://cdn2.scratch.mit.edu/get_image/project/678684630_100x80.png?v=1742473301"
+      },
+      "history": {
+        "created": "2022-04-21T13:20:02.000Z",
+        "modified": "2025-03-20T12:21:41.000Z",
+        "shared": "2022-04-21T13:46:54.000Z"
+      },
+      "stats": {
+        "views": 1392,
+        "loves": 33,
+        "favorites": 28,
+        "remixes": 0
+      },
+      "remix": {
+        "root": 671903155
       }
     },
     {
