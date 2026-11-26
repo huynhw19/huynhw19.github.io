@@ -37,12 +37,17 @@ jobs:
           const end = html.indexOf('</script>', start);
           if (start < 0 || end < 0) throw new Error('Could not locate the dashboard inline script');
           const source = html.slice(start + marker.length, end);
+          const fs = await import('node:fs/promises');
+          await fs.writeFile('/tmp/admin-inline.js', source);
           console.log('Published page:', url, 'HTTP', response.status, 'inline script chars:', source.length);
           try {
             new Function(source);
             console.log('PASS: Admin Dashboard inline script parses');
           } catch (error) {
             console.error('FAIL: Admin Dashboard inline script:', error.stack || error.message);
+            const { spawnSync } = await import('node:child_process');
+            const check = spawnSync(process.execPath, ['--check', '/tmp/admin-inline.js'], { encoding: 'utf8' });
+            console.error(check.stderr || check.stdout);
             process.exitCode = 1;
           }
           console.log('Initial UI contains verifying text:', html.includes('Verifying your administrator access'));
