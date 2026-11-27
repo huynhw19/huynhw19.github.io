@@ -44,7 +44,7 @@ Get the right package from the [ConfigKit Downloads page](https://huynhw19.githu
 | [Personal Insights](https://huynhw19.github.io/personal-insights.html) | Review activity and workspace summaries. |
 | [Advanced Analytics](https://huynhw19.github.io/advanced-analytics.html) | Explore private activity trends, project and collaboration metrics, creator performance, period comparisons and CSV exports. |
 | [Security Centre](https://huynhw19.github.io/security-centre.html) | Review account-protection options and security settings. |
-| [Scratch Project Studio](https://huynhw19.github.io/scratch-project.html) | Load and run Scratch projects, use the editor workflow and save project files to Drive when signed in. |
+| [Scratch Project Studio](https://huynhw19.github.io/scratch-studio.html) | Professional project library, versions, private asset collections, publishing and challenges. |
 | [ConfigKit Movies](https://huynhw19.github.io/movies.html) | Discover movie information, publish films, manage creator pages, collect watchlists, review movies, build collections and view creator analytics. |
 | [Community](https://huynhw19.github.io/community.html) | Set up a community profile and discover other members. |
 | [Groups](https://huynhw19.github.io/groups.html) | Create or join groups and share profiles. |
@@ -176,7 +176,8 @@ There is no general local build step required for the static pages. Some account
 ├── family-dashboard.html      # Family tools
 ├── Education-dashboard.html   # Education tools
 ├── kids-zone.html             # Kids learning and games
-├── scratch-project.html       # Scratch Project Studio
+├── scratch-studio.html        # Professional Scratch workspace
+├── scratch-project.html       # Compatible Scratch player and Drive editor handoff
 ├── supabase/
 │   ├── functions/             # Edge Functions
 │   └── migrations/            # Database migrations
