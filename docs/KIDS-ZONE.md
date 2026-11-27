@@ -27,6 +27,12 @@ Stories and activities can be searched by keyword and filtered for ages 3–5, 6
 
 Story writing is session-only: the Studio does not save children's free-text writing to a server. Children are reminded not to enter private information such as full names, addresses, school names or passwords. Parents and caregivers are encouraged to explore together and talk about kindness, feelings, safe choices and asking a trusted adult for help.
 
+## 50,000 Storybook Library
+
+Kids Zone includes a searchable library of 50,000 generated storybook entries. The catalogue is formed from 10 themes, 10 lead characters, 10 settings, 10 positive learning themes and 5 magical objects (10 × 10 × 10 × 10 × 5). Each entry has a distinct catalogue title and a five-page browser-rendered story assembled from original reusable narrative passages. This is a combinatorial storybook collection, not 50,000 separately hand-written manuscripts.
+
+Readers can search titles and story ingredients, filter by theme and age band (3–5, 6–8 and 9–10), browse results in batches, and open a five-page reader with previous/next controls. The catalogue and story text are generated locally in the browser; the feature adds no database tables, external AI calls, accounts, uploads or sharing of children's reading activity.
+
 ## Guest access
 
 The game catalogue is available to visitors without signing in. Guest play does not save progress to a child profile. Sign-in remains required for family-linked features such as child-specific saved progress, parent-approved videos and resources. If an account requires an additional security check, the public games remain playable while those account features stay unavailable.
