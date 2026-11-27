@@ -26,6 +26,18 @@
 
 .storytelling-section{margin:1.3rem 0;padding:clamp(1rem,3vw,1.5rem);background:linear-gradient(135deg,#fff8fc,#f2f0ff 55%,#eff9ff);border:1px solid var(--line);border-radius:1.25rem;box-shadow:var(--shadow)}
 .storytelling-section .story-intro{max-width:760px}.story-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0}.story-tabs button[aria-pressed=true]{background:#4535a0;color:#fff}.story-panel{padding:1rem;background:#fff;border:1px solid var(--line);border-radius:1rem;margin-top:.75rem}.story-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.65rem;margin:.8rem 0}.story-tools label{display:block;font-weight:800}.story-tools input,.story-tools select{width:100%;padding:.75rem;border:2px solid #d9d4f7;border-radius:.75rem;font:inherit;background:#fff;color:var(--ink)}.story-scene{font-size:1.08rem;line-height:1.75;white-space:pre-line;margin:.8rem 0}.story-choices{display:grid;gap:.55rem}.story-choices button{text-align:left;background:#eaf3ff;color:#294e7a}.story-meta{font-size:.9rem;color:var(--muted)}.story-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:.7rem;margin:.8rem 0}.story-card{padding:.9rem;border:1px solid var(--line);border-radius:.8rem;background:#fff}.story-card h3{margin:.1rem 0 .3rem;font-size:1.05rem}.story-card p{margin:.25rem 0 .7rem;color:var(--muted)}.story-card button{width:100%}.story-activity-result{min-height:1.5rem;font-weight:750;color:#4d3aa6;margin:.7rem 0}.story-small{font-size:.92rem;color:var(--muted)}@media(prefers-reduced-motion:reduce){.storytelling-section *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+.book-library{margin:1.3rem 0;padding:clamp(1rem,3vw,1.5rem);background:linear-gradient(135deg,#fffdf2,#fff7fb 55%,#f1f7ff);border:1px solid var(--line);border-radius:1.25rem;box-shadow:var(--shadow)}
+.book-library-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.65rem;margin:.8rem 0}
+.book-library-tools label{display:block;font-weight:800}
+.book-library-tools input,.book-library-tools select{width:100%;padding:.75rem;border:2px solid #d9d4f7;border-radius:.75rem;font:inherit;background:#fff;color:var(--ink)}
+.book-library-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:.7rem;margin:.8rem 0}
+.book-card{padding:1rem;border:1px solid var(--line);border-radius:.9rem;background:#fff;display:flex;flex-direction:column;gap:.4rem}
+.book-card h3{font-size:1.05rem;margin:0}.book-card p{margin:0;color:var(--muted);font-size:.93rem}.book-card button{margin-top:auto}
+.book-reader{margin:.9rem 0;padding:clamp(1rem,3vw,1.5rem);border:2px solid #e4defc;border-radius:1rem;background:#fff}
+.book-reader-page{min-height:150px;font-size:1.08rem;line-height:1.85;white-space:pre-line}
+.book-reader-controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.book-library-status{font-weight:750;color:#4d3aa6;min-height:1.5rem}
 </style>
   <link rel="stylesheet" href="brand.css?v=1">
   <link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
@@ -81,6 +93,28 @@
     <button type="button" id="activity-load-more" class="secondary">Show more activities</button>
   </div>
   <p class="story-small">Grown-ups: explore together, let children lead the story, and talk about feelings, safe choices and asking a trusted adult for help.</p>
+</section>
+
+
+<section class="book-library" id="kids-book-library" aria-labelledby="kids-books-heading">
+  <span class="eyebrow">📚 Discover • Read • Imagine</span>
+  <h2 id="kids-books-heading">50,000 Kids Zone Storybooks 🌟</h2>
+  <p class="story-small">Explore a giant collection of original, generated mini storybooks. Search by title, character, place or theme, choose an age group, and open a book to read its five pages.</p>
+  <div class="book-library-tools">
+    <div><label for="kids-book-search">Search the library</label><input id="kids-book-search" type="search" placeholder="Try space, dragons, ocean, kindness…"></div>
+    <div><label for="kids-book-age">Reading age</label><select id="kids-book-age"><option value="">All ages</option><option value="3-5">Ages 3–5</option><option value="6-8">Ages 6–8</option><option value="9-10">Ages 9–10</option></select></div>
+    <div><label for="kids-book-theme">Story theme</label><select id="kids-book-theme"><option value="">All themes</option><option value="Adventure">Adventure</option><option value="Animals">Animals</option><option value="Fantasy">Fantasy</option><option value="Nature">Nature</option><option value="Science">Science</option><option value="Friendship">Friendship</option><option value="Mystery">Mystery</option><option value="Space">Space</option><option value="Community">Community</option><option value="Creativity">Creativity</option></select></div>
+  </div>
+  <p id="kids-book-count" class="story-meta" aria-live="polite">Loading 50,000 storybooks…</p>
+  <div id="kids-book-grid" class="book-library-grid" aria-label="Storybook results"></div>
+  <div class="book-reader" id="kids-book-reader" hidden aria-live="polite">
+    <p class="eyebrow" id="kids-book-reader-meta">Storybook</p>
+    <h3 id="kids-book-reader-title"></h3>
+    <p class="book-reader-page" id="kids-book-reader-page"></p>
+    <div class="book-reader-controls"><button type="button" class="secondary" id="kids-book-prev">← Previous page</button><span id="kids-book-page-number" class="story-meta"></span><button type="button" id="kids-book-next">Next page →</button><button type="button" class="secondary" id="kids-book-close">Back to library</button></div>
+  </div>
+  <div class="book-reader-controls"><button type="button" class="secondary" id="kids-book-more">Show more books</button></div>
+  <p class="story-small">A grown-up can read along with younger children. Keep personal details out of anything you write or share online.</p>
 </section>
 
 <section class="kids-video-section" id="kids-video-library" aria-labelledby="kids-video-heading">
@@ -706,6 +740,46 @@ chooseSocialScenario();
 
 })();
 </script>
+
+<script>
+(()=> {
+const themes=["Adventure","Animals","Fantasy","Nature","Science","Friendship","Mystery","Space","Community","Creativity"];
+const heroes=["Mira the Fox","Toby the Turtle","Luna the Inventor","Pip the Penguin","Ari the Astronaut","Nia the Brave","Oliver the Otter","Zara the Dragon","Kai the Koala","Bea the Bee"];
+const places=["Whispering Woods","Coral Castle","Moonlight Meadow","Cloudberry Village","The Crystal Caves","Starshine Station","Rainbow Reef","The Floating Garden","Maple Mountain","The Secret Library"];
+const lessons=["Sharing Makes More","The Courage to Try","A Little Act of Kindness","Listening Carefully","Working as a Team","Being Curious","Caring for Nature","Solving Problems Together","Celebrating Differences","Keeping Promises"];
+const objects=["Golden Compass","Singing Shell","Pocket Telescope","Silver Key","Glowing Seed"];
+const ageBands=["3-5","6-8","9-10"];
+const total=themes.length*heroes.length*places.length*lessons.length*objects.length;
+const $=id=>document.getElementById(id);
+const esc=value=>String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+const books=[];
+for(let t=0;t<themes.length;t++)for(let h=0;h<heroes.length;h++)for(let p=0;p<places.length;p++)for(let l=0;l<lessons.length;l++)for(let o=0;o<objects.length;o++){
+ const index=books.length;
+ const theme=themes[t],hero=heroes[h],place=places[p],lesson=lessons[l],object=objects[o];
+ books.push({id:index+1,title:hero+" and the "+object+" of "+place,theme,hero,place,lesson,object,age:ageBands[index%3]});
+}
+let visible=24,activeBook=null,page=0;
+function pages(book){return [
+"One bright morning, "+book.hero+" discovered a curious "+book.object+" near "+book.place+". It shimmered softly, as if it had a story to tell. "+book.hero+" wondered where it had come from.",
+"Just then, a friendly traveller arrived with a problem. Something important in "+book.place+" needed help. The traveller explained what had happened, and "+book.hero+" listened carefully before making a plan.",
+"Following the clues, "+book.hero+" explored the surroundings. There were surprises, tricky choices and new friends along the way. When things became difficult, everyone shared ideas and helped one another.",
+"At last, the mystery became clear. The friends discovered that the best way forward was to remember: "+book.lesson.toLowerCase()+". They used the "+book.object+" to bring everyone together and solve the problem.",
+"As the sun set over "+book.place+", the friends celebrated what they had learned. "+book.hero+" knew this was only the beginning of many more "+book.theme.toLowerCase()+" adventures. And the little "+book.object+" glowed once more."
+];}
+function matches(book){const q=$("kids-book-search").value.trim().toLowerCase();const age=$("kids-book-age").value;const theme=$("kids-book-theme").value;const hay=[book.title,book.theme,book.hero,book.place,book.lesson,book.object].join(" ").toLowerCase();return (!q||hay.includes(q))&&(!age||book.age===age)&&(!theme||book.theme===theme);}
+function render(){const filtered=books.filter(matches);const shown=filtered.slice(0,visible);$("kids-book-count").textContent=filtered.length.toLocaleString()+" storybooks found · Showing "+shown.length.toLocaleString()+" of "+filtered.length.toLocaleString()+" · "+total.toLocaleString()+" books in the library";$("kids-book-grid").innerHTML=shown.map(book=>'<article class="book-card"><span class="story-meta">📖 '+esc(book.theme)+' · Ages '+esc(book.age)+'</span><h3>'+esc(book.title)+'</h3><p>'+esc(book.hero)+' visits '+esc(book.place)+' and discovers a lesson about '+esc(book.lesson.toLowerCase())+'.</p><button type="button" data-open-book="'+book.id+'">Read this book</button></article>').join("")||'<p>No books match yet. Try another search or filter.</p>';$("kids-book-more").hidden=shown.length>=filtered.length;}
+function openBook(id){activeBook=books[id-1];if(!activeBook)return;page=0;$("kids-book-reader").hidden=false;$("kids-book-reader-title").textContent=activeBook.title;$("kids-book-reader-meta").textContent=activeBook.theme+" · Ages "+activeBook.age;$("kids-book-reader").scrollIntoView({behavior:"smooth",block:"start"});renderPage();}
+function renderPage(){const content=pages(activeBook);$("kids-book-reader-page").textContent=content[page];$("kids-book-page-number").textContent="Page "+(page+1)+" of "+content.length;$("kids-book-prev").disabled=page===0;$("kids-book-next").disabled=page===content.length-1;}
+["kids-book-search","kids-book-age","kids-book-theme"].forEach(id=>$(id).addEventListener(id==="kids-book-search"?"input":"change",()=>{visible=24;render();}));
+$("kids-book-grid").addEventListener("click",event=>{const button=event.target.closest("[data-open-book]");if(button)openBook(Number(button.dataset.openBook));});
+$("kids-book-more").addEventListener("click",()=>{visible+=24;render();});
+$("kids-book-prev").addEventListener("click",()=>{if(page>0){page--;renderPage();}});
+$("kids-book-next").addEventListener("click",()=>{if(activeBook&&page<4){page++;renderPage();}});
+$("kids-book-close").addEventListener("click",()=>{$("kids-book-reader").hidden=true;});
+render();
+})();
+</script>
+
   <script src="/cookie-consent.js?v=2" defer></script>
 </body>
 </html>
