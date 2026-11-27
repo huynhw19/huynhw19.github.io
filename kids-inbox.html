@@ -28,12 +28,12 @@ const notes=[
 const key='kids-zone-inbox-read-v1';let read=[];try{const x=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(x))read=x.filter(n=>Number.isInteger(n)&&n>=0&&n<notes.length)}catch(e){}
 const host=document.getElementById('messages'),summary=document.getElementById('summary');let mode='all';
 const familyHost=document.getElementById('family-announcements-list'),familyStatus=document.getElementById('family-announcements-status');
-const familyReadKey='kids-zone-family-inbox-read-v1';let familyRead=[];try{const saved=JSON.parse(localStorage.getItem(familyReadKey)||'[]');if(Array.isArray(saved))familyRead=saved;}catch(_){}
+const familyReadKey='kids-zone-family-inbox-read-v1';let familyRead=[],familyInboxClient=null,familyInboxSubscribed=false;try{const saved=JSON.parse(localStorage.getItem(familyReadKey)||'[]');if(Array.isArray(saved))familyRead=saved;}catch(_){}
 function saveFamilyRead(){try{localStorage.setItem(familyReadKey,JSON.stringify(familyRead));}catch(_){}}
 async function loadFamilyAnnouncements(){
  const config=window.CONFIGKIT_AUTH||{};
  if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){familyStatus.textContent='Family announcements are unavailable because account services are not configured.';return;}
- const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey);
+ const client=familyInboxClient||(familyInboxClient=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey));
  const {data:sessionData,error:sessionError}=await client.auth.getSession();
  if(sessionError||!sessionData.session){familyStatus.textContent='Sign in with your family account to view private family announcements.';const link=document.createElement('a');link.href='login.html?next=kids-inbox.html';link.textContent='Sign in';familyStatus.append(' ',link);return;}
  const {data:members,error:memberError}=await client.from('family_account_members').select('family_id').eq('user_id',sessionData.session.user.id);
@@ -52,7 +52,7 @@ async function loadFamilyAnnouncements(){
   if(!familyRead.includes(item.id)){const b=document.createElement('button');b.type='button';b.textContent='Mark as read';b.addEventListener('click',()=>{familyRead.push(item.id);saveFamilyRead();card.classList.remove('unread');b.remove();});card.append(b);}
   familyHost.append(card);
  });
- client.channel('kids-inbox-family-announcements').on('postgres_changes',{event:'*',schema:'public',table:'family_announcements'},()=>{void loadFamilyAnnouncements();}).subscribe();
+ if(!familyInboxSubscribed){familyInboxSubscribed=true;client.channel('kids-inbox-family-announcements').on('postgres_changes',{event:'*',schema:'public',table:'family_announcements'},()=>{void loadFamilyAnnouncements();}).subscribe();}
 }
 
 function save(){try{localStorage.setItem(key,JSON.stringify(read))}catch(e){}}
