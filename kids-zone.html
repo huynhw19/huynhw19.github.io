@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="A family-friendly collection of simple games for signed-in ConfigKit members.">
+<meta name="description" content="Free public family-friendly games in ConfigKit Kids Zone. Sign-in is optional for saved family features.">
 <title>Kids Zone — ConfigKit</title>
 <style>
 :root{color-scheme:light;--ink:#24304a;--muted:#68738a;--paper:#f5f7ff;--white:#fff;--line:#e3e8f4;--purple:#6654c8;--pink:#ffe8f1;--blue:#e7f3ff;--yellow:#fff5cf;--green:#e5f8eb;--shadow:0 12px 30px #28345a12}
@@ -179,12 +179,12 @@
 </div>
 </main>
 <footer>ConfigKit Kids Zone · Have fun and be kind to yourself and others.</footer>
-<script src="auth-config.js"></script>
+<script src="auth-config.js?v=20261127-kids-public"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="family-screen-time.js"></script>
 <script>
 (()=> {
-const status=document.getElementById('status'),zone=document.getElementById('zone'),signout=document.getElementById('signout'),config=window.CONFIGKIT_AUTH||{};const childId=new URLSearchParams(location.search).get('child');let activeChildProfile=null;if(childId&&/^[0-9a-f-]{36}$/i.test(childId)){document.getElementById('kids-messages-link').href='kids-messages.html?child='+encodeURIComponent(childId);document.getElementById('kids-messages-entry').hidden=false;document.getElementById('social-messages-link').href='kids-messages.html?child='+encodeURIComponent(childId);document.getElementById('social-messages-entry').hidden=false;}
+const status=document.getElementById('status'),zone=document.getElementById('zone'),signout=document.getElementById('signout'),config=window.CONFIGKIT_AUTH||{};status.hidden=true;zone.hidden=false;const childId=new URLSearchParams(location.search).get('child');let activeChildProfile=null;if(childId&&/^[0-9a-f-]{36}$/i.test(childId)){document.getElementById('kids-messages-link').href='kids-messages.html?child='+encodeURIComponent(childId);document.getElementById('kids-messages-entry').hidden=false;document.getElementById('social-messages-link').href='kids-messages.html?child='+encodeURIComponent(childId);document.getElementById('social-messages-entry').hidden=false;}
 const say=(message,error=false)=>{status.hidden=false;status.classList.toggle('error',error);status.textContent=message;};
 if(!config.supabaseUrl||!config.supabaseAnonKey||!window.supabase?.createClient){say('Sign-in is not configured. Please contact the site owner.',true);return;}
 const client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
