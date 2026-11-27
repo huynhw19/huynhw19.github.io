@@ -24,7 +24,7 @@ Migration tables:
 
 Both tables have RLS enabled, no anon access, authenticated grants limited to the operations used by the page, verified-session and OAuth-client restrictive gates, and Realtime publication membership.
 
-The policies scope parents to their own child profiles and children to their own linked profile. Children can only create pending redemption requests for active rewards. Parents can award points and review pending requests. A database trigger prevents editing the core details of an activity and checks the available points again when a parent approves a redemption, preventing over-redemption from concurrent requests.
+The policies scope parents to their own child profiles and children to their own linked profile. Children can only create pending redemption requests for active rewards. Parents can award points and review pending requests. A database trigger prevents editing the core details of an activity and checks the available points again when a parent approves a redemption. A partial unique index allows only one pending redemption request per child at a time, so multiple open requests cannot race to spend the same balance.
 
 ## How to use
 
