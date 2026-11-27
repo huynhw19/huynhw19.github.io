@@ -135,7 +135,7 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const runtimeStatus=$('runtime-status');
-let player=null, loaded=false, paused=false, muted=false, volumeLevel=100, currentTitle='Scratch project', db=null, signedInUser=null, isLoading=false;
+let player=null, loaded=false, paused=false, muted=false, volumeLevel=100, currentTitle='Scratch project', db=null, signedInUser=null, isLoading=false, deepLinkHandled=false, publicDeepLinkHandled=false;
 function status(message,kind=''){runtimeStatus.className='status'+(kind?' '+kind:'');runtimeStatus.textContent=message;}
 function progress(percent,label){const wrap=$('load-progress-wrap'),bar=$('load-progress');wrap.hidden=false;bar.value=Math.max(0,Math.min(100,percent));$('load-progress-number').textContent=Math.round(bar.value)+'%';$('load-progress-label').textContent=label;}
 function hideProgress(){ $('load-progress-wrap').hidden=true; }
@@ -351,6 +351,17 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
   }catch(e){accountStatus.textContent='Could not verify your secure Drive session: '+(e.message||'Please sign in again.');return;}
   accountStatus.textContent='Signed in. Your Scratch project files are private to your ConfigKit account.';
   try{await refreshDriveList();}catch(e){accountStatus.textContent='Drive could not be loaded: '+(e.message||'Please try again.');}
+  const requestedDriveProject=new URLSearchParams(location.search).get('driveProject');
+  if(requestedDriveProject&&!deepLinkHandled){
+   deepLinkHandled=true;
+   try{
+    const {data:row,error:rowError}=await db.from('drive_items').select('id,name,storage_path').eq('id',requestedDriveProject).eq('user_id',signedInUser.id).eq('item_type','file').is('deleted_at',null).single();
+    if(rowError)throw rowError;
+    const {data:file,error:fileError}=await db.storage.from(bucket).download(row.storage_path);if(fileError)throw fileError;
+    await loadProject(await file.arrayBuffer(),row.name.replace(/\.scratch\.sb3$/i,''));
+    accountStatus.textContent=row.name+' opened from Scratch Studio.';
+   }catch(e){accountStatus.textContent='Could not open the selected private project: '+(e.message||'Please check your Drive access.');}
+  }
   $('save-drive').disabled=!loaded;$('open-editor').disabled=!loaded;
  };
  db.auth.getSession().then(({data,error})=>{if(error)throw error;return signedIn(data.session)}).catch(e=>{accountStatus.textContent='Could not check sign-in: '+e.message;});
@@ -415,6 +426,23 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
  $('account-editor').hidden=false;$('editor-account').textContent='Account sign-in is temporarily unavailable. You can still play projects and download local copies.';
 }
 
+// Public showcase links use a separate public bucket. The private Drive bucket and its RLS rules are unchanged.
+const publicProjectId=new URLSearchParams(location.search).get('publicProject');
+if(publicProjectId&&db&&!publicDeepLinkHandled){
+ publicDeepLinkHandled=true;
+ (async()=>{
+  try{
+   const {data:project,error}=await db.from('scratch_projects').select('id,title,visibility,public_storage_path').eq('id',publicProjectId).in('visibility',['public','unlisted']).single();
+   if(error)throw error;
+   if(!project.public_storage_path)throw new Error('This project is not currently published.');
+   const {data:publicFile}=db.storage.from('configkit-scratch-public').getPublicUrl(project.public_storage_path);
+   const response=await fetch(publicFile.publicUrl);
+   if(!response.ok)throw new Error('The published project file could not be retrieved.');
+   await loadProject(await response.arrayBuffer(),project.title||'Scratch project');
+   status('Published project loaded.','success');
+  }catch(e){status('Could not open this published project: '+(e.message||'Please try again.'),'error');}
+ })();
+}
 const exampleCache=[];
 function projectCategory(p){
  const text=((p.title||'')+' '+(p.description||'')+' '+(p.instructions||'')).toLowerCase();
