@@ -406,7 +406,7 @@ if(authConfig.supabaseUrl&&authConfig.supabaseAnonKey&&window.supabase?.createCl
    accountStatus.textContent='Uploading the private working copy to ConfigKit Drive…';
    const {error:uploadError}=await db.storage.from(bucket).upload(path,blob,{contentType:'application/octet-stream',upsert:false});if(uploadError)throw uploadError;
    accountStatus.textContent='Registering the saved project in your private Drive…';
-   const {error:rowError}=await db.from('drive_items').insert({id,user_id:signedInUser.id,parent_id:null,item_type:'file',name,mime_type:'application/x-scratch-project',size_bytes:blob.size,storage_path:path});
+   const {error:rowError}=await db.from('drive_items').insert({id,user_id:signedInUser.id,parent_id:null,item_type:'file',name,mime_type:'application/x-configkit-scratch-editor-copy',size_bytes:blob.size,storage_path:path});
    if(rowError){await db.storage.from(bucket).remove([path]);throw rowError;}
    accountStatus.textContent='Creating a secure one-hour editor link…';
    const {data:signed,error:signedError}=await db.storage.from(bucket).createSignedUrl(path,3600);if(signedError)throw signedError;
