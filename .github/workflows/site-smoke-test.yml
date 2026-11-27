@@ -174,7 +174,7 @@ jobs:
           let published = false;
           for (let i = 0; i < 30; i++) {
             const response = await fetch(base + '/coding-studio.html?check=' + Date.now(), { cache: 'no-store' });
-            if (response.ok && (await response.text()).includes('data-coding-studio-build="2026-11-27"')) { published = true; break; }
+            if (response.ok && (await response.text()).includes('data-coding-studio-build="2026-11-27-extensions2"')) { published = true; break; }
             await new Promise(resolve => setTimeout(resolve, 3000));
           }
           if (!published) throw new Error('Coding Studio has not appeared on the published site yet.');
@@ -187,14 +187,18 @@ jobs:
             await page.goto(base + '/coding-studio.html?check=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
             await page.waitForFunction(() => !!window.Blockly && !!window.Blockly.JavaScript && !!window.Blockly.Python, null, { timeout: 30000 });
             await page.waitForFunction(() => document.querySelector('#code-view')?.textContent.includes('Hello from ConfigKit'), null, { timeout: 15000 });
-            await page.waitForFunction(() => document.querySelectorAll('#extension-grid input[type=checkbox]').length === 6, null, { timeout: 15000 });
+            await page.waitForFunction(() => document.querySelectorAll('#extension-grid input[type=checkbox]').length === 9, null, { timeout: 15000 });
             const extensionCount = await page.locator('#extension-grid input[type=checkbox]').count();
-            if (extensionCount !== 6) errors.push('Extension manager did not load all six extensions.');
+            if (extensionCount !== 9) errors.push('Extension manager did not load all nine extensions.');
             await page.locator('#extension-grid input[type=checkbox]').nth(4).uncheck();
-            if (!(await page.locator('#extension-status').innerText()).includes('5 of 6')) errors.push('Extension toggle did not update the enabled toolbox.');
+            if (!(await page.locator('#extension-status').innerText()).includes('8 of 9')) errors.push('Extension toggle did not update the enabled toolbox.');
             await page.locator('#extension-grid input[type=checkbox]').nth(4).check();
-            const customBlocks = await page.evaluate(() => ['ck_goto','ck_pen_down','ck_when_flag','ck_key_pressed','ck_backdrop'].every(type => !!Blockly.Blocks[type]));
+            const customBlocks = await page.evaluate(() => ['ck_goto','ck_pen_down','ck_when_flag','ck_key_pressed','ck_backdrop','ck_glide','ck_ghost','ck_touching_edge','ck_distance'].every(type => !!Blockly.Blocks[type]));
             if (!customBlocks) errors.push('Custom extension blocks were not registered.');
+            const toolboxNames = await page.evaluate(() => window.ConfigKitWorkspace.getToolbox().getToolboxItems().map(item => item.getName?.()).filter(Boolean));
+            for (const name of ['🧭 Motion+','🎭 Looks','🚩 Events','👀 Sensing','✏️ Pen','🔊 Sound+','🎞️ Animation+','✨ Visual Effects','🎮 Game Tools']) {
+              if (!toolboxNames.includes(name)) errors.push('Extension category missing from visible toolbox: ' + name);
+            }
             await page.getByRole('tab', { name: 'Python' }).click();
             if (!(await page.locator('#code-view').innerText()).includes('print')) errors.push('Python code generation did not produce a print statement.');
             await page.getByRole('tab', { name: 'JavaScript' }).click();
