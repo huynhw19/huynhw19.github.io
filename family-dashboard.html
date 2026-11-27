@@ -120,6 +120,31 @@
         </div>
       </div>
     </section>
+    <section class="card" id="family-shared-media" aria-labelledby="family-media-title">
+      <span class="eyebrow">Private family space · Shared live</span>
+      <h2 id="family-media-title">📸 Family Photo Album</h2>
+      <p class="muted">Upload family photos for linked household members. Albums are private, limited to JPEG, PNG, WebP or GIF images up to 10 MB each. Avoid uploading sensitive images or photos of people who have not agreed to share them.</p>
+      <form id="family-photo-form">
+        <label for="family-photo-file">Choose a photo<input id="family-photo-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required></label>
+        <label for="family-photo-caption">Caption (optional)<input id="family-photo-caption" maxlength="240" placeholder="Add a memory or caption"></label>
+        <div class="actions"><button type="submit" id="family-photo-upload">Upload to family album</button></div>
+      </form>
+      <p id="family-photo-status" class="muted" role="status" aria-live="polite"></p>
+      <div id="family-photo-grid" class="hub-grid"><p class="muted">Your shared family photos will appear here.</p></div>
+    </section>
+    <section class="card" id="family-announcements" aria-labelledby="family-announcements-title">
+      <span class="eyebrow">Parent & carer publishing</span>
+      <h2 id="family-announcements-title">📣 Family Announcements</h2>
+      <p class="muted">Write a family update, reminder, celebration or encouraging note. Only linked family members can read these posts in the family inbox. Keep personal or sensitive details out of announcements.</p>
+      <form id="family-announcement-form">
+        <label for="family-announcement-category">Type<select id="family-announcement-category"><option>Family news</option><option>Reminder</option><option>Celebration</option><option>Encouragement</option><option>Safety</option></select></label>
+        <label for="family-announcement-title">Title<input id="family-announcement-title" maxlength="120" required placeholder="e.g. Saturday family picnic"></label>
+        <label for="family-announcement-body">Message<textarea id="family-announcement-body" maxlength="2000" rows="4" required placeholder="Write a kind, family-friendly message…"></textarea></label>
+        <div class="actions"><button type="submit" id="family-announcement-save">Publish announcement</button><a href="kids-inbox.html">Open Family Inbox</a></div>
+      </form>
+      <p id="family-announcement-status" class="muted" role="status" aria-live="polite"></p>
+      <div id="family-announcement-list"><p class="muted">Your family announcements will appear here.</p></div>
+    </section>
     <section class="card" id="family-safety-guide" aria-labelledby="family-safety-title">
       <span class="eyebrow">Parent & carer controls</span><h2 id="family-safety-title">🔐 Family Safety & Privacy Centre</h2>
       <p>Keep child accounts private, review connections and use the existing approval and reporting tools. Kids Messages is intended for approved connections, not public contact with strangers.</p>
@@ -569,6 +594,75 @@
         const blob=new Blob([JSON.stringify(hubItems,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
         a.href=url;a.download='configkit-family-life-items.json';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);hubMessage('All visible family items were exported as JSON.');
       });
+      // Shared family photo album and parent-authored announcements.
+      const photoGrid=document.getElementById('family-photo-grid'),photoStatus=document.getElementById('family-photo-status');
+      const announcementList=document.getElementById('family-announcement-list'),announcementStatus=document.getElementById('family-announcement-status');
+      async function loadFamilyPhotos(){
+        if(!familyAccountId)return;
+        const {data,error}=await client.from('family_photos').select('id,family_id,uploaded_by,storage_path,caption,created_at').eq('family_id',familyAccountId).order('created_at',{ascending:false}).limit(100);
+        photoGrid.replaceChildren();
+        if(error){photoStatus.textContent='Could not load the family album: '+error.message;return;}
+        if(!data?.length){const p=document.createElement('p');p.className='muted';p.textContent='No family photos yet. Upload the first memory.';photoGrid.append(p);return;}
+        for(const photo of data){
+          const {data:signed,error:signedError}=await client.storage.from('family-albums').createSignedUrl(photo.storage_path,3600);
+          if(signedError)continue;
+          const card=document.createElement('article');card.className='child';
+          const img=document.createElement('img');img.src=signed.signedUrl;img.alt=photo.caption||'Shared family photo';img.loading='lazy';img.style.cssText='width:100%;max-height:260px;object-fit:cover;border-radius:.65rem';
+          const caption=document.createElement('p');caption.textContent=photo.caption||'Family memory';const meta=document.createElement('small');meta.className='muted';meta.textContent=new Date(photo.created_at).toLocaleString();
+          const del=document.createElement('button');del.type='button';del.className='danger';del.textContent='Delete';del.addEventListener('click',async()=>{
+            if(!confirm('Delete this photo for everyone in the family?'))return;del.disabled=true;
+            const removed=await client.storage.from('family-albums').remove([photo.storage_path]);
+            if(removed.error){photoStatus.textContent='Could not remove the image file: '+removed.error.message;del.disabled=false;return;}
+            const result=await client.from('family_photos').delete().eq('id',photo.id).eq('family_id',familyAccountId);
+            if(result.error){photoStatus.textContent='The image file was removed, but its album record needs cleanup: '+result.error.message;return;}
+            photoStatus.textContent='Photo deleted for the family.';await loadFamilyPhotos();
+          });
+          card.append(img,caption,meta,del);photoGrid.append(card);
+        }
+      }
+      document.getElementById('family-photo-form').addEventListener('submit',async e=>{
+        e.preventDefault();if(!familyAccountId){photoStatus.textContent='Create or join a Family ID first.';return;}
+        const file=document.getElementById('family-photo-file').files[0],caption=document.getElementById('family-photo-caption').value.trim();
+        const allowed=['image/jpeg','image/png','image/webp','image/gif'];
+        if(!file||!allowed.includes(file.type)||file.size>10*1024*1024){photoStatus.textContent='Choose a JPEG, PNG, WebP or GIF image no larger than 10 MB.';return;}
+        const ext=({ 'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif'})[file.type];
+        const path=familyAccountId+'/'+userId+'/'+crypto.randomUUID()+'.'+ext,button=document.getElementById('family-photo-upload');button.disabled=true;
+        const uploaded=await client.storage.from('family-albums').upload(path,file,{contentType:file.type,upsert:false});
+        if(uploaded.error){photoStatus.textContent='Photo upload failed: '+uploaded.error.message;button.disabled=false;return;}
+        const saved=await client.from('family_photos').insert({family_id:familyAccountId,uploaded_by:userId,storage_path:path,caption});
+        if(saved.error){await client.storage.from('family-albums').remove([path]);photoStatus.textContent='Could not save the album record: '+saved.error.message;button.disabled=false;return;}
+        e.target.reset();button.disabled=false;photoStatus.textContent='Photo added to your private family album.';await loadFamilyPhotos();
+      });
+      async function loadFamilyAnnouncements(){
+        if(!familyAccountId)return;
+        const {data,error}=await client.from('family_announcements').select('id,family_id,created_by,title,body,category,created_at').eq('family_id',familyAccountId).order('created_at',{ascending:false}).limit(100);
+        announcementList.replaceChildren();
+        if(error){announcementStatus.textContent='Could not load announcements: '+error.message;return;}
+        if(!data?.length){const p=document.createElement('p');p.className='muted';p.textContent='No parent announcements yet.';announcementList.append(p);return;}
+        data.forEach(item=>{
+          const card=document.createElement('article');card.className='hub-entry';const main=document.createElement('div');main.className='hub-entry-main';
+          const heading=document.createElement('strong');heading.textContent=item.title;const meta=document.createElement('small');meta.textContent=item.category+' · '+new Date(item.created_at).toLocaleString();
+          const body=document.createElement('p');body.textContent=item.body;main.append(heading,meta,body);card.append(main);
+          if(item.created_by===userId){const del=document.createElement('button');del.type='button';del.className='danger';del.textContent='Delete';del.addEventListener('click',async()=>{if(!confirm('Delete this announcement for everyone?'))return;del.disabled=true;const result=await client.from('family_announcements').delete().eq('id',item.id).eq('family_id',familyAccountId);if(result.error){announcementStatus.textContent='Could not delete announcement: '+result.error.message;del.disabled=false;return;}await loadFamilyAnnouncements();});card.append(del);}
+          announcementList.append(card);
+        });
+      }
+      document.getElementById('family-announcement-form').addEventListener('submit',async e=>{
+        e.preventDefault();if(!familyAccountId){announcementStatus.textContent='Create or join a Family ID first.';return;}
+        const title=document.getElementById('family-announcement-title').value.trim(),body=document.getElementById('family-announcement-body').value.trim(),category=document.getElementById('family-announcement-category').value;
+        if(!title||!body){announcementStatus.textContent='Enter both a title and message.';return;}
+        const button=document.getElementById('family-announcement-save');button.disabled=true;
+        const {error}=await client.from('family_announcements').insert({family_id:familyAccountId,created_by:userId,title,body,category});
+        button.disabled=false;if(error){announcementStatus.textContent='Could not publish: '+error.message;return;}
+        e.target.reset();announcementStatus.textContent='Announcement published to your family inbox.';await loadFamilyAnnouncements();
+      });
+      function subscribeFamilyMedia(){
+        if(!familyAccountId)return;
+        client.channel('family-media-'+familyAccountId)
+          .on('postgres_changes',{event:'*',schema:'public',table:'family_photos',filter:'family_id=eq.'+familyAccountId},()=>{void loadFamilyPhotos();})
+          .on('postgres_changes',{event:'*',schema:'public',table:'family_announcements',filter:'family_id=eq.'+familyAccountId},()=>{void loadFamilyAnnouncements();})
+          .subscribe();
+      }
       async function init(){
         const {data,error}=await client.auth.getSession();
         if(error||!data.session){window.location.replace('login.html?next=family-dashboard.html');return;}
