@@ -273,6 +273,7 @@ A code review or syntax check is not the same as a full live-device or multi-acc
 | [COMMUNITY-WIKI.md](COMMUNITY-WIKI.md) | Community Wiki publishing and moderation |
 | [KIDS-MESSAGES.md](KIDS-MESSAGES.md) | Parent-supervised messaging |
 | [docs/KIDS-ZONE.md](docs/KIDS-ZONE.md) | Kids Zone catalogue notes |
+| [docs/KIDS-REWARDS.md](docs/KIDS-REWARDS.md) | Family rewards, points and child redemption |
 | [docs/EDUCATION-BOOKS.md](docs/EDUCATION-BOOKS.md) | Education book features |
 | [GROUPS-SETUP.md](GROUPS-SETUP.md) | Groups configuration |
 | [COLLABORATION.md](COLLABORATION.md) | Real-time collaboration setup, roles, invitations and security |
