@@ -578,6 +578,7 @@
         creator.hidden=false;panel.hidden=false;kidsVideos.hidden=false;resourcesPanel.hidden=false;
         await loadFamilyId();
         await hubLoad();
+        hubSubscribe();
         await loadChildren();
       }
       client.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace('login.html');});
