@@ -756,7 +756,7 @@ const books=[];
 for(let t=0;t<themes.length;t++)for(let h=0;h<heroes.length;h++)for(let p=0;p<places.length;p++)for(let l=0;l<lessons.length;l++)for(let o=0;o<objects.length;o++){
  const index=books.length;
  const theme=themes[t],hero=heroes[h],place=places[p],lesson=lessons[l],object=objects[o];
- books.push({id:index+1,title:hero+" and the "+object+" of "+place,theme,hero,place,lesson,object,age:ageBands[index%3]});
+ books.push({id:index+1,title:hero+" — "+theme+": "+object+" of "+place+" ("+lesson+")",theme,hero,place,lesson,object,age:ageBands[index%3]});
 }
 let visible=24,activeBook=null,page=0;
 function pages(book){return [
