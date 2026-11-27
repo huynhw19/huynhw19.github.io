@@ -8,6 +8,18 @@
   <style>
     :root{color-scheme:light;--ink:#17231f;--muted:#66736d;--line:#e4eae6;--paper:#f7f9f6;--white:#fff;--green:#226b51;--green-dark:#174b39;--mint:#e8f4ed;--red:#9b3030;--shadow:0 12px 32px rgba(23,35,31,.08)}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{width:min(100% - 32px,900px);margin:0 auto}header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line);flex-wrap:wrap}nav{display:flex;gap:1rem;flex-wrap:wrap}a{color:var(--green)}main{padding:2rem 0 3rem}.steps{padding-left:1.35rem}.steps li{padding:.25rem 0}.qr-panel{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap}.qr-panel img{width:176px;height:176px;max-width:100%;border:1px solid var(--line);border-radius:.75rem;padding:.4rem;background:#fff}.qr-copy{flex:1 1 220px}.card{background:var(--white);border:1px solid var(--line);border-radius:1rem;box-shadow:var(--shadow);padding:1.25rem;margin:1rem 0}.muted{color:var(--muted)}h1{font-size:clamp(2rem,5vw,2.7rem);line-height:1.15;margin:.3rem 0}.eyebrow{display:inline-block;background:var(--mint);color:var(--green-dark);border-radius:999px;padding:.25rem .7rem;font-size:.85rem;font-weight:700}form{display:grid;gap:.85rem;max-width:560px}label{display:grid;gap:.25rem;font-weight:600}input,textarea,button{font:inherit}input,textarea{width:100%;padding:.7rem;border:1px solid #b9c8c0;border-radius:.55rem;background:white;color:var(--ink)}button{border:0;border-radius:.6rem;padding:.65rem .9rem;background:var(--green);color:white;font-weight:650;cursor:pointer}button.secondary{background:var(--mint);color:var(--green-dark)}button.danger{background:#9b3030}.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}.child{border:1px solid var(--line);border-radius:.75rem;padding:1rem;margin:.75rem 0}.status{padding:.7rem 0;color:var(--green-dark)}.status.error{color:var(--red)}.inbox-count{display:inline-block;min-width:1.4rem;text-align:center;padding:0 .35rem;border-radius:999px;background:var(--mint);color:var(--green-dark);font-size:.82rem;font-weight:700}.inbox-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}.inbox-summary{display:flex;gap:.5rem;flex-wrap:wrap;margin:.7rem 0}.inbox-summary span{background:var(--mint);color:var(--green-dark);padding:.35rem .7rem;border-radius:999px;font-size:.9rem;font-weight:650}[hidden]{display:none!important}footer{padding:1rem 0 2rem;color:var(--muted)}.kids-video-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(220px,1fr);gap:1rem;margin-top:1rem}.kids-video-player{aspect-ratio:16/9;background:#17231f;border-radius:.75rem;overflow:hidden;display:grid;place-items:center;color:white}.kids-video-player iframe{width:100%;height:100%;border:0}.kids-video-list{list-style:none;padding:0;margin:0;display:grid;gap:.5rem}.kids-video-list li{border:1px solid var(--line);border-radius:.65rem;padding:.65rem}.kids-video-list button{width:100%;text-align:left;background:var(--mint);color:var(--green-dark)}@media(max-width:650px){.kids-video-layout{grid-template-columns:1fr}}@media(max-width:600px){header{align-items:flex-start;flex-direction:column;padding:.8rem 0}nav{gap:.7rem}}
+
+    .hub-hero{background:linear-gradient(135deg,#edf7f0,#f1efff 55%,#fff5e8);border-color:#dce8df}
+    .hub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:.8rem;margin:1rem 0}
+    .hub-tile{display:flex;flex-direction:column;align-items:flex-start;gap:.35rem;min-height:135px;padding:1rem;border:1px solid var(--line);border-radius:.85rem;background:#fff;text-decoration:none;color:var(--ink);transition:transform .15s,box-shadow .15s}
+    .hub-tile:hover{transform:translateY(-2px);box-shadow:var(--shadow)}.hub-tile .hub-icon{font-size:1.8rem}.hub-tile strong{font-size:1rem}.hub-tile small{color:var(--muted);line-height:1.4}
+    .hub-tools{display:grid;grid-template-columns:minmax(240px,.85fr) minmax(0,1.5fr);gap:1rem}
+    .hub-tools form{max-width:none}.hub-tools .field{margin:.5rem 0}.hub-entry{display:flex;justify-content:space-between;align-items:flex-start;gap:.8rem;border:1px solid var(--line);border-radius:.75rem;padding:.8rem;margin:.6rem 0;background:#fff}
+    .hub-entry-main{min-width:0;overflow-wrap:anywhere}.hub-entry small{display:block;color:var(--muted)}.hub-entry.done .hub-entry-main>strong{text-decoration:line-through;color:var(--muted)}
+    .hub-entry-actions{display:flex;gap:.35rem;flex-wrap:wrap;flex-shrink:0}.hub-entry-actions button{padding:.4rem .55rem;font-size:.85rem}
+    .hub-stat-row{display:flex;gap:.6rem;flex-wrap:wrap}.hub-stat{padding:.65rem .85rem;border-radius:.7rem;background:var(--mint);color:var(--green-dark);font-weight:700}
+    .hub-note{padding:.8rem;border-radius:.7rem;background:#fff8e8;border:1px solid #f1e3c1;color:#66522b}
+    @media(max-width:720px){.hub-tools{grid-template-columns:1fr}.hub-entry{flex-direction:column}.hub-entry-actions{width:100%}}
   </style>
   <link rel="stylesheet" href="brand.css?v=1">
   <link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
@@ -60,6 +72,67 @@
       <a href="https://www.esafety.gov.au/research/growing-up-online-parenting-young-children-aged-3-to-10-in-the-digital-age" target="_blank" rel="noopener noreferrer">eSafety guide for parents of children aged 3–10</a></div>
       <p class="muted">Parents and carers should preview activities, play alongside younger children, and take regular screen breaks.</p>
     </section>
+
+    <section class="card hub-hero" aria-labelledby="family-hub-title">
+      <span class="eyebrow">Your household, connected</span>
+      <h2 id="family-hub-title">🏡 ConfigKit Family Hub</h2>
+      <p>One place to reach your family apps, organise everyday life and keep an eye on the things that matter. Your existing family planner, Kids Zone and Kids Messages remain connected below.</p>
+      <div class="hub-grid" aria-label="Family apps">
+        <a class="hub-tile" href="family-planner.html"><span class="hub-icon">📅</span><strong>Family Calendar & Chores</strong><small>Shared household events, tasks, assignments and chores.</small></a>
+        <a class="hub-tile" href="kids-zone.html"><span class="hub-icon">🎮</span><strong>Kids Zone World</strong><small>Learning islands, games, stories and creative activities.</small></a>
+        <a class="hub-tile" href="kids-messages.html"><span class="hub-icon">💬</span><strong>Kids Messages</strong><small>Child messaging with parent-approved connections.</small></a>
+        <a class="hub-tile" href="kids-messages-adults.html"><span class="hub-icon">🛡️</span><strong>Messages & Safety Centre</strong><small>Adult controls, approvals and family messaging tools.</small></a>
+        <a class="hub-tile" href="kids-inbox.html"><span class="hub-icon">📨</span><strong>Kids Inbox</strong><small>Family announcements and encouraging notes.</small></a>
+        <a class="hub-tile" href="#family-life-tools"><span class="hub-icon">🍽️</span><strong>Meals & Shopping</strong><small>Plan meals and keep a household shopping list.</small></a>
+        <a class="hub-tile" href="#family-life-tools"><span class="hub-icon">💰</span><strong>Savings & Pocket Money</strong><small>Track family savings goals and allowance notes.</small></a>
+        <a class="hub-tile" href="#family-life-tools"><span class="hub-icon">🌤️</span><strong>Routines & Check-ins</strong><small>Daily routines and simple feelings check-ins.</small></a>
+        <a class="hub-tile" href="#family-life-tools"><span class="hub-icon">📸</span><strong>Memories & Celebrations</strong><small>Keep written family memories and special dates.</small></a>
+        <a class="hub-tile" href="#family-life-tools"><span class="hub-icon">🎉</span><strong>Family Activities</strong><small>Plan outings, game nights and weekend ideas.</small></a>
+        <a class="hub-tile" href="#family-life-tools"><span class="hub-icon">📚</span><strong>Learning & Reading Goals</strong><small>Record family learning goals and milestones.</small></a>
+        <a class="hub-tile" href="#family-safety-guide"><span class="hub-icon">🔐</span><strong>Family Safety & Privacy</strong><small>Review family permissions, safe messaging and privacy.</small></a>
+      </div>
+      <p class="muted">The shared Family Planner stores household tasks and events with your Family ID. The additional Family Life organiser below is saved only in this browser on this device; it does not sync to other family members.</p>
+    </section>
+    <section class="card" id="family-life-tools" aria-labelledby="family-life-title">
+      <span class="eyebrow">Private household organiser · This device</span>
+      <h2 id="family-life-title">✨ Family Life Organiser</h2>
+      <p class="muted">Keep meal ideas, shopping lists, savings goals, allowance notes, routines, feelings check-ins, memories, celebrations, activity plans and learning goals together. Avoid storing passwords, financial account details or sensitive medical information here.</p>
+      <div class="hub-stat-row" aria-live="polite"><span class="hub-stat" id="hub-total">0 saved items</span><span class="hub-stat" id="hub-open">0 to do</span><span class="hub-stat" id="hub-done">0 completed</span></div>
+      <div class="hub-tools">
+        <div>
+          <h3>Add a family item</h3>
+          <form id="hub-form">
+            <div class="field"><label for="hub-category">Category</label><select id="hub-category" required>
+              <option value="meal">🍽️ Meal plan</option><option value="shopping">🛒 Shopping list</option><option value="savings">💰 Savings goal</option><option value="allowance">🪙 Pocket money note</option><option value="routine">🌤️ Daily routine</option><option value="feelings">💗 Feelings check-in</option><option value="memory">📸 Family memory</option><option value="celebration">🎂 Birthday & celebration</option><option value="activity">🎉 Family activity</option><option value="learning">📚 Learning & reading goal</option>
+            </select></div>
+            <div class="field"><label for="hub-title">Title</label><input id="hub-title" maxlength="120" required placeholder="e.g. Pancake Sunday"></div>
+            <div class="field"><label for="hub-date">Date (optional)</label><input id="hub-date" type="date"></div>
+            <div class="field"><label for="hub-amount">Amount (optional, for goals or allowance)</label><input id="hub-amount" type="number" min="0" max="1000000" step="0.01" inputmode="decimal" placeholder="e.g. 10.00"></div>
+            <div class="field"><label for="hub-details">Notes (optional)</label><textarea id="hub-details" maxlength="1000" rows="3" placeholder="Add a short note…"></textarea></div>
+            <div class="actions"><button type="submit" id="hub-save">Save item</button></div>
+          </form>
+          <p class="muted" id="hub-status" role="status" aria-live="polite"></p>
+        </div>
+        <div>
+          <div class="inbox-head"><h3>Our family items</h3><div class="actions"><select id="hub-filter" aria-label="Filter family items"><option value="all">All categories</option><option value="meal">Meals</option><option value="shopping">Shopping</option><option value="savings">Savings</option><option value="allowance">Pocket money</option><option value="routine">Routines</option><option value="feelings">Check-ins</option><option value="memory">Memories</option><option value="celebration">Celebrations</option><option value="activity">Activities</option><option value="learning">Learning goals</option></select></div></div>
+          <div id="hub-list"><p class="muted">Your saved family items will appear here.</p></div>
+          <div class="actions"><button type="button" class="secondary" id="hub-export">Export my items</button><button type="button" class="secondary" id="hub-clear">Clear this device's items</button></div>
+        </div>
+      </div>
+    </section>
+    <section class="card" id="family-safety-guide" aria-labelledby="family-safety-title">
+      <span class="eyebrow">Parent & carer controls</span><h2 id="family-safety-title">🔐 Family Safety & Privacy Centre</h2>
+      <p>Keep child accounts private, review connections and use the existing approval and reporting tools. Kids Messages is intended for approved connections, not public contact with strangers.</p>
+      <ul>
+        <li>Review pending friend requests and safety reports in the <a href="#kids-requests">Parent Inbox</a>.</li>
+        <li>Manage child profiles and PINs in <a href="#manage-children">Manage children</a>.</li>
+        <li>Use <a href="kids-messages-adults.html">Kids Messages Centre</a> for adult messaging controls.</li>
+        <li>Review account security and sign-in options in <a href="account-settings.html">Account settings</a>.</li>
+        <li>Read the <a href="privacy.html">ConfigKit privacy information</a>.</li>
+      </ul>
+      <div class="hub-note"><strong>Emergency reminder:</strong> For an immediate danger or emergency, contact your local emergency services. Keep emergency contacts and highly sensitive information in a secure place intended for that purpose, not in this browser organiser.</div>
+    </section>
+
     <section class="card" id="creator" hidden>
       <h2 id="form-title">Add a child</h2>
       <form id="child-form">
@@ -405,6 +478,51 @@
           }
         });
       }
+
+      // Family Life organiser: device-local only, namespaced to the signed-in adult account.
+      const hubCategories={meal:'Meal plan',shopping:'Shopping list',savings:'Savings goal',allowance:'Pocket money note',routine:'Daily routine',feelings:'Feelings check-in',memory:'Family memory',celebration:'Birthday & celebration',activity:'Family activity',learning:'Learning & reading goal'};
+      let hubItems=[];
+      function hubKey(){return 'configkit-family-life-v1-'+userId;}
+      function hubSave(){try{localStorage.setItem(hubKey(),JSON.stringify(hubItems));return true;}catch(_){hubMessage('Could not save on this device. Check available browser storage.',true);return false;}}
+      function hubMessage(message,error=false){const el=document.getElementById('hub-status');el.textContent=message;el.style.color=error?'var(--red)':'var(--green-dark)';}
+      function hubLoad(){try{const parsed=JSON.parse(localStorage.getItem(hubKey())||'[]');hubItems=Array.isArray(parsed)?parsed.filter(x=>x&&typeof x.id==='string'&&hubCategories[x.category]&&typeof x.title==='string'):[];}catch(_){hubItems=[];}hubRender();}
+      function hubRender(){
+        const filter=document.getElementById('hub-filter').value,host=document.getElementById('hub-list');
+        const visible=hubItems.filter(x=>filter==='all'||x.category===filter).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')||b.createdAt-a.createdAt);
+        host.replaceChildren();
+        if(!visible.length){const p=document.createElement('p');p.className='muted';p.textContent='No items here yet. Add your first family item.';host.append(p);}
+        visible.forEach(item=>{
+          const card=document.createElement('article');card.className='hub-entry'+(item.done?' done':'');
+          const main=document.createElement('div');main.className='hub-entry-main';
+          const title=document.createElement('strong');title.textContent=item.title;main.append(title);
+          const meta=document.createElement('small');meta.textContent=hubCategories[item.category]+(item.date?' · '+item.date:'')+(item.amount!==null?' · Amount: '+Number(item.amount).toFixed(2):'')+(item.done?' · Completed':' · Open');main.append(meta);
+          if(item.details){const note=document.createElement('p');note.textContent=item.details;note.style.margin='.35rem 0 0';main.append(note);}
+          const actions=document.createElement('div');actions.className='hub-entry-actions';
+          const toggle=document.createElement('button');toggle.type='button';toggle.className='secondary';toggle.textContent=item.done?'Reopen':'Complete';toggle.addEventListener('click',()=>{item.done=!item.done;if(hubSave())hubRender();});
+          const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Delete';remove.addEventListener('click',()=>{if(!window.confirm('Delete this family item from this device?'))return;hubItems=hubItems.filter(x=>x.id!==item.id);if(hubSave())hubRender();});
+          actions.append(toggle,remove);card.append(main,actions);host.append(card);
+        });
+        const done=hubItems.filter(x=>x.done).length;
+        document.getElementById('hub-total').textContent=hubItems.length+' saved item'+(hubItems.length===1?'':'s');
+        document.getElementById('hub-open').textContent=(hubItems.length-done)+' to do';
+        document.getElementById('hub-done').textContent=done+' completed';
+      }
+      document.getElementById('hub-form').addEventListener('submit',event=>{
+        event.preventDefault();
+        const category=document.getElementById('hub-category').value,title=document.getElementById('hub-title').value.trim(),rawAmount=document.getElementById('hub-amount').value;
+        if(!hubCategories[category]||!title){hubMessage('Choose a category and enter a title.',true);return;}
+        const amount=rawAmount===''?null:Number(rawAmount);
+        if(amount!==null&&(!Number.isFinite(amount)||amount<0||amount>1000000)){hubMessage('Enter a valid amount, or leave it blank.',true);return;}
+        hubItems.unshift({id:typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2),category,title,date:document.getElementById('hub-date').value||'',amount,details:document.getElementById('hub-details').value.trim(),done:false,createdAt:Date.now()});
+        if(hubSave()){event.target.reset();hubMessage('Saved on this device. It has not been shared with other family members.');hubRender();}
+      });
+      document.getElementById('hub-filter').addEventListener('change',hubRender);
+      document.getElementById('hub-clear').addEventListener('click',()=>{if(!hubItems.length)return;if(!window.confirm('Permanently clear all Family Life organiser items saved for this account in this browser?'))return;hubItems=[];if(hubSave()){hubMessage('This device’s organiser items have been cleared.');hubRender();}});
+      document.getElementById('hub-export').addEventListener('click',()=>{
+        const blob=new Blob([JSON.stringify(hubItems,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+        a.href=url;a.download='configkit-family-life-items.json';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);hubMessage('Your organiser items were exported as a JSON file.');
+      });
+
       async function init(){
         const {data,error}=await client.auth.getSession();
         if(error||!data.session){window.location.replace('login.html?next=family-dashboard.html');return;}
