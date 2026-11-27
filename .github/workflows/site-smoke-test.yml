@@ -138,3 +138,66 @@ jobs:
             console.log('PASS: published Studio starts, navigation and upload panel work, and compatible player starts.');
           } finally { await browser.close(); }
           NODE
+
+  coding-studio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify Coding Studio script syntax
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs/promises';
+          const html = await fs.readFile('coding-studio.html', 'utf8');
+          const scripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)]
+            .map(match => match[1]).filter(source => source.trim());
+          if (!scripts.length) throw new Error('No inline Coding Studio script found');
+          for (const source of scripts) new Function(source);
+          console.log('PASS: Coding Studio inline scripts parse');
+          NODE
+      - name: Install browser test dependency
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Verify published Coding Studio editor and project workflow
+        env:
+          SITE_URL: https://huynhw19.github.io
+        run: |
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+          const base = process.env.SITE_URL;
+          let published = false;
+          for (let i = 0; i < 30; i++) {
+            const response = await fetch(base + '/coding-studio.html?check=' + Date.now(), { cache: 'no-store' });
+            if (response.ok && (await response.text()).includes('data-coding-studio-build="2026-11-27"')) { published = true; break; }
+            await new Promise(resolve => setTimeout(resolve, 3000));
+          }
+          if (!published) throw new Error('Coding Studio has not appeared on the published site yet.');
+          const browser = await chromium.launch({ headless: true });
+          try {
+            const context = await browser.newContext();
+            const page = await context.newPage();
+            const errors = [];
+            page.on('pageerror', error => errors.push(error.stack || error.message));
+            await page.goto(base + '/coding-studio.html?check=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await page.waitForFunction(() => !!window.Blockly && !!window.Blockly.JavaScript && !!window.Blockly.Python, null, { timeout: 30000 });
+            await page.waitForFunction(() => document.querySelector('#code-view')?.textContent.includes('Hello from ConfigKit'), null, { timeout: 15000 });
+            await page.getByRole('tab', { name: 'Python' }).click();
+            if (!(await page.locator('#code-view').innerText()).includes('print')) errors.push('Python code generation did not produce a print statement.');
+            await page.getByRole('tab', { name: 'JavaScript' }).click();
+            await page.locator('#run-code').click();
+            await page.waitForFunction(() => document.querySelector('#output')?.innerText.includes('Hello from ConfigKit!'), null, { timeout: 10000 });
+            await page.locator('#project-name').fill('CI Coding Project');
+            await page.locator('#save-project').click();
+            if (!(await page.locator('#saved-projects option').evaluateAll(options => options.some(option => option.value === 'CI Coding Project')))) errors.push('Saved project did not appear in the project list.');
+            await page.locator('#saved-projects').selectOption('CI Coding Project');
+            await page.locator('#open-project').click();
+            if (errors.length) throw new Error(errors.join('\\n'));
+            console.log('PASS: Blockly loads, JS/Python generation works, JS runner executes, and local save/open works.');
+          } finally { await browser.close(); }
+          NODE
