@@ -673,6 +673,8 @@
         await loadFamilyId();
         await hubLoad();
         hubSubscribe();
+        await Promise.all([loadFamilyPhotos(),loadFamilyAnnouncements()]);
+        subscribeFamilyMedia();
         await loadChildren();
       }
       client.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace('login.html');});
