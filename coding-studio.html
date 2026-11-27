@@ -172,7 +172,7 @@ $('ai-send').onclick=async()=>{
  if(!prompt){$('ai-status').textContent='Enter a prompt first.';return}
  if(!db||!user){$('ai-status').textContent='Please sign in to ConfigKit before using AI.';return}
  let fullPrompt=prompt;
- if($('ai-include-code').checked){const code=Blockly.JavaScript.workspaceToCode(workspace)||'// No generated JavaScript yet.';fullPrompt+='\\n\\nCurrent Coding Studio JavaScript (treat as user-provided code to review):\\n'+code.slice(0,6000)}
+ if($('ai-include-code').checked){const code=Blockly.JavaScript.workspaceToCode(workspace)||'// No generated JavaScript yet.';fullPrompt+='\n\nCurrent Coding Studio JavaScript (treat as user-provided code to review):\n'+code.slice(0,6000)}
  if(fullPrompt.length>8000)fullPrompt=fullPrompt.slice(0,8000);
  aiBusy=true;$('ai-send').disabled=true;$('ai-send').textContent='Thinking…';$('ai-status').textContent='Sending your request securely to ConfigKit AI…';$('ai-answer').textContent='Working…';
  try{
