@@ -195,9 +195,10 @@ jobs:
             await page.locator('#extension-grid input[type=checkbox]').nth(4).check();
             const customBlocks = await page.evaluate(() => ['ck_goto','ck_pen_down','ck_when_flag','ck_key_pressed','ck_backdrop','ck_glide','ck_ghost','ck_touching_edge','ck_distance'].every(type => !!Blockly.Blocks[type]));
             if (!customBlocks) errors.push('Custom extension blocks were not registered.');
-            const toolboxNames = await page.evaluate(() => window.ConfigKitWorkspace.getToolbox().getToolboxItems().map(item => item.getName?.()).filter(Boolean));
+            const toolboxNames = await page.locator('#blocklyDiv .blocklyTreeLabel').allTextContents();
+            console.log('Visible toolbox categories:', toolboxNames.join(' | '));
             for (const name of ['🧭 Motion+','🎭 Looks','🚩 Events','👀 Sensing','✏️ Pen','🔊 Sound+','🎞️ Animation+','✨ Visual Effects','🎮 Game Tools']) {
-              if (!toolboxNames.includes(name)) errors.push('Extension category missing from visible toolbox: ' + name);
+              if (!toolboxNames.some(label => label.includes(name))) errors.push('Extension category missing from visible toolbox: ' + name);
             }
             await page.getByRole('tab', { name: 'Python' }).click();
             if (!(await page.locator('#code-view').innerText()).includes('print')) errors.push('Python code generation did not produce a print statement.');
