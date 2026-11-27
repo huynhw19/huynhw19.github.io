@@ -9,7 +9,8 @@ Live page: https://huynhw19.github.io/family-rewards.html
 - Children with a linked child sign-in can view their available balance and request an active reward.
 - Parents review redemption requests. Approval deducts points; declining leaves the balance unchanged.
 - Parent and child views refresh from Supabase Realtime.
-- The existing 50 Kids Achievements page remains available as a separate set of browser-saved challenges.
+- The 50 Kids Achievements page syncs completion badges to the linked child profile; guest progress remains browser-local.
+- The parent view brings together that child's educational game attempts, completed storytelling activities, achievement badges and the household's completed chores.
 
 Points are family encouragement, not money, grades or a measure of a child's worth. Families should agree on fair and age-appropriate reward expectations.
 
@@ -19,6 +20,7 @@ Migration tables:
 
 - `public.family_reward_catalog`: parent-managed reward options, scoped to one family and child.
 - `public.family_reward_activity`: immutable point awards and child redemption requests/reviews.
+- `public.family_child_achievements`: one shared completion record per child and achievement index (0–49).
 
 Both tables have RLS enabled, no anon access, authenticated grants limited to the operations used by the page, verified-session and OAuth-client restrictive gates, and Realtime publication membership.
 
@@ -32,7 +34,7 @@ The policies scope parents to their own child profiles and children to their own
 4. Open Kids Zone as the linked child account and choose **Family Rewards & Points**.
 5. The child can request a reward when their approved balance is sufficient; the parent approves or declines it from the dashboard.
 
-A child needs a linked `family_children.child_user_id` sign-in to use the child view. A guest can still use public Kids Zone activities but cannot see private family reward balances.
+A child needs a linked `family_children.child_user_id` sign-in to use the child view and sync achievement progress. A guest can still use public Kids Zone activities but cannot see private family reward balances; guest achievement progress stays on that browser.
 
 ## Verification
 
