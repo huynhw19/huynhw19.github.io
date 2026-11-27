@@ -154,12 +154,11 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from 'node:fs/promises';
           const html = await fs.readFile('coding-studio.html', 'utf8');
-          const marker = '<script>' + String.fromCharCode(10) + '(()=>';
-          const start = html.indexOf(marker);
-          const end = html.lastIndexOf('</script>');
-          if (start < 0 || end < 0) throw new Error('Could not locate Coding Studio inline script');
-          new Function(html.slice(start + '<script>'.length, end));
-          console.log('PASS: Coding Studio inline scripts parse');
+          const scripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)]
+            .map(match => match[1]).filter(source => source.trim());
+          if (scripts.length < 2) throw new Error('Expected both Coding Studio inline scripts');
+          for (const source of scripts) new Function(source);
+          console.log('PASS: all ' + scripts.length + ' Coding Studio inline scripts parse');
           NODE
       - name: Install browser test dependency
         run: |
@@ -188,6 +187,14 @@ jobs:
             await page.goto(base + '/coding-studio.html?check=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
             await page.waitForFunction(() => !!window.Blockly && !!window.Blockly.JavaScript && !!window.Blockly.Python, null, { timeout: 30000 });
             await page.waitForFunction(() => document.querySelector('#code-view')?.textContent.includes('Hello from ConfigKit'), null, { timeout: 15000 });
+            await page.waitForFunction(() => document.querySelectorAll('#extension-grid input[type=checkbox]').length === 6, null, { timeout: 15000 });
+            const extensionCount = await page.locator('#extension-grid input[type=checkbox]').count();
+            if (extensionCount !== 6) errors.push('Extension manager did not load all six extensions.');
+            await page.locator('#extension-grid input[type=checkbox]').nth(4).uncheck();
+            if (!(await page.locator('#extension-status').innerText()).includes('5 of 6')) errors.push('Extension toggle did not update the enabled toolbox.');
+            await page.locator('#extension-grid input[type=checkbox]').nth(4).check();
+            const customBlocks = await page.evaluate(() => ['ck_goto','ck_pen_down','ck_when_flag','ck_key_pressed','ck_backdrop'].every(type => !!Blockly.Blocks[type]));
+            if (!customBlocks) errors.push('Custom extension blocks were not registered.');
             await page.getByRole('tab', { name: 'Python' }).click();
             if (!(await page.locator('#code-view').innerText()).includes('print')) errors.push('Python code generation did not produce a print statement.');
             await page.getByRole('tab', { name: 'JavaScript' }).click();
