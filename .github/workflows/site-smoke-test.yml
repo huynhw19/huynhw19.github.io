@@ -72,7 +72,7 @@ jobs:
             if (status.includes('Loading secure admin workspace')) errors.push('Dashboard stayed on its initial loading message.');
             if (identity.includes('Verifying your administrator access')) errors.push('Identity stayed on its initial verification message.');
             if (!status.includes('Please sign in to ConfigKit') && !status.includes('Owner access verified') && !status.includes('Administrator access verified')) errors.push('Dashboard did not reach a recognised authentication state.');
-            if (errors.length) throw new Error(errors.join('\\n'));
+            if (errors.length) throw new Error(errors.join('\n'));
             console.log('PASS: published Admin Dashboard script ran and reached an authentication state.');
           } finally { await browser.close(); }
           NODE
@@ -93,7 +93,7 @@ jobs:
           import fs from 'node:fs/promises';
           for (const file of ['scratch-studio.html', 'scratch-project.html']) {
             const html = await fs.readFile(file, 'utf8');
-            const scripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)]
+            const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
               .map(match => match[1]).filter(source => source.trim());
             if (!scripts.length) throw new Error(file + ': no inline script found');
             for (const source of scripts) new Function(source);
@@ -134,7 +134,7 @@ jobs:
             if (!(await page.locator('#upload-panel').isVisible())) errors.push('Project upload panel did not open.');
             await page.goto(base + '/scratch-project.html?check=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
             await page.locator('#runtime-status').waitFor({ state: 'visible', timeout: 15000 });
-            if (errors.length) throw new Error(errors.join('\\n'));
+            if (errors.length) throw new Error(errors.join('\n'));
             console.log('PASS: published Studio starts, navigation and upload panel work, and compatible player starts.');
           } finally { await browser.close(); }
           NODE
