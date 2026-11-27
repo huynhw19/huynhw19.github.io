@@ -27,6 +27,8 @@
 <button class="filter" type="button" data-filter="files" aria-pressed="false">Files</button>
 <button class="filter" type="button" data-filter="notes" aria-pressed="false">My notes</button>
 <button class="filter" type="button" data-filter="education" aria-pressed="false">Education</button>
+<button class="filter" type="button" data-filter="documentation" aria-pressed="false">Documentation</button>
+<button class="filter" type="button" data-filter="platform" aria-pressed="false">Platform &amp; developer</button>
 </div>
 <p class="hint">Tip: press / or Ctrl K to focus search. Use quotes for an exact phrase, OR for alternatives, and -word to exclude a term.</p>
 </section>
@@ -82,7 +84,20 @@ const pages=[
  {title:'ConfigKit Mail',description:'Open your ConfigKit mailbox and messages.',href:'mail.html',kind:'Tools & guides',filter:'tools',keywords:'mail email inbox messages'},
  {title:'Account Settings',description:'Manage your account, sign-in and security preferences.',href:'account-settings.html',kind:'Tools & guides',filter:'tools',keywords:'account settings security passkey two factor'},
  {title:'Security Centre',description:'Review account protection, two-factor authentication, passkeys, recovery options and active sessions.',href:'security-centre.html',kind:'Tools & guides',filter:'tools',keywords:'security centre security center account protection mfa 2fa authenticator passkey recovery codes sessions devices'},
- {title:'Account Help & Support',description:'Find help or contact ConfigKit support.',href:'support.html',kind:'Tools & guides',filter:'tools',keywords:'support help contact'}
+ {title:'Account Help & Support',description:'Find help or contact ConfigKit support.',href:'support.html',kind:'Tools & guides',filter:'tools',keywords:'support help contact'},
+ {title:'Complete ConfigKit User Guide',description:'A broad user guide to ConfigKit workspaces, tools and account features.',href:'complete-guide.html',kind:'Documentation',filter:'documentation',keywords:'documentation user guide help manual getting started'},
+ {title:'Official ConfigKit Wiki',description:'Browse the feature directory, setup help and links to ConfigKit workspaces.',href:'wiki.html',kind:'Documentation',filter:'documentation',keywords:'wiki documentation help feature directory guides'},
+ {title:'Account Guide',description:'Learn about ConfigKit accounts, sign-in, sessions and account settings.',href:'account-docs.html',kind:'Documentation',filter:'documentation',keywords:'account documentation login sign in sessions security'},
+ {title:'How-to Guides',description:'Follow practical step-by-step guides for common ConfigKit tasks.',href:'how-to.html',kind:'Documentation',filter:'documentation',keywords:'how to tutorials instructions documentation'},
+ {title:'OAuth Developer Guide',description:'Integrate third-party apps with ConfigKit using OAuth 2.1, OpenID Connect and PKCE.',href:'oauth-developer-guide.html',kind:'Platform & developer',filter:'platform',keywords:'oauth oidc openid connect identity provider developer integration pkce'},
+ {title:'Register an OAuth App',description:'Register and submit an application that lets people sign in with ConfigKit.',href:'oauth-apps.html',kind:'Platform & developer',filter:'platform',keywords:'oauth app registration client id redirect uri developer'},
+ {title:'OAuth Test Client',description:'Exercise the ConfigKit OAuth authorization-code and PKCE sign-in flow.',href:'oauth-test.html',kind:'Platform & developer',filter:'platform',keywords:'oauth test client pkce authorization code'},
+ {title:'Connected Apps',description:'Review connected OAuth applications and revoke access you no longer want to grant.',href:'connected-apps.html',kind:'Platform & developer',filter:'platform',keywords:'oauth connected apps grants permissions revoke access'},
+ {title:'Admin Portal',description:'Owner and approved administrator workspace for moderation, support, announcements and platform operations.',href:'admin-portal.html',kind:'Platform & developer',filter:'platform',keywords:'admin administrator owner moderation reports support audit maintenance'},
+ {title:'Platform Announcements',description:'Read published ConfigKit service and product announcements.',href:'announcements.html',kind:'Platform & developer',filter:'platform',keywords:'announcements updates news release notices'},
+ {title:'Integrations Directory',description:'Review ConfigKit integrations and connected service workflows.',href:'integrations.html',kind:'Platform & developer',filter:'platform',keywords:'integrations unipile email services developer'},
+ {title:'ConfigKit Upgrade Roadmap',description:'Explore shipped capabilities, planned work and community-submitted ideas.',href:'roadmap.html',kind:'Platform & developer',filter:'platform',keywords:'roadmap planned shipped exploring building feature requests votes'},
+ {title:'Universal Search Help',description:'Understand searchable content, filters, query syntax and privacy behaviour.',href:'wiki.html#search',kind:'Documentation',filter:'documentation',keywords:'universal search documentation search syntax filters privacy'}
 ];
 const cfg=window.CONFIGKIT_AUTH||{};
 const db=cfg.supabaseUrl&&cfg.supabaseAnonKey&&window.supabase?.createClient
@@ -91,8 +106,8 @@ const db=cfg.supabaseUrl&&cfg.supabaseAnonKey&&window.supabase?.createClient
 let user=null,dbRows=[],activeFilter='all',timer=null,lastQuery='',requestId=0;
 const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const setStatus=(message,error=false)=>{statusEl.textContent=message||'';statusEl.classList.toggle('error',!!error);};
-const typeName=value=>({'app':'App','tool':'Community tool','profile':'Member','discussion':'Discussion','profile-post':'Shared profile','video':'Video','group':'Group','event':'Event','game':'Community game','community-book':'Community book','book':'Book','document':'Document','slideshow':'Slideshow','file':'Drive file','saved-profile':'Saved profile','store-item':'Store listing','group-resource':'Group resource','group-comment':'Group discussion','library-profile':'Library profile','note':'Private note'}[value]||value);
-const filterForDb=value=>({app:'tools',tool:'community',profile:'people','discussion':'community','profile-post':'community',video:'videos',group:'community',event:'community',game:'community','community-book':'community',book:'education',document:'education',slideshow:'education',file:'files','saved-profile':'files','store-item':'community','group-resource':'files','group-comment':'community','library-profile':'files',note:'notes'}[value]||'all');
+const typeName=value=>({'roadmap':'Roadmap item','announcement':'Announcement','app':'App','tool':'Community tool','profile':'Member','discussion':'Discussion','profile-post':'Shared profile','video':'Video','group':'Group','event':'Event','game':'Community game','community-book':'Community book','book':'Book','document':'Document','slideshow':'Slideshow','file':'Drive file','saved-profile':'Saved profile','store-item':'Store listing','group-resource':'Group resource','group-comment':'Group discussion','library-profile':'Library profile','note':'Private note'}[value]||value);
+const filterForDb=value=>({app:'tools',tool:'community',profile:'people','discussion':'community','profile-post':'community',video:'videos',group:'community',event:'community',game:'community','community-book':'community',book:'education',document:'education',slideshow:'education',file:'files','saved-profile':'files','store-item':'community','group-resource':'files','group-comment':'community','library-profile':'files',note:'notes',roadmap:'platform',announcement:'platform'}[value]||'all');
 const allResults=()=>[
  ...pages.map(p=>({...p,id:'page-'+p.href,source:'page'})),
  ...dbRows.map(r=>({...r,kind:typeName(r.category),filter:filterForDb(r.category),source:'database'}))

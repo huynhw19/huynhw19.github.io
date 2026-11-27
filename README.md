@@ -277,6 +277,24 @@ See the repository's Markdown files for additional setup, troubleshooting and fe
 
 ---
 
+
+
+## 🧭 Platform, developer and operations guides
+
+These guides describe ConfigKit's shared platform capabilities and how to work with them:
+
+- [Platform architecture and operations](CONFIGKIT-PLATFORM-GUIDE.md) — application architecture, Supabase boundaries, account roles, OAuth, announcements and administration.
+- [Universal Search documentation](docs/UNIVERSAL-SEARCH.md) — searchable sources, filters, query behaviour, privacy boundaries and maintenance notes.
+- [Universal Search](https://huynhw19.github.io/universal-search.html) — find tools, guides and permitted account or community content.
+- [Upgrade Roadmap](https://huynhw19.github.io/roadmap.html) — shipped work, planned improvements and community suggestions.
+- [OAuth developer guide](https://huynhw19.github.io/oauth-developer-guide.html) and [OAuth app registration](https://huynhw19.github.io/oauth-apps.html) — connect third-party apps with ConfigKit identity.
+- [Connected Apps](https://huynhw19.github.io/connected-apps.html) — review and revoke approved OAuth connections.
+- [Admin Portal](https://huynhw19.github.io/admin-portal.html) — owner and approved administrator operations.
+- [Announcements](https://huynhw19.github.io/announcements.html) — published ConfigKit platform updates.
+- [Integrations](https://huynhw19.github.io/integrations.html) — available platform integrations.
+
+The README and these guides describe the current implementation at a high level. A feature's presence in a guide does not override its in-app permissions, approval requirements or backend access policies.
+
 ## 🤝 Contributing
 
 Contributions and careful bug reports are welcome.
