@@ -396,7 +396,7 @@ window.CONFIGKIT_AUTH = {
               // Shared ConfigKit Shortcut recipes are deliberately public, read-only views.
               // They contain only the recipe explicitly shared by its owner, not private shortcuts.
               if (pageName === 'configkit-shortcuts.html' && new URLSearchParams(window.location.search).has('share')) return;
-              if (pageName === 'events.html') return;
+              if (pageName === 'events.html' || pageName === 'kids-zone.html') return;
               const {data: recovery, error:recoveryError} = await client.functions.invoke('recovery-codes', {body:{action:'status'}});
               const recoveryVerified = !recoveryError && recovery?.verified;
               // A configured recovery gate is normally required here.
