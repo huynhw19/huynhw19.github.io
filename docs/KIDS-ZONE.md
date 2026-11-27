@@ -27,6 +27,10 @@ Stories and activities can be searched by keyword and filtered for ages 3–5, 6
 
 Story writing is session-only: the Studio does not save children's free-text writing to a server. Children are reminded not to enter private information such as full names, addresses, school names or passwords. Parents and caregivers are encouraged to explore together and talk about kindness, feelings, safe choices and asking a trusted adult for help.
 
+## Guest access
+
+The game catalogue is available to visitors without signing in. Guest play does not save progress to a child profile. Sign-in remains required for family-linked features such as child-specific saved progress, parent-approved videos and resources. If an account requires an additional security check, the public games remain playable while those account features stay unavailable.
+
 ## Age groups and accessibility
 
 - Age filters are available for 3–5, 6–8 and 9–10 across the storytelling catalogues.
