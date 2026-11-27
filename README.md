@@ -111,7 +111,7 @@ Please publish original, useful material. Never include passwords, verification 
 
 ---
 
-## 👨‍👩‍👧 Family and education
+### Family Hub additions
 
 ConfigKit's Family Dashboard now includes a connected Family Hub landing area linking the existing Kids Zone, Kids Messages, Kids Inbox, adult messaging controls and shared Family Planner. The Family Life Organiser adds device-local lists for meal ideas, shopping, savings goals, pocket-money notes, routines, feelings check-ins, written memories, celebrations, family activities and learning goals. These organiser entries are stored in browser local storage for the signed-in adult account on that device, can be exported as JSON or cleared, and are not synced to other family members. Use the shared Family Planner for household tasks, chores and events that need to be visible to linked family members. No new database tables or server-side sync are introduced by the local organiser.
 
