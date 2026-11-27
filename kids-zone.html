@@ -38,6 +38,20 @@
 .book-reader-page{min-height:150px;font-size:1.08rem;line-height:1.85;white-space:pre-line}
 .book-reader-controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
 .book-library-status{font-weight:750;color:#4d3aa6;min-height:1.5rem}
+
+.kids-world{margin:1.4rem 0;padding:clamp(1rem,3vw,1.6rem);border:1px solid #dcd9f5;border-radius:1.35rem;background:linear-gradient(145deg,#f4f0ff,#eff9ff 48%,#fff8e9);box-shadow:var(--shadow)}
+.kids-world-intro{max-width:780px}.kids-world-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,205px),1fr));gap:.75rem;margin:1rem 0}
+.kids-world-tile{display:flex;flex-direction:column;align-items:flex-start;gap:.35rem;min-height:150px;padding:1rem;border:1px solid #e0def3;border-radius:1rem;background:#fff;color:var(--ink);text-align:left;box-shadow:0 5px 16px #28345a0a}
+.kids-world-tile .world-icon{font-size:2rem}.kids-world-tile strong{font-size:1.02rem}.kids-world-tile small{font-size:.88rem;font-weight:500;color:var(--muted)}.kids-world-tile[aria-pressed=true]{outline:3px solid #a99df5;background:#fbfaff}
+.kids-world-progress{padding:1rem;background:#fff;border:1px solid var(--line);border-radius:1rem}
+.kids-world-progress-track{height:12px;background:#e9eaf2;border-radius:999px;overflow:hidden}.kids-world-progress-fill{height:100%;width:0;background:#5b9c79;transition:width .2s}
+.kids-world-station{padding:clamp(1rem,3vw,1.5rem);margin-top:1rem;border:1px solid #dfdcf5;border-radius:1rem;background:#fff}
+.kids-world-station h3{margin:.2rem 0}.kids-world-question{font-size:1.12rem;font-weight:800;margin:.8rem 0}
+.kids-world-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.55rem}.kids-world-options button{background:#edf2ff;color:#344477;text-align:left}
+.kids-world-options button:disabled{opacity:.75}.kids-world-feedback{min-height:1.7rem;font-weight:750;color:#4d3aa6;margin:.7rem 0}
+.kids-world-create{display:grid;gap:.65rem}.kids-world-create textarea{width:100%;min-height:105px;padding:.8rem;border:2px solid #d9d4f7;border-radius:.75rem;font:inherit;resize:vertical}
+.kids-world-meta{color:var(--muted);font-size:.9rem}.kids-world-actions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.8rem}
+@media(prefers-reduced-motion:reduce){.kids-world-progress-fill{transition:none}}
 </style>
   <link rel="stylesheet" href="brand.css?v=1">
   <link rel="icon" href="configkit-favicon.svg" type="image/svg+xml">
@@ -115,6 +129,48 @@
   </div>
   <div class="book-reader-controls"><button type="button" class="secondary" id="kids-book-more">Show more books</button></div>
   <p class="story-small">A grown-up can read along with younger children. Keep personal details out of anything you write or share online.</p>
+</section>
+
+
+<section class="kids-world" id="kids-world" aria-labelledby="kids-world-heading">
+  <div class="kids-world-intro">
+    <span class="eyebrow">🗺️ Explore • Learn • Create</span>
+    <h2 id="kids-world-heading">Kids Zone World 🌈</h2>
+    <p>Welcome to your learning universe! Pick an island to try a quiz, solve a puzzle, make something creative or discover something new. Explore at your own pace.</p>
+    <p class="story-small">Made for ages 3–10. Activities are browser-based. Ask a grown-up to explore with you, and never enter your full name, address, school or other private details.</p>
+  </div>
+  <div class="kids-world-progress" aria-labelledby="kids-world-progress-heading">
+    <h3 id="kids-world-progress-heading">🏆 My World Explorer progress</h3>
+    <p id="kids-world-progress-text" class="kids-world-meta" aria-live="polite">0 activities completed · 12 islands to explore</p>
+    <div class="kids-world-progress-track" role="progressbar" aria-label="World islands explored" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0" id="kids-world-progress-bar"><div class="kids-world-progress-fill" id="kids-world-progress-fill"></div></div>
+    <p id="kids-world-badges" class="kids-world-meta">Your explorer badges will appear here as you visit new islands.</p>
+    <button type="button" class="secondary" id="kids-world-reset">Reset World progress on this device</button>
+  </div>
+  <div class="kids-world-map" id="kids-world-map" role="group" aria-label="Choose a learning island">
+    <button type="button" class="kids-world-tile" data-world="science" aria-pressed="true"><span class="world-icon">🧪</span><strong>Junior Science Lab</strong><small>Experiments, nature and discovery</small></button>
+    <button type="button" class="kids-world-tile" data-world="reading"><span class="world-icon">📚</span><strong>Reading Island</strong><small>Reading missions and book adventures</small></button>
+    <button type="button" class="kids-world-tile" data-world="coding"><span class="world-icon">💻</span><strong>Junior Coding Academy</strong><small>Logic, sequences and coding puzzles</small></button>
+    <button type="button" class="kids-world-tile" data-world="art"><span class="world-icon">🎨</span><strong>Art Mountain</strong><small>Drawing and creative challenges</small></button>
+    <button type="button" class="kids-world-tile" data-world="music"><span class="world-icon">🎵</span><strong>Music Academy</strong><small>Rhythm, instruments and sound</small></button>
+    <button type="button" class="kids-world-tile" data-world="world"><span class="world-icon">🌍</span><strong>World Explorer</strong><small>Places, maps and geography</small></button>
+    <button type="button" class="kids-world-tile" data-world="history"><span class="world-icon">🦖</span><strong>Dinosaur & History World</strong><small>Fossils and the past</small></button>
+    <button type="button" class="kids-world-tile" data-world="animals"><span class="world-icon">🐼</span><strong>Animal Kingdom</strong><small>Wildlife and habitats</small></button>
+    <button type="button" class="kids-world-tile" data-world="maths"><span class="world-icon">🔢</span><strong>Maths Adventure</strong><small>Numbers, shapes and patterns</small></button>
+    <button type="button" class="kids-world-tile" data-world="builder"><span class="world-icon">🏗️</span><strong>Build-a-World Studio</strong><small>Invent a place of your own</small></button>
+    <button type="button" class="kids-world-tile" data-world="quests"><span class="world-icon">🏆</span><strong>Kids Quest & Rewards</strong><small>Kindness and learning missions</small></button>
+    <button type="button" class="kids-world-tile" data-world="space"><span class="world-icon">🪐</span><strong>Space Academy</strong><small>Planets and astronomy</small></button>
+  </div>
+  <div class="kids-world-station" id="kids-world-station" aria-live="polite">
+    <p class="eyebrow" id="kids-world-station-label">🧪 Junior Science Lab</p>
+    <h3 id="kids-world-station-title">Science discovery</h3>
+    <p id="kids-world-station-description" class="kids-world-meta">Try a science question.</p>
+    <p id="kids-world-question" class="kids-world-question"></p>
+    <div id="kids-world-options" class="kids-world-options"></div>
+    <div id="kids-world-create" class="kids-world-create" hidden><label for="kids-world-idea">Your idea (keep personal details private)</label><textarea id="kids-world-idea" maxlength="500" placeholder="Write or plan your creation here…"></textarea><button type="button" id="kids-world-share-idea">Save idea for this visit</button><p id="kids-world-idea-status" class="kids-world-meta" aria-live="polite">Your idea stays in this page session.</p></div>
+    <p id="kids-world-feedback" class="kids-world-feedback" role="status"></p>
+    <div class="kids-world-actions"><button type="button" id="kids-world-next">✨ Another activity</button><a id="kids-world-reading-link" href="#kids-book-library" hidden>📖 Open the 50,000-book library</a></div>
+  </div>
+  <p class="story-small">Progress is stored only in this browser on this device. It is not uploaded or shared. A grown-up can reset it at any time.</p>
 </section>
 
 <section class="kids-video-section" id="kids-video-library" aria-labelledby="kids-video-heading">
@@ -777,6 +833,79 @@ $("kids-book-prev").addEventListener("click",()=>{if(page>0){page--;renderPage()
 $("kids-book-next").addEventListener("click",()=>{if(activeBook&&page<4){page++;renderPage();}});
 $("kids-book-close").addEventListener("click",()=>{$("kids-book-reader").hidden=true;});
 render();
+})();
+</script>
+
+
+<script>
+(()=> {
+const data={
+science:{name:"Junior Science Lab",icon:"🧪",desc:"Explore science with safe thought experiments. Ask a grown-up before trying anything in real life.",items:[
+["What do plants usually need to grow? ",["Sunlight, water and air","Candy and toys","Only darkness"],0,"Plants use sunlight, water and air to grow. Real experiments should be done with a grown-up."],
+["Which material is attracted to a magnet? ",["Wood","Iron","Paper"],1,"Iron is a magnetic metal. Many other materials are not attracted to ordinary magnets."],
+["What happens to a puddle on a warm sunny day? ",["It can evaporate","It turns into stone","It becomes snow"],0,"Heat can help liquid water evaporate into water vapour."],
+["Which part of a plant takes in water from soil? ",["Flower petals","Roots","Fruit"],1,"Roots take in water and help anchor a plant in the soil."]]},
+reading:{name:"Reading Island",icon:"📚",desc:"Practise reading, vocabulary and story thinking. Then visit the giant Kids Zone book library.",link:true,items:[
+["Which word means almost the same as 'enormous'? ",["Tiny","Huge","Quiet"],1,"Huge means very large, just like enormous."],
+["A story has a beginning, middle and…",["Ending","Shopping list","Map only"],0,"Many stories have a beginning, a middle where events happen, and an ending."],
+["Which one is a character in a story? ",["A hero","A full stop","A bookshelf"],0,"Characters are the people, animals or imaginary beings in a story."],
+["What can a book's title help you discover? ",["What it may be about","The weather tomorrow","Your shoe size"],0,"A title gives readers a clue about a book's subject or story."]]},
+coding:{name:"Junior Coding Academy",icon:"💻",desc:"Practise the thinking skills used in programming: order, patterns, loops and instructions.",items:[
+["A robot must move forward twice. Which instruction sequence works? ",["Forward, forward","Turn, jump, sleep","Back, back, stop"],0,"Two forward instructions make the robot move forward twice."],
+["What comes next in this pattern: 2, 4, 6, 8…? ",["9","10","12"],1,"The pattern adds 2 each time, so 10 comes next."],
+["What is a loop in coding? ",["A repeated set of instructions","A computer screen","A type of keyboard"],0,"A loop repeats instructions, saving you from writing the same steps again."],
+["Why should instructions be clear? ",["So a computer knows what to do","To make them longer","So they rhyme"],0,"Computers follow instructions literally, so clear steps matter."]]},
+art:{name:"Art Mountain",icon:"🎨",desc:"Try an imagination prompt. Sketch your idea on paper or describe it below.",create:"Imagine a friendly creature who lives in a garden. Draw or describe its shape, colours, home and favourite thing to do."},
+music:{name:"Music Academy",icon:"🎵",desc:"Discover rhythm, instruments and the building blocks of music.",items:[
+["Which instrument has black and white keys? ",["Piano","Drum","Triangle"],0,"A piano has black and white keys and can play many notes at once."],
+["What helps musicians keep a steady beat? ",["A rhythm","A ruler only","A pillow"],0,"A steady beat is the regular pulse you can clap or tap along with."],
+["Which instrument do you usually blow into? ",["Flute","Drum kit","Violin"],0,"A flute makes sound when a player blows across its opening."],
+["What is a group of notes played together called? ",["A chord","A bookmark","A footprint"],0,"A chord is made from notes sounded together."]]},
+world:{name:"World Explorer",icon:"🌍",desc:"Explore geography and our amazing planet.",items:[
+["Which is the largest ocean on Earth? ",["Pacific Ocean","Arctic Ocean","Indian Ocean"],0,"The Pacific is the largest ocean on Earth."],
+["What do we call a book of maps? ",["An atlas","A diary","A cookbook"],0,"An atlas is a collection of maps."],
+["Which direction is opposite to north? ",["East","South","West"],1,"South is opposite north on a compass."],
+["What is a very large area of land called? ",["A continent","A puddle","A cloud"],0,"A continent is one of Earth's major land areas."]]},
+history:{name:"Dinosaur & History World",icon:"🦖",desc:"Travel into the past and learn about fossils, dinosaurs and history.",items:[
+["What is a fossil? ",["A preserved trace or remain of ancient life","A new toy","A type of cloud"],0,"Fossils preserve evidence of ancient plants and animals."],
+["Which dinosaur is famous for its three horns? ",["Triceratops","Stegosaurus","Brachiosaurus"],0,"Triceratops had three prominent horns on its head."],
+["Who studies objects and places from the past? ",["Archaeologists","Astronauts","Chefs"],0,"Archaeologists study past people through objects, buildings and sites."],
+["Did humans and non-bird dinosaurs live at the same time? ",["Yes, always","No, they lived in different eras","Only in castles"],1,"Non-bird dinosaurs died out long before humans appeared."]]},
+animals:{name:"Animal Kingdom",icon:"🐼",desc:"Discover animal adaptations, habitats and wildlife.",items:[
+["Which animal is a mammal? ",["Dolphin","Shark","Octopus"],0,"Dolphins are mammals: they breathe air and feed their young milk."],
+["Where do polar bears naturally live? ",["The Arctic","The Sahara Desert","The Amazon rainforest"],0,"Polar bears live in the Arctic region."],
+["What do bees help many flowering plants do? ",["Pollinate","Build mountains","Make snow"],0,"Bees carry pollen between flowers, helping many plants reproduce."],
+["Which animal is known for changing colour to blend in? ",["Chameleon","Penguin","Elephant"],0,"Some chameleons can change colour for communication and other reasons."]]},
+maths:{name:"Maths Adventure",icon:"🔢",desc:"Warm up your brain with numbers, shapes and patterns.",items:[
+["What is 7 + 5? ",["11","12","13"],1,"7 plus 5 equals 12."],
+["What is half of 18? ",["8","9","10"],1,"Half of 18 is 9 because 9 + 9 = 18."],
+["How many sides does a hexagon have? ",["5","6","8"],1,"A hexagon has six sides."],
+["What comes next: 5, 10, 15, 20…? ",["22","25","30"],1,"The sequence increases by 5, so 25 comes next."]]},
+builder:{name:"Build-a-World Studio",icon:"🏗️",desc:"Become a designer! Invent a town, park, home or imaginary world.",create:"Design a brand-new place. What is its name? What buildings, nature, transport and fun places will it have? How will people and animals stay safe?"},
+quests:{name:"Kids Quest & Rewards",icon:"🏆",desc:"Complete positive everyday missions. Rewards celebrate effort, curiosity and kindness.",items:[
+["A new classmate is sitting alone. What is a kind first step? ",["Invite them to join, if they want","Make fun of them","Ignore them on purpose"],0,"A friendly invitation can help someone feel welcome. They can choose whether to join."],
+["You find rubbish near a park. What is a safe choice? ",["Tell a grown-up and help if they say it is safe","Touch sharp or unknown items","Throw more rubbish"],0,"Ask a trusted grown-up before picking anything up, especially if it looks unsafe."],
+["A puzzle feels difficult. What could you try? ",["Break it into smaller steps","Give up immediately","Blame someone"],0,"Small steps and asking for help can make a tricky task easier."],
+["A friend has a different idea. What can you do? ",["Listen and take turns","Shout over them","Never let them speak"],0,"Listening and taking turns helps everyone feel included."]]},
+space:{name:"Space Academy",icon:"🪐",desc:"Explore our Solar System and the wonders of space.",items:[
+["Which planet is known as the Red Planet? ",["Mars","Venus","Neptune"],0,"Mars looks reddish because of iron-rich dust on its surface."],
+["What is the star at the centre of our Solar System? ",["The Sun","Polaris","The Moon"],0,"The Sun is the star at the centre of our Solar System."],
+["Which planet has famous large rings? ",["Saturn","Mercury","Earth"],0,"Saturn is famous for its bright and extensive ring system."],
+["What do astronauts wear outside a spacecraft? ",["A spacesuit","A raincoat","A swimming costume"],0,"Spacesuits help protect astronauts in the harsh environment of space."]]}
+};
+const ids=Object.keys(data),$=id=>document.getElementById(id),storageKey="configkit-kids-world-progress-v1";
+let current="science",itemIndex=0,progress={completed:0,visited:[],badges:[]},lastIdea="";
+try{const saved=JSON.parse(localStorage.getItem(storageKey)||"null");if(saved&&Array.isArray(saved.visited)&&Number.isFinite(saved.completed))progress={completed:Math.max(0,saved.completed),visited:saved.visited.filter(x=>ids.includes(x)),badges:[]};}catch(_){}
+function persist(){try{localStorage.setItem(storageKey,JSON.stringify(progress));}catch(_){}}
+function updateProgress(){const count=progress.visited.length;$("kids-world-progress-text").textContent=progress.completed+" activities completed · "+count+" of 12 islands explored";$("kids-world-progress-fill").style.width=(count/12*100)+"%";$("kids-world-progress-bar").setAttribute("aria-valuenow",String(count));$("kids-world-badges").textContent=count===12?"🌟 World Explorer Master! You have visited every island.":count>=8?"🏅 Super Explorer · Keep discovering new islands!":count>=4?"✨ Curious Explorer · Great exploring!":"Your explorer badges will appear here as you visit new islands.";document.querySelectorAll("[data-world]").forEach(b=>{b.setAttribute("aria-pressed",String(b.dataset.world===current));const base=data[b.dataset.world];b.querySelector("small").textContent=progress.visited.includes(b.dataset.world)?"✓ Visited · "+base.desc:b.querySelector("small").textContent;});}
+function finish(){progress.completed++;if(!progress.visited.includes(current))progress.visited.push(current);persist();updateProgress();}
+function choose(id){if(!data[id])return;current=id;itemIndex=0;lastIdea="";$("kids-world-feedback").textContent="";$("kids-world-idea").value="";$("kids-world-idea-status").textContent="Your idea stays in this page session.";$("kids-world-station-label").textContent=data[id].icon+" "+data[id].name;$("kids-world-station-title").textContent=data[id].name;$("kids-world-station-description").textContent=data[id].desc;$("kids-world-reading-link").hidden=!data[id].link;document.querySelectorAll("[data-world]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.world===id)));next();updateProgress();}
+function next(){const station=data[current];$("kids-world-feedback").textContent="";$("kids-world-options").replaceChildren();$("kids-world-create").hidden=!station.create;$("kids-world-question").hidden=!!station.create;if(station.create){$("kids-world-question").textContent=station.create;$("kids-world-idea").value="";$("kids-world-idea-status").textContent="Your idea stays in this page session. Write or sketch it on paper.";return;}const item=station.items[itemIndex%station.items.length];$("kids-world-question").textContent=item[0];item[1].forEach((answer,i)=>{const button=document.createElement("button");button.type="button";button.textContent=answer;button.addEventListener("click",()=>{if($("kids-world-options").dataset.answered==="yes")return;$("kids-world-options").dataset.answered="yes";[...$("kids-world-options").children].forEach(b=>b.disabled=true);if(i===item[2]){button.textContent="✓ "+answer;$("kids-world-feedback").textContent="🌟 Correct! "+item[3];finish();}else{$("kids-world-feedback").textContent="Good try! "+item[3]+" Choose another activity to practise.";}});$("kids-world-options").append(button);});$("kids-world-options").dataset.answered="no";itemIndex++;}
+$("kids-world-map").addEventListener("click",event=>{const button=event.target.closest("[data-world]");if(button)choose(button.dataset.world);});
+$("kids-world-next").addEventListener("click",()=>{if(data[current].create){$("kids-world-feedback").textContent="Try adding a new detail or idea to your creation. You can keep inventing!";$("kids-world-idea").focus();return;}next();});
+$("kids-world-share-idea").addEventListener("click",()=>{const idea=$("kids-world-idea").value.trim();if(!idea){$("kids-world-idea-status").textContent="Add an idea first, then save it for this visit.";return;}lastIdea=idea;$("kids-world-idea-status").textContent="✨ Your idea is saved in this page session only. It is not uploaded or shared.";$("kids-world-feedback").textContent="Wonderful creativity! You made something of your own.";finish();});
+$("kids-world-reset").addEventListener("click",()=>{if(!confirm("Reset Kids World progress saved on this device?"))return;progress={completed:0,visited:[],badges:[]};persist();updateProgress();$("kids-world-feedback").textContent="Your Kids World progress has been reset on this device.";});
+updateProgress();choose("science");
 })();
 </script>
 
