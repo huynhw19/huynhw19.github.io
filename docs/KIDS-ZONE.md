@@ -27,6 +27,25 @@ Stories and activities can be searched by keyword and filtered for ages 3–5, 6
 
 Story writing is session-only: the Studio does not save children's free-text writing to a server. Children are reminded not to enter private information such as full names, addresses, school names or passwords. Parents and caregivers are encouraged to explore together and talk about kindness, feelings, safe choices and asking a trusted adult for help.
 
+## Kids Zone World
+
+Kids Zone includes a single World map linking 12 browser-based learning islands:
+
+- Junior Science Lab: safe science knowledge questions.
+- Reading Island: vocabulary and story comprehension, with a link to the 50,000-book library.
+- Junior Coding Academy: sequencing, patterns, loops and clear instructions.
+- Art Mountain: open-ended drawing and imagination prompts.
+- Music Academy: rhythm and instrument knowledge.
+- World Explorer: geography and map knowledge.
+- Dinosaur & History World: fossils, dinosaurs and archaeology.
+- Animal Kingdom: habitats, wildlife and adaptations.
+- Maths Adventure: arithmetic, fractions, shapes and sequences.
+- Build-a-World Studio: open-ended design prompts.
+- Kids Quest & Rewards: kindness, safe choices and persistence scenarios.
+- Space Academy: Solar System and astronomy questions.
+
+Quiz stations provide multiple-choice feedback and another activity control. Creative stations provide a short text area for an idea; the text remains in the current page session and is not uploaded. The shared progress tracker records completed activity counts and visited island IDs in browser local storage on the current device. It is not synced to a child profile or Supabase. A reset control clears this local progress. These are starter activity sets and generated/reusable learning prompts, not thousands of separately authored lessons or experiments. Children should ask a grown-up before trying any real-world experiment.
+
 ## 50,000 Storybook Library
 
 Kids Zone includes a searchable library of 50,000 generated storybook entries. The catalogue is formed from 10 themes, 10 lead characters, 10 settings, 10 positive learning themes and 5 magical objects (10 × 10 × 10 × 10 × 5). Each entry has a distinct catalogue title and a five-page browser-rendered story assembled from original reusable narrative passages. This is a combinatorial storybook collection, not 50,000 separately hand-written manuscripts.
