@@ -286,6 +286,7 @@ These guides describe ConfigKit's shared platform capabilities and how to work w
 
 - [Platform architecture and operations](CONFIGKIT-PLATFORM-GUIDE.md) — application architecture, Supabase boundaries, account roles, OAuth, announcements and administration.
 - [Universal Search documentation](docs/UNIVERSAL-SEARCH.md) — searchable sources, filters, query behaviour, privacy boundaries and maintenance notes.
+- [Scratch Project Studio documentation](docs/SCRATCH-PROJECT-STUDIO.md) — workspace architecture, Drive compatibility, versions, publishing and security boundaries.
 - [Universal Search](https://huynhw19.github.io/universal-search.html) — find tools, guides and permitted account or community content.
 - [Upgrade Roadmap](https://huynhw19.github.io/roadmap.html) — shipped work, planned improvements and community suggestions.
 - [OAuth developer guide](https://huynhw19.github.io/oauth-developer-guide.html) and [OAuth app registration](https://huynhw19.github.io/oauth-apps.html) — connect third-party apps with ConfigKit identity.
