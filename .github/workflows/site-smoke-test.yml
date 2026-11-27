@@ -154,11 +154,11 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from 'node:fs/promises';
           const html = await fs.readFile('coding-studio.html', 'utf8');
-          const marker = '<script>';
-          const start = html.lastIndexOf(marker);
-          const end = html.indexOf('</script>', start);
+          const marker = '<script>' + String.fromCharCode(10) + '(()=>';
+          const start = html.indexOf(marker);
+          const end = html.lastIndexOf('</script>');
           if (start < 0 || end < 0) throw new Error('Could not locate Coding Studio inline script');
-          new Function(html.slice(start + marker.length, end));
+          new Function(html.slice(start + '<script>'.length, end));
           console.log('PASS: Coding Studio inline scripts parse');
           NODE
       - name: Install browser test dependency
