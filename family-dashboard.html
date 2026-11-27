@@ -91,7 +91,7 @@
         <a class="hub-tile" href="#family-life-tools"><span class="hub-icon">📚</span><strong>Learning & Reading Goals</strong><small>Record family learning goals and milestones.</small></a>
         <a class="hub-tile" href="#family-safety-guide"><span class="hub-icon">🔐</span><strong>Family Safety & Privacy</strong><small>Review family permissions, safe messaging and privacy.</small></a>
       </div>
-      <p class="muted">The shared Family Planner stores household tasks and events with your Family ID. The additional Family Life organiser below is saved only in this browser on this device; it does not sync to other family members.</p>
+      <p class="muted">Family Planner and Family Life organiser items are stored in your secure family account. Linked family members can see updates as they happen. Family Life organiser access requires a verified signed-in adult family account.</p>
     </section>
     <section class="card" id="family-life-tools" aria-labelledby="family-life-title">
       <span class="eyebrow">Private household organiser · This device</span>
@@ -213,6 +213,8 @@
       const title = document.getElementById('form-title');
       const save = document.getElementById('save-child');
       let userId = null;
+      let familyAccountId = null;
+      let hubChannel = null;
       let editingId = null;
       const say = (message, error = false) => { status.textContent = message; status.classList.toggle('error', error); };
       if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
@@ -432,7 +434,7 @@
         const familyStatus=document.getElementById('family-id-status');
         const copyButton=document.getElementById('copy-family-id');
         const loadMembership=()=>client.from('family_account_members')
-          .select('role,family:family_accounts(family_id)')
+          .select('role,family:family_accounts(id,family_id)')
           .eq('user_id',userId).maybeSingle();
         let {data,error}=await loadMembership();
         if(error){
@@ -468,6 +470,7 @@
           copyButton.hidden=true;return;
         }
         const familyId=family.family_id;
+        familyAccountId=family.id || null;
         familyPanel.hidden=false;familyValue.textContent=familyId;copyButton.hidden=false;
         copyButton.addEventListener('click',async()=>{
           try{
@@ -479,50 +482,93 @@
         });
       }
 
-      // Family Life organiser: device-local only, namespaced to the signed-in adult account.
+      // Family Life organiser: shared through the authenticated family account.
       const hubCategories={meal:'Meal plan',shopping:'Shopping list',savings:'Savings goal',allowance:'Pocket money note',routine:'Daily routine',feelings:'Feelings check-in',memory:'Family memory',celebration:'Birthday & celebration',activity:'Family activity',learning:'Learning & reading goal'};
       let hubItems=[];
-      function hubKey(){return 'configkit-family-life-v1-'+userId;}
-      function hubSave(){try{localStorage.setItem(hubKey(),JSON.stringify(hubItems));return true;}catch(_){hubMessage('Could not save on this device. Check available browser storage.',true);return false;}}
+      function hubLegacyKey(){return 'configkit-family-life-v1-'+userId;}
+      function hubMigrationKey(){return 'configkit-family-life-migrated-v1-'+userId;}
       function hubMessage(message,error=false){const el=document.getElementById('hub-status');el.textContent=message;el.style.color=error?'var(--red)':'var(--green-dark)';}
-      function hubLoad(){try{const parsed=JSON.parse(localStorage.getItem(hubKey())||'[]');hubItems=Array.isArray(parsed)?parsed.filter(x=>x&&typeof x.id==='string'&&hubCategories[x.category]&&typeof x.title==='string'):[];}catch(_){hubItems=[];}hubRender();}
       function hubRender(){
         const filter=document.getElementById('hub-filter').value,host=document.getElementById('hub-list');
-        const visible=hubItems.filter(x=>filter==='all'||x.category===filter).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')||b.createdAt-a.createdAt);
+        const visible=hubItems.filter(x=>filter==='all'||x.category===filter).sort((a,b)=>(a.item_date||'9999').localeCompare(b.item_date||'9999')||new Date(b.created_at)-new Date(a.created_at));
         host.replaceChildren();
-        if(!visible.length){const p=document.createElement('p');p.className='muted';p.textContent='No items here yet. Add your first family item.';host.append(p);}
+        if(!visible.length){const p=document.createElement('p');p.className='muted';p.textContent='No shared family items yet. Add your first item.';host.append(p);}
         visible.forEach(item=>{
-          const card=document.createElement('article');card.className='hub-entry'+(item.done?' done':'');
+          const card=document.createElement('article');card.className='hub-entry'+(item.status==='completed'?' done':'');
           const main=document.createElement('div');main.className='hub-entry-main';
           const title=document.createElement('strong');title.textContent=item.title;main.append(title);
-          const meta=document.createElement('small');meta.textContent=hubCategories[item.category]+(item.date?' · '+item.date:'')+(item.amount!==null?' · Amount: '+Number(item.amount).toFixed(2):'')+(item.done?' · Completed':' · Open');main.append(meta);
+          const meta=document.createElement('small');meta.textContent=hubCategories[item.category]+(item.item_date?' · '+item.item_date:'')+(item.amount!==null?' · Amount: '+Number(item.amount).toFixed(2):'')+(item.status==='completed'?' · Completed':' · Open');main.append(meta);
           if(item.details){const note=document.createElement('p');note.textContent=item.details;note.style.margin='.35rem 0 0';main.append(note);}
           const actions=document.createElement('div');actions.className='hub-entry-actions';
-          const toggle=document.createElement('button');toggle.type='button';toggle.className='secondary';toggle.textContent=item.done?'Reopen':'Complete';toggle.addEventListener('click',()=>{item.done=!item.done;if(hubSave())hubRender();});
-          const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Delete';remove.addEventListener('click',()=>{if(!window.confirm('Delete this family item from this device?'))return;hubItems=hubItems.filter(x=>x.id!==item.id);if(hubSave())hubRender();});
+          const toggle=document.createElement('button');toggle.type='button';toggle.className='secondary';toggle.textContent=item.status==='completed'?'Reopen':'Complete';toggle.addEventListener('click',async()=>{
+            toggle.disabled=true;const {error}=await client.from('family_life_items').update({status:item.status==='completed'?'todo':'completed',updated_at:new Date().toISOString()}).eq('id',item.id).eq('family_id',familyAccountId);
+            if(error){toggle.disabled=false;hubMessage('Could not update this shared item: '+error.message,true);return;}await hubLoad();
+          });
+          const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Delete';remove.addEventListener('click',async()=>{
+            if(!window.confirm('Delete this shared family item for everyone in the family?'))return;remove.disabled=true;
+            const {error}=await client.from('family_life_items').delete().eq('id',item.id).eq('family_id',familyAccountId);
+            if(error){remove.disabled=false;hubMessage('Could not delete this item: '+error.message,true);return;}await hubLoad();
+          });
           actions.append(toggle,remove);card.append(main,actions);host.append(card);
         });
-        const done=hubItems.filter(x=>x.done).length;
-        document.getElementById('hub-total').textContent=hubItems.length+' saved item'+(hubItems.length===1?'':'s');
+        const done=hubItems.filter(x=>x.status==='completed').length;
+        document.getElementById('hub-total').textContent=hubItems.length+' shared item'+(hubItems.length===1?'':'s');
         document.getElementById('hub-open').textContent=(hubItems.length-done)+' to do';
         document.getElementById('hub-done').textContent=done+' completed';
       }
-      document.getElementById('hub-form').addEventListener('submit',event=>{
+      async function hubLoad(importLegacy=true){
+        if(!familyAccountId){hubItems=[];hubRender();hubMessage('Create or join a Family ID to share these items across family members.',true);return;}
+        const {data,error}=await client.from('family_life_items').select('id,family_id,created_by,category,title,details,item_date,amount,status,created_at,updated_at').eq('family_id',familyAccountId).order('item_date',{ascending:true,nullsFirst:false}).limit(1000);
+        if(error){hubMessage('Could not load shared family items: '+error.message,true);return;}
+        hubItems=data||[];
+        if(importLegacy){
+          let alreadyMigrated=false;try{alreadyMigrated=localStorage.getItem(hubMigrationKey())==='1';}catch(_){}
+          if(!alreadyMigrated){
+            let legacy=[];try{const parsed=JSON.parse(localStorage.getItem(hubLegacyKey())||'[]');legacy=Array.isArray(parsed)?parsed.filter(x=>x&&hubCategories[x.category]&&typeof x.title==='string'&&x.title.trim()).slice(0,200):[];}catch(_){}
+            if(legacy.length){
+              const payload=legacy.map(x=>({family_id:familyAccountId,created_by:userId,category:x.category,title:x.title.trim().slice(0,120),details:String(x.details||'').slice(0,1000),item_date:/^\d{4}-\d{2}-\d{2}$/.test(x.date||'')?x.date:null,amount:Number.isFinite(Number(x.amount))&&x.amount!==null?Number(x.amount):null,status:x.done?'completed':'todo'}));
+              const moved=await client.from('family_life_items').insert(payload);
+              if(moved.error){hubRender();hubMessage('Your older device-only items are still safe. Could not import them yet: '+moved.error.message,true);return;}
+              try{localStorage.setItem(hubMigrationKey(),'1');}catch(_){}
+              const refreshed=await client.from('family_life_items').select('id,family_id,created_by,category,title,details,item_date,amount,status,created_at,updated_at').eq('family_id',familyAccountId).order('item_date',{ascending:true,nullsFirst:false}).limit(1000);
+              if(!refreshed.error)hubItems=refreshed.data||[];
+              hubMessage('Your previous device-only items have been imported into the shared family organiser.');
+            }else{try{localStorage.setItem(hubMigrationKey(),'1');}catch(_){}}
+          }
+        }
+        hubRender();
+      }
+      function hubSubscribe(){
+        if(!familyAccountId||hubChannel)return;
+        hubChannel=client.channel('family-life-'+familyAccountId)
+          .on('postgres_changes',{event:'*',schema:'public',table:'family_life_items',filter:'family_id=eq.'+familyAccountId},()=>{void hubLoad(false);})
+          .subscribe((state)=>{if(state==='CHANNEL_ERROR'||state==='TIMED_OUT')hubMessage('Live updates are temporarily unavailable. Use refresh to check the latest family items.',true);});
+      }
+      document.getElementById('hub-form').addEventListener('submit',async event=>{
         event.preventDefault();
+        if(!familyAccountId){hubMessage('Create or join a Family ID before adding shared items.',true);return;}
         const category=document.getElementById('hub-category').value,title=document.getElementById('hub-title').value.trim(),rawAmount=document.getElementById('hub-amount').value;
         if(!hubCategories[category]||!title){hubMessage('Choose a category and enter a title.',true);return;}
         const amount=rawAmount===''?null:Number(rawAmount);
         if(amount!==null&&(!Number.isFinite(amount)||amount<0||amount>1000000)){hubMessage('Enter a valid amount, or leave it blank.',true);return;}
-        hubItems.unshift({id:typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2),category,title,date:document.getElementById('hub-date').value||'',amount,details:document.getElementById('hub-details').value.trim(),done:false,createdAt:Date.now()});
-        if(hubSave()){event.target.reset();hubMessage('Saved on this device. It has not been shared with other family members.');hubRender();}
+        const button=document.getElementById('hub-save');button.disabled=true;
+        const payload={family_id:familyAccountId,created_by:userId,category,title:title.slice(0,120),item_date:document.getElementById('hub-date').value||null,amount,details:document.getElementById('hub-details').value.trim().slice(0,1000),status:'todo'};
+        const {error}=await client.from('family_life_items').insert(payload);button.disabled=false;
+        if(error){hubMessage('Could not save shared item: '+error.message,true);return;}
+        event.target.reset();hubMessage('Saved to your family organiser. Other family members will see it too.');await hubLoad(false);
       });
       document.getElementById('hub-filter').addEventListener('change',hubRender);
-      document.getElementById('hub-clear').addEventListener('click',()=>{if(!hubItems.length)return;if(!window.confirm('Permanently clear all Family Life organiser items saved for this account in this browser?'))return;hubItems=[];if(hubSave()){hubMessage('This device’s organiser items have been cleared.');hubRender();}});
+      document.getElementById('hub-clear').textContent='Delete items I created';
+      document.getElementById('hub-clear').addEventListener('click',async()=>{
+        const mine=hubItems.filter(x=>x.created_by===userId);if(!mine.length){hubMessage('You have no items to delete.');return;}
+        if(!window.confirm('Delete '+mine.length+' item(s) you created? These will disappear for every family member.'))return;
+        const {error}=await client.from('family_life_items').delete().eq('family_id',familyAccountId).eq('created_by',userId);
+        if(error){hubMessage('Could not delete your items: '+error.message,true);return;}hubMessage('Your items were deleted for the whole family.');await hubLoad(false);
+      });
       document.getElementById('hub-export').addEventListener('click',()=>{
         const blob=new Blob([JSON.stringify(hubItems,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
-        a.href=url;a.download='configkit-family-life-items.json';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);hubMessage('Your organiser items were exported as a JSON file.');
+        a.href=url;a.download='configkit-family-life-items.json';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);hubMessage('All visible family items were exported as JSON.');
       });
-
       async function init(){
         const {data,error}=await client.auth.getSession();
         if(error||!data.session){window.location.replace('login.html?next=family-dashboard.html');return;}
@@ -530,8 +576,8 @@
         if(accountType!=='personal'){accountLabel.textContent='This dashboard is available only to personal accounts.';return;}
         userId=user.id; accountLabel.textContent='Signed in as '+(user.email || 'your personal account');
         creator.hidden=false;panel.hidden=false;kidsVideos.hidden=false;resourcesPanel.hidden=false;
-        hubLoad();
         await loadFamilyId();
+        await hubLoad();
         await loadChildren();
       }
       client.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace('login.html');});
