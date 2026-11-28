@@ -525,7 +525,7 @@ function makeCard(item){
   let answer='',turnNumber=0,scores=[0,0];
   function newRound(){
     const data=type.make(n+turnNumber++);
-    let q,correct,choices;if(data.length===4){[q,correct,choices]=data;}else{[q,correct]=data;choices=[String(correct),String(Number(correct)+1),String(Math.max(0,Number(correct)-2)),String(Number(correct)+3)];}
+    let q,correct,choices;if(data.length>=3&&Array.isArray(data[2])){[q,correct,choices]=data;}else{[q,correct]=data;choices=[String(correct),String(Number(correct)+1),String(Math.max(0,Number(correct)-2)),String(Number(correct)+3)];}
     answer=String(correct);question.textContent=(multiplayer?'Player '+(turnNumber%2===1?1:2)+' — ':'')+q;
     result.textContent=multiplayer?'Players take turns on this device. Player 1: '+scores[0]+' · Player 2: '+scores[1]:'Choose the correct answer.';
     options.replaceChildren();const unique=[...new Set(choices.map(String))];while(unique.length<4)unique.push(String(Number(correct)+unique.length+2));
