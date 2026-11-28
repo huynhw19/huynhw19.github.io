@@ -232,7 +232,7 @@
 
 <div class="game-search" role="search">
   <label for="game-search">🔎 Find a game</label>
-  <input id="game-search" type="search" placeholder="Search 500,000 games by name or topic…" autocomplete="off">
+  <input id="game-search" type="search" placeholder="Search 505,000 games by name or topic…" autocomplete="off">
   <label for="age-filter">Choose an age group</label>
   <select id="age-filter" aria-label="Filter games by age group">
     <option value="">All age groups</option>
@@ -240,7 +240,7 @@
     <option value="6-8">Ages 6–8</option>
     <option value="9-10">Ages 9–10</option>
   </select>
-  <p id="game-count" class="muted" aria-live="polite">Showing 500,000 games</p>
+  <p id="game-count" class="muted" aria-live="polite">Showing 505,000 games</p>
   <p id="progress-status" class="muted" role="status" aria-live="polite">Open Kids Zone from a child profile to save progress for that child.</p>
 </div>
 <section class="games" aria-label="Games">
@@ -466,8 +466,8 @@ document.getElementById('creative-game-age').addEventListener('change',filterCre
 document.getElementById('creative-game-more').addEventListener('click',()=>renderCreativeGames());
 filterCreativeGames();
 
-// Build a searchable 500,000-game catalog, adding 50,000 generated games to the existing 110,000, but render cards in small batches
-// so mobile browsers do not need to create 100 DOM nodes at once.
+// Build a searchable 505,000-game catalog. Keep the original 500,000 IDs stable and add 5,000 entries
+// from five new age-banded learning templates. Render cards in small batches for mobile browsers.
 const gameTypes=[
   {name:'Number Quest',ageBand:'6-8',desc:'Practise addition, subtraction, multiplication and division',make:n=>{const mode=n%4,a=(n*7)%90+10,b=(n*11)%20+2;if(mode===0)return ['What is '+a+' + '+b+'?',a+b];if(mode===1)return ['What is '+(a+b)+' − '+b+'?',a];if(mode===2)return ['What is '+(n%12+2)+' × '+(n%9+2)+'?',(n%12+2)*(n%9+2)];const divisor=n%9+2,quotient=n%12+2;return ['What is '+(divisor*quotient)+' ÷ '+divisor+'?',quotient];}},
   {name:'Pattern Patrol',ageBand:'3-5',desc:'Find number and shape patterns',make:n=>{const step=n%12+2,a=n%30+1;return ['What comes next: '+a+', '+(a+step)+', '+(a+2*step)+', '+(a+3*step)+', ?',a+4*step];}},
@@ -488,10 +488,18 @@ const gameTypes=[
   {name:'Measurement Masters',ageBand:'9-10',desc:'Practise length, mass and measurement',make:n=>{const a=n%9+2,b=n%6+2;const qs=[['How many centimetres are in one metre?','100',['10','50','100','1000']],['How many minutes are in one hour?','60',['30','45','60','90']],['Which unit is best for measuring a pencil?','Centimetres',['Kilometres','Centimetres','Litres','Kilograms']],['How many grams are in one kilogram?','1000',['100','500','1000','10000']],['A ribbon is '+a+' cm long. Another is '+b+' cm. Total length?',String(a+b)+' cm',[String(a+b)+' cm',String(a*b)+' cm',String(Math.abs(a-b))+' cm',String(a+b+5)+' cm']]];return qs[n%qs.length];}},
   {name:'Kindness Quest',ageBand:'3-5',desc:'Practise empathy, sharing and friendly choices',make:n=>{const qs=[['A friend drops their crayons. What is a kind choice?','Help pick them up',['Walk away','Help pick them up','Hide a crayon','Laugh']],['Someone is speaking. What can you do?','Listen',['Shout over them','Listen','Push ahead','Ignore them']],['You want the same toy as a friend. What can help?','Take turns',['Grab it','Take turns','Hide it','Break it']]];return qs[n%qs.length];}}
 ]
+const bonusGameTypes=[
+  {name:'Fraction Friends',ageBand:'9-10',desc:'Explore quarters, halves and fraction-based number sense',make:n=>{const whole=(n%9+2)*4,part=whole/4;return ['What is one quarter of '+whole+'?',String(part),[String(part),String(part+1),String(part+2),String(part*2)]];}},
+  {name:'Nature Numbers',ageBand:'6-8',desc:'Solve friendly multiplication and grouping puzzles about nature',make:n=>{const flowers=n%8+3,bunches=n%4+2,answer=flowers*bunches;return ['There are '+flowers+' flowers in each patch. How many flowers are in '+bunches+' patches?',String(answer),[String(answer),String(answer+flowers),String(answer-bunches),String(flowers+bunches)]];}},
+  {name:'Story Sequencer',ageBand:'6-8',desc:'Put everyday events and story steps in a sensible order',make:n=>{const qs=[['A seed is going to grow into a plant. What happens first?','Plant the seed',['Water the leaves','Pick the fruit','Plant the seed','Watch it flower']],['You are making a sandwich. What is a sensible first step?','Wash your hands',['Eat the sandwich','Wash your hands','Put it in a lunchbox','Clear the plate']],['A story has a beginning, middle and end. Which part introduces the characters?','Beginning',['Ending','Middle','Beginning','The title page only']],['You want to send a kind thank-you card. What should you do first?','Think about what you are thankful for',['Post it before writing','Think about what you are thankful for','Throw it away','Choose a stamp before making the card']]];return qs[n%qs.length];}},
+  {name:'Sound & Rhythm',ageBand:'3-5',desc:'Listen for repeating sounds and simple rhythm patterns',make:n=>{const qs=[['Clap, tap, clap, tap, what comes next?','Clap',['Clap','Tap','Jump','Spin']],['High, low, high, low, what comes next?','High',['Low','High','Quiet','Fast']],['Drum, bell, drum, bell, what comes next?','Drum',['Bell','Whistle','Drum','Clap']]];return qs[n%qs.length];}},
+  {name:'Safe Choice Stars',ageBand:'6-8',desc:'Practise kind, careful choices in everyday and online situations',make:n=>{const qs=[['A player you do not know asks for your home address in a game. What should you do?','Do not share it and tell a trusted grown-up',['Share it so you can be friends','Do not share it and tell a trusted grown-up','Ask them to guess it','Post it in the game']],['You find an unfamiliar plant at the park. What is the safest choice?','Look without touching and ask a grown-up',['Taste a leaf','Pull it out','Look without touching and ask a grown-up','Take it home']],['A friend feels left out of a game. What could you do?','Invite them to join if they would like',['Tell them to go away','Invite them to join if they would like','Hide the game pieces','Laugh at them']],['A website asks you to enter a password to win a toy. What should you do?','Stop and ask a trusted grown-up',['Type the password quickly','Use a friend’s password','Stop and ask a trusted grown-up','Share the offer with everyone']]];return qs[n%qs.length];}}
+]
 const gameGrid=document.querySelector('.games');
 const searchInput=document.getElementById('game-search'),gameCount=document.getElementById('game-count'),ageFilter=document.getElementById('age-filter'),progressStatus=document.getElementById('progress-status');
 const loadMore=document.createElement('button');loadMore.type='button';loadMore.className='secondary';loadMore.textContent='Load 100 more games';loadMore.style.display='block';loadMore.style.margin='0 auto 2rem';gameGrid.after(loadMore);
-const catalog=Array.from({length:499980},(_,k)=>{const n=k+20,t=gameTypes[n%gameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
+const TOTAL_GAME_COUNT=505000;
+const catalog=Array.from({length:504980},(_,k)=>{const n=k+20,t=n<500000?gameTypes[n%gameTypes.length]:bonusGameTypes[(n-500000)%bonusGameTypes.length];return {n,number:n+1,type:t,ageBand:t.ageBand,multiplayer:n<5020,search:(t.name+' '+(n+1)+' '+t.desc+(n<5020?' multiplayer two player pass and play':'')).toLowerCase()};});
 let shown=0,activeMatches=null;
 async function recordGameProgress(item,isCorrect){
   if(!activeChildProfile?.id){progressStatus.textContent='This session is not linked to a child profile, so progress was not saved.';return;}
@@ -506,7 +514,7 @@ function makeCard(item){
   const {n,number,type,multiplayer}=item,typeIndex=n%gameTypes.length;
   const article=document.createElement('article');article.className='game generated-game';article.dataset.gameSearch=item.search;article.dataset.ageBand=item.ageBand;
   const heading=document.createElement('h2');heading.textContent=(multiplayer?'👥 ':'🎮 ')+type.name+' '+number+(multiplayer?' · 2 players':'');
-  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of 500,000';
+  const description=document.createElement('p');description.textContent=(multiplayer?'Two-player pass-and-play · ':'')+type.desc+' · Game '+number+' of '+TOTAL_GAME_COUNT.toLocaleString();
   const play=document.createElement('button');play.type='button';play.textContent=multiplayer?'Start two-player game':'Play game';
   const challenge=document.createElement('div');challenge.hidden=true;
   const question=document.createElement('p');question.className='mini-question';
