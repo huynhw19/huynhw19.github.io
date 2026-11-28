@@ -119,7 +119,7 @@ ConfigKit's Family Dashboard includes a connected Family Hub linking Kids Zone, 
 
 ConfigKit includes dedicated family and education workspaces:
 
-- **Kids Zone:** a searchable catalogue described in the project as 500,000 game entries. The catalogue combines 20 hand-built games with 499,980 generated entries based on 17 reusable learning templates; it is not 500,000 independently hand-built game engines. See [Kids Zone notes](docs/KIDS-ZONE.md).
+- **Kids Zone:** a searchable catalogue of 505,000 game entries: 20 hand-built games and 504,980 generated entries based on 22 reusable, age-banded learning templates. The original 500,000 game IDs are preserved, with 5,000 additional games added in this update; the generated entries are not independently hand-built game engines. See [Kids Zone notes](docs/KIDS-ZONE.md).
 - **Kids Messages:** parent-approved contacts, linked education relationships and visible parent oversight. The child-facing experience is designed around text, emojis, stickers and bounded drawings rather than open media uploads. See [Kids Messages documentation](KIDS-MESSAGES.md).
 - **Family Dashboard:** family setup, child management, learning activities, saved resources and safety controls.
 - **Education Dashboard:** lesson planning, student management, teaching resources, learning sessions and education content.
