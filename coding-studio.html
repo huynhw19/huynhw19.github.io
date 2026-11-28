@@ -120,10 +120,10 @@ ck_wait:{init(){this.appendDummyInput().appendField('wait').appendField(new Bloc
 Object.entries(defs2).forEach(([type,def])=>Blockly.Blocks[type]=def);
 const js=Blockly.JavaScript,py=Blockly.Python;
 const stmt=(type,fn)=>{js.forBlock[type]=fn;py.forBlock[type]=b=>'# ConfigKit extension block: '+type+'\n'};
-stmt('ck_glide',(b)=>'await window.ConfigKitStage.glide('+Number(b.getFieldValue('X'))+','+Number(b.getFieldValue('Y'))+','+Number(b.getFieldValue('SECS'))*1000+');\\n');
-stmt('ck_spin',b=>'await window.ConfigKitStage.spin('+Number(b.getFieldValue('DEGREES'))+');\\n');
-stmt('ck_ghost',b=>'window.ConfigKitStage.ghost('+Number(b.getFieldValue('AMOUNT'))+');\\n');
-stmt('ck_clear_effects',()=>'window.ConfigKitStage.clearEffects();\\n');
+stmt('ck_glide',(b)=>'await window.ConfigKitStage.glide('+Number(b.getFieldValue('X'))+','+Number(b.getFieldValue('Y'))+','+Number(b.getFieldValue('SECS'))*1000+');\n');
+stmt('ck_spin',b=>'await window.ConfigKitStage.spin('+Number(b.getFieldValue('DEGREES'))+');\n');
+stmt('ck_ghost',b=>'window.ConfigKitStage.ghost('+Number(b.getFieldValue('AMOUNT'))+');\n');
+stmt('ck_clear_effects',()=>'window.ConfigKitStage.clearEffects();\n');
 js.forBlock.ck_touching_edge=()=>'window.ConfigKitStage.touchingEdge()';
 js.forBlock.ck_distance=()=>'window.ConfigKitStage.distance()';
 ['ck_touching_edge','ck_distance'].forEach(t=>py.forBlock[t]=()=>'False');
